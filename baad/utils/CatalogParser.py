@@ -43,7 +43,7 @@ class CatalogParser:
         return self._fetch_bytes(catalog, '/TableBundles/TableCatalog.bytes', 'tablebytes')
 
     def _fetch_media_bytes(self, catalog: str) -> bytes:
-        return self._fetch_bytes(catalog, '/MediaResources/MediaCatalog.bytes', 'mediabytes')
+        return self._fetch_bytes(catalog, '/MediaResources/Catalog/MediaCatalog.bytes', 'mediabytes')
 
     def _fetch_data(self, url: str, cache_name: str) -> dict:
         with CachedSession(cache_name=cache_name, use_temp=True) as session:
