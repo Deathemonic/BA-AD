@@ -99,8 +99,8 @@ class CatalogParser:
             ],
             'MediaResources': [
                 {
-                    'url': f'{server_url}/MediaResources/{value["path"]}',
-                    'path': value['path'],
+                    'url': f'{server_url}/MediaResources/{value["path"].replace("\\", "/")}',
+                    'path': value['path'].replace("\\", "/"),
                     'crc': value.get('crc', 0),
                 }
                 for key, value in media_data['MediaResources'].items()
