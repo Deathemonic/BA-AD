@@ -99,7 +99,7 @@ class CatalogParser:
             ],
             'MediaResources': [
                 {
-                    'url': f'{server_url}/MediaResources/{value["path"].replace("\\", "/")}',
+                    'url': f'{server_url}/MediaResources/{value["path"]}'.replace("\\", "/"),
                     'path': value['path'].replace("\\", "/"),
                     'crc': value.get('crc', 0),
                 }
