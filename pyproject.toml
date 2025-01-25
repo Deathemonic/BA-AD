@@ -3,7 +3,7 @@ name = "BA-AD"
 version = "2.1.0"
 description = "Blue Archive Asset Downloader"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.13"
 dependencies = [
     "aiofiles>=24.1.0",
     "aiohttp>=3.10.10",
