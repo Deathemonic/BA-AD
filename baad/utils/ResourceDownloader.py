@@ -87,14 +87,6 @@ class ResourceDownloader:
         self.console.print(f'[green]Successfully downloaded: {file_path.name}[/green]')
         return True
 
-    async def _get_file_size(self, session: ClientSession, url: str) -> int | None:
-        try:
-            async with session.head(url, allow_redirects=True) as response:
-                return int(response.headers.get('Content-Length', 0))
-
-        except (ClientError, ValueError):
-            return None
-
     async def _download_file(
         self, session: ClientSession, url: str, file_path: Path, crc: int, retries: int = 3
     ) -> None:
@@ -102,7 +94,7 @@ class ResourceDownloader:
             return
 
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        total_size = await self._get_file_size(session, url)
+        total_size = await self.get_file_size(session, url)
 
         if total_size is None:
             self.console.log(f'[bold red]Failed to get file size for {url}[/bold red]')
@@ -130,6 +122,14 @@ class ResourceDownloader:
         for category, files in game_files.items():
             if category in categories:
                 await self._download_category(files, Path(self.output) / category)
+
+    async def get_file_size(self, session: ClientSession, url: str) -> int | None:
+        try:
+            async with session.head(url, allow_redirects=True) as response:
+                return int(response.headers.get('Content-Length', 0))
+
+        except (ClientError, ValueError):
+            return None
 
     def initialize_download(self) -> dict:
         self.fetch_catalog_url()

@@ -34,7 +34,16 @@ class CatalogList:
             
         self.all_items = self._load_all_items()
         
-    def _load_catalogs(self) -> Dict[str, List[str]]:
+    def _format_size(self, size: int) -> str:
+        if size == 0:
+            return ""
+        for unit in ['B', 'KB', 'MB', 'GB']:
+            if size < 1024:
+                return f"{size:.1f}{unit}"
+            size /= 1024
+        return f"{size:.1f}TB"
+        
+    def _load_catalogs(self) -> Dict[str, List[dict]]:
         cache_dir = self.downloader.catalog_parser.cache_dir
         paths = {
             'AssetBundles': (cache_dir / 'bundleDownloadInfo.json', 'BundleFiles'),
@@ -48,23 +57,23 @@ class CatalogList:
             if path.exists()
         }
 
-    def _load_catalog_items(self, category: str, path: Path, key: str) -> List[str]:
+    def _load_catalog_items(self, category: str, path: Path, key: str) -> List[dict]:
         with open(path) as f:
             data = json.load(f)
             
         if category == 'AssetBundles':
-            return [item['Name'] for item in data.get(key, [])]
+            return [{'name': item['Name'], 'size': item.get('Size', 0)} for item in data.get(key, [])]
             
         if category == 'MediaResources':
-            return [Path(item['path']).name for item in data.get(key, {}).values()]
+            return [{'name': Path(item['path']).name, 'size': item.get('bytes', 0)} for item in data.get(key, {}).values()]
             
-        return list(data.get(key, {}).keys())
+        return [{'name': name, 'size': data.get('size', 0)} for name, data in data.get(key, {}).items()]
 
-    def _create_table(self, items: List[Tuple[str, str, float]]) -> Table:
+    def _create_table(self, items: List[Tuple[str, str, int]]) -> Table:
         table = Table(show_header=True, header_style="bold magenta", expand=True, box=None)
         table.add_column("Category", style="cyan", width=15)
         table.add_column("Name", style="green")
-        table.add_column("Score", justify="right", style="yellow", width=8)
+        table.add_column("Size", justify="right", style="yellow", width=10)
 
         total_items = len(items)
         self.visible_items = min(self.console.height - 8, total_items)
@@ -77,28 +86,28 @@ class CatalogList:
         end_idx = min(start_idx + self.visible_items, total_items)
         
         for idx in range(start_idx, end_idx):
-            category, name, score = items[idx]
+            category, name, size = items[idx]
             style = "reverse" if idx == self.selected_index else ""
-            score_text = f"{score:0.1f}" if score > 0 else ""
+            size_text = self._format_size(size)
             
             table.add_row(
                 Text(category, style=style),
                 Text(name, style=style),
-                Text(score_text, style=style)
+                Text(size_text, style=style)
             )
 
         return table
 
-    def _filter_items(self) -> List[Tuple[str, str, float]]:
+    def _filter_items(self) -> List[Tuple[str, str, int]]:
         if not self.query:
             return self.all_items
             
         query = self.query.lower()
         filtered_items = []
         
-        for category, name, _ in self.all_items:
+        for category, name, size in self.all_items:
             if query in name.lower():
-                filtered_items.append((category, name, 100.0))
+                filtered_items.append((category, name, size))
                 
         if not filtered_items:
             choices = [(cat, name) for cat, name, _ in self.all_items]
@@ -109,14 +118,14 @@ class CatalogList:
                 score_cutoff=self.score_cutoff,
                 limit=None
             )
-            filtered_items = [(cat, name, score) for (cat, name), score, _ in matches]
+            filtered_items = [(cat, name, size) for (cat, name), _, _ in matches for _, n, s in [next((i for i in self.all_items if i[0] == cat and i[1] == name), (None, None, 0))]]
             
         return sorted(filtered_items, key=lambda x: x[2], reverse=True)
 
-    def _load_all_items(self) -> List[Tuple[str, str, float]]:
+    def _load_all_items(self) -> List[Tuple[str, str, int]]:
         catalogs = self._load_catalogs()
         return [
-            (category, item, 0.0)
+            (category, item['name'], item['size'])
             for category, items in catalogs.items()
             for item in items
         ]
@@ -208,11 +217,11 @@ class CatalogList:
             
         return True
     
-    def _download_selected_item(self, filtered_items: List[Tuple[str, str, float]], live: Live) -> None:
+    def _download_selected_item(self, filtered_items: List[Tuple[str, str, int]], live: Live) -> None:
         if not filtered_items or self.selected_index >= len(filtered_items):
             return
 
-        category, name, _ = filtered_items[self.selected_index]
+        category, name = filtered_items[self.selected_index]
 
         live.stop()
 

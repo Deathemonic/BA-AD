@@ -87,6 +87,7 @@ class CatalogParser:
                 {
                     'url': f'{server_url}/Android/{asset["Name"]}',
                     'crc': asset.get('Crc', 0),
+                    'size': asset.get('Size', 0)
                 }
                 for asset in bundle_data['BundleFiles']
             ],
@@ -94,6 +95,7 @@ class CatalogParser:
                 {
                     'url': f'{server_url}/TableBundles/{key}',
                     'crc': asset.get('crc', 0),
+                    'size': asset.get('size', 0)
                 }
                 for key, asset in table_data['TableBundles'].items()
             ],
@@ -102,6 +104,7 @@ class CatalogParser:
                     'url': f'{server_url}/MediaResources/{value["path"]}'.replace("\\", "/"),
                     'path': value['path'].replace("\\", "/"),
                     'crc': value.get('crc', 0),
+                    'bytes': value.get('bytes', 0)
                 }
                 for key, value in media_data['MediaResources'].items()
             ],

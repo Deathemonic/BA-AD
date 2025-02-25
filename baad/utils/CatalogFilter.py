@@ -62,12 +62,12 @@ class CatalogFilter:
         asset_results = [
             {
                 'url': data['url'],
-                'crc': data['crc'], 
-                'score': score,
+                'crc': data['crc'],
+                'size': data.get('size', 0),
                 'name': name
             }
 
-            for name, score, data in asset_matches
+            for name, data in asset_matches
         ]
 
         table_choices = {
@@ -80,10 +80,10 @@ class CatalogFilter:
             {
                 'url': data['url'],
                 'crc': data['crc'],
-                'score': score,
+                'size': data.get('size', 0),
                 'name': name
             }
-            for name, score, data in table_matches
+            for name, data in table_matches
         ]
 
         media_choices = {
@@ -97,10 +97,10 @@ class CatalogFilter:
                 'url': data['url'],
                 'path': data['path'],
                 'crc': data['crc'],
-                'score': score,
+                'size': data.get('bytes', 0),
                 'name': name
             }
-            for name, score, data in media_matches
+            for name, data in media_matches
         ]
 
         return {
