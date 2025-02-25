@@ -10,6 +10,7 @@ from .utils.FlatbufGenerator import FlatbufGenerator
 from .utils.ResourceDownloader import ResourceDownloader
 from .utils.StudioExtracter import AssetStudioExtracter
 from .utils.TableExtracter import TableExtracter
+from .utils.MediaExtracter import MediaExtracter
 from .utils.CatalogList import CatalogList
 
 
@@ -118,6 +119,11 @@ def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
         help='extract the tablebundles',
     )
     extract.add_argument(
+        '--media',
+        action='store_true',
+        help='extract the mediaresources',
+    )
+    extract.add_argument(
         '-a',
         '--all',
         action='store_true',
@@ -141,12 +147,12 @@ def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
         )
         raise SystemExit(1)
 
-    if hasattr(args, 'commands') and args.commands == 'extract' and args.assets and args.tables:
+    if hasattr(args, 'commands') and args.commands == 'extract' and sum([args.assets, args.tables, args.media]) > 1:
         console = Console(stderr=True)
         console.print(
             Traceback.from_exception(
                 type(ArgumentTypeError),
-                ArgumentTypeError("'--assets' cannot be used with '--tables'"),
+                ArgumentTypeError("Cannot use multiple extract options together (--assets, --tables, --media)"),
                 None,
             )
         )
@@ -179,22 +185,31 @@ def resource_downloader(args) -> ResourceDownloader:
     return downloader
 
 
-def extracter(args) -> TableExtracter | AssetExtracter | AssetStudioExtracter | None:
-    table_extract = TableExtracter(args.path)
-    asset_extract = AssetExtracter(args.path)
-    asset_studio_extract = AssetStudioExtracter(args.path)
+def extracter(args) -> TableExtracter | AssetExtracter | AssetStudioExtracter | MediaExtracter | None:
+    if args.all:
+        args.tables = True
+        args.assets = True
+        args.media = True
 
     if args.tables:
+        table_extract = TableExtracter(args.path)
         table_extract.run_extraction()
         return table_extract
 
     if args.assets and not args.studio:
+        asset_extract = AssetExtracter(args.path)
         asset_extract.extract_assets()
         return asset_extract
 
     if args.assets and args.studio:
+        asset_studio_extract = AssetStudioExtracter(args.path)
         asset_studio_extract.extract_assets()
         return asset_studio_extract
+
+    if args.media:
+        media_extract = MediaExtracter(args.path)
+        media_extract.run_extraction()
+        return media_extract
 
     return None
 

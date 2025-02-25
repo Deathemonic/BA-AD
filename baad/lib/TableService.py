@@ -9,15 +9,19 @@ from .XXHashService import calculate_hash
 
 
 class TableZipFile(ZipFile):
-    def __init__(self, file: Union[str, BytesIO], name: str = None) -> None:
+    def __init__(self, file: Union[str, BytesIO], password: bytes = None) -> None:
         super().__init__(file)
-        file_name = name if isinstance(file, BytesIO) else Path(file).name
-        self.password = self._generate_password(file_name)
+        if password is None:
+            file_name = Path(file).name if isinstance(file, str) else file.name
+            self.password = self._generate_password(file_name.lower())
+        else:
+            self.password = password
 
     def _generate_password(self, file_name: str) -> bytes:
         hash_value = calculate_hash(file_name)
         twister = MersenneTwister(hash_value)
-        return b64encode(twister.next_bytes(15))
+        next_bytes = twister.next_bytes(15)
+        return b64encode(next_bytes)
 
     def open(self, name: str, mode: str = 'r', force_zip64: bool = False) -> bytes:
         return super().open(name, mode, pwd=self.password, force_zip64=force_zip64)
