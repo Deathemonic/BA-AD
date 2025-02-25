@@ -167,44 +167,41 @@ options:
 
 ```
 > baad search
-╭────────────────────────────────────────── [242 matches] [Press ESC to exit] ──────────────────────────────────────────────────────╮
-│ > hina                                                                                                                                             │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│  Category           Name                                                                                                                    Score  │
-│  AssetBundles       assets-_mx-characters-chinatsu_original-_mxdependency_assets_all_846378255.bundle                                       100.0  │
-│  AssetBundles       assets-_mx-characters-hinata_original-_mxdependency_assets_all_2633272979.bundle                                        100.0  │
-│  AssetBundles       assets-_mx-characters-hina_original-_mxdependency_assets_all_2197045057.bundle                                          100.0  │
-│  AssetBundles       assets-_mx-spinecharacters-hinata_spr-_mxdependency-2022-05-12_assets_all_2069167071.bundle                             100.0  │
-│  AssetBundles       assets-_mx-spinecharacters-hina_spr-_mxdependency-2022-05-12_assets_all_2902431980.bundle                               100.0  │
-│  AssetBundles       assets-_mx-spinelobbies-chinatsu_home-_mxdependency-2022-08-05_assets_all_3351844762.bundle                             100.0  │
-│  AssetBundles       assets-_mx-spinelobbies-chinatsu_home-_mxdependency-2024-10-07_assets_all_2446188734.bundle                             100.0  │
-│  AssetBundles       assets-_mx-spinelobbies-hinata_home-_mxdependency-2022-05-12_assets_all_954430367.bundle                                100.0  │
-│  AssetBundles       assets-_mx-spinelobbies-hina_home-_mxdependency-2022-05-12_assets_all_942958369.bundle                                  100.0  │
-│  AssetBundles       cafe-characteranimation-hinata_original-_mxload-2022-05-12_assets_all_3824060714.bundle                                 100.0  │
-│  AssetBundles       cafe-characteranimation-hinata_original-_mxload-2023-01-31_assets_all_84505541.bundle                                   100.0  │
-│  AssetBundles       ch0231_ex1_skillrange_hina-_mxload-2024-05-30_assets_all_3972412721.bundle                                              100.0  │
-│  AssetBundles       character-chinatsu_original-_mxload-2024-05-30_assets_all_3428424620.bundle                                             100.0  │
-│  AssetBundles       character-hinata_original-_mxload-2024-05-30_assets_all_3469200835.bundle                                               100.0  │
-│  AssetBundles       character-hina_original-_mxload-2024-05-30_assets_all_491539302.bundle                                                  100.0  │
-│  AssetBundles       character-npc_hina_original-_mxload-2024-05-30_assets_all_4216052020.bundle                                             100.0  │
-│  AssetBundles       field-animations-hina_original_field-_mxload-2024-01-05_assets_all_802754237.bundle                                     100.0  │
-│  AssetBundles       field-cafe-characteranimation-field_player_hina_original-_mxload-2024-01-05_assets_all_2972041167.bundle                100.0  │
-│  AssetBundles       fx_anim_hina_haloroot-_mxload-2024-05-30_assets_all_1580215221.bundle                                                   100.0  │
-│  AssetBundles       prologdepengroup-assets-_mx-characters-chinatsu_original-_mxprolog-2024-01-05_assets_all_2365528123.bundle              100.0  │
-│  AssetBundles       prologdepengroup-assets-_mx-spinecharacters-chinatsu_spr-_mxprolog-2022-05-12_assets_all_1184923134.bundle              100.0  │
-│  MediaResources     Hina_Battle_Damage_1.ogg                                                                                                100.0  │
-│  MediaResources     Hina_MemorialLobby_4_2.ogg                                                                                              100.0  │
-│  MediaResources     Hina_Battle_Damage_3.ogg                                                                                                100.0  │
-│  MediaResources     Hina_Battle_Damage_2.ogg                                                                                                100.0  │
-│  MediaResources     Hina_Formation_Select.ogg                                                                                               100.0  │
-│  MediaResources     Hina_MemorialLobby_4_1.ogg                                                                                              100.0  │
-│  MediaResources     Hina_Battle_BuffSelf_1.ogg                                                                                              100.0  │
-│  MediaResources     Hina_Season_Birthday_Player.ogg                                                                                         100.0  │
-│  MediaResources     Hina_Tactic_Defeat_1.ogg                                                                                                100.0  │
-│                                                                                                                                                    │
-│                                                                                                                                                    │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────────────── [22065 matches] [Press ESC to exit] ───────────────────────────────────────────────────────╮
+│ >                                                                                                                                                │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│  Category          Name                                                                                                                    Size  │
+│  AssetBundles      academy-_mxload-2022-05-12_prefab_assets_all_4170120622.bundle                                                         1.1MB  │
+│  AssetBundles      academy-_mxload-2022-09-14_prefab_assets_all_1177703018.bundle                                                       167.3KB  │
+│  AssetBundles      academy-_mxload-2023-01-03_prefab_assets_all_79312310.bundle                                                         176.4KB  │
+│  AssetBundles      academy-_mxload-2023-02-27_prefab_assets_all_1639057228.bundle                                                       172.7KB  │
+│  AssetBundles      academy-_mxload-2023-03-14_prefab_assets_all_2700611036.bundle                                                       175.0KB  │
+│  AssetBundles      academy-_mxload-2023-09-15_prefab_assets_all_3574084195.bundle                                                       178.5KB  │
+│  AssetBundles      academy-_mxload-2024-08-02_prefab_assets_all_1586451891.bundle                                                       166.2KB  │
+│  AssetBundles      akari_original_skill_frag-_mxload-2024-05-30_assets_all_235178830.bundle                                               7.7KB  │
+│  AssetBundles      arms-_mxload-2022-05-12_prefab_assets_all_2242344387.bundle                                                           96.9KB  │
+│  AssetBundles      arms-_mxload-2022-06-13_prefab_assets_all_169265965.bundle                                                            49.3KB  │
+│  AssetBundles      arms-_mxload-2022-08-05_prefab_assets_all_721668755.bundle                                                            54.1KB  │
+│  AssetBundles      arms-_mxload-2023-02-27_prefab_assets_all_1634731385.bundle                                                           46.2KB  │
+│  AssetBundles      arms-_mxload-2024-02-27_prefab_assets_all_4171726177.bundle                                                           24.8KB  │
+│  AssetBundles      ar_common-_mxload-2024-05-30_assets_all_3186116768.bundle                                                              2.6KB  │
+│  AssetBundles      assets-spine-runtime-spine-unity-_mxdependency-2023-09-15_assets_all_1461670764.bundle                                21.6KB  │
+│  AssetBundles      assets-_mx-3denvironments-_mxdependency-2022-05-12_assets_all_254839603.bundle                                       249.0KB  │
+│  AssetBundles      assets-_mx-3denvironments-_mxdependency-2023-08-23_assets_all_2855529825.bundle                                        4.0KB  │
+│  AssetBundles      assets-_mx-3denvironments-_mxdependency-2023-08-29_assets_all_4138896791.bundle                                      220.8KB  │
+│  AssetBundles      assets-_mx-3dobject-airi_original_icecream-_mxdependency-2022-05-12_assets_all_2565193982.bundle                      45.8KB  │
+│  AssetBundles      assets-_mx-3dobject-airi_original_icecream-_mxdependency-2022-05-12_mat_assets_all_2123000585.bundle                   3.0KB  │
+│  AssetBundles      assets-_mx-3dobject-airi_original_icecream-_mxdependency-2022-05-12_psd_assets_all_3215411693.bundle                  16.0KB  │
+│  AssetBundles      assets-_mx-3dobject-ayane_original_ex-_mxdependency-2022-05-12_assets_all_3241542591.bundle                            9.1KB  │
+│  AssetBundles      assets-_mx-3dobject-ayane_original_ex-_mxdependency-2022-05-12_prefab_assets_all_4076567522.bundle                     5.3KB  │
+│  AssetBundles      assets-_mx-3dobject-common_skill_healbomb_weapon-_mxdependency-2022-05-12_assets_all_1024083411.bundle                71.0KB  │
+│  AssetBundles      assets-_mx-3dobject-common_skill_healbomb_weapon-_mxdependency-2022-05-12_mat_assets_all_1458339694.bundle             3.0KB  │
+│  AssetBundles      assets-_mx-3dobject-common_skill_healbomb_weapon-_mxdependency-2022-05-12_psd_assets_all_2045859013.bundle             2.1KB  │
+│  AssetBundles      assets-_mx-3dobject-common_skill_landmine-_mxdependency-2022-05-12_assets_all_450941517.bundle                        58.2KB  │
+│                                                                                                                                                  │
+│                                                                                                                                                  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ##### Download Mode
@@ -270,14 +267,13 @@ Examples:
 
 #### Extracting
 
-To extract the assetsbundles, and  tablebundles we need to initialize extract mode, to do that we pass `extract` so it will be like this `baad extract`.
+To extract the `AssetBundles`, `TableBundles`, and `MediaResources` we need to initialize extract mode, to do that we pass `extract` so it will be like this `baad extract`.
 
-No need to extract the `MediaResources` as it's already extracted by default.
 
 ```
 > baad extract --help
 
-usage: baad extract [-h] [--path PATH] [--studio] [--assets] [--tables] [-a]
+usage: baad extract [-h] [--path PATH] [--studio] [--assets] [--tables] [--media] [-a]
 
 options:
   -h, --help   show this help message and exit
@@ -285,6 +281,7 @@ options:
   --studio     uses the assetstudiomod as a backend for extracting the assetbundles
   --assets     extract the assetbundles
   --tables     extract the tablebundles
+  --media      extract the mediaresources
   -a, --all    extract all game files
 ```
 <br>
@@ -340,6 +337,20 @@ options:
 
 > [!NOTE]
 > Note you may see warnings and some files didn't get parse, it's a known issue for now but most files will be parse just fine.
+
+<details open>
+	<summary>MediaResources</summary>
+<br>
+  Due to the recent Blue Archive update, which added korean dubs, the voices are now in a zip file.
+
+  To extract mediaresources you need to pass `--media` to extract the asset then pass `--path` to specify the voices zip path. This will extract the audio files to the parent path folder then `MediaExtracted`.
+
+  Example:
+  - Extracts the voices to `./output/MediaExtracted`
+  ```
+  > baad extract --media --path ./output/MediaResources/GameData/Audio/VOC_JP
+  ```
+</details>
 
 ### What to do now?
 

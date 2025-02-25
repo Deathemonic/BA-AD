@@ -11,11 +11,12 @@ from .XXHashService import calculate_hash
 class TableZipFile(ZipFile):
     def __init__(self, file: Union[str, BytesIO], password: bytes = None) -> None:
         super().__init__(file)
-        if password is None:
-            file_name = Path(file).name if isinstance(file, str) else file.name
-            self.password = self._generate_password(file_name.lower())
-        else:
+        if password is not None:
             self.password = password
+            return
+            
+        file_name = Path(file).name if isinstance(file, str) else file.name
+        self.password = self._generate_password(file_name.lower())
 
     def _generate_password(self, file_name: str) -> bytes:
         hash_value = calculate_hash(file_name)
