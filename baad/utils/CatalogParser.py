@@ -14,7 +14,7 @@ from .CatalogFetcher import catalog_url
 class CatalogParser:
     def __init__(self, catalog_url: str | None = None):
         self.root = Path(__file__).parent.parent
-        self.cache_dir = Path(user_cache_dir(__app_name__, __app_author__))
+        self.cache_dir = Path(user_cache_dir(__app_name__, __app_author__)) / 'jp'
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.console = Console()
         self.catalog_url = catalog_url or None

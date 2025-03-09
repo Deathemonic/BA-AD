@@ -221,7 +221,7 @@ class CatalogList:
         if not filtered_items or self.selected_index >= len(filtered_items):
             return
 
-        category, name = filtered_items[self.selected_index]
+        category, name, _ = filtered_items[self.selected_index]
 
         live.stop()
 
