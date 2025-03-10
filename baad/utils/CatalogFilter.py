@@ -22,33 +22,25 @@ class CatalogFilter:
     def _find_matches(self, pattern: str, choices: dict) -> list:
         pattern = pattern.lower()
         matches = [
-            (name, 100, data) 
+            (name, data) 
             for name, data in choices.items() 
             if pattern in name.lower()
         ]
-        
-        if matches:
-            return sorted(matches, key=lambda x: x[1], reverse=True)
-            
-        return sorted(
-            [
-                (name, match[1], data)
 
-                for name, data in choices.items()
+        return matches if matches else [
+            (name, data)
 
-                if (
-                    match := process.extractOne(
-                        query=pattern,
-                        choices=[name], 
-                        scorer=fuzz.token_sort_ratio,
-                        score_cutoff=self.score_cutoff
-                    )
+            for name, data in choices.items()
+
+            if (
+                match := process.extractOne(
+                    query=pattern,
+                    choices=[name], 
+                    scorer=fuzz.token_sort_ratio,
+                    score_cutoff=self.score_cutoff
                 )
-            ],
-
-            key=lambda x: x[1],
-            reverse=True
-        )
+            )
+        ]
 
     def filter_files(self, pattern: str) -> dict:
         game_files = self._load_game_files()
