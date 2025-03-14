@@ -46,6 +46,11 @@ def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
         type=str,
         help='output directory for the downloaded files (default: ./output)',
     )
+    search.add_argument(
+        '--version',
+        type=str,
+        help='specific version to search for (default: latest)',
+    )
 
     download = sub_parser.add_parser(
         'download',
@@ -55,6 +60,11 @@ def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
         '--output',
         type=str,
         help='output directory for the downloaded files (default: ./output)',
+    )
+    download.add_argument(
+        '--version',
+        type=str,
+        help='specific version to download (default: latest)',
     )
     download.add_argument(
         '--limit',
@@ -164,7 +174,8 @@ def resource_downloader(args) -> ResourceDownloader:
     downloader_args = {
         'update': args.update,
         'catalog_url': args.catalog,
-        'filter_pattern': args.filter if hasattr(args, 'filter') else None
+        'filter_pattern': args.filter if hasattr(args, 'filter') else None,
+        'version': args.version if hasattr(args, 'version') else None
     }
     
     if args.output:

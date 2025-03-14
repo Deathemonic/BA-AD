@@ -4,16 +4,30 @@ from zipfile import ZipFile
 import cloudscraper
 import requests
 import shutil
+from platformdirs import user_data_dir
 
 from .Progress import create_live_display, create_progress_group
+from .. import __app_name__, __app_author__
+from .CatalogParser import CatalogParser
 
 
 class ApkParser:
-    def __init__(self, apk_url: str | None = None, apk_path: str | None = None) -> None:
-        self.apk_url = apk_url or 'https://d.apkpure.com/b/XAPK/com.YostarJP.BlueArchive?version=latest'
+    def __init__(self, apk_url: str | None = None, apk_path: str | None = None, version: str | None = None) -> None:
+        self.version = version
+        self.catalog_parser = CatalogParser()
 
         self.root = Path(__file__).parent.parent
-        self.apk_path = apk_path or self.root / 'public' / 'jp' / 'BlueArchive.xapk'
+        self.cache_dir = Path(user_data_dir(__app_name__, __app_author__)) / 'jp'
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+
+        if not self.version:
+            self.version = self.catalog_parser.fetch_version()
+        
+        self.version_dir = self.cache_dir / self.version
+        self.version_dir.mkdir(parents=True, exist_ok=True)
+        
+        self.apk_path = apk_path or self.version_dir / 'BlueArchive.xapk'
+        self.apk_url = apk_url or self._get_apk_url()
 
         self.live = create_live_display()
         self.progress_group, self.download_progress, self.extract_progress, self.print_progress, self.console = (
@@ -21,6 +35,10 @@ class ApkParser:
         )
 
         self.scraper = cloudscraper.create_scraper()
+
+    @staticmethod
+    def _get_apk_url(self) -> str:
+        return f'https://d.apkpure.com/b/XAPK/com.YostarJP.BlueArchive?version={self.version}'
 
     @staticmethod
     def _get_files(zip: ZipFile) -> set:
@@ -81,10 +99,10 @@ class ApkParser:
 
     def _log_size(self, local: int, remote: int) -> None:
         if local == remote:
-            self.console.print('[green]APK is up to date. Skipping download...[/green]')
+            self.console.print(f'[green]APK version {self.version} is up to date. Skipping download...[/green]')
 
         if local < remote:
-            self.console.print('[yellow]Apk is out of date. Downloading...[/yellow]')
+            self.console.print(f'[yellow]APK version {self.version} is out of date. Downloading...[/yellow]')
 
     def _parse_zipfile(self, apk_path: Path, extract_path: Path) -> None:
         with ZipFile(apk_path, 'r') as zip:

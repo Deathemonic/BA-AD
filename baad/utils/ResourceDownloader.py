@@ -11,12 +11,13 @@ from .CatalogFilter import CatalogFilter
 
 
 class ResourceDownloader:
-    def __init__(self, update: bool = False, output: str | None = None, catalog_url: str | None = None, filter_pattern: str | None = None) -> None:
+    def __init__(self, update: bool = False, output: str | None = None, catalog_url: str | None = None, filter_pattern: str | None = None, version: str | None = None) -> None:
         self.root = Path(__file__).parent.parent
         self.output = output or Path.cwd() / 'output'
         self.update = update
         self.catalog_url = catalog_url
         self.filter_pattern = filter_pattern
+        self.version = version
 
         self.semaphore = None
         self.catalog_parser = CatalogParser(catalog_url)
@@ -135,7 +136,9 @@ class ResourceDownloader:
         self.catalog_parser.fetch_catalogs()
         result = self.catalog_parser.get_game_files()
         
-        game_files_path = self.catalog_parser.cache_dir / 'GameFiles.json'
+        game_files_dir = self.catalog_parser.cache_dir / (self.version or self.catalog_parser.fetch_version())
+        game_files_dir.mkdir(parents=True, exist_ok=True)
+        game_files_path = game_files_dir / 'GameFiles.json'
         self.catalog_parser.save_json(game_files_path, result)
         
         if not self.filter_pattern:
@@ -165,7 +168,7 @@ class ResourceDownloader:
             self.console.print(f'[cyan]Using provided catalog URL: {self.catalog_url}[/cyan]')
             return
 
-        ApkParser().download_apk(self.update)
+        ApkParser(version=self.version).download_apk(self.update)
         self.console.print('[cyan]Fetching catalog URL...[/cyan]')
         catalog_url = self.catalog_parser.fetch_catalog_url()
         self.console.print(f'[green]Catalog URL fetched: {catalog_url}[/green]')
