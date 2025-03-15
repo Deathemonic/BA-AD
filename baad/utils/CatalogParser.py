@@ -12,12 +12,13 @@ from .CatalogFetcher import catalog_url
 
 
 class CatalogParser:
-    def __init__(self, catalog_url: str | None = None):
+    def __init__(self, catalog_url: str | None = None, version: str | None = None):
         self.root = Path(__file__).parent.parent
         self.cache_dir = Path(user_cache_dir(__app_name__, __app_author__)) / 'jp'
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.console = Console()
         self.catalog_url = catalog_url or None
+        self.version = version
 
     @staticmethod
     def _calculate_crc32(file_path: Path) -> int:
@@ -27,7 +28,10 @@ class CatalogParser:
     @staticmethod
     def _fetch_bytes(catalog: str, file: str, cache: str) -> bytes:
         with CachedSession(cache, use_temp=True) as session:
-            return session.get(f'{catalog}{file}').content
+            response = session.get(f'{catalog}{file}')
+            if response.status_code != 200:
+                raise Exception(f"HTTP error {response.status_code}: {response.reason} for URL {catalog}{file}")
+            return response.content
 
     @staticmethod
     def _load_json(file_path: Path) -> dict:
@@ -43,7 +47,18 @@ class CatalogParser:
         return self._fetch_bytes(catalog, '/TableBundles/TableCatalog.bytes', 'tablebytes')
 
     def _fetch_media_bytes(self, catalog: str) -> bytes:
-        return self._fetch_bytes(catalog, '/MediaResources/Catalog/MediaCatalog.bytes', 'mediabytes')
+        paths = [
+            '/MediaResources/Catalog/MediaCatalog.bytes',
+            '/MediaResources/MediaCatalog.bytes'
+        ]
+
+        for path in paths:
+            try:
+                return self._fetch_bytes(catalog, path, 'mediabytes')
+            except Exception:
+                continue
+                
+        raise Exception("Failed to fetch media bytes from all available paths")
 
     def _fetch_data(self, url: str, cache_name: str) -> dict:
         with CachedSession(cache_name=cache_name, use_temp=True) as session:
@@ -55,7 +70,7 @@ class CatalogParser:
                 raise SystemExit(1) from e
 
     def fetch_catalog_url(self) -> str:
-        server_api = self.catalog_url if self.catalog_url else catalog_url()
+        server_api = self.catalog_url if self.catalog_url else catalog_url(self.version)
         server_data = self._fetch_data(server_api, 'serverapi')
         return server_data['ConnectionGroups'][0]['OverrideConnectionGroups'][-1]['AddressablesCatalogUrlRoot']
 

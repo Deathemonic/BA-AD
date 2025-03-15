@@ -242,7 +242,14 @@ def main() -> None:
     if args.commands == 'search':
         root_path = Path(__file__).parent
         output_path = args.output if hasattr(args, 'output') else None
-        catalog_list = CatalogList(root_path, output_path)
+        version = args.version if hasattr(args, 'version') else None
+        
+        downloader_args = {
+            'update': args.update,
+            'output': output_path,
+            'version': version
+        }
+        catalog_list = CatalogList(root_path, **downloader_args)
         catalog_list.show()
         return
 

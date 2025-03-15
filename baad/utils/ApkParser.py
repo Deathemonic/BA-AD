@@ -37,7 +37,16 @@ class ApkParser:
         self.scraper = cloudscraper.create_scraper()
 
     def _get_apk_url(self) -> str:
-        return f'https://d.apkpure.com/b/XAPK/com.YostarJP.BlueArchive?version={self.version}'
+        if not self.version:
+            return 'https://d.apkpure.com/b/XAPK/com.YostarJP.BlueArchive?version=latest'
+            
+        if self.version.startswith("1."):
+            parts = self.version.split('.')
+            if len(parts) >= 3 and parts[2] != "0":
+                version_code = parts[2]
+                return f'https://d.apkpure.com/b/XAPK/com.YostarJP.BlueArchive?versionCode={version_code}'
+        
+        return 'https://d.apkpure.com/b/XAPK/com.YostarJP.BlueArchive?version=latest'
 
     @staticmethod
     def _get_files(zip: ZipFile) -> set:

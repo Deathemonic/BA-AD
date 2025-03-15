@@ -20,7 +20,7 @@ class ResourceDownloader:
         self.version = version
 
         self.semaphore = None
-        self.catalog_parser = CatalogParser(catalog_url)
+        self.catalog_parser = CatalogParser(catalog_url, version)
         self.categories = {
             'asset': 'AssetBundles',
             'table': 'TableBundles',
@@ -53,31 +53,35 @@ class ResourceDownloader:
         self, session: ClientSession, url: str, fp: Path, size: int, retries: int = 3
     ) -> bool:
         for attempt in range(retries):
-            bytes_downloaded = 0
-
             try:
-                async with session.get(url) as response:
-                    async with aiofiles.open(fp, 'wb') as f:
-                        async for chunk in response.content.iter_chunked(8192):
-                            if not chunk:
-                                break
-
-                            await f.write(chunk)
-                            bytes_downloaded += len(chunk)
-
+                bytes_downloaded = await self._attempt_download(session, url, fp)
+                
                 if bytes_downloaded == size:
                     self.console.print(f'[green]Successfully downloaded {fp.name}[/green]')
                     return True
-
+                    
             except Exception as e:
                 self.console.log(f'[yellow]Error downloading {fp.name} {str(e)}[/yellow]')
-                continue
-
+            
             if attempt < retries - 1:
                 await asyncio.sleep(2**attempt)
-
+                
         self.console.log(f'[bold red]Failed to download {fp.name} after {retries} attempts.[/bold red]')
         return False
+        
+    async def _attempt_download(self, session: ClientSession, url: str, fp: Path) -> int:
+        bytes_downloaded = 0
+        
+        async with session.get(url) as response:
+            async with aiofiles.open(fp, 'wb') as f:
+                async for chunk in response.content.iter_chunked(8192):
+                    if not chunk:
+                        break
+
+                    await f.write(chunk)
+                    bytes_downloaded += len(chunk)
+                    
+        return bytes_downloaded
 
     async def _verify_download(self, file_path: Path, crc: int) -> bool:
         if self.catalog_parser._calculate_crc32(file_path) != crc:
@@ -101,8 +105,11 @@ class ResourceDownloader:
             return
 
         download_success = await self._download_file_content(session, url, file_path, total_size, retries)
-
-        if download_success and await self._verify_download(file_path, crc):
+        if not download_success:
+            return
+            
+        verify_success = await self._verify_download(file_path, crc)
+        if not verify_success:
             return
 
     async def _download_category(self, files: list, base_path: Path) -> None:
@@ -168,7 +175,8 @@ class ResourceDownloader:
             self.console.print(f'[cyan]Using provided catalog URL: {self.catalog_url}[/cyan]')
             return
 
-        ApkParser(version=self.version).download_apk(self.update)
+        apk_parser = ApkParser(version=self.version)
+        apk_parser.download_apk(self.update)
         self.console.print('[cyan]Fetching catalog URL...[/cyan]')
         catalog_url = self.catalog_parser.fetch_catalog_url()
         self.console.print(f'[green]Catalog URL fetched: {catalog_url}[/green]')

@@ -17,7 +17,7 @@ from .ResourceDownloader import ResourceDownloader
 
 
 class CatalogList:
-    def __init__(self, root_path: Path, output_path: Path):
+    def __init__(self, root_path: Path, output: Path = None, update: bool = False, version: str = None):
         self.root = root_path
         self.console = Console()
         self.score_cutoff = 85
@@ -25,7 +25,8 @@ class CatalogList:
         self.selected_index = 0
         self.scroll_offset = 0
         self.visible_items = self.console.height - 8
-        self.downloader = ResourceDownloader(output=output_path)
+        
+        self.downloader = ResourceDownloader(output=output, update=update, version=version)
         
         game_files_path = self.downloader.catalog_parser.cache_dir / 'GameFiles.json'
         if not game_files_path.exists():
@@ -45,29 +46,45 @@ class CatalogList:
         
     def _load_catalogs(self) -> Dict[str, List[dict]]:
         cache_dir = self.downloader.catalog_parser.cache_dir
-        paths = {
+        
+        catalog_configs = {
             'AssetBundles': (cache_dir / 'bundleDownloadInfo.json', 'BundleFiles'),
             'MediaResources': (cache_dir / 'MediaCatalog.json', 'MediaResources'),
             'TableBundles': (cache_dir / 'TableCatalog.json', 'TableBundles')
         }
         
-        return {
-            category: self._load_catalog_items(category, path, key)
-            for category, (path, key) in paths.items()
-            if path.exists()
-        }
+        result = {}
+        for category, (path, key) in catalog_configs.items():
+            if not path.exists():
+                continue
+                
+            result[category] = self._load_catalog_items(category, path, key)
+            
+        return result
 
     def _load_catalog_items(self, category: str, path: Path, key: str) -> List[dict]:
         with open(path) as f:
             data = json.load(f)
             
         if category == 'AssetBundles':
-            return [{'name': item['Name'], 'size': item.get('Size', 0)} for item in data.get(key, [])]
+            return self._load_asset_bundles(data, key)
             
         if category == 'MediaResources':
-            return [{'name': Path(item['path']).name, 'size': item.get('bytes', 0)} for item in data.get(key, {}).values()]
+            return self._load_media_resources(data, key)
             
-        return [{'name': name, 'size': data.get('size', 0)} for name, data in data.get(key, {}).items()]
+        return self._load_table_bundles(data, key)
+        
+    def _load_asset_bundles(self, data: dict, key: str) -> List[dict]:
+        items = data.get(key, [])
+        return [{'name': item['Name'], 'size': item.get('Size', 0)} for item in items]
+        
+    def _load_media_resources(self, data: dict, key: str) -> List[dict]:
+        items = data.get(key, {}).values()
+        return [{'name': Path(item['path']).name, 'size': item.get('bytes', 0)} for item in items]
+        
+    def _load_table_bundles(self, data: dict, key: str) -> List[dict]:
+        items = data.get(key, {}).items()
+        return [{'name': name, 'size': item_data.get('size', 0)} for name, item_data in items]
 
     def _create_table(self, items: List[Tuple[str, str, int]]) -> Table:
         table = Table(show_header=True, header_style="bold magenta", expand=True, box=None)
