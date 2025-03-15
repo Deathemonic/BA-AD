@@ -36,7 +36,6 @@ class ApkParser:
 
         self.scraper = cloudscraper.create_scraper()
 
-    @staticmethod
     def _get_apk_url(self) -> str:
         return f'https://d.apkpure.com/b/XAPK/com.YostarJP.BlueArchive?version={self.version}'
 
