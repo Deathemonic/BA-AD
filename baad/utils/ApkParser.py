@@ -23,20 +23,16 @@ class ApkParser:
         self.progress_group, self.download_progress, self.extract_progress, self.print_progress, self.console = (
             create_progress_group()
         )
+        self.scraper = cloudscraper.create_scraper()
 
         if not self.version:
             self.version = self.catalog_parser.fetch_version()
         
         self.version_dir = self.cache_dir / self.version
         self.version_dir.mkdir(parents=True, exist_ok=True)
-        
         self.apk_path = apk_path or self.version_dir / 'BlueArchive.xapk'
         
-        # Initialize scraper before calling _get_apk_url
-        self.scraper = cloudscraper.create_scraper()
-        
         self.apk_url = apk_url or self._get_apk_url()
-
         self.live = create_live_display()
 
 

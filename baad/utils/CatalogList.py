@@ -36,8 +36,6 @@ class CatalogList:
         if not game_files_path.exists():
             self.console.print("[yellow]Initializing game files...[/yellow]")
             self.downloader.initialize_download()
-        else:
-            self.console.print("[green]Using cached game files[/green]")
         
         self.all_items = self._load_all_items()
         
