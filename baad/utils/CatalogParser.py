@@ -70,9 +70,18 @@ class CatalogParser:
                 raise SystemExit(1) from e
 
     def fetch_catalog_url(self) -> str:
-        server_api = self.catalog_url if self.catalog_url else catalog_url(self.version)
-        server_data = self._fetch_data(server_api, 'serverapi')
-        return server_data['ConnectionGroups'][0]['OverrideConnectionGroups'][-1]['AddressablesCatalogUrlRoot']
+        if not self.catalog_url:
+            server_api = catalog_url(self.version)
+            server_data = self._fetch_data(server_api, 'serverapi')
+            return server_data['ConnectionGroups'][0]['OverrideConnectionGroups'][-1]['AddressablesCatalogUrlRoot']
+        
+        if self.catalog_url.startswith(('http://', 'https://')):
+            return self.catalog_url
+        
+        if '_' in self.catalog_url:
+            return f'https://prod-clientpatch.bluearchiveyostar.com/{self.catalog_url}'
+        
+        return f'https://{self.catalog_url}'
 
     def fetch_catalogs(self) -> None:
         server_url = self.fetch_catalog_url()

@@ -51,6 +51,11 @@ def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
         type=str,
         help='specific version to search for (default: latest)',
     )
+    search.add_argument(
+        '--catalog',
+        type=str,
+        help='force change the catalog url (will skip apk download)',
+    )
 
     download = sub_parser.add_parser(
         'download',
@@ -241,14 +246,21 @@ def main() -> None:
         
     if args.commands == 'search':
         root_path = Path(__file__).parent
-        output_path = args.output if hasattr(args, 'output') else None
-        version = args.version if hasattr(args, 'version') else None
+        output_path = args.output if hasattr(args, 'output') and args.output else None
+        version = args.version if hasattr(args, 'version') and args.version else None
         
         downloader_args = {
             'update': args.update,
             'output': output_path,
             'version': version
         }
+        
+        if hasattr(args, 'catalog') and args.catalog:
+            downloader_args['catalog_url'] = args.catalog
+        
+        console = Console()
+        console.print("[bold blue]Initializing search mode...[/bold blue]")
+            
         catalog_list = CatalogList(root_path, **downloader_args)
         catalog_list.show()
         return

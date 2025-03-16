@@ -172,7 +172,7 @@ class ResourceDownloader:
 
     def fetch_catalog_url(self) -> None:
         if self.catalog_url:
-            self.console.print(f'[cyan]Using provided catalog URL: {self.catalog_url}[/cyan]')
+            self.catalog_parser.catalog_url = self.catalog_url
             return
 
         apk_parser = ApkParser(version=self.version)

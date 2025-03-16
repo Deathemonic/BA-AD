@@ -22,6 +22,7 @@ def _search_for_pattern(path: Path, pattern: bytes) -> bytes | None:
                 start_index = content.index(pattern)
                 data = content[start_index + len(pattern):]
                 return data[:-2]
+            
         except Exception as e:
             print(f"Error reading file {config_file}: {e}")
     
@@ -71,6 +72,7 @@ def find_game_config(version: str = None) -> None | bytes:
     
     for path_name, path in search_paths:
         result = _search_for_pattern(path, pattern)
+
         if result:
             return result
     

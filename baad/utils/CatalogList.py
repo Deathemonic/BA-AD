@@ -17,7 +17,7 @@ from .ResourceDownloader import ResourceDownloader
 
 
 class CatalogList:
-    def __init__(self, root_path: Path, output: Path = None, update: bool = False, version: str = None):
+    def __init__(self, root_path: Path, output: Path = None, update: bool = False, version: str = None, catalog_url: str = None):
         self.root = root_path
         self.console = Console()
         self.score_cutoff = 85
@@ -26,13 +26,19 @@ class CatalogList:
         self.scroll_offset = 0
         self.visible_items = self.console.height - 8
         
-        self.downloader = ResourceDownloader(output=output, update=update, version=version)
+        self.downloader = ResourceDownloader(output=output, update=update, version=version, catalog_url=catalog_url)
+        self.downloader.fetch_catalog_url()
+        
+        self.console.print("[cyan]Fetching catalogs...[/cyan]")
+        self.downloader.catalog_parser.fetch_catalogs()
         
         game_files_path = self.downloader.catalog_parser.cache_dir / 'GameFiles.json'
         if not game_files_path.exists():
             self.console.print("[yellow]Initializing game files...[/yellow]")
             self.downloader.initialize_download()
-            
+        else:
+            self.console.print("[green]Using cached game files[/green]")
+        
         self.all_items = self._load_all_items()
         
     def _format_size(self, size: int) -> str:
