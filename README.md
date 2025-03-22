@@ -409,7 +409,7 @@ Don't like my [shitty code](https://shitcode.net/latest/language/python) and wha
 
 ### Acknowledgement
  - [hdk5/MoeXCOM](https://github.com/hdk5/MoeXCOM)
- - [espectZ/blue-archive-viewer](https://github.com/respectZ/blue-archive-viewer)
+ - [respectZ/blue-archive-viewer](https://github.com/respectZ/blue-archive-viewer)
  - [fiseleo/Blue-Archive-JP-Downloader](https://github.com/fiseleo/Blue-Archive-JP-Downloader)
  - [K0lb3/Blue-Archive---Asset-Downloader](https://github.com/K0lb3/Blue-Archive---Asset-Downloader)
  - [lwd-temp/blue-archive-spine-production](https://github.com/lwd-temp/blue-archive-spine-production)
