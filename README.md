@@ -394,6 +394,11 @@ Well anything you want, you can use assetbundles to extract the chibi models and
 
 </details>
 
+### Global
+If you want to downloaad the Global `AssetBundles`, `TableBundles`, and `MediaResources` then check out [BA-AD Rust](https://github.com/Deathemonic/BA-AD/tree/rust). It is a BA-AD written rust with global support.
+
+To Install it just download one of the binaries at [Releases](https://github.com/Deathemonic/BA-AD/releases).
+
 ### Dump
 To get `dump.cs` you need to manually decompile the `libil2cpp.so`. I recommend following the instructions from [Auto-Il2cppDumper](https://github.com/AndnixSH/Auto-Il2cppDumper) or [Zygisk-Il2CppDumper](https://github.com/Perfare/Zygisk-Il2CppDumper). Also I recommend using a emulator like **MuMuPlayer** to get easy root access.
 
