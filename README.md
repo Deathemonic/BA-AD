@@ -395,9 +395,9 @@ Well anything you want, you can use assetbundles to extract the chibi models and
 </details>
 
 ### Global
-If you want to downloaad the Global `AssetBundles`, `TableBundles`, and `MediaResources` then check out [BA-AD Rust](https://github.com/Deathemonic/BA-AD/tree/rust). It is a BA-AD written rust with global support.
+If you want to downloaad the Global `AssetBundles`, `TableBundles`, and `MediaResources` then check out [BA-AD Rust](https://github.com/Deathemonic/BA-AD/tree/rust). It is **BA-AD** written in `rust`.
 
-To Install it just download one of the binaries at [Releases](https://github.com/Deathemonic/BA-AD/releases)
+To install it just download one of the binaries at [Releases](https://github.com/Deathemonic/BA-AD/releases)
 
 > [!NOTE]
 > BA-AD Rust is still a work in progress, there are some stuff that is missing like the `search` and `extract` feature, it may also contains some bugs.
