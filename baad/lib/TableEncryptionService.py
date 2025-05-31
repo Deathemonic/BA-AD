@@ -23,11 +23,11 @@ class TableEncryptionService:
 
     def create_key(self, name: str) -> bytes:
         seed = calculate_hash(name)
-        return MersenneTwister(seed).next_bytes(8)
+        return MersenneTwister(seed).NextBytes(8)
 
     def xor(self, name: str, data: bytes) -> bytes:
         seed = calculate_hash(name)
-        key = MersenneTwister(seed).next_bytes(len(data))
+        key = MersenneTwister(seed).NextBytes(len(data))
         return self._xor(data, key) if data else data
 
     def _xor(self, value: bytes, key: bytes) -> bytes:
