@@ -117,7 +117,7 @@ class CatalogParser:
             ],
             'TableBundles': [
                 {
-                    'url': f'{server_url}/TableBundles/{key}',
+                    'url': f'{server_url}/TableBundles/{asset["name"]}',
                     'crc': asset.get('crc', 0),
                     'size': asset.get('size', 0)
                 }
