@@ -1,6 +1,6 @@
 [project]
 name = "BA-AD"
-version = "2.1.0"
+version = "3.1.0"
 description = "Blue Archive Asset Downloader"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
@@ -17,6 +17,7 @@ dependencies = [
     "rich>=13.9.4",
     "unitypy>=1.20.12",
     "xxhash>=3.5.0",
+    "bacy",
 ]
 
 [build-system]
@@ -25,6 +26,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["baad"]
+
+[tool.uv.sources]
+bacy = { git = "https://github.com/Deathemonic/BA-CY", rev = "pyo3" }
 
 [project.scripts]
 baad = "baad.__main__:main"

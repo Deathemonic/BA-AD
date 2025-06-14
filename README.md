@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="baad/public/archive.png" width="500px" alt="logo">
+  <img src=".github/resources/archive.png" width="500px" alt="logo">
   <h1>Blue Archive - Asset Downloader</h1>
 </div>
 
@@ -49,41 +49,27 @@ pip install git+https://github.com/Deathemonic/BA-AD
 	<summary>Tutorial with Screenshots (Click to expand)</summary>
 <br>
 
-Before doing anything, make sure you have [`uv`](https://github.com/astral-sh/uv?tab=readme-ov-file#installation) installed.
+1. Open your Terminal
 
-1. Download the repository files
+*For Windows press `Ctrl + X` or `Right Click` on the Start Menu then select Terminal*
 
-![stepone](baad/public/tutorial/step1.png)
+![stepone](.github/resources/tutorial/step1.png)
 
-2. Extract the downloaded zip and open the folder from the extracted zip
+2. Install `uv` 
 
-![steptwo](baad/public/tutorial/step2.png)
+*For Windows type `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`*
 
-3. `Shift` + `Right Click` then click `Open PowerShell window here`
+*For **Mac** or **GNU/Linux** type `curl -LsSf https://astral.sh/uv/install.sh | sh`*
 
-_alternatively you can open cmd then change directory to the folder_
+![steptwo](.github/resources/tutorial/step2.png)
 
-![stepthree](baad/public/tutorial/step3.png)
+3. Install `BA-AD`
 
-<br>
+*Type `uv tool install git+https://github.com/Deathemonic/BA-AD`*
 
+![stepthree](.github/resources/tutorial/step3.png)
 
-4. Install the tool using `uv tool install .`
-
-![steptwentytwo](baad/public/tutorial/step22.png)
-
-5. You can now run it using the `uvx --from ba-ad baad` to see the usage. Check out [Usage](#usage) on how to use the tool.
-
-![steptwentythree](baad/public/tutorial/step23.png)
-
-<br>
-
-4. Or you can install tool by typing `pip install .`
-
-![stepfour](baad/public/tutorial/step4.png)
-
-
-5. Your done just type `baad --help` to see the usage. Check out [Usage](#usage) on how to use the tool.
+4. Your done just type `baad --help` to see the usage. Check out [Usage](#usage) on how to use the tool.
 
 <br>
 
@@ -92,25 +78,25 @@ _alternatively you can open cmd then change directory to the folder_
 <br>
 
 - Downloads the assetbundles
-![stepfive](baad/public/tutorial/step5.png)
-![stepsix](baad/public/tutorial/step6.png)
+![stepfive](.github/resources/tutorial/step5.png)
+![stepsix](.github/resources/tutorial/step6.png)
 
 - Downloads the tablebundles
-![stepseven](baad/public/tutorial/step7.png)
+![stepseven](.github/resources/tutorial/step7.png)
 
 - Downloads the media reasources
-![stepeight](baad/public/tutorial/step8.png)
+![stepeight](.github/resources/tutorial/step8.png)
 
 - Output results
-![stepnine](baad/public/tutorial/step9.png)
-![stepthirteen](baad/public/tutorial/step13.png)
+![stepnine](.github/resources/tutorial/step9.png)
+![stepthirteen](.github/resources/tutorial/step13.png)
 
 - Extracting assetbundles
-![stepten](baad/public/tutorial/step10.png)
-![stepeleven](baad/public/tutorial/step11.png)
+![stepten](.github/resources/tutorial/step10.png)
+![stepeleven](.github/resources/tutorial/step11.png)
 
 - Extracting tablebundles
-![steptwelve](baad/public/tutorial/step12.png)
+![steptwelve](.github/resources/tutorial/step12.png)
 
 </details>
 
@@ -210,13 +196,12 @@ By passing `download` to the command it will initialize the download mode. This 
 
 ```
 > baad download --help
-usage: baad download [-h] [--output OUTPUT] [--limit LIMIT] [--catalog CATALOG] [--filter FILTER] [--assets] [--tables] [--media] [-a]
+usage: baad download [-h] [--output OUTPUT] [--limit LIMIT] [--filter FILTER] [--assets] [--tables] [--media] [-a]
 
 options:
   -h, --help         show this help message and exit
   --output OUTPUT    output directory for the downloaded files (default: ./output)
   --limit LIMIT      set a limit the download limit (default: 5)
-  --catalog CATALOG  force change the catalog url (will skip apk download)
   --filter FILTER    filter by name
   --assets           download the assetbundles
   --tables           download the tablebundles
@@ -363,34 +348,34 @@ Well anything you want, you can use assetbundles to extract the chibi models and
 <br>
 
 1. You can export the assetbundles using [AssetStudioMod](https://github.com/aelurum/AssetStudio)
-![stepfourteen](baad/public/tutorial/step14.png)
+![stepfourteen](.github/resources/tutorial/step14.png)
 
 - Then you can view the extracted model using [Blender](https://www.blender.org)
-![stepfifteen](baad/public/tutorial/step15.png)
+![stepfifteen](.github/resources/tutorial/step15.png)
 
 - Or you can convert the model to pmx to use with [MikuMikuDance](https://learnmmd.com)
-![stepsixteen](baad/public/tutorial/step16.png)
+![stepsixteen](.github/resources/tutorial/step16.png)
 
 - Or you can port the model to [Source](https://en.wikipedia.org/wiki/Source_(game_engine)) to use with **Gmod** or **Source Film Maker**
-![stepseventeen](baad/public/tutorial/step24.png)
+![stepseventeen](.github/resources/tutorial/step24.png)
 
 
 2. You can use the extracted tablebundles to view the game database
 
 - You can view the character dialog
-![stepeighteen](baad/public/tutorial/step18.png)
+![stepeighteen](.github/resources/tutorial/step18.png)
 
 - You can view the charater skill info
-![stepnineteen](baad/public/tutorial/step19.png)
+![stepnineteen](.github/resources/tutorial/step19.png)
 
 
 3. You can use the download media resources to view the game backgrounds, cg, video, or music
 
 - You can view the game backgrounds and CG
-![steptwenty](baad/public/tutorial/step20.png)
+![steptwenty](.github/resources/tutorial/step20.png)
 
 - You can listen character voice lines and ost
-![steptwentyone](baad/public/tutorial/step21.png)
+![steptwentyone](.github/resources/tutorial/step21.png)
 
 </details>
 
@@ -399,13 +384,11 @@ If you want to download the Global `AssetBundles`, `TableBundles`, and `MediaRes
 
 To install it just download one of the binaries at [Releases](https://github.com/Deathemonic/BA-AD/releases)
 
-> [!NOTE]
+> [!IMPORTANT]
 > BA-AD Rust is still a work in progress, there are some stuff that is missing like the `search` and `extract` feature, it may also contains some bugs.
 
 ### Dump
-To get `dump.cs` you need to manually decompile the `libil2cpp.so`. I recommend following the instructions from [Auto-Il2cppDumper](https://github.com/AndnixSH/Auto-Il2cppDumper) or [Zygisk-Il2CppDumper](https://github.com/Perfare/Zygisk-Il2CppDumper). Also I recommend using a emulator like **MuMuPlayer** to get easy root access.
-
-But you your lazy you can use [Il2CppDumper](https://github.com/Perfare/Il2CppDumper) to dump it manually or automatically using a script. You gonna need the **Blue Archive JP** apk from [**ApkPure**](https://apkpure.com/blue-archive/com.YostarJP.BlueArchive), then rename .xapk to .zip and extract it. You will have multiple apks the apks you need is `config.arm64_v8a.apk` and `UnityDataAssetPack.apk` then rename .apk to .zip and extract it.
+To get `dump.cs` you need to manually dump `libil2cpp.so`. Use [Il2CppDumper](https://github.com/Perfare/Il2CppDumper) to dump it manually or automatically using a script. You gonna need the **Blue Archive JP** apk from [**ApkPure**](https://apkpure.com/blue-archive/com.YostarJP.BlueArchive), then rename .xapk to .zip and extract it. You will have multiple apks the apks you need is `config.arm64_v8a.apk` and `UnityDataAssetPack.apk` then rename .apk to .zip and extract it.
 
 `libil2cpp.so` is located at extracted the `config.arm64_v8a.apk` then at `lib/arm64-v8a` and the `global-metadata.dat` is located at the extracted `UnityDataAssetPack.apk` then at `assets/bin/Data/Managed/Metadata`.
 
@@ -414,6 +397,12 @@ But you your lazy you can use [Il2CppDumper](https://github.com/Perfare/Il2CppDu
 
 ### Contributing
 Don't like my [shitty code](https://shitcode.net/latest/language/python) and what to change it? Feel free to contribute by submitting a pull request or issue. Always appreciate the help.
+
+
+### Contributors
+<a href="https://github.com/Deathemonic/BA-AD/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Deathemonic/BA-AD"/>
+</a>
 
 ### Acknowledgement
  - [hdk5/MoeXCOM](https://github.com/hdk5/MoeXCOM)
