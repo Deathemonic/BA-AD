@@ -5,16 +5,18 @@ from rich.console import Console
 from rich.traceback import Traceback
 
 from . import __version__
-from .utils.AssetExtracter import AssetExtracter
-from .utils.FlatbufGenerator import FlatbufGenerator
-from .utils.ResourceDownloader import ResourceDownloader
-from .utils.StudioExtracter import AssetStudioExtracter
-from .utils.TableExtracter import TableExtracter
-from .utils.MediaExtracter import MediaExtracter
-from .utils.CatalogList import CatalogList
+from .extractors.assetextractor import AssetExtractor
+from .utils.flatgen import FlatbufGenerator
+from .utils.downloader import ResourceDownloader
+from .extractors.studioextractor import AssetStudioExtractor
+from .extractors.tableextractor import TableExtractor
+from .extractors.mediaextractor import MediaExtractor
+from .utils.list import List
+from .utils.apk import Apk
+from .utils.parser import CatalogParser
 
 
-def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
+def arguments() -> tuple:
     parser = ArgumentParser(description='Blue Archive Asset Downloader')
     sub_parser = parser.add_subparsers(dest='commands')
 
@@ -34,7 +36,7 @@ def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
         '-g',
         '--generate',
         action='store_true',
-        help='generate the flatbuf schemas',
+        help='generate the flatbuf schemas (this will be removed in the future and will be replaced by BA-FB)',
     )
 
     search = sub_parser.add_parser(
@@ -45,16 +47,6 @@ def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
         '--output',
         type=str,
         help='output directory for the downloaded files (default: ./output)',
-    )
-    search.add_argument(
-        '--version',
-        type=str,
-        help='specific version to search for (default: latest)',
-    )
-    search.add_argument(
-        '--catalog',
-        type=str,
-        help='force change the catalog url (will skip apk download)',
     )
 
     download = sub_parser.add_parser(
@@ -67,20 +59,10 @@ def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
         help='output directory for the downloaded files (default: ./output)',
     )
     download.add_argument(
-        '--version',
-        type=str,
-        help='specific version to download (default: latest)',
-    )
-    download.add_argument(
         '--limit',
         type=int,
         default=5,
         help='set a limit the download limit (default: 5)',
-    )
-    download.add_argument(
-        '--catalog',
-        type=str,
-        help='force change the catalog url (will skip apk download)',
     )
     download.add_argument(
         '--filter',
@@ -111,7 +93,7 @@ def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
 
     extract = sub_parser.add_parser(
         'extract',
-        help='extract game files',
+        help='extract game files (this will be removed in the future and will be replaced by BA-AE)',
     )
     extract.add_argument(
         '--path',
@@ -175,105 +157,98 @@ def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
     return parser, args
 
 
-def resource_downloader(args) -> ResourceDownloader:
-    downloader_args = {
-        'update': args.update,
-        'catalog_url': args.catalog,
-        'filter_pattern': args.filter if hasattr(args, 'filter') else None,
-        'version': args.version if hasattr(args, 'version') else None
-    }
+def handle_apk(args, console) -> str:
+    apk = Apk()
     
-    if args.output:
-        downloader_args['output'] = args.output
-    downloader = ResourceDownloader(**downloader_args)
+    if args.update:
+        console.print("[yellow]Force updating APK...[/yellow]")
+        apk.download_apk(update=True)
+    else:
+        if not apk.apk_exists():
+            console.print("[yellow]APK doesn't exist. Downloading...[/yellow]")
+            apk.download_apk()
+        elif apk.is_outdated():
+            console.print("[yellow]APK is outdated. Updating...[/yellow]")
+            apk.download_apk()
+        else:
+            console.print("[green]APK is up to date.[/green]")
+    
+    parser = CatalogParser()
+    return parser.fetch_catalog_url()
 
-    if hasattr(args, 'commands') and args.commands == 'download':
-        if args.all:
-            args.assets = args.tables = args.media = True
 
-        limit = None if args.limit == 0 else args.limit
-        downloader.download(
-            assets=args.assets,
-            tables=args.tables,
-            media=args.media,
-            limit=limit,
-        )
-    return downloader
+def handle_download(args, catalog_url) -> None:
+    downloader = ResourceDownloader(
+        update=args.update,
+        output=args.output,
+        filter_pattern=args.filter if hasattr(args, 'filter') else None
+    )
+
+    if args.all:
+        args.assets = args.tables = args.media = True
+
+    limit = None if args.limit == 0 else args.limit
+    downloader.download(
+        assets=args.assets,
+        tables=args.tables,
+        media=args.media,
+        limit=limit
+    )
 
 
-def extracter(args) -> TableExtracter | AssetExtracter | AssetStudioExtracter | MediaExtracter | None:
+def handle_extract(args) -> None:
     if args.all:
         args.tables = True
         args.assets = True
         args.media = True
 
     if args.tables:
-        table_extract = TableExtracter(args.path)
+        table_extract = TableExtractor(args.path)
         table_extract.run_extraction()
-        return table_extract
 
     if args.assets and not args.studio:
-        asset_extract = AssetExtracter(args.path)
+        asset_extract = AssetExtractor(args.path)
         asset_extract.extract_assets()
-        return asset_extract
 
     if args.assets and args.studio:
-        asset_studio_extract = AssetStudioExtracter(args.path)
+        asset_studio_extract = AssetStudioExtractor(args.path)
         asset_studio_extract.extract_assets()
-        return asset_studio_extract
 
     if args.media:
-        media_extract = MediaExtracter(args.path)
+        media_extract = MediaExtractor(args.path)
         media_extract.run_extraction()
-        return media_extract
 
-    return None
+
+def handle_search(args) -> None:
+    root_path = Path(__file__).parent
+    output_path = args.output if hasattr(args, 'output') and args.output else None
+    
+    catalog_list = List(root_path, update=args.update, output=output_path)
+    catalog_list.show()
 
 
 def main() -> None:
     parser, args = arguments()
+    console = Console()
 
     if not hasattr(args, 'commands'):
-        return
-
-    if args.commands == 'download':
-        resource_downloader(args)
-        return
-        
-    if args.commands == 'extract':
-        extracter(args)
-        return
-        
-    if args.commands == 'search':
-        root_path = Path(__file__).parent
-        output_path = args.output if hasattr(args, 'output') and args.output else None
-        version = args.version if hasattr(args, 'version') and args.version else None
-        
-        downloader_args = {
-            'update': args.update,
-            'output': output_path,
-            'version': version
-        }
-        
-        if hasattr(args, 'catalog') and args.catalog:
-            downloader_args['catalog_url'] = args.catalog
-        
-        console = Console()
-        console.print("[bold blue]Initializing search mode...[/bold blue]")
-            
-        catalog_list = CatalogList(root_path, **downloader_args)
-        catalog_list.show()
-        return
-
-    if args.update:
-        ResourceDownloader(update=args.update).fetch_catalog_url()
+        parser.print_help()
         return
 
     if args.generate:
         FlatbufGenerator().generate()
         return
 
-    parser.print_help()
+    catalog_url = None
+    if args.commands in ['download', 'search']:
+        catalog_url = handle_apk(args, console)
+
+    if args.commands == 'download':
+        handle_download(args, catalog_url)
+    elif args.commands == 'extract':
+        handle_extract(args)
+    elif args.commands == 'search':
+        handle_search(args)
 
 
 if __name__ == '__main__':

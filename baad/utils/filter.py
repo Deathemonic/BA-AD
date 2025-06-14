@@ -1,17 +1,16 @@
-import json
 from pathlib import Path
 
 from rapidfuzz import process, fuzz
+from ..helpers.json import load_json
 
 
-class CatalogFilter:
+class Filter:
     def __init__(self, game_files_path: Path):
         self.game_files_path = game_files_path
         self.score_cutoff = 85
 
     def _load_game_files(self) -> dict:
-        with open(self.game_files_path, 'r') as f:
-            return json.load(f)
+        return load_json(self.game_files_path)
 
     def _get_name_from_url(self, url: str) -> str:
         return Path(url).name

@@ -5,7 +5,8 @@ from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Random import get_random_bytes
 from Crypto.Util.Padding import pad, unpad
 
-
+# TODO: Deprecated (Moving to BA-CY)
+# Keep here for compatibility
 def encrypt(plain_text: str, pass_phrase: str) -> str:
     block_size = 16
 

@@ -1,6 +1,6 @@
 from enum import IntEnum
 
-from ..lib.TableEncryptionService import TableEncryptionService
+from ..crypto.TableEncryptionService import TableEncryptionService
 
 
 def dump_table(obj) -> list:

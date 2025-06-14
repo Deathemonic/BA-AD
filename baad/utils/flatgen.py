@@ -4,9 +4,9 @@ import subprocess
 from pathlib import Path
 import keyword
 
-from .Progress import create_live_display, create_progress_group
+from ..helpers.progress import create_live_display, create_progress_group
 
-
+# TODO: Deprecated (Moved to BA-FB)
 class FlatbufGenerator:
     def __init__(self) -> None:
         self.root = Path(__file__).parent.parent
@@ -28,14 +28,14 @@ class FlatbufGenerator:
 
         self.types = {'bool', 'byte', 'ubyte', 'int', 'uint', 'long', 'ulong', 'float', 'double', 'string'}
         self.type_converters = {
-            'string': 'table_encryption.convert_string',
-            'int': 'table_encryption.convert_int',
-            'uint': 'table_encryption.convert_uint',
-            'long': 'table_encryption.convert_long',
-            'ulong': 'table_encryption.convert_ulong',
-            'float': 'table_encryption.convert_float',
-            'double': 'table_encryption.convert_double',
-            'sbyte': 'table_encryption.convert_ubyte',
+            'string': 'bacy.convert_string',
+            'int': 'bacy.convert_int',
+            'uint': 'bacy.convert_uint',
+            'long': 'bacy.convert_long',
+            'ulong': 'bacy.convert_ulong',
+            'float': 'bacy.convert_float',
+            'double': 'bacy.convert_double',
+            'sbyte': 'bacy.convert_ubyte',
         }
 
         self.reEnum = re.compile(
@@ -172,12 +172,11 @@ public enum (.{1,128}?) // TypeDefIndex: \d+?
 
     def _create_dumper_wrappers(self, structs: dict, enums: dict, f) -> None:
         f.write('from enum import IntEnum\n\n')
-        f.write('from ..lib.TableEncryptionService import TableEncryptionService\n\n\n')
+        f.write('import bacy\n\n\n')
         f.write('def dump_table(obj) -> list:\n')
-        f.write('    table_encryption = TableEncryptionService()\n\n')
         f.write('    typ_name = obj.__class__.__name__[:-5]\n')
         f.write("    dump_func = next(f for x, f in globals().items() if x.endswith(f'_{typ_name}'))\n")
-        f.write('    password = table_encryption.create_key(typ_name[:-5])\n')
+        f.write('    password = bacy.create_key(typ_name[:-5].encode())\n')
         f.write(
             '    return [\n        dump_func(obj.DataList(j), password)\n        for j in range(obj.DataListLength())\n    ]\n\n\n'
         )
@@ -191,7 +190,6 @@ public enum (.{1,128}?) // TypeDefIndex: \d+?
 
     def _write_struct_dumper(self, name: str, struct: dict, enums: dict, structs: dict, f) -> None:
         f.write(f'def dump_{name}(obj, password) -> dict:\n')
-        f.write('    table_encryption = TableEncryptionService()\n\n')
         f.write('    return {\n')
 
         for pname, ptype in struct.items():

@@ -6,13 +6,14 @@ from pathlib import Path
 
 import requests
 
-from .Progress import create_live_display, create_progress_group
+from ..helpers.progress import create_live_display, create_progress_group
+from ..helpers.filemanager import ensure_directory_exists, get_asset_output_dir, get_extracted_dir
 
-
-class AssetStudioExtracter:
+# TODO: Deprecated (Moved to BA-AE)
+class AssetStudioExtractor:
     def __init__(self, output_path: Path) -> None:
-        self.asset_path = output_path or Path.cwd() / 'output' / 'AssetBundles'
-        self.extracted_path = Path(self.asset_path).parent / 'AssetExtracted'
+        self.asset_path = get_asset_output_dir(output_path)
+        self.extracted_path = get_extracted_dir(output_path, 'Asset')
 
         self.root = self.root = Path(__file__).parent.parent
 
@@ -44,7 +45,7 @@ class AssetStudioExtracter:
             return
 
         zip_path = self.bin_path / 'AssetStudioModCLI.zip'
-        self.bin_path.mkdir(parents=True, exist_ok=True)
+        ensure_directory_exists(self.bin_path)
 
         if not zip_path.exists():
             self.console.print('[cyan]Downloading AssetStudioModCLI...[/cyan]')
@@ -74,7 +75,7 @@ class AssetStudioExtracter:
     def _extract_bundle(self, bundle_path: Path) -> None:
         bundle_name = bundle_path.stem
         bundle_output = self.extracted_path / bundle_name
-        bundle_output.mkdir(parents=True, exist_ok=True)
+        ensure_directory_exists(bundle_output)
 
         command = [
             str(self.asset_studio_path),
@@ -91,7 +92,7 @@ class AssetStudioExtracter:
         self._run_asset_studio_command(command)
 
         fbx_output = bundle_output / 'FBX'
-        fbx_output.mkdir(parents=True, exist_ok=True)
+        ensure_directory_exists(fbx_output)
 
         command = [
             str(self.asset_studio_path),

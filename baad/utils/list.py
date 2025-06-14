@@ -1,22 +1,23 @@
-import json
-import sys
 import asyncio
 from pathlib import Path
-from typing import List, Dict, Tuple
 
 from rich.console import Console
-from rich.layout import Layout
-from rich.panel import Panel
-from rich.table import Table
 from rich.text import Text
 from rich.live import Live
-
 from rapidfuzz import process, fuzz
 
-from .ResourceDownloader import ResourceDownloader
+from ..helpers.json import load_json
+from ..helpers.interface import (
+    format_size,
+    create_table,
+    create_layout,
+    create_panel,
+    get_character_input
+)
+from .downloader import ResourceDownloader
 
 
-class CatalogList:
+class List:
     def __init__(self, root_path: Path, output: Path = None, update: bool = False, version: str = None, catalog_url: str = None):
         self.root = root_path
         self.console = Console()
@@ -39,16 +40,7 @@ class CatalogList:
         
         self.all_items = self._load_all_items()
         
-    def _format_size(self, size: int) -> str:
-        if size == 0:
-            return ""
-        for unit in ['B', 'KB', 'MB', 'GB']:
-            if size < 1024:
-                return f"{size:.1f}{unit}"
-            size /= 1024
-        return f"{size:.1f}TB"
-        
-    def _load_catalogs(self) -> Dict[str, List[dict]]:
+    def _load_catalogs(self) -> dict:
         cache_dir = self.downloader.catalog_parser.cache_dir
         
         catalog_configs = {
@@ -66,9 +58,8 @@ class CatalogList:
             
         return result
 
-    def _load_catalog_items(self, category: str, path: Path, key: str) -> List[dict]:
-        with open(path) as f:
-            data = json.load(f)
+    def _load_catalog_items(self, category: str, path: Path, key: str) -> list:
+        data = load_json(path)
             
         if category == 'AssetBundles':
             return self._load_asset_bundles(data, key)
@@ -78,23 +69,24 @@ class CatalogList:
             
         return self._load_table_bundles(data, key)
         
-    def _load_asset_bundles(self, data: dict, key: str) -> List[dict]:
+    def _load_asset_bundles(self, data: dict, key: str) -> list:
         items = data.get(key, [])
         return [{'name': item['Name'], 'size': item.get('Size', 0)} for item in items]
         
-    def _load_media_resources(self, data: dict, key: str) -> List[dict]:
+    def _load_media_resources(self, data: dict, key: str) -> list:
         items = data.get(key, {}).values()
         return [{'name': Path(item['path']).name, 'size': item.get('bytes', 0)} for item in items]
         
-    def _load_table_bundles(self, data: dict, key: str) -> List[dict]:
+    def _load_table_bundles(self, data: dict, key: str) -> list:
         items = data.get(key, {}).items()
         return [{'name': name, 'size': item_data.get('size', 0)} for name, item_data in items]
 
-    def _create_table(self, items: List[Tuple[str, str, int]]) -> Table:
-        table = Table(show_header=True, header_style="bold magenta", expand=True, box=None)
-        table.add_column("Category", style="cyan", width=15)
-        table.add_column("Name", style="green")
-        table.add_column("Size", justify="right", style="yellow", width=10)
+    def _create_table(self, items: list) -> dict:
+        columns = [
+            ("Category", "cyan", None, 15),
+            ("Name", "green", None, None),
+            ("Size", "yellow", "right", 10)
+        ]
 
         total_items = len(items)
         self.visible_items = min(self.console.height - 8, total_items)
@@ -106,20 +98,21 @@ class CatalogList:
         start_idx = self.scroll_offset
         end_idx = min(start_idx + self.visible_items, total_items)
         
+        rows = []
         for idx in range(start_idx, end_idx):
             category, name, size = items[idx]
             style = "reverse" if idx == self.selected_index else ""
-            size_text = self._format_size(size)
+            size_text = format_size(size)
             
-            table.add_row(
+            rows.append([
                 Text(category, style=style),
                 Text(name, style=style),
                 Text(size_text, style=style)
-            )
+            ])
 
-        return table
+        return create_table(columns, rows)
 
-    def _filter_items(self) -> List[Tuple[str, str, int]]:
+    def _filter_items(self) -> list:
         if not self.query:
             return self.all_items
             
@@ -143,63 +136,13 @@ class CatalogList:
             
         return sorted(filtered_items, key=lambda x: x[2], reverse=True)
 
-    def _load_all_items(self) -> List[Tuple[str, str, int]]:
+    def _load_all_items(self) -> list:
         catalogs = self._load_catalogs()
         return [
             (category, item['name'], item['size'])
             for category, items in catalogs.items()
             for item in items
         ]
-    
-    def _get_char(self) -> str:
-        if sys.platform == "win32":
-            import msvcrt
-            if not msvcrt.kbhit():
-                return ""
-            
-            char = msvcrt.getch()
-
-            if char in [b'\x03', b'\x1b']:  # Ctrl+C, ESC
-                return '\x1b'
-            
-            elif char == b'\x08':  # Backspace
-                return '\x08'
-            
-            elif char == b'\xe0':
-                char = msvcrt.getch()
-
-                if char == b'H':  # Up arrow
-                    return '\x1b[A'
-                
-                elif char == b'P':  # Down arrow
-                    return '\x1b[B'
-                
-            return char.decode('utf-8', errors='ignore')
-        
-        if sys.platform == "posix":
-            import tty
-            import termios
-            import select
-            
-            if not select.select([sys.stdin], [], [], 0)[0]:
-                return ""
-                
-            fd = sys.stdin.fileno()
-            old_settings = termios.tcgetattr(fd)
-
-            try:
-                tty.setraw(sys.stdin.fileno())
-                char = sys.stdin.read(1)
-                
-                if char == '\x1b': # Ctrl+C, ESC
-        
-                    if select.select([sys.stdin], [], [], 0.1)[0]:
-                        char += sys.stdin.read(2)
-
-            finally:
-                termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-                
-            return char
 
     def _handle_input(self, char: str, live: Live) -> bool:
         if not char:
@@ -238,7 +181,7 @@ class CatalogList:
             
         return True
     
-    def _download_selected_item(self, filtered_items: List[Tuple[str, str, int]], live: Live) -> None:
+    def _download_selected_item(self, filtered_items: list, live: Live) -> None:
         if not filtered_items or self.selected_index >= len(filtered_items):
             return
 
@@ -272,29 +215,25 @@ class CatalogList:
                 [category_key]
             ))
 
-            self._get_char()
+            get_character_input()  # Wait for key press
         
         live.start()
 
     def show(self):
-        layout = Layout()
-        layout.split_column(
-            Layout(name="search", size=3),
-            Layout(name="content")
-        )
+        layout = create_layout()
         
         with Live(layout, console=self.console, screen=True, refresh_per_second=60) as live:
             for _ in iter(bool, True):
                 filtered_items = self._filter_items()
                 
-                layout["search"].update(Panel(
+                layout["search"].update(create_panel(
                     Text(f"> {self.query}", style="bold blue"),
                     title=f"[{len(filtered_items)} matches] [Press ESC to exit]",
                     style="blue"
                 ))
                 
                 table = self._create_table(filtered_items)
-                layout["content"].update(Panel(table))
+                layout["content"].update(create_panel(table))
                 
-                if not self._handle_input(self._get_char(), live):
+                if not self._handle_input(get_character_input(), live):
                     break
