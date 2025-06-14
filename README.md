@@ -388,7 +388,7 @@ To install it just download one of the binaries at [Releases](https://github.com
 > BA-AD Rust is still a work in progress, there are some stuff that is missing like the `search` and `extract` feature, it may also contains some bugs.
 
 ### Dump
-To get `dump.cs` you need to manually dump `libil2cpp.so`. Use [Il2CppDumper](https://github.com/Perfare/Il2CppDumper) to dump it manually or automatically using a script. You gonna need the **Blue Archive JP** apk from [**ApkPure**](https://apkpure.com/blue-archive/com.YostarJP.BlueArchive), then rename .xapk to .zip and extract it. You will have multiple apks the apks you need is `config.arm64_v8a.apk` and `UnityDataAssetPack.apk` then rename .apk to .zip and extract it.
+To get `dump.cs` you need to manually dump `libil2cpp.so` using [Il2CppDumper](https://github.com/Perfare/Il2CppDumper). You gonna need the **Blue Archive JP** apk from [**ApkPure**](https://apkpure.com/blue-archive/com.YostarJP.BlueArchive), then rename .xapk to .zip and extract it. You will have multiple apks the apks you need is `config.arm64_v8a.apk` and `UnityDataAssetPack.apk` then rename .apk to .zip and extract it.
 
 `libil2cpp.so` is located at extracted the `config.arm64_v8a.apk` then at `lib/arm64-v8a` and the `global-metadata.dat` is located at the extracted `UnityDataAssetPack.apk` then at `assets/bin/Data/Managed/Metadata`.
 
