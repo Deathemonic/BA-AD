@@ -24,7 +24,7 @@ class FlatbufGenerator:
             self.console.print(f'[red]Unsupported system: {system}[/red]')
             raise SystemExit(1)
 
-        self.flatc_path = self.root / 'lib' / 'flatbuf' / flatc_type
+        self.flatc_path = self.root / 'crypto' / 'flatbuf' / flatc_type
 
         self.types = {'bool', 'byte', 'ubyte', 'int', 'uint', 'long', 'ulong', 'float', 'double', 'string'}
         self.type_converters = {
@@ -254,11 +254,11 @@ public enum (.{1,128}?) // TypeDefIndex: \d+?
                 f.write(content)
 
     def _initialize_generate(self, task: int) -> None:
-        structs, enums = self.dump_cs_to_structs_and_enums(self.root / 'lib' / 'flatbuf' / 'dump.cs')
+        structs, enums = self.dump_cs_to_structs_and_enums(self.root / 'crypto' / 'flatbuf' / 'dump.cs')
         self.extract_progress.update(task, advance=1)
         self.live.update(self.progress_group)
 
-        fbs_path = self.generate_fbs(structs, enums, self.root / 'lib' / 'flatbuf' / 'BlueArchive.fbs')
+        fbs_path = self.generate_fbs(structs, enums, self.root / 'crypto' / 'flatbuf' / 'BlueArchive.fbs')
         self.extract_progress.update(task, advance=1)
         self.live.update(self.progress_group)
 

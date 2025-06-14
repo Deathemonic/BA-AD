@@ -1,14 +1,12 @@
 from enum import IntEnum
 
-from ..crypto.TableEncryptionService import TableEncryptionService
+import bacy
 
 
 def dump_table(obj) -> list:
-    table_encryption = TableEncryptionService()
-
     typ_name = obj.__class__.__name__[:-5]
     dump_func = next(f for x, f in globals().items() if x.endswith(f'_{typ_name}'))
-    password = table_encryption.create_key(typ_name[:-5])
+    password = bacy.create_key(typ_name[:-5].encode())
     return [
         dump_func(obj.DataList(j), password)
         for j in range(obj.DataListLength())
@@ -16,674 +14,588 @@ def dump_table(obj) -> list:
 
 
 def dump_GroundVector3(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'X': table_encryption.convert_float(obj.X(), password),
-        'Y': table_encryption.convert_float(obj.Y(), password),
-        'Z': table_encryption.convert_float(obj.Z(), password),
+        'X': bacy.convert_float(obj.X(), password),
+        'Y': bacy.convert_float(obj.Y(), password),
+        'Z': bacy.convert_float(obj.Z(), password),
     }
 
 
 def dump_AcademyFavorScheduleExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'ScheduleGroupId': table_encryption.convert_long(obj.ScheduleGroupId(), password),
-        'OrderInGroup': table_encryption.convert_long(obj.OrderInGroup(), password),
-        'Location': table_encryption.convert_string(obj.Location(), password),
-        'LocalizeScenarioId': table_encryption.convert_uint(obj.LocalizeScenarioId(), password),
-        'FavorRank': table_encryption.convert_long(obj.FavorRank(), password),
-        'SecretStoneAmount': table_encryption.convert_long(obj.SecretStoneAmount(), password),
-        'ScenarioSriptGroupId': table_encryption.convert_long(obj.ScenarioSriptGroupId(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardAmount': [table_encryption.convert_long(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'ScheduleGroupId': bacy.convert_long(obj.ScheduleGroupId(), password),
+        'OrderInGroup': bacy.convert_long(obj.OrderInGroup(), password),
+        'Location': bacy.convert_string(obj.Location(), password),
+        'LocalizeScenarioId': bacy.convert_uint(obj.LocalizeScenarioId(), password),
+        'FavorRank': bacy.convert_long(obj.FavorRank(), password),
+        'SecretStoneAmount': bacy.convert_long(obj.SecretStoneAmount(), password),
+        'ScenarioSriptGroupId': bacy.convert_long(obj.ScenarioSriptGroupId(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardAmount': [bacy.convert_long(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
     }
 
 
 def dump_AcademyLocationExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'PrefabPath': table_encryption.convert_string(obj.PrefabPath(), password),
-        'IconImagePath': table_encryption.convert_string(obj.IconImagePath(), password),
-        'OpenCondition': [School(table_encryption.convert_int(obj.OpenCondition(j), password)).name for j in range(obj.OpenConditionLength())],
-        'OpenConditionCount': [table_encryption.convert_long(obj.OpenConditionCount(j), password) for j in range(obj.OpenConditionCountLength())],
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardParcelId': table_encryption.convert_long(obj.RewardParcelId(), password),
-        'OpenTeacherRank': table_encryption.convert_long(obj.OpenTeacherRank(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'PrefabPath': bacy.convert_string(obj.PrefabPath(), password),
+        'IconImagePath': bacy.convert_string(obj.IconImagePath(), password),
+        'OpenCondition': [School(bacy.convert_int(obj.OpenCondition(j), password)).name for j in range(obj.OpenConditionLength())],
+        'OpenConditionCount': [bacy.convert_long(obj.OpenConditionCount(j), password) for j in range(obj.OpenConditionCountLength())],
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardParcelId': bacy.convert_long(obj.RewardParcelId(), password),
+        'OpenTeacherRank': bacy.convert_long(obj.OpenTeacherRank(), password),
     }
 
 
 def dump_AcademyLocationRankExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Rank': table_encryption.convert_long(obj.Rank(), password),
-        'RankExp': table_encryption.convert_long(obj.RankExp(), password),
-        'TotalExp': table_encryption.convert_long(obj.TotalExp(), password),
+        'Rank': bacy.convert_long(obj.Rank(), password),
+        'RankExp': bacy.convert_long(obj.RankExp(), password),
+        'TotalExp': bacy.convert_long(obj.TotalExp(), password),
     }
 
 
 def dump_AcademyMessanger1Excel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'MessageGroupId': table_encryption.convert_long(obj.MessageGroupId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'MessageCondition': AcademyMessageConditions(table_encryption.convert_int(obj.MessageCondition(), password)).name,
-        'ConditionValue': table_encryption.convert_long(obj.ConditionValue(), password),
-        'PreConditionGroupId': table_encryption.convert_long(obj.PreConditionGroupId(), password),
-        'PreConditionFavorScheduleId': table_encryption.convert_long(obj.PreConditionFavorScheduleId(), password),
-        'FavorScheduleId': table_encryption.convert_long(obj.FavorScheduleId(), password),
-        'NextGroupId': table_encryption.convert_long(obj.NextGroupId(), password),
-        'FeedbackTimeMillisec': table_encryption.convert_long(obj.FeedbackTimeMillisec(), password),
-        'MessageType': AcademyMessageTypes(table_encryption.convert_int(obj.MessageType(), password)).name,
-        'ImagePath': table_encryption.convert_string(obj.ImagePath(), password),
-        'MessageKR': table_encryption.convert_string(obj.MessageKR(), password),
-        'MessageJP': table_encryption.convert_string(obj.MessageJP(), password),
+        'MessageGroupId': bacy.convert_long(obj.MessageGroupId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'MessageCondition': AcademyMessageConditions(bacy.convert_int(obj.MessageCondition(), password)).name,
+        'ConditionValue': bacy.convert_long(obj.ConditionValue(), password),
+        'PreConditionGroupId': bacy.convert_long(obj.PreConditionGroupId(), password),
+        'PreConditionFavorScheduleId': bacy.convert_long(obj.PreConditionFavorScheduleId(), password),
+        'FavorScheduleId': bacy.convert_long(obj.FavorScheduleId(), password),
+        'NextGroupId': bacy.convert_long(obj.NextGroupId(), password),
+        'FeedbackTimeMillisec': bacy.convert_long(obj.FeedbackTimeMillisec(), password),
+        'MessageType': AcademyMessageTypes(bacy.convert_int(obj.MessageType(), password)).name,
+        'ImagePath': bacy.convert_string(obj.ImagePath(), password),
+        'MessageKR': bacy.convert_string(obj.MessageKR(), password),
+        'MessageJP': bacy.convert_string(obj.MessageJP(), password),
     }
 
 
 def dump_AcademyMessanger2Excel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'MessageGroupId': table_encryption.convert_long(obj.MessageGroupId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'MessageCondition': AcademyMessageConditions(table_encryption.convert_int(obj.MessageCondition(), password)).name,
-        'ConditionValue': table_encryption.convert_long(obj.ConditionValue(), password),
-        'PreConditionGroupId': table_encryption.convert_long(obj.PreConditionGroupId(), password),
-        'PreConditionFavorScheduleId': table_encryption.convert_long(obj.PreConditionFavorScheduleId(), password),
-        'FavorScheduleId': table_encryption.convert_long(obj.FavorScheduleId(), password),
-        'NextGroupId': table_encryption.convert_long(obj.NextGroupId(), password),
-        'FeedbackTimeMillisec': table_encryption.convert_long(obj.FeedbackTimeMillisec(), password),
-        'MessageType': AcademyMessageTypes(table_encryption.convert_int(obj.MessageType(), password)).name,
-        'ImagePath': table_encryption.convert_string(obj.ImagePath(), password),
-        'MessageKR': table_encryption.convert_string(obj.MessageKR(), password),
-        'MessageJP': table_encryption.convert_string(obj.MessageJP(), password),
+        'MessageGroupId': bacy.convert_long(obj.MessageGroupId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'MessageCondition': AcademyMessageConditions(bacy.convert_int(obj.MessageCondition(), password)).name,
+        'ConditionValue': bacy.convert_long(obj.ConditionValue(), password),
+        'PreConditionGroupId': bacy.convert_long(obj.PreConditionGroupId(), password),
+        'PreConditionFavorScheduleId': bacy.convert_long(obj.PreConditionFavorScheduleId(), password),
+        'FavorScheduleId': bacy.convert_long(obj.FavorScheduleId(), password),
+        'NextGroupId': bacy.convert_long(obj.NextGroupId(), password),
+        'FeedbackTimeMillisec': bacy.convert_long(obj.FeedbackTimeMillisec(), password),
+        'MessageType': AcademyMessageTypes(bacy.convert_int(obj.MessageType(), password)).name,
+        'ImagePath': bacy.convert_string(obj.ImagePath(), password),
+        'MessageKR': bacy.convert_string(obj.MessageKR(), password),
+        'MessageJP': bacy.convert_string(obj.MessageJP(), password),
     }
 
 
 def dump_AcademyMessanger3Excel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'MessageGroupId': table_encryption.convert_long(obj.MessageGroupId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'MessageCondition': AcademyMessageConditions(table_encryption.convert_int(obj.MessageCondition(), password)).name,
-        'ConditionValue': table_encryption.convert_long(obj.ConditionValue(), password),
-        'PreConditionGroupId': table_encryption.convert_long(obj.PreConditionGroupId(), password),
-        'PreConditionFavorScheduleId': table_encryption.convert_long(obj.PreConditionFavorScheduleId(), password),
-        'FavorScheduleId': table_encryption.convert_long(obj.FavorScheduleId(), password),
-        'NextGroupId': table_encryption.convert_long(obj.NextGroupId(), password),
-        'FeedbackTimeMillisec': table_encryption.convert_long(obj.FeedbackTimeMillisec(), password),
-        'MessageType': AcademyMessageTypes(table_encryption.convert_int(obj.MessageType(), password)).name,
-        'ImagePath': table_encryption.convert_string(obj.ImagePath(), password),
-        'MessageKR': table_encryption.convert_string(obj.MessageKR(), password),
-        'MessageJP': table_encryption.convert_string(obj.MessageJP(), password),
+        'MessageGroupId': bacy.convert_long(obj.MessageGroupId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'MessageCondition': AcademyMessageConditions(bacy.convert_int(obj.MessageCondition(), password)).name,
+        'ConditionValue': bacy.convert_long(obj.ConditionValue(), password),
+        'PreConditionGroupId': bacy.convert_long(obj.PreConditionGroupId(), password),
+        'PreConditionFavorScheduleId': bacy.convert_long(obj.PreConditionFavorScheduleId(), password),
+        'FavorScheduleId': bacy.convert_long(obj.FavorScheduleId(), password),
+        'NextGroupId': bacy.convert_long(obj.NextGroupId(), password),
+        'FeedbackTimeMillisec': bacy.convert_long(obj.FeedbackTimeMillisec(), password),
+        'MessageType': AcademyMessageTypes(bacy.convert_int(obj.MessageType(), password)).name,
+        'ImagePath': bacy.convert_string(obj.ImagePath(), password),
+        'MessageKR': bacy.convert_string(obj.MessageKR(), password),
+        'MessageJP': bacy.convert_string(obj.MessageJP(), password),
     }
 
 
 def dump_AcademyMessangerExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'MessageGroupId': table_encryption.convert_long(obj.MessageGroupId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'MessageCondition': AcademyMessageConditions(table_encryption.convert_int(obj.MessageCondition(), password)).name,
-        'ConditionValue': table_encryption.convert_long(obj.ConditionValue(), password),
-        'PreConditionGroupId': table_encryption.convert_long(obj.PreConditionGroupId(), password),
-        'PreConditionFavorScheduleId': table_encryption.convert_long(obj.PreConditionFavorScheduleId(), password),
-        'FavorScheduleId': table_encryption.convert_long(obj.FavorScheduleId(), password),
-        'NextGroupId': table_encryption.convert_long(obj.NextGroupId(), password),
-        'FeedbackTimeMillisec': table_encryption.convert_long(obj.FeedbackTimeMillisec(), password),
-        'MessageType': AcademyMessageTypes(table_encryption.convert_int(obj.MessageType(), password)).name,
-        'ImagePath': table_encryption.convert_string(obj.ImagePath(), password),
-        'MessageKR': table_encryption.convert_string(obj.MessageKR(), password),
-        'MessageJP': table_encryption.convert_string(obj.MessageJP(), password),
+        'MessageGroupId': bacy.convert_long(obj.MessageGroupId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'MessageCondition': AcademyMessageConditions(bacy.convert_int(obj.MessageCondition(), password)).name,
+        'ConditionValue': bacy.convert_long(obj.ConditionValue(), password),
+        'PreConditionGroupId': bacy.convert_long(obj.PreConditionGroupId(), password),
+        'PreConditionFavorScheduleId': bacy.convert_long(obj.PreConditionFavorScheduleId(), password),
+        'FavorScheduleId': bacy.convert_long(obj.FavorScheduleId(), password),
+        'NextGroupId': bacy.convert_long(obj.NextGroupId(), password),
+        'FeedbackTimeMillisec': bacy.convert_long(obj.FeedbackTimeMillisec(), password),
+        'MessageType': AcademyMessageTypes(bacy.convert_int(obj.MessageType(), password)).name,
+        'ImagePath': bacy.convert_string(obj.ImagePath(), password),
+        'MessageKR': bacy.convert_string(obj.MessageKR(), password),
+        'MessageJP': bacy.convert_string(obj.MessageJP(), password),
     }
 
 
 def dump_AcademyRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Location': table_encryption.convert_string(obj.Location(), password),
-        'ScheduleGroupId': table_encryption.convert_long(obj.ScheduleGroupId(), password),
-        'OrderInGroup': table_encryption.convert_long(obj.OrderInGroup(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'ProgressTexture': table_encryption.convert_string(obj.ProgressTexture(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'LocationRank': table_encryption.convert_long(obj.LocationRank(), password),
-        'FavorExp': table_encryption.convert_long(obj.FavorExp(), password),
-        'SecretStoneAmount': table_encryption.convert_long(obj.SecretStoneAmount(), password),
-        'SecretStoneProb': table_encryption.convert_long(obj.SecretStoneProb(), password),
-        'ExtraFavorExp': table_encryption.convert_long(obj.ExtraFavorExp(), password),
-        'ExtraFavorExpProb': table_encryption.convert_long(obj.ExtraFavorExpProb(), password),
-        'ExtraRewardParcelType': [ParcelType(table_encryption.convert_int(obj.ExtraRewardParcelType(j), password)).name for j in range(obj.ExtraRewardParcelTypeLength())],
-        'ExtraRewardParcelId': [table_encryption.convert_long(obj.ExtraRewardParcelId(j), password) for j in range(obj.ExtraRewardParcelIdLength())],
-        'ExtraRewardAmount': [table_encryption.convert_long(obj.ExtraRewardAmount(j), password) for j in range(obj.ExtraRewardAmountLength())],
-        'ExtraRewardProb': [table_encryption.convert_long(obj.ExtraRewardProb(j), password) for j in range(obj.ExtraRewardProbLength())],
+        'Location': bacy.convert_string(obj.Location(), password),
+        'ScheduleGroupId': bacy.convert_long(obj.ScheduleGroupId(), password),
+        'OrderInGroup': bacy.convert_long(obj.OrderInGroup(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'ProgressTexture': bacy.convert_string(obj.ProgressTexture(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'LocationRank': bacy.convert_long(obj.LocationRank(), password),
+        'FavorExp': bacy.convert_long(obj.FavorExp(), password),
+        'SecretStoneAmount': bacy.convert_long(obj.SecretStoneAmount(), password),
+        'SecretStoneProb': bacy.convert_long(obj.SecretStoneProb(), password),
+        'ExtraFavorExp': bacy.convert_long(obj.ExtraFavorExp(), password),
+        'ExtraFavorExpProb': bacy.convert_long(obj.ExtraFavorExpProb(), password),
+        'ExtraRewardParcelType': [ParcelType(bacy.convert_int(obj.ExtraRewardParcelType(j), password)).name for j in range(obj.ExtraRewardParcelTypeLength())],
+        'ExtraRewardParcelId': [bacy.convert_long(obj.ExtraRewardParcelId(j), password) for j in range(obj.ExtraRewardParcelIdLength())],
+        'ExtraRewardAmount': [bacy.convert_long(obj.ExtraRewardAmount(j), password) for j in range(obj.ExtraRewardAmountLength())],
+        'ExtraRewardProb': [bacy.convert_long(obj.ExtraRewardProb(j), password) for j in range(obj.ExtraRewardProbLength())],
         'IsExtraRewardDisplayed': [obj.IsExtraRewardDisplayed(j) for j in range(obj.IsExtraRewardDisplayedLength())],
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardAmount': [table_encryption.convert_long(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardAmount': [bacy.convert_long(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
     }
 
 
 def dump_AcademyTicketExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'LocationRankSum': table_encryption.convert_long(obj.LocationRankSum(), password),
-        'ScheduleTicktetMax': table_encryption.convert_long(obj.ScheduleTicktetMax(), password),
+        'LocationRankSum': bacy.convert_long(obj.LocationRankSum(), password),
+        'ScheduleTicktetMax': bacy.convert_long(obj.ScheduleTicktetMax(), password),
     }
 
 
 def dump_AcademyZoneExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'LocationId': table_encryption.convert_long(obj.LocationId(), password),
-        'LocationRankForUnlock': table_encryption.convert_long(obj.LocationRankForUnlock(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'StudentVisitProb': [table_encryption.convert_long(obj.StudentVisitProb(j), password) for j in range(obj.StudentVisitProbLength())],
-        'RewardGroupId': table_encryption.convert_long(obj.RewardGroupId(), password),
-        'Tags': [Tag(table_encryption.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'LocationId': bacy.convert_long(obj.LocationId(), password),
+        'LocationRankForUnlock': bacy.convert_long(obj.LocationRankForUnlock(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'StudentVisitProb': [bacy.convert_long(obj.StudentVisitProb(j), password) for j in range(obj.StudentVisitProbLength())],
+        'RewardGroupId': bacy.convert_long(obj.RewardGroupId(), password),
+        'Tags': [Tag(bacy.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
     }
 
 
 def dump_AccountLevelExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Level': table_encryption.convert_long(obj.Level(), password),
-        'Exp': table_encryption.convert_long(obj.Exp(), password),
-        'APAutoChargeMax': table_encryption.convert_long(obj.APAutoChargeMax(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Level': bacy.convert_long(obj.Level(), password),
+        'Exp': bacy.convert_long(obj.Exp(), password),
+        'APAutoChargeMax': bacy.convert_long(obj.APAutoChargeMax(), password),
         'NeedReportEvent': obj.NeedReportEvent(),
     }
 
 
 def dump_BlendData(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Type': table_encryption.convert_int(obj.Type(), password),
+        'Type': bacy.convert_int(obj.Type(), password),
         'InfoList': [dump_BlendInfo(obj.InfoList(j), password) for j in range(obj.InfoListLength())],
     }
 
 
 def dump_BlendInfo(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'From': table_encryption.convert_int(obj.From(), password),
-        'To': table_encryption.convert_int(obj.To(), password),
-        'Blend': table_encryption.convert_float(obj.Blend(), password),
+        'From': bacy.convert_int(obj.From(), password),
+        'To': bacy.convert_int(obj.To(), password),
+        'Blend': bacy.convert_float(obj.Blend(), password),
     }
 
 
 def dump_AnimatorData(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'DefaultStateName': table_encryption.convert_string(obj.DefaultStateName(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
+        'DefaultStateName': bacy.convert_string(obj.DefaultStateName(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
         'DataList': [dump_AniStateData(obj.DataList(j), password) for j in range(obj.DataListLength())],
     }
 
 
 def dump_AniStateData(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'StateName': table_encryption.convert_string(obj.StateName(), password),
-        'StatePrefix': table_encryption.convert_string(obj.StatePrefix(), password),
-        'StateNameWithPrefix': table_encryption.convert_string(obj.StateNameWithPrefix(), password),
-        'Tag': table_encryption.convert_string(obj.Tag(), password),
-        'SpeedParameterName': table_encryption.convert_string(obj.SpeedParameterName(), password),
-        'SpeedParamter': table_encryption.convert_float(obj.SpeedParamter(), password),
-        'StateSpeed': table_encryption.convert_float(obj.StateSpeed(), password),
-        'ClipName': table_encryption.convert_string(obj.ClipName(), password),
-        'Length': table_encryption.convert_float(obj.Length(), password),
-        'FrameRate': table_encryption.convert_float(obj.FrameRate(), password),
+        'StateName': bacy.convert_string(obj.StateName(), password),
+        'StatePrefix': bacy.convert_string(obj.StatePrefix(), password),
+        'StateNameWithPrefix': bacy.convert_string(obj.StateNameWithPrefix(), password),
+        'Tag': bacy.convert_string(obj.Tag(), password),
+        'SpeedParameterName': bacy.convert_string(obj.SpeedParameterName(), password),
+        'SpeedParamter': bacy.convert_float(obj.SpeedParamter(), password),
+        'StateSpeed': bacy.convert_float(obj.StateSpeed(), password),
+        'ClipName': bacy.convert_string(obj.ClipName(), password),
+        'Length': bacy.convert_float(obj.Length(), password),
+        'FrameRate': bacy.convert_float(obj.FrameRate(), password),
         'IsLooping': obj.IsLooping(),
         'Events': [dump_AniEventData(obj.Events(j), password) for j in range(obj.EventsLength())],
     }
 
 
 def dump_AniEventData(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'Time': table_encryption.convert_float(obj.Time(), password),
-        'IntParam': table_encryption.convert_int(obj.IntParam(), password),
-        'FloatParam': table_encryption.convert_float(obj.FloatParam(), password),
-        'StringParam': table_encryption.convert_string(obj.StringParam(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
+        'Time': bacy.convert_float(obj.Time(), password),
+        'IntParam': bacy.convert_int(obj.IntParam(), password),
+        'FloatParam': bacy.convert_float(obj.FloatParam(), password),
+        'StringParam': bacy.convert_string(obj.StringParam(), password),
     }
 
 
 def dump_ArenaLevelSectionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ArenaSeasonId': table_encryption.convert_long(obj.ArenaSeasonId(), password),
-        'StartLevel': table_encryption.convert_long(obj.StartLevel(), password),
-        'LastLevel': table_encryption.convert_long(obj.LastLevel(), password),
-        'UserCount': table_encryption.convert_long(obj.UserCount(), password),
+        'ArenaSeasonId': bacy.convert_long(obj.ArenaSeasonId(), password),
+        'StartLevel': bacy.convert_long(obj.StartLevel(), password),
+        'LastLevel': bacy.convert_long(obj.LastLevel(), password),
+        'UserCount': bacy.convert_long(obj.UserCount(), password),
     }
 
 
 def dump_ArenaMapExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'TerrainType': table_encryption.convert_long(obj.TerrainType(), password),
-        'TerrainTypeLocalizeKey': table_encryption.convert_string(obj.TerrainTypeLocalizeKey(), password),
-        'ImagePath': table_encryption.convert_string(obj.ImagePath(), password),
-        'GroundGroupId': table_encryption.convert_long(obj.GroundGroupId(), password),
-        'GroundGroupNameLocalizeKey': table_encryption.convert_string(obj.GroundGroupNameLocalizeKey(), password),
-        'StartRank': table_encryption.convert_long(obj.StartRank(), password),
-        'EndRank': table_encryption.convert_long(obj.EndRank(), password),
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'TerrainType': bacy.convert_long(obj.TerrainType(), password),
+        'TerrainTypeLocalizeKey': bacy.convert_string(obj.TerrainTypeLocalizeKey(), password),
+        'ImagePath': bacy.convert_string(obj.ImagePath(), password),
+        'GroundGroupId': bacy.convert_long(obj.GroundGroupId(), password),
+        'GroundGroupNameLocalizeKey': bacy.convert_string(obj.GroundGroupNameLocalizeKey(), password),
+        'StartRank': bacy.convert_long(obj.StartRank(), password),
+        'EndRank': bacy.convert_long(obj.EndRank(), password),
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
     }
 
 
 def dump_ArenaNPCExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'Rank': table_encryption.convert_long(obj.Rank(), password),
-        'NPCAccountLevel': table_encryption.convert_long(obj.NPCAccountLevel(), password),
-        'NPCLevel': table_encryption.convert_long(obj.NPCLevel(), password),
-        'NPCLevelDeviation': table_encryption.convert_long(obj.NPCLevelDeviation(), password),
-        'NPCStarGrade': table_encryption.convert_long(obj.NPCStarGrade(), password),
-        'ExceptionCharacterRarities': [Rarity(table_encryption.convert_int(obj.ExceptionCharacterRarities(j), password)).name for j in range(obj.ExceptionCharacterRaritiesLength())],
-        'ExceptionMainCharacterIds': [table_encryption.convert_long(obj.ExceptionMainCharacterIds(j), password) for j in range(obj.ExceptionMainCharacterIdsLength())],
-        'ExceptionSupportCharacterIds': [table_encryption.convert_long(obj.ExceptionSupportCharacterIds(j), password) for j in range(obj.ExceptionSupportCharacterIdsLength())],
-        'ExceptionTSSIds': [table_encryption.convert_long(obj.ExceptionTSSIds(j), password) for j in range(obj.ExceptionTSSIdsLength())],
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'Rank': bacy.convert_long(obj.Rank(), password),
+        'NPCAccountLevel': bacy.convert_long(obj.NPCAccountLevel(), password),
+        'NPCLevel': bacy.convert_long(obj.NPCLevel(), password),
+        'NPCLevelDeviation': bacy.convert_long(obj.NPCLevelDeviation(), password),
+        'NPCStarGrade': bacy.convert_long(obj.NPCStarGrade(), password),
+        'ExceptionCharacterRarities': [Rarity(bacy.convert_int(obj.ExceptionCharacterRarities(j), password)).name for j in range(obj.ExceptionCharacterRaritiesLength())],
+        'ExceptionMainCharacterIds': [bacy.convert_long(obj.ExceptionMainCharacterIds(j), password) for j in range(obj.ExceptionMainCharacterIdsLength())],
+        'ExceptionSupportCharacterIds': [bacy.convert_long(obj.ExceptionSupportCharacterIds(j), password) for j in range(obj.ExceptionSupportCharacterIdsLength())],
+        'ExceptionTSSIds': [bacy.convert_long(obj.ExceptionTSSIds(j), password) for j in range(obj.ExceptionTSSIdsLength())],
     }
 
 
 def dump_ArenaRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'ArenaRewardType': ArenaRewardType(table_encryption.convert_int(obj.ArenaRewardType_(), password)).name,
-        'RankStart': table_encryption.convert_long(obj.RankStart(), password),
-        'RankEnd': table_encryption.convert_long(obj.RankEnd(), password),
-        'RankIconPath': table_encryption.convert_string(obj.RankIconPath(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelUniqueId': [table_encryption.convert_long(obj.RewardParcelUniqueId(j), password) for j in range(obj.RewardParcelUniqueIdLength())],
-        'RewardParcelUniqueName': [table_encryption.convert_string(obj.RewardParcelUniqueName(j), password) for j in range(obj.RewardParcelUniqueNameLength())],
-        'RewardParcelAmount': [table_encryption.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'ArenaRewardType': ArenaRewardType(bacy.convert_int(obj.ArenaRewardType_(), password)).name,
+        'RankStart': bacy.convert_long(obj.RankStart(), password),
+        'RankEnd': bacy.convert_long(obj.RankEnd(), password),
+        'RankIconPath': bacy.convert_string(obj.RankIconPath(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelUniqueId': [bacy.convert_long(obj.RewardParcelUniqueId(j), password) for j in range(obj.RewardParcelUniqueIdLength())],
+        'RewardParcelUniqueName': [bacy.convert_string(obj.RewardParcelUniqueName(j), password) for j in range(obj.RewardParcelUniqueNameLength())],
+        'RewardParcelAmount': [bacy.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
     }
 
 
 def dump_ArenaSeasonCloseRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'SeasonId': table_encryption.convert_long(obj.SeasonId(), password),
-        'RankStart': table_encryption.convert_long(obj.RankStart(), password),
-        'RankEnd': table_encryption.convert_long(obj.RankEnd(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelUniqueId': [table_encryption.convert_long(obj.RewardParcelUniqueId(j), password) for j in range(obj.RewardParcelUniqueIdLength())],
-        'RewardParcelUniqueName': [table_encryption.convert_string(obj.RewardParcelUniqueName(j), password) for j in range(obj.RewardParcelUniqueNameLength())],
-        'RewardParcelAmount': [table_encryption.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'SeasonId': bacy.convert_long(obj.SeasonId(), password),
+        'RankStart': bacy.convert_long(obj.RankStart(), password),
+        'RankEnd': bacy.convert_long(obj.RankEnd(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelUniqueId': [bacy.convert_long(obj.RewardParcelUniqueId(j), password) for j in range(obj.RewardParcelUniqueIdLength())],
+        'RewardParcelUniqueName': [bacy.convert_string(obj.RewardParcelUniqueName(j), password) for j in range(obj.RewardParcelUniqueNameLength())],
+        'RewardParcelAmount': [bacy.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
     }
 
 
 def dump_ArenaSeasonExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'SeasonStartDate': table_encryption.convert_string(obj.SeasonStartDate(), password),
-        'SeasonEndDate': table_encryption.convert_string(obj.SeasonEndDate(), password),
-        'SeasonGroupLimit': table_encryption.convert_long(obj.SeasonGroupLimit(), password),
-        'PrevSeasonId': table_encryption.convert_long(obj.PrevSeasonId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'SeasonStartDate': bacy.convert_string(obj.SeasonStartDate(), password),
+        'SeasonEndDate': bacy.convert_string(obj.SeasonEndDate(), password),
+        'SeasonGroupLimit': bacy.convert_long(obj.SeasonGroupLimit(), password),
+        'PrevSeasonId': bacy.convert_long(obj.PrevSeasonId(), password),
     }
 
 
 def dump_AssistEchelonTypeConvertExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Contents': EchelonType(table_encryption.convert_int(obj.Contents(), password)).name,
-        'ConvertTo': EchelonType(table_encryption.convert_int(obj.ConvertTo(), password)).name,
+        'Contents': EchelonType(bacy.convert_int(obj.Contents(), password)).name,
+        'ConvertTo': EchelonType(bacy.convert_int(obj.ConvertTo(), password)).name,
     }
 
 
 def dump_AttendanceExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Type': AttendanceType(table_encryption.convert_int(obj.Type(), password)).name,
-        'CountdownPrefab': table_encryption.convert_string(obj.CountdownPrefab(), password),
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'AccountType': AccountState(table_encryption.convert_int(obj.AccountType(), password)).name,
-        'AccountLevelLimit': table_encryption.convert_long(obj.AccountLevelLimit(), password),
-        'Title': table_encryption.convert_string(obj.Title(), password),
-        'InfomationLocalizeCode': table_encryption.convert_string(obj.InfomationLocalizeCode(), password),
-        'CountRule': AttendanceCountRule(table_encryption.convert_int(obj.CountRule(), password)).name,
-        'CountReset': AttendanceResetType(table_encryption.convert_int(obj.CountReset(), password)).name,
-        'BookSize': table_encryption.convert_long(obj.BookSize(), password),
-        'StartDate': table_encryption.convert_string(obj.StartDate(), password),
-        'StartableEndDate': table_encryption.convert_string(obj.StartableEndDate(), password),
-        'EndDate': table_encryption.convert_string(obj.EndDate(), password),
-        'ExpiryDate': table_encryption.convert_long(obj.ExpiryDate(), password),
-        'MailType': MailType(table_encryption.convert_int(obj.MailType_(), password)).name,
-        'DialogCategory': DialogCategory(table_encryption.convert_int(obj.DialogCategory_(), password)).name,
-        'TitleImagePath': table_encryption.convert_string(obj.TitleImagePath(), password),
-        'DecorationImagePath': table_encryption.convert_string(obj.DecorationImagePath(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Type': AttendanceType(bacy.convert_int(obj.Type(), password)).name,
+        'CountdownPrefab': bacy.convert_string(obj.CountdownPrefab(), password),
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'AccountType': AccountState(bacy.convert_int(obj.AccountType(), password)).name,
+        'AccountLevelLimit': bacy.convert_long(obj.AccountLevelLimit(), password),
+        'Title': bacy.convert_string(obj.Title(), password),
+        'InfomationLocalizeCode': bacy.convert_string(obj.InfomationLocalizeCode(), password),
+        'CountRule': AttendanceCountRule(bacy.convert_int(obj.CountRule(), password)).name,
+        'CountReset': AttendanceResetType(bacy.convert_int(obj.CountReset(), password)).name,
+        'BookSize': bacy.convert_long(obj.BookSize(), password),
+        'StartDate': bacy.convert_string(obj.StartDate(), password),
+        'StartableEndDate': bacy.convert_string(obj.StartableEndDate(), password),
+        'EndDate': bacy.convert_string(obj.EndDate(), password),
+        'ExpiryDate': bacy.convert_long(obj.ExpiryDate(), password),
+        'MailType': MailType(bacy.convert_int(obj.MailType_(), password)).name,
+        'DialogCategory': DialogCategory(bacy.convert_int(obj.DialogCategory_(), password)).name,
+        'TitleImagePath': bacy.convert_string(obj.TitleImagePath(), password),
+        'DecorationImagePath': bacy.convert_string(obj.DecorationImagePath(), password),
     }
 
 
 def dump_AttendanceRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'AttendanceId': table_encryption.convert_long(obj.AttendanceId(), password),
-        'Day': table_encryption.convert_long(obj.Day(), password),
-        'RewardIcon': table_encryption.convert_string(obj.RewardIcon(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardId': [table_encryption.convert_long(obj.RewardId(j), password) for j in range(obj.RewardIdLength())],
-        'RewardAmount': [table_encryption.convert_long(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
+        'AttendanceId': bacy.convert_long(obj.AttendanceId(), password),
+        'Day': bacy.convert_long(obj.Day(), password),
+        'RewardIcon': bacy.convert_string(obj.RewardIcon(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardId': [bacy.convert_long(obj.RewardId(j), password) for j in range(obj.RewardIdLength())],
+        'RewardAmount': [bacy.convert_long(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
     }
 
 
 def dump_BattleLevelFactorExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'LevelDiff': table_encryption.convert_int(obj.LevelDiff(), password),
-        'DamageRate': table_encryption.convert_long(obj.DamageRate(), password),
+        'LevelDiff': bacy.convert_int(obj.LevelDiff(), password),
+        'DamageRate': bacy.convert_long(obj.DamageRate(), password),
     }
 
 
 def dump_BossExternalBTExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ExternalBTId': table_encryption.convert_long(obj.ExternalBTId(), password),
-        'AIPhase': table_encryption.convert_long(obj.AIPhase(), password),
-        'ExternalBTNodeType': ExternalBTNodeType(table_encryption.convert_int(obj.ExternalBTNodeType_(), password)).name,
-        'ExternalBTTrigger': ExternalBTTrigger(table_encryption.convert_int(obj.ExternalBTTrigger_(), password)).name,
-        'TriggerArgument': table_encryption.convert_string(obj.TriggerArgument(), password),
-        'BehaviorRate': table_encryption.convert_long(obj.BehaviorRate(), password),
-        'ExternalBehavior': ExternalBehavior(table_encryption.convert_int(obj.ExternalBehavior_(), password)).name,
-        'BehaviorArgument': table_encryption.convert_string(obj.BehaviorArgument(), password),
+        'ExternalBTId': bacy.convert_long(obj.ExternalBTId(), password),
+        'AIPhase': bacy.convert_long(obj.AIPhase(), password),
+        'ExternalBTNodeType': ExternalBTNodeType(bacy.convert_int(obj.ExternalBTNodeType_(), password)).name,
+        'ExternalBTTrigger': ExternalBTTrigger(bacy.convert_int(obj.ExternalBTTrigger_(), password)).name,
+        'TriggerArgument': bacy.convert_string(obj.TriggerArgument(), password),
+        'BehaviorRate': bacy.convert_long(obj.BehaviorRate(), password),
+        'ExternalBehavior': ExternalBehavior(bacy.convert_int(obj.ExternalBehavior_(), password)).name,
+        'BehaviorArgument': bacy.convert_string(obj.BehaviorArgument(), password),
     }
 
 
 def dump_BossPhaseExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'AIPhase': table_encryption.convert_long(obj.AIPhase(), password),
-        'NormalAttackSkillUniqueName': table_encryption.convert_string(obj.NormalAttackSkillUniqueName(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'AIPhase': bacy.convert_long(obj.AIPhase(), password),
+        'NormalAttackSkillUniqueName': bacy.convert_string(obj.NormalAttackSkillUniqueName(), password),
         'UseExSkill': [obj.UseExSkill(j) for j in range(obj.UseExSkillLength())],
     }
 
 
 def dump_BuffParticleExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'UniqueName': table_encryption.convert_string(obj.UniqueName(), password),
-        'BuffType': table_encryption.convert_string(obj.BuffType(), password),
-        'BuffName': table_encryption.convert_string(obj.BuffName(), password),
-        'ResourcePath': table_encryption.convert_string(obj.ResourcePath(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'UniqueName': bacy.convert_string(obj.UniqueName(), password),
+        'BuffType': bacy.convert_string(obj.BuffType(), password),
+        'BuffName': bacy.convert_string(obj.BuffName(), password),
+        'ResourcePath': bacy.convert_string(obj.ResourcePath(), password),
     }
 
 
 def dump_BulletArmorDamageFactorExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'DamageFactorGroupId': table_encryption.convert_string(obj.DamageFactorGroupId(), password),
-        'BulletType': BulletType(table_encryption.convert_int(obj.BulletType_(), password)).name,
-        'ArmorType': ArmorType(table_encryption.convert_int(obj.ArmorType_(), password)).name,
-        'DamageRate': table_encryption.convert_long(obj.DamageRate(), password),
-        'DamageAttribute': DamageAttribute(table_encryption.convert_int(obj.DamageAttribute_(), password)).name,
-        'MinDamageRate': table_encryption.convert_long(obj.MinDamageRate(), password),
-        'MaxDamageRate': table_encryption.convert_long(obj.MaxDamageRate(), password),
+        'DamageFactorGroupId': bacy.convert_string(obj.DamageFactorGroupId(), password),
+        'BulletType': BulletType(bacy.convert_int(obj.BulletType_(), password)).name,
+        'ArmorType': ArmorType(bacy.convert_int(obj.ArmorType_(), password)).name,
+        'DamageRate': bacy.convert_long(obj.DamageRate(), password),
+        'DamageAttribute': DamageAttribute(bacy.convert_int(obj.DamageAttribute_(), password)).name,
+        'MinDamageRate': bacy.convert_long(obj.MinDamageRate(), password),
+        'MaxDamageRate': bacy.convert_long(obj.MaxDamageRate(), password),
         'ShowHighlightFloater': obj.ShowHighlightFloater(),
     }
 
 
 def dump_CafeInfoExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CafeId': table_encryption.convert_long(obj.CafeId(), password),
+        'CafeId': bacy.convert_long(obj.CafeId(), password),
         'IsDefault': obj.IsDefault(),
-        'OpenConditionCafeId': OpenConditionContent(table_encryption.convert_int(obj.OpenConditionCafeId(), password)).name,
-        'OpenConditionCafeInvite': OpenConditionContent(table_encryption.convert_int(obj.OpenConditionCafeInvite(), password)).name,
+        'OpenConditionCafeId': OpenConditionContent(bacy.convert_int(obj.OpenConditionCafeId(), password)).name,
+        'OpenConditionCafeInvite': OpenConditionContent(bacy.convert_int(obj.OpenConditionCafeInvite(), password)).name,
     }
 
 
 def dump_CafeInteractionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
         'IgnoreIfUnobtained': obj.IgnoreIfUnobtained(),
-        'IgnoreIfUnobtainedStartDate': table_encryption.convert_string(obj.IgnoreIfUnobtainedStartDate(), password),
-        'IgnoreIfUnobtainedEndDate': table_encryption.convert_string(obj.IgnoreIfUnobtainedEndDate(), password),
-        'BubbleType': [BubbleType(table_encryption.convert_int(obj.BubbleType_(j), password)).name for j in range(obj.BubbleTypeLength())],
-        'BubbleDuration': [table_encryption.convert_long(obj.BubbleDuration(j), password) for j in range(obj.BubbleDurationLength())],
-        'FavorEmoticonRewardParcelType': ParcelType(table_encryption.convert_int(obj.FavorEmoticonRewardParcelType(), password)).name,
-        'FavorEmoticonRewardId': table_encryption.convert_long(obj.FavorEmoticonRewardId(), password),
-        'FavorEmoticonRewardAmount': table_encryption.convert_long(obj.FavorEmoticonRewardAmount(), password),
-        'CafeCharacterState': [table_encryption.convert_string(obj.CafeCharacterState(j), password) for j in range(obj.CafeCharacterStateLength())],
+        'IgnoreIfUnobtainedStartDate': bacy.convert_string(obj.IgnoreIfUnobtainedStartDate(), password),
+        'IgnoreIfUnobtainedEndDate': bacy.convert_string(obj.IgnoreIfUnobtainedEndDate(), password),
+        'BubbleType': [BubbleType(bacy.convert_int(obj.BubbleType_(j), password)).name for j in range(obj.BubbleTypeLength())],
+        'BubbleDuration': [bacy.convert_long(obj.BubbleDuration(j), password) for j in range(obj.BubbleDurationLength())],
+        'FavorEmoticonRewardParcelType': ParcelType(bacy.convert_int(obj.FavorEmoticonRewardParcelType(), password)).name,
+        'FavorEmoticonRewardId': bacy.convert_long(obj.FavorEmoticonRewardId(), password),
+        'FavorEmoticonRewardAmount': bacy.convert_long(obj.FavorEmoticonRewardAmount(), password),
+        'CafeCharacterState': [bacy.convert_string(obj.CafeCharacterState(j), password) for j in range(obj.CafeCharacterStateLength())],
     }
 
 
 def dump_CafeProductionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CafeId': table_encryption.convert_long(obj.CafeId(), password),
-        'Rank': table_encryption.convert_long(obj.Rank(), password),
-        'CafeProductionParcelType': ParcelType(table_encryption.convert_int(obj.CafeProductionParcelType(), password)).name,
-        'CafeProductionParcelId': table_encryption.convert_long(obj.CafeProductionParcelId(), password),
-        'ParcelProductionCoefficient': table_encryption.convert_long(obj.ParcelProductionCoefficient(), password),
-        'ParcelProductionCorrectionValue': table_encryption.convert_long(obj.ParcelProductionCorrectionValue(), password),
-        'ParcelStorageMax': table_encryption.convert_long(obj.ParcelStorageMax(), password),
+        'CafeId': bacy.convert_long(obj.CafeId(), password),
+        'Rank': bacy.convert_long(obj.Rank(), password),
+        'CafeProductionParcelType': ParcelType(bacy.convert_int(obj.CafeProductionParcelType(), password)).name,
+        'CafeProductionParcelId': bacy.convert_long(obj.CafeProductionParcelId(), password),
+        'ParcelProductionCoefficient': bacy.convert_long(obj.ParcelProductionCoefficient(), password),
+        'ParcelProductionCorrectionValue': bacy.convert_long(obj.ParcelProductionCorrectionValue(), password),
+        'ParcelStorageMax': bacy.convert_long(obj.ParcelStorageMax(), password),
     }
 
 
 def dump_CafeRankExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CafeId': table_encryption.convert_long(obj.CafeId(), password),
-        'Rank': table_encryption.convert_long(obj.Rank(), password),
-        'RecipeId': table_encryption.convert_long(obj.RecipeId(), password),
-        'ComfortMax': table_encryption.convert_long(obj.ComfortMax(), password),
-        'TagCountMax': table_encryption.convert_long(obj.TagCountMax(), password),
-        'CharacterVisitMin': table_encryption.convert_int(obj.CharacterVisitMin(), password),
-        'CharacterVisitMax': table_encryption.convert_int(obj.CharacterVisitMax(), password),
-        'CafeVisitWeightBase': table_encryption.convert_int(obj.CafeVisitWeightBase(), password),
-        'CafeVisitWeightTagBonusStep': [table_encryption.convert_int(obj.CafeVisitWeightTagBonusStep(j), password) for j in range(obj.CafeVisitWeightTagBonusStepLength())],
-        'CafeVisitWeightTagBonus': [table_encryption.convert_int(obj.CafeVisitWeightTagBonus(j), password) for j in range(obj.CafeVisitWeightTagBonusLength())],
+        'CafeId': bacy.convert_long(obj.CafeId(), password),
+        'Rank': bacy.convert_long(obj.Rank(), password),
+        'RecipeId': bacy.convert_long(obj.RecipeId(), password),
+        'ComfortMax': bacy.convert_long(obj.ComfortMax(), password),
+        'TagCountMax': bacy.convert_long(obj.TagCountMax(), password),
+        'CharacterVisitMin': bacy.convert_int(obj.CharacterVisitMin(), password),
+        'CharacterVisitMax': bacy.convert_int(obj.CharacterVisitMax(), password),
+        'CafeVisitWeightBase': bacy.convert_int(obj.CafeVisitWeightBase(), password),
+        'CafeVisitWeightTagBonusStep': [bacy.convert_int(obj.CafeVisitWeightTagBonusStep(j), password) for j in range(obj.CafeVisitWeightTagBonusStepLength())],
+        'CafeVisitWeightTagBonus': [bacy.convert_int(obj.CafeVisitWeightTagBonus(j), password) for j in range(obj.CafeVisitWeightTagBonusLength())],
     }
 
 
 def dump_CampaignChapterExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'NormalImagePath': table_encryption.convert_string(obj.NormalImagePath(), password),
-        'HardImagePath': table_encryption.convert_string(obj.HardImagePath(), password),
-        'Order': table_encryption.convert_long(obj.Order(), password),
-        'PreChapterId': [table_encryption.convert_long(obj.PreChapterId(j), password) for j in range(obj.PreChapterIdLength())],
-        'ChapterRewardId': table_encryption.convert_long(obj.ChapterRewardId(), password),
-        'ChapterHardRewardId': table_encryption.convert_long(obj.ChapterHardRewardId(), password),
-        'ChapterVeryHardRewardId': table_encryption.convert_long(obj.ChapterVeryHardRewardId(), password),
-        'NormalCampaignStageId': [table_encryption.convert_long(obj.NormalCampaignStageId(j), password) for j in range(obj.NormalCampaignStageIdLength())],
-        'NormalExtraStageId': [table_encryption.convert_long(obj.NormalExtraStageId(j), password) for j in range(obj.NormalExtraStageIdLength())],
-        'HardCampaignStageId': [table_encryption.convert_long(obj.HardCampaignStageId(j), password) for j in range(obj.HardCampaignStageIdLength())],
-        'VeryHardCampaignStageId': [table_encryption.convert_long(obj.VeryHardCampaignStageId(j), password) for j in range(obj.VeryHardCampaignStageIdLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
+        'NormalImagePath': bacy.convert_string(obj.NormalImagePath(), password),
+        'HardImagePath': bacy.convert_string(obj.HardImagePath(), password),
+        'Order': bacy.convert_long(obj.Order(), password),
+        'PreChapterId': [bacy.convert_long(obj.PreChapterId(j), password) for j in range(obj.PreChapterIdLength())],
+        'ChapterRewardId': bacy.convert_long(obj.ChapterRewardId(), password),
+        'ChapterHardRewardId': bacy.convert_long(obj.ChapterHardRewardId(), password),
+        'ChapterVeryHardRewardId': bacy.convert_long(obj.ChapterVeryHardRewardId(), password),
+        'NormalCampaignStageId': [bacy.convert_long(obj.NormalCampaignStageId(j), password) for j in range(obj.NormalCampaignStageIdLength())],
+        'NormalExtraStageId': [bacy.convert_long(obj.NormalExtraStageId(j), password) for j in range(obj.NormalExtraStageIdLength())],
+        'HardCampaignStageId': [bacy.convert_long(obj.HardCampaignStageId(j), password) for j in range(obj.HardCampaignStageIdLength())],
+        'VeryHardCampaignStageId': [bacy.convert_long(obj.VeryHardCampaignStageId(j), password) for j in range(obj.VeryHardCampaignStageIdLength())],
         'IsTacticSkip': obj.IsTacticSkip(),
     }
 
 
 def dump_CampaignChapterRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'CampaignChapterStar': table_encryption.convert_long(obj.CampaignChapterStar(), password),
-        'ChapterRewardParcelType': [ParcelType(table_encryption.convert_int(obj.ChapterRewardParcelType(j), password)).name for j in range(obj.ChapterRewardParcelTypeLength())],
-        'ChapterRewardId': [table_encryption.convert_long(obj.ChapterRewardId(j), password) for j in range(obj.ChapterRewardIdLength())],
-        'ChapterRewardAmount': [table_encryption.convert_int(obj.ChapterRewardAmount(j), password) for j in range(obj.ChapterRewardAmountLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'CampaignChapterStar': bacy.convert_long(obj.CampaignChapterStar(), password),
+        'ChapterRewardParcelType': [ParcelType(bacy.convert_int(obj.ChapterRewardParcelType(j), password)).name for j in range(obj.ChapterRewardParcelTypeLength())],
+        'ChapterRewardId': [bacy.convert_long(obj.ChapterRewardId(j), password) for j in range(obj.ChapterRewardIdLength())],
+        'ChapterRewardAmount': [bacy.convert_int(obj.ChapterRewardAmount(j), password) for j in range(obj.ChapterRewardAmountLength())],
     }
 
 
 def dump_CampaignStageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
         'Deprecated': obj.Deprecated(),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'StageNumber': table_encryption.convert_string(obj.StageNumber(), password),
-        'CleardScenarioId': table_encryption.convert_long(obj.CleardScenarioId(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'StageEnterCostType': ParcelType(table_encryption.convert_int(obj.StageEnterCostType(), password)).name,
-        'StageEnterCostId': table_encryption.convert_long(obj.StageEnterCostId(), password),
-        'StageEnterCostAmount': table_encryption.convert_int(obj.StageEnterCostAmount(), password),
-        'StageEnterEchelonCount': table_encryption.convert_int(obj.StageEnterEchelonCount(), password),
-        'StarConditionTacticRankSCount': table_encryption.convert_long(obj.StarConditionTacticRankSCount(), password),
-        'StarConditionTurnCount': table_encryption.convert_long(obj.StarConditionTurnCount(), password),
-        'EnterScenarioGroupId': [table_encryption.convert_long(obj.EnterScenarioGroupId(j), password) for j in range(obj.EnterScenarioGroupIdLength())],
-        'ClearScenarioGroupId': [table_encryption.convert_long(obj.ClearScenarioGroupId(j), password) for j in range(obj.ClearScenarioGroupIdLength())],
-        'StrategyMap': table_encryption.convert_string(obj.StrategyMap(), password),
-        'StrategyMapBG': table_encryption.convert_string(obj.StrategyMapBG(), password),
-        'CampaignStageRewardId': table_encryption.convert_long(obj.CampaignStageRewardId(), password),
-        'MaxTurn': table_encryption.convert_int(obj.MaxTurn(), password),
-        'StageTopography': StageTopography(table_encryption.convert_int(obj.StageTopography_(), password)).name,
-        'RecommandLevel': table_encryption.convert_int(obj.RecommandLevel(), password),
-        'BgmId': table_encryption.convert_string(obj.BgmId(), password),
-        'StrategyEnvironment': StrategyEnvironment(table_encryption.convert_int(obj.StrategyEnvironment_(), password)).name,
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
-        'StrategySkipGroundId': table_encryption.convert_int(obj.StrategySkipGroundId(), password),
-        'ContentType': ContentType(table_encryption.convert_int(obj.ContentType_(), password)).name,
-        'BGMId': table_encryption.convert_long(obj.BGMId(), password),
-        'FirstClearReportEventName': table_encryption.convert_string(obj.FirstClearReportEventName(), password),
-        'TacticRewardExp': table_encryption.convert_long(obj.TacticRewardExp(), password),
-        'FixedEchelonId': table_encryption.convert_long(obj.FixedEchelonId(), password),
-        'EchelonExtensionType': EchelonExtensionType(table_encryption.convert_int(obj.EchelonExtensionType_(), password)).name,
+        'Name': bacy.convert_string(obj.Name(), password),
+        'StageNumber': bacy.convert_string(obj.StageNumber(), password),
+        'CleardScenarioId': bacy.convert_long(obj.CleardScenarioId(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'StageEnterCostType': ParcelType(bacy.convert_int(obj.StageEnterCostType(), password)).name,
+        'StageEnterCostId': bacy.convert_long(obj.StageEnterCostId(), password),
+        'StageEnterCostAmount': bacy.convert_int(obj.StageEnterCostAmount(), password),
+        'StageEnterEchelonCount': bacy.convert_int(obj.StageEnterEchelonCount(), password),
+        'StarConditionTacticRankSCount': bacy.convert_long(obj.StarConditionTacticRankSCount(), password),
+        'StarConditionTurnCount': bacy.convert_long(obj.StarConditionTurnCount(), password),
+        'EnterScenarioGroupId': [bacy.convert_long(obj.EnterScenarioGroupId(j), password) for j in range(obj.EnterScenarioGroupIdLength())],
+        'ClearScenarioGroupId': [bacy.convert_long(obj.ClearScenarioGroupId(j), password) for j in range(obj.ClearScenarioGroupIdLength())],
+        'StrategyMap': bacy.convert_string(obj.StrategyMap(), password),
+        'StrategyMapBG': bacy.convert_string(obj.StrategyMapBG(), password),
+        'CampaignStageRewardId': bacy.convert_long(obj.CampaignStageRewardId(), password),
+        'MaxTurn': bacy.convert_int(obj.MaxTurn(), password),
+        'StageTopography': StageTopography(bacy.convert_int(obj.StageTopography_(), password)).name,
+        'RecommandLevel': bacy.convert_int(obj.RecommandLevel(), password),
+        'BgmId': bacy.convert_string(obj.BgmId(), password),
+        'StrategyEnvironment': StrategyEnvironment(bacy.convert_int(obj.StrategyEnvironment_(), password)).name,
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
+        'StrategySkipGroundId': bacy.convert_int(obj.StrategySkipGroundId(), password),
+        'ContentType': ContentType(bacy.convert_int(obj.ContentType_(), password)).name,
+        'BGMId': bacy.convert_long(obj.BGMId(), password),
+        'FirstClearReportEventName': bacy.convert_string(obj.FirstClearReportEventName(), password),
+        'TacticRewardExp': bacy.convert_long(obj.TacticRewardExp(), password),
+        'FixedEchelonId': bacy.convert_long(obj.FixedEchelonId(), password),
+        'EchelonExtensionType': EchelonExtensionType(bacy.convert_int(obj.EchelonExtensionType_(), password)).name,
     }
 
 
 def dump_CampaignStageRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'RewardTag': RewardTag(table_encryption.convert_int(obj.RewardTag_(), password)).name,
-        'StageRewardProb': table_encryption.convert_int(obj.StageRewardProb(), password),
-        'StageRewardParcelType': ParcelType(table_encryption.convert_int(obj.StageRewardParcelType(), password)).name,
-        'StageRewardId': table_encryption.convert_long(obj.StageRewardId(), password),
-        'StageRewardAmount': table_encryption.convert_int(obj.StageRewardAmount(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'RewardTag': RewardTag(bacy.convert_int(obj.RewardTag_(), password)).name,
+        'StageRewardProb': bacy.convert_int(obj.StageRewardProb(), password),
+        'StageRewardParcelType': ParcelType(bacy.convert_int(obj.StageRewardParcelType(), password)).name,
+        'StageRewardId': bacy.convert_long(obj.StageRewardId(), password),
+        'StageRewardAmount': bacy.convert_int(obj.StageRewardAmount(), password),
         'IsDisplayed': obj.IsDisplayed(),
     }
 
 
 def dump_CampaignStrategyObjectExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Key': table_encryption.convert_uint(obj.Key(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'PrefabName': table_encryption.convert_string(obj.PrefabName(), password),
-        'StrategyObjectType': StrategyObjectType(table_encryption.convert_int(obj.StrategyObjectType_(), password)).name,
-        'StrategyRewardParcelType': ParcelType(table_encryption.convert_int(obj.StrategyRewardParcelType(), password)).name,
-        'StrategyRewardID': table_encryption.convert_long(obj.StrategyRewardID(), password),
-        'StrategyRewardName': table_encryption.convert_string(obj.StrategyRewardName(), password),
-        'StrategyRewardAmount': table_encryption.convert_int(obj.StrategyRewardAmount(), password),
-        'StrategySightRange': table_encryption.convert_long(obj.StrategySightRange(), password),
-        'PortalId': table_encryption.convert_int(obj.PortalId(), password),
-        'HealValue': table_encryption.convert_int(obj.HealValue(), password),
-        'SwithId': table_encryption.convert_int(obj.SwithId(), password),
-        'BuffId': table_encryption.convert_int(obj.BuffId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Key': bacy.convert_uint(obj.Key(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
+        'PrefabName': bacy.convert_string(obj.PrefabName(), password),
+        'StrategyObjectType': StrategyObjectType(bacy.convert_int(obj.StrategyObjectType_(), password)).name,
+        'StrategyRewardParcelType': ParcelType(bacy.convert_int(obj.StrategyRewardParcelType(), password)).name,
+        'StrategyRewardID': bacy.convert_long(obj.StrategyRewardID(), password),
+        'StrategyRewardName': bacy.convert_string(obj.StrategyRewardName(), password),
+        'StrategyRewardAmount': bacy.convert_int(obj.StrategyRewardAmount(), password),
+        'StrategySightRange': bacy.convert_long(obj.StrategySightRange(), password),
+        'PortalId': bacy.convert_int(obj.PortalId(), password),
+        'HealValue': bacy.convert_int(obj.HealValue(), password),
+        'SwithId': bacy.convert_int(obj.SwithId(), password),
+        'BuffId': bacy.convert_int(obj.BuffId(), password),
         'Disposable': obj.Disposable(),
     }
 
 
 def dump_CampaignUnitExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Key': table_encryption.convert_uint(obj.Key(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'PrefabName': table_encryption.convert_string(obj.PrefabName(), password),
-        'StrategyPrefabName': table_encryption.convert_string(obj.StrategyPrefabName(), password),
-        'EnterScenarioGroupId': [table_encryption.convert_long(obj.EnterScenarioGroupId(j), password) for j in range(obj.EnterScenarioGroupIdLength())],
-        'ClearScenarioGroupId': [table_encryption.convert_long(obj.ClearScenarioGroupId(j), password) for j in range(obj.ClearScenarioGroupIdLength())],
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
-        'MoveRange': table_encryption.convert_int(obj.MoveRange(), password),
-        'AIMoveType': StrategyAIType(table_encryption.convert_int(obj.AIMoveType(), password)).name,
-        'Grade': HexaUnitGrade(table_encryption.convert_int(obj.Grade(), password)).name,
-        'EnvironmentType': TacticEnvironment(table_encryption.convert_int(obj.EnvironmentType(), password)).name,
-        'Scale': table_encryption.convert_float(obj.Scale(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Key': bacy.convert_uint(obj.Key(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
+        'PrefabName': bacy.convert_string(obj.PrefabName(), password),
+        'StrategyPrefabName': bacy.convert_string(obj.StrategyPrefabName(), password),
+        'EnterScenarioGroupId': [bacy.convert_long(obj.EnterScenarioGroupId(j), password) for j in range(obj.EnterScenarioGroupIdLength())],
+        'ClearScenarioGroupId': [bacy.convert_long(obj.ClearScenarioGroupId(j), password) for j in range(obj.ClearScenarioGroupIdLength())],
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
+        'MoveRange': bacy.convert_int(obj.MoveRange(), password),
+        'AIMoveType': StrategyAIType(bacy.convert_int(obj.AIMoveType(), password)).name,
+        'Grade': HexaUnitGrade(bacy.convert_int(obj.Grade(), password)).name,
+        'EnvironmentType': TacticEnvironment(bacy.convert_int(obj.EnvironmentType(), password)).name,
+        'Scale': bacy.convert_float(obj.Scale(), password),
         'IsTacticSkip': obj.IsTacticSkip(),
     }
 
 
 def dump_CharacterAcademyTagsExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'FavorTags': [Tag(table_encryption.convert_int(obj.FavorTags(j), password)).name for j in range(obj.FavorTagsLength())],
-        'FavorItemTags': [Tag(table_encryption.convert_int(obj.FavorItemTags(j), password)).name for j in range(obj.FavorItemTagsLength())],
-        'FavorItemUniqueTags': [Tag(table_encryption.convert_int(obj.FavorItemUniqueTags(j), password)).name for j in range(obj.FavorItemUniqueTagsLength())],
-        'ForbiddenTags': [Tag(table_encryption.convert_int(obj.ForbiddenTags(j), password)).name for j in range(obj.ForbiddenTagsLength())],
-        'ZoneWhiteListTags': [Tag(table_encryption.convert_int(obj.ZoneWhiteListTags(j), password)).name for j in range(obj.ZoneWhiteListTagsLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'FavorTags': [Tag(bacy.convert_int(obj.FavorTags(j), password)).name for j in range(obj.FavorTagsLength())],
+        'FavorItemTags': [Tag(bacy.convert_int(obj.FavorItemTags(j), password)).name for j in range(obj.FavorItemTagsLength())],
+        'FavorItemUniqueTags': [Tag(bacy.convert_int(obj.FavorItemUniqueTags(j), password)).name for j in range(obj.FavorItemUniqueTagsLength())],
+        'ForbiddenTags': [Tag(bacy.convert_int(obj.ForbiddenTags(j), password)).name for j in range(obj.ForbiddenTagsLength())],
+        'ZoneWhiteListTags': [Tag(bacy.convert_int(obj.ZoneWhiteListTags(j), password)).name for j in range(obj.ZoneWhiteListTagsLength())],
     }
 
 
 def dump_CharacterAIExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EngageType': EngageType(table_encryption.convert_int(obj.EngageType_(), password)).name,
-        'Positioning': PositioningType(table_encryption.convert_int(obj.Positioning(), password)).name,
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EngageType': EngageType(bacy.convert_int(obj.EngageType_(), password)).name,
+        'Positioning': PositioningType(bacy.convert_int(obj.Positioning(), password)).name,
         'CheckCanUseAutoSkill': obj.CheckCanUseAutoSkill(),
-        'DistanceReduceRatioObstaclePath': table_encryption.convert_long(obj.DistanceReduceRatioObstaclePath(), password),
-        'DistanceReduceObstaclePath': table_encryption.convert_long(obj.DistanceReduceObstaclePath(), password),
-        'DistanceReduceRatioFormationPath': table_encryption.convert_long(obj.DistanceReduceRatioFormationPath(), password),
-        'DistanceReduceFormationPath': table_encryption.convert_long(obj.DistanceReduceFormationPath(), password),
-        'MinimumPositionGap': table_encryption.convert_long(obj.MinimumPositionGap(), password),
+        'DistanceReduceRatioObstaclePath': bacy.convert_long(obj.DistanceReduceRatioObstaclePath(), password),
+        'DistanceReduceObstaclePath': bacy.convert_long(obj.DistanceReduceObstaclePath(), password),
+        'DistanceReduceRatioFormationPath': bacy.convert_long(obj.DistanceReduceRatioFormationPath(), password),
+        'DistanceReduceFormationPath': bacy.convert_long(obj.DistanceReduceFormationPath(), password),
+        'MinimumPositionGap': bacy.convert_long(obj.MinimumPositionGap(), password),
         'CanUseObstacleOfKneelMotion': obj.CanUseObstacleOfKneelMotion(),
         'CanUseObstacleOfStandMotion': obj.CanUseObstacleOfStandMotion(),
         'HasTargetSwitchingMotion': obj.HasTargetSwitchingMotion(),
@@ -691,3794 +603,3410 @@ def dump_CharacterAIExcel(obj, password) -> dict:
 
 
 def dump_CharacterCalculationLimitExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'TacticEntityType': TacticEntityType(table_encryption.convert_int(obj.TacticEntityType_(), password)).name,
-        'CalculationValue': BattleCalculationStat(table_encryption.convert_int(obj.CalculationValue(), password)).name,
-        'MinValue': table_encryption.convert_long(obj.MinValue(), password),
-        'MaxValue': table_encryption.convert_long(obj.MaxValue(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'TacticEntityType': TacticEntityType(bacy.convert_int(obj.TacticEntityType_(), password)).name,
+        'CalculationValue': BattleCalculationStat(bacy.convert_int(obj.CalculationValue(), password)).name,
+        'MinValue': bacy.convert_long(obj.MinValue(), password),
+        'MaxValue': bacy.convert_long(obj.MaxValue(), password),
     }
 
 
 def dump_CharacterCombatSkinExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_string(obj.GroupId(), password),
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'ResourcePath': table_encryption.convert_string(obj.ResourcePath(), password),
+        'GroupId': bacy.convert_string(obj.GroupId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'ResourcePath': bacy.convert_string(obj.ResourcePath(), password),
     }
 
 
 def dump_CharacterDialogFieldExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'Phase': table_encryption.convert_int(obj.Phase(), password),
-        'TargetIndex': table_encryption.convert_int(obj.TargetIndex(), password),
-        'DialogType': FieldDialogType(table_encryption.convert_int(obj.DialogType(), password)).name,
-        'Duration': table_encryption.convert_long(obj.Duration(), password),
-        'MotionName': table_encryption.convert_string(obj.MotionName(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'Phase': bacy.convert_int(obj.Phase(), password),
+        'TargetIndex': bacy.convert_int(obj.TargetIndex(), password),
+        'DialogType': FieldDialogType(bacy.convert_int(obj.DialogType(), password)).name,
+        'Duration': bacy.convert_long(obj.Duration(), password),
+        'MotionName': bacy.convert_string(obj.MotionName(), password),
         'IsInteractionDialog': obj.IsInteractionDialog(),
         'HideUI': obj.HideUI(),
-        'LocalizeKR': table_encryption.convert_string(obj.LocalizeKR(), password),
-        'LocalizeJP': table_encryption.convert_string(obj.LocalizeJP(), password),
+        'LocalizeKR': bacy.convert_string(obj.LocalizeKR(), password),
+        'LocalizeJP': bacy.convert_string(obj.LocalizeJP(), password),
     }
 
 
 def dump_CharacterExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'DevName': table_encryption.convert_string(obj.DevName(), password),
-        'CostumeGroupId': table_encryption.convert_long(obj.CostumeGroupId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'DevName': bacy.convert_string(obj.DevName(), password),
+        'CostumeGroupId': bacy.convert_long(obj.CostumeGroupId(), password),
         'IsPlayable': obj.IsPlayable(),
-        'ProductionStep': ProductionStep(table_encryption.convert_int(obj.ProductionStep_(), password)).name,
+        'ProductionStep': ProductionStep(bacy.convert_int(obj.ProductionStep_(), password)).name,
         'CollectionVisible': obj.CollectionVisible(),
-        'ReleaseDate': table_encryption.convert_string(obj.ReleaseDate(), password),
-        'CollectionVisibleStartDate': table_encryption.convert_string(obj.CollectionVisibleStartDate(), password),
-        'CollectionVisibleEndDate': table_encryption.convert_string(obj.CollectionVisibleEndDate(), password),
+        'ReleaseDate': bacy.convert_string(obj.ReleaseDate(), password),
+        'CollectionVisibleStartDate': bacy.convert_string(obj.CollectionVisibleStartDate(), password),
+        'CollectionVisibleEndDate': bacy.convert_string(obj.CollectionVisibleEndDate(), password),
         'IsPlayableCharacter': obj.IsPlayableCharacter(),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'Rarity': Rarity(table_encryption.convert_int(obj.Rarity_(), password)).name,
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'Rarity': Rarity(bacy.convert_int(obj.Rarity_(), password)).name,
         'IsNPC': obj.IsNPC(),
-        'TacticEntityType': TacticEntityType(table_encryption.convert_int(obj.TacticEntityType_(), password)).name,
+        'TacticEntityType': TacticEntityType(bacy.convert_int(obj.TacticEntityType_(), password)).name,
         'CanSurvive': obj.CanSurvive(),
         'IsDummy': obj.IsDummy(),
-        'SubPartsCount': table_encryption.convert_int(obj.SubPartsCount(), password),
-        'TacticRole': TacticRole(table_encryption.convert_int(obj.TacticRole_(), password)).name,
-        'WeaponType': WeaponType(table_encryption.convert_int(obj.WeaponType_(), password)).name,
-        'TacticRange': TacticRange(table_encryption.convert_int(obj.TacticRange_(), password)).name,
-        'BulletType': BulletType(table_encryption.convert_int(obj.BulletType_(), password)).name,
-        'ArmorType': ArmorType(table_encryption.convert_int(obj.ArmorType_(), password)).name,
-        'AimIKType': AimIKType(table_encryption.convert_int(obj.AimIKType_(), password)).name,
-        'School': School(table_encryption.convert_int(obj.School_(), password)).name,
-        'Club': Club(table_encryption.convert_int(obj.Club_(), password)).name,
-        'DefaultStarGrade': table_encryption.convert_int(obj.DefaultStarGrade(), password),
-        'MaxStarGrade': table_encryption.convert_int(obj.MaxStarGrade(), password),
-        'StatLevelUpType': StatLevelUpType(table_encryption.convert_int(obj.StatLevelUpType_(), password)).name,
-        'SquadType': SquadType(table_encryption.convert_int(obj.SquadType_(), password)).name,
+        'SubPartsCount': bacy.convert_int(obj.SubPartsCount(), password),
+        'TacticRole': TacticRole(bacy.convert_int(obj.TacticRole_(), password)).name,
+        'WeaponType': WeaponType(bacy.convert_int(obj.WeaponType_(), password)).name,
+        'TacticRange': TacticRange(bacy.convert_int(obj.TacticRange_(), password)).name,
+        'BulletType': BulletType(bacy.convert_int(obj.BulletType_(), password)).name,
+        'ArmorType': ArmorType(bacy.convert_int(obj.ArmorType_(), password)).name,
+        'AimIKType': AimIKType(bacy.convert_int(obj.AimIKType_(), password)).name,
+        'School': School(bacy.convert_int(obj.School_(), password)).name,
+        'Club': Club(bacy.convert_int(obj.Club_(), password)).name,
+        'DefaultStarGrade': bacy.convert_int(obj.DefaultStarGrade(), password),
+        'MaxStarGrade': bacy.convert_int(obj.MaxStarGrade(), password),
+        'StatLevelUpType': StatLevelUpType(bacy.convert_int(obj.StatLevelUpType_(), password)).name,
+        'SquadType': SquadType(bacy.convert_int(obj.SquadType_(), password)).name,
         'Jumpable': obj.Jumpable(),
-        'PersonalityId': table_encryption.convert_long(obj.PersonalityId(), password),
-        'CharacterAIId': table_encryption.convert_long(obj.CharacterAIId(), password),
-        'ExternalBTId': table_encryption.convert_long(obj.ExternalBTId(), password),
-        'MainCombatStyleId': table_encryption.convert_long(obj.MainCombatStyleId(), password),
-        'CombatStyleIndex': table_encryption.convert_int(obj.CombatStyleIndex(), password),
-        'ScenarioCharacter': table_encryption.convert_string(obj.ScenarioCharacter(), password),
-        'SpawnTemplateId': table_encryption.convert_uint(obj.SpawnTemplateId(), password),
-        'FavorLevelupType': table_encryption.convert_int(obj.FavorLevelupType(), password),
-        'EquipmentSlot': [EquipmentCategory(table_encryption.convert_int(obj.EquipmentSlot(j), password)).name for j in range(obj.EquipmentSlotLength())],
-        'WeaponLocalizeId': table_encryption.convert_uint(obj.WeaponLocalizeId(), password),
+        'PersonalityId': bacy.convert_long(obj.PersonalityId(), password),
+        'CharacterAIId': bacy.convert_long(obj.CharacterAIId(), password),
+        'ExternalBTId': bacy.convert_long(obj.ExternalBTId(), password),
+        'MainCombatStyleId': bacy.convert_long(obj.MainCombatStyleId(), password),
+        'CombatStyleIndex': bacy.convert_int(obj.CombatStyleIndex(), password),
+        'ScenarioCharacter': bacy.convert_string(obj.ScenarioCharacter(), password),
+        'SpawnTemplateId': bacy.convert_uint(obj.SpawnTemplateId(), password),
+        'FavorLevelupType': bacy.convert_int(obj.FavorLevelupType(), password),
+        'EquipmentSlot': [EquipmentCategory(bacy.convert_int(obj.EquipmentSlot(j), password)).name for j in range(obj.EquipmentSlotLength())],
+        'WeaponLocalizeId': bacy.convert_uint(obj.WeaponLocalizeId(), password),
         'DisplayEnemyInfo': obj.DisplayEnemyInfo(),
-        'BodyRadius': table_encryption.convert_long(obj.BodyRadius(), password),
-        'RandomEffectRadius': table_encryption.convert_long(obj.RandomEffectRadius(), password),
+        'BodyRadius': bacy.convert_long(obj.BodyRadius(), password),
+        'RandomEffectRadius': bacy.convert_long(obj.RandomEffectRadius(), password),
         'HPBarHide': obj.HPBarHide(),
-        'HpBarHeight': table_encryption.convert_float(obj.HpBarHeight(), password),
-        'HighlightFloaterHeight': table_encryption.convert_float(obj.HighlightFloaterHeight(), password),
-        'EmojiOffsetX': table_encryption.convert_float(obj.EmojiOffsetX(), password),
-        'EmojiOffsetY': table_encryption.convert_float(obj.EmojiOffsetY(), password),
-        'MoveStartFrame': table_encryption.convert_int(obj.MoveStartFrame(), password),
-        'MoveEndFrame': table_encryption.convert_int(obj.MoveEndFrame(), password),
-        'JumpMotionFrame': table_encryption.convert_int(obj.JumpMotionFrame(), password),
-        'AppearFrame': table_encryption.convert_int(obj.AppearFrame(), password),
+        'HpBarHeight': bacy.convert_float(obj.HpBarHeight(), password),
+        'HighlightFloaterHeight': bacy.convert_float(obj.HighlightFloaterHeight(), password),
+        'EmojiOffsetX': bacy.convert_float(obj.EmojiOffsetX(), password),
+        'EmojiOffsetY': bacy.convert_float(obj.EmojiOffsetY(), password),
+        'MoveStartFrame': bacy.convert_int(obj.MoveStartFrame(), password),
+        'MoveEndFrame': bacy.convert_int(obj.MoveEndFrame(), password),
+        'JumpMotionFrame': bacy.convert_int(obj.JumpMotionFrame(), password),
+        'AppearFrame': bacy.convert_int(obj.AppearFrame(), password),
         'CanMove': obj.CanMove(),
         'CanFix': obj.CanFix(),
         'CanCrowdControl': obj.CanCrowdControl(),
         'CanBattleItemMove': obj.CanBattleItemMove(),
         'IsAirUnit': obj.IsAirUnit(),
-        'AirUnitHeight': table_encryption.convert_long(obj.AirUnitHeight(), password),
-        'Tags': [Tag(table_encryption.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
-        'SecretStoneItemId': table_encryption.convert_long(obj.SecretStoneItemId(), password),
-        'SecretStoneItemAmount': table_encryption.convert_int(obj.SecretStoneItemAmount(), password),
-        'CharacterPieceItemId': table_encryption.convert_long(obj.CharacterPieceItemId(), password),
-        'CharacterPieceItemAmount': table_encryption.convert_int(obj.CharacterPieceItemAmount(), password),
-        'CombineRecipeId': table_encryption.convert_long(obj.CombineRecipeId(), password),
+        'AirUnitHeight': bacy.convert_long(obj.AirUnitHeight(), password),
+        'Tags': [Tag(bacy.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
+        'SecretStoneItemId': bacy.convert_long(obj.SecretStoneItemId(), password),
+        'SecretStoneItemAmount': bacy.convert_int(obj.SecretStoneItemAmount(), password),
+        'CharacterPieceItemId': bacy.convert_long(obj.CharacterPieceItemId(), password),
+        'CharacterPieceItemAmount': bacy.convert_int(obj.CharacterPieceItemAmount(), password),
+        'CombineRecipeId': bacy.convert_long(obj.CombineRecipeId(), password),
     }
 
 
 def dump_CharacterGearExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'StatLevelUpType': StatLevelUpType(table_encryption.convert_int(obj.StatLevelUpType_(), password)).name,
-        'Tier': table_encryption.convert_long(obj.Tier(), password),
-        'NextTierEquipment': table_encryption.convert_long(obj.NextTierEquipment(), password),
-        'RecipeId': table_encryption.convert_long(obj.RecipeId(), password),
-        'OpenFavorLevel': table_encryption.convert_long(obj.OpenFavorLevel(), password),
-        'MaxLevel': table_encryption.convert_long(obj.MaxLevel(), password),
-        'LearnSkillSlot': table_encryption.convert_string(obj.LearnSkillSlot(), password),
-        'StatType': [EquipmentOptionType(table_encryption.convert_int(obj.StatType(j), password)).name for j in range(obj.StatTypeLength())],
-        'MinStatValue': [table_encryption.convert_long(obj.MinStatValue(j), password) for j in range(obj.MinStatValueLength())],
-        'MaxStatValue': [table_encryption.convert_long(obj.MaxStatValue(j), password) for j in range(obj.MaxStatValueLength())],
-        'Icon': table_encryption.convert_string(obj.Icon(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'Tags': [Tag(table_encryption.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'StatLevelUpType': StatLevelUpType(bacy.convert_int(obj.StatLevelUpType_(), password)).name,
+        'Tier': bacy.convert_long(obj.Tier(), password),
+        'NextTierEquipment': bacy.convert_long(obj.NextTierEquipment(), password),
+        'RecipeId': bacy.convert_long(obj.RecipeId(), password),
+        'OpenFavorLevel': bacy.convert_long(obj.OpenFavorLevel(), password),
+        'MaxLevel': bacy.convert_long(obj.MaxLevel(), password),
+        'LearnSkillSlot': bacy.convert_string(obj.LearnSkillSlot(), password),
+        'StatType': [EquipmentOptionType(bacy.convert_int(obj.StatType(j), password)).name for j in range(obj.StatTypeLength())],
+        'MinStatValue': [bacy.convert_long(obj.MinStatValue(j), password) for j in range(obj.MinStatValueLength())],
+        'MaxStatValue': [bacy.convert_long(obj.MaxStatValue(j), password) for j in range(obj.MaxStatValueLength())],
+        'Icon': bacy.convert_string(obj.Icon(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'Tags': [Tag(bacy.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
     }
 
 
 def dump_CharacterGearLevelExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Level': table_encryption.convert_int(obj.Level(), password),
-        'TierLevelExp': [table_encryption.convert_long(obj.TierLevelExp(j), password) for j in range(obj.TierLevelExpLength())],
-        'TotalExp': [table_encryption.convert_long(obj.TotalExp(j), password) for j in range(obj.TotalExpLength())],
+        'Level': bacy.convert_int(obj.Level(), password),
+        'TierLevelExp': [bacy.convert_long(obj.TierLevelExp(j), password) for j in range(obj.TierLevelExpLength())],
+        'TotalExp': [bacy.convert_long(obj.TotalExp(j), password) for j in range(obj.TotalExpLength())],
     }
 
 
 def dump_CharacterIllustCoordinateExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'CharacterBodyCenterX': table_encryption.convert_float(obj.CharacterBodyCenterX(), password),
-        'CharacterBodyCenterY': table_encryption.convert_float(obj.CharacterBodyCenterY(), password),
-        'DefaultScale': table_encryption.convert_float(obj.DefaultScale(), password),
-        'MinScale': table_encryption.convert_float(obj.MinScale(), password),
-        'MaxScale': table_encryption.convert_float(obj.MaxScale(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'CharacterBodyCenterX': bacy.convert_float(obj.CharacterBodyCenterX(), password),
+        'CharacterBodyCenterY': bacy.convert_float(obj.CharacterBodyCenterY(), password),
+        'DefaultScale': bacy.convert_float(obj.DefaultScale(), password),
+        'MinScale': bacy.convert_float(obj.MinScale(), password),
+        'MaxScale': bacy.convert_float(obj.MaxScale(), password),
     }
 
 
 def dump_CharacterLevelExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Level': table_encryption.convert_int(obj.Level(), password),
-        'Exp': table_encryption.convert_long(obj.Exp(), password),
-        'TotalExp': table_encryption.convert_long(obj.TotalExp(), password),
+        'Level': bacy.convert_int(obj.Level(), password),
+        'Exp': bacy.convert_long(obj.Exp(), password),
+        'TotalExp': bacy.convert_long(obj.TotalExp(), password),
     }
 
 
 def dump_CharacterLevelStatFactorExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Level': table_encryption.convert_long(obj.Level(), password),
-        'CriticalFactor': table_encryption.convert_long(obj.CriticalFactor(), password),
-        'StabilityFactor': table_encryption.convert_long(obj.StabilityFactor(), password),
-        'DefenceFactor': table_encryption.convert_long(obj.DefenceFactor(), password),
-        'AccuracyFactor': table_encryption.convert_long(obj.AccuracyFactor(), password),
+        'Level': bacy.convert_long(obj.Level(), password),
+        'CriticalFactor': bacy.convert_long(obj.CriticalFactor(), password),
+        'StabilityFactor': bacy.convert_long(obj.StabilityFactor(), password),
+        'DefenceFactor': bacy.convert_long(obj.DefenceFactor(), password),
+        'AccuracyFactor': bacy.convert_long(obj.AccuracyFactor(), password),
     }
 
 
 def dump_CharacterSkillListExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CharacterSkillListGroupId': table_encryption.convert_long(obj.CharacterSkillListGroupId(), password),
-        'MinimumGradeCharacterWeapon': table_encryption.convert_int(obj.MinimumGradeCharacterWeapon(), password),
-        'MinimumTierCharacterGear': table_encryption.convert_int(obj.MinimumTierCharacterGear(), password),
-        'FormIndex': table_encryption.convert_int(obj.FormIndex(), password),
+        'CharacterSkillListGroupId': bacy.convert_long(obj.CharacterSkillListGroupId(), password),
+        'MinimumGradeCharacterWeapon': bacy.convert_int(obj.MinimumGradeCharacterWeapon(), password),
+        'MinimumTierCharacterGear': bacy.convert_int(obj.MinimumTierCharacterGear(), password),
+        'FormIndex': bacy.convert_int(obj.FormIndex(), password),
         'IsRootMotion': obj.IsRootMotion(),
         'IsMoveLeftRight': obj.IsMoveLeftRight(),
         'UseRandomExSkillTimeline': obj.UseRandomExSkillTimeline(),
-        'TSAInteractionId': table_encryption.convert_long(obj.TSAInteractionId(), password),
-        'NormalSkillGroupId': [table_encryption.convert_string(obj.NormalSkillGroupId(j), password) for j in range(obj.NormalSkillGroupIdLength())],
-        'NormalSkillTimeLineIndex': [table_encryption.convert_int(obj.NormalSkillTimeLineIndex(j), password) for j in range(obj.NormalSkillTimeLineIndexLength())],
-        'ExSkillGroupId': [table_encryption.convert_string(obj.ExSkillGroupId(j), password) for j in range(obj.ExSkillGroupIdLength())],
-        'ExSkillCutInTimeLineIndex': [table_encryption.convert_string(obj.ExSkillCutInTimeLineIndex(j), password) for j in range(obj.ExSkillCutInTimeLineIndexLength())],
-        'ExSkillLevelTimeLineIndex': [table_encryption.convert_string(obj.ExSkillLevelTimeLineIndex(j), password) for j in range(obj.ExSkillLevelTimeLineIndexLength())],
-        'PublicSkillGroupId': [table_encryption.convert_string(obj.PublicSkillGroupId(j), password) for j in range(obj.PublicSkillGroupIdLength())],
-        'PublicSkillTimeLineIndex': [table_encryption.convert_int(obj.PublicSkillTimeLineIndex(j), password) for j in range(obj.PublicSkillTimeLineIndexLength())],
-        'PassiveSkillGroupId': [table_encryption.convert_string(obj.PassiveSkillGroupId(j), password) for j in range(obj.PassiveSkillGroupIdLength())],
-        'LeaderSkillGroupId': [table_encryption.convert_string(obj.LeaderSkillGroupId(j), password) for j in range(obj.LeaderSkillGroupIdLength())],
-        'ExtraPassiveSkillGroupId': [table_encryption.convert_string(obj.ExtraPassiveSkillGroupId(j), password) for j in range(obj.ExtraPassiveSkillGroupIdLength())],
-        'HiddenPassiveSkillGroupId': [table_encryption.convert_string(obj.HiddenPassiveSkillGroupId(j), password) for j in range(obj.HiddenPassiveSkillGroupIdLength())],
+        'TSAInteractionId': bacy.convert_long(obj.TSAInteractionId(), password),
+        'NormalSkillGroupId': [bacy.convert_string(obj.NormalSkillGroupId(j), password) for j in range(obj.NormalSkillGroupIdLength())],
+        'NormalSkillTimeLineIndex': [bacy.convert_int(obj.NormalSkillTimeLineIndex(j), password) for j in range(obj.NormalSkillTimeLineIndexLength())],
+        'ExSkillGroupId': [bacy.convert_string(obj.ExSkillGroupId(j), password) for j in range(obj.ExSkillGroupIdLength())],
+        'ExSkillCutInTimeLineIndex': [bacy.convert_string(obj.ExSkillCutInTimeLineIndex(j), password) for j in range(obj.ExSkillCutInTimeLineIndexLength())],
+        'ExSkillLevelTimeLineIndex': [bacy.convert_string(obj.ExSkillLevelTimeLineIndex(j), password) for j in range(obj.ExSkillLevelTimeLineIndexLength())],
+        'PublicSkillGroupId': [bacy.convert_string(obj.PublicSkillGroupId(j), password) for j in range(obj.PublicSkillGroupIdLength())],
+        'PublicSkillTimeLineIndex': [bacy.convert_int(obj.PublicSkillTimeLineIndex(j), password) for j in range(obj.PublicSkillTimeLineIndexLength())],
+        'PassiveSkillGroupId': [bacy.convert_string(obj.PassiveSkillGroupId(j), password) for j in range(obj.PassiveSkillGroupIdLength())],
+        'LeaderSkillGroupId': [bacy.convert_string(obj.LeaderSkillGroupId(j), password) for j in range(obj.LeaderSkillGroupIdLength())],
+        'ExtraPassiveSkillGroupId': [bacy.convert_string(obj.ExtraPassiveSkillGroupId(j), password) for j in range(obj.ExtraPassiveSkillGroupIdLength())],
+        'HiddenPassiveSkillGroupId': [bacy.convert_string(obj.HiddenPassiveSkillGroupId(j), password) for j in range(obj.HiddenPassiveSkillGroupIdLength())],
     }
 
 
 def dump_CharacterStatExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'StabilityRate': table_encryption.convert_long(obj.StabilityRate(), password),
-        'StabilityPoint': table_encryption.convert_long(obj.StabilityPoint(), password),
-        'AttackPower1': table_encryption.convert_long(obj.AttackPower1(), password),
-        'AttackPower100': table_encryption.convert_long(obj.AttackPower100(), password),
-        'MaxHP1': table_encryption.convert_long(obj.MaxHP1(), password),
-        'MaxHP100': table_encryption.convert_long(obj.MaxHP100(), password),
-        'DefensePower1': table_encryption.convert_long(obj.DefensePower1(), password),
-        'DefensePower100': table_encryption.convert_long(obj.DefensePower100(), password),
-        'HealPower1': table_encryption.convert_long(obj.HealPower1(), password),
-        'HealPower100': table_encryption.convert_long(obj.HealPower100(), password),
-        'DodgePoint': table_encryption.convert_long(obj.DodgePoint(), password),
-        'AccuracyPoint': table_encryption.convert_long(obj.AccuracyPoint(), password),
-        'CriticalPoint': table_encryption.convert_long(obj.CriticalPoint(), password),
-        'CriticalResistPoint': table_encryption.convert_long(obj.CriticalResistPoint(), password),
-        'CriticalDamageRate': table_encryption.convert_long(obj.CriticalDamageRate(), password),
-        'CriticalDamageResistRate': table_encryption.convert_long(obj.CriticalDamageResistRate(), password),
-        'BlockRate': table_encryption.convert_long(obj.BlockRate(), password),
-        'HealEffectivenessRate': table_encryption.convert_long(obj.HealEffectivenessRate(), password),
-        'OppressionPower': table_encryption.convert_long(obj.OppressionPower(), password),
-        'OppressionResist': table_encryption.convert_long(obj.OppressionResist(), password),
-        'DefensePenetration1': table_encryption.convert_long(obj.DefensePenetration1(), password),
-        'DefensePenetration100': table_encryption.convert_long(obj.DefensePenetration100(), password),
-        'DefensePenetrationResist1': table_encryption.convert_long(obj.DefensePenetrationResist1(), password),
-        'DefensePenetrationResist100': table_encryption.convert_long(obj.DefensePenetrationResist100(), password),
-        'EnhanceExplosionRate': table_encryption.convert_long(obj.EnhanceExplosionRate(), password),
-        'EnhancePierceRate': table_encryption.convert_long(obj.EnhancePierceRate(), password),
-        'EnhanceMysticRate': table_encryption.convert_long(obj.EnhanceMysticRate(), password),
-        'EnhanceSonicRate': table_encryption.convert_long(obj.EnhanceSonicRate(), password),
-        'EnhanceSiegeRate': table_encryption.convert_long(obj.EnhanceSiegeRate(), password),
-        'EnhanceNormalRate': table_encryption.convert_long(obj.EnhanceNormalRate(), password),
-        'EnhanceLightArmorRate': table_encryption.convert_long(obj.EnhanceLightArmorRate(), password),
-        'EnhanceHeavyArmorRate': table_encryption.convert_long(obj.EnhanceHeavyArmorRate(), password),
-        'EnhanceUnarmedRate': table_encryption.convert_long(obj.EnhanceUnarmedRate(), password),
-        'EnhanceElasticArmorRate': table_encryption.convert_long(obj.EnhanceElasticArmorRate(), password),
-        'EnhanceStructureRate': table_encryption.convert_long(obj.EnhanceStructureRate(), password),
-        'EnhanceNormalArmorRate': table_encryption.convert_long(obj.EnhanceNormalArmorRate(), password),
-        'ExtendBuffDuration': table_encryption.convert_long(obj.ExtendBuffDuration(), password),
-        'ExtendDebuffDuration': table_encryption.convert_long(obj.ExtendDebuffDuration(), password),
-        'ExtendCrowdControlDuration': table_encryption.convert_long(obj.ExtendCrowdControlDuration(), password),
-        'AmmoCount': table_encryption.convert_long(obj.AmmoCount(), password),
-        'AmmoCost': table_encryption.convert_long(obj.AmmoCost(), password),
-        'IgnoreDelayCount': table_encryption.convert_long(obj.IgnoreDelayCount(), password),
-        'NormalAttackSpeed': table_encryption.convert_long(obj.NormalAttackSpeed(), password),
-        'Range': table_encryption.convert_long(obj.Range(), password),
-        'InitialRangeRate': table_encryption.convert_long(obj.InitialRangeRate(), password),
-        'MoveSpeed': table_encryption.convert_long(obj.MoveSpeed(), password),
-        'SightPoint': table_encryption.convert_long(obj.SightPoint(), password),
-        'ActiveGauge': table_encryption.convert_long(obj.ActiveGauge(), password),
-        'GroggyGauge': table_encryption.convert_int(obj.GroggyGauge(), password),
-        'GroggyTime': table_encryption.convert_int(obj.GroggyTime(), password),
-        'StrategyMobility': table_encryption.convert_long(obj.StrategyMobility(), password),
-        'ActionCount': table_encryption.convert_long(obj.ActionCount(), password),
-        'StrategySightRange': table_encryption.convert_long(obj.StrategySightRange(), password),
-        'DamageRatio': table_encryption.convert_long(obj.DamageRatio(), password),
-        'DamagedRatio': table_encryption.convert_long(obj.DamagedRatio(), password),
-        'DamageRatio2Increase': table_encryption.convert_long(obj.DamageRatio2Increase(), password),
-        'DamageRatio2Decrease': table_encryption.convert_long(obj.DamageRatio2Decrease(), password),
-        'DamagedRatio2Increase': table_encryption.convert_long(obj.DamagedRatio2Increase(), password),
-        'DamagedRatio2Decrease': table_encryption.convert_long(obj.DamagedRatio2Decrease(), password),
-        'ExDamagedRatioIncrease': table_encryption.convert_long(obj.ExDamagedRatioIncrease(), password),
-        'ExDamagedRatioDecrease': table_encryption.convert_long(obj.ExDamagedRatioDecrease(), password),
-        'EnhanceExDamageRate': table_encryption.convert_long(obj.EnhanceExDamageRate(), password),
-        'ReduceExDamagedRate': table_encryption.convert_long(obj.ReduceExDamagedRate(), password),
-        'HealRate': table_encryption.convert_long(obj.HealRate(), password),
-        'HealLightArmorRate': table_encryption.convert_long(obj.HealLightArmorRate(), password),
-        'HealHeavyArmorRate': table_encryption.convert_long(obj.HealHeavyArmorRate(), password),
-        'HealUnarmedRate': table_encryption.convert_long(obj.HealUnarmedRate(), password),
-        'HealElasticArmorRate': table_encryption.convert_long(obj.HealElasticArmorRate(), password),
-        'HealNormalArmorRate': table_encryption.convert_long(obj.HealNormalArmorRate(), password),
-        'HealedExplosionRate': table_encryption.convert_long(obj.HealedExplosionRate(), password),
-        'HealedPierceRate': table_encryption.convert_long(obj.HealedPierceRate(), password),
-        'HealedMysticRate': table_encryption.convert_long(obj.HealedMysticRate(), password),
-        'HealedSonicRate': table_encryption.convert_long(obj.HealedSonicRate(), password),
-        'HealedNormalRate': table_encryption.convert_long(obj.HealedNormalRate(), password),
-        'StreetBattleAdaptation': TerrainAdaptationStat(table_encryption.convert_int(obj.StreetBattleAdaptation(), password)).name,
-        'OutdoorBattleAdaptation': TerrainAdaptationStat(table_encryption.convert_int(obj.OutdoorBattleAdaptation(), password)).name,
-        'IndoorBattleAdaptation': TerrainAdaptationStat(table_encryption.convert_int(obj.IndoorBattleAdaptation(), password)).name,
-        'RegenCost': table_encryption.convert_long(obj.RegenCost(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'StabilityRate': bacy.convert_long(obj.StabilityRate(), password),
+        'StabilityPoint': bacy.convert_long(obj.StabilityPoint(), password),
+        'AttackPower1': bacy.convert_long(obj.AttackPower1(), password),
+        'AttackPower100': bacy.convert_long(obj.AttackPower100(), password),
+        'MaxHP1': bacy.convert_long(obj.MaxHP1(), password),
+        'MaxHP100': bacy.convert_long(obj.MaxHP100(), password),
+        'DefensePower1': bacy.convert_long(obj.DefensePower1(), password),
+        'DefensePower100': bacy.convert_long(obj.DefensePower100(), password),
+        'HealPower1': bacy.convert_long(obj.HealPower1(), password),
+        'HealPower100': bacy.convert_long(obj.HealPower100(), password),
+        'DodgePoint': bacy.convert_long(obj.DodgePoint(), password),
+        'AccuracyPoint': bacy.convert_long(obj.AccuracyPoint(), password),
+        'CriticalPoint': bacy.convert_long(obj.CriticalPoint(), password),
+        'CriticalResistPoint': bacy.convert_long(obj.CriticalResistPoint(), password),
+        'CriticalDamageRate': bacy.convert_long(obj.CriticalDamageRate(), password),
+        'CriticalDamageResistRate': bacy.convert_long(obj.CriticalDamageResistRate(), password),
+        'BlockRate': bacy.convert_long(obj.BlockRate(), password),
+        'HealEffectivenessRate': bacy.convert_long(obj.HealEffectivenessRate(), password),
+        'OppressionPower': bacy.convert_long(obj.OppressionPower(), password),
+        'OppressionResist': bacy.convert_long(obj.OppressionResist(), password),
+        'DefensePenetration1': bacy.convert_long(obj.DefensePenetration1(), password),
+        'DefensePenetration100': bacy.convert_long(obj.DefensePenetration100(), password),
+        'DefensePenetrationResist1': bacy.convert_long(obj.DefensePenetrationResist1(), password),
+        'DefensePenetrationResist100': bacy.convert_long(obj.DefensePenetrationResist100(), password),
+        'EnhanceExplosionRate': bacy.convert_long(obj.EnhanceExplosionRate(), password),
+        'EnhancePierceRate': bacy.convert_long(obj.EnhancePierceRate(), password),
+        'EnhanceMysticRate': bacy.convert_long(obj.EnhanceMysticRate(), password),
+        'EnhanceSonicRate': bacy.convert_long(obj.EnhanceSonicRate(), password),
+        'EnhanceSiegeRate': bacy.convert_long(obj.EnhanceSiegeRate(), password),
+        'EnhanceNormalRate': bacy.convert_long(obj.EnhanceNormalRate(), password),
+        'EnhanceLightArmorRate': bacy.convert_long(obj.EnhanceLightArmorRate(), password),
+        'EnhanceHeavyArmorRate': bacy.convert_long(obj.EnhanceHeavyArmorRate(), password),
+        'EnhanceUnarmedRate': bacy.convert_long(obj.EnhanceUnarmedRate(), password),
+        'EnhanceElasticArmorRate': bacy.convert_long(obj.EnhanceElasticArmorRate(), password),
+        'EnhanceStructureRate': bacy.convert_long(obj.EnhanceStructureRate(), password),
+        'EnhanceNormalArmorRate': bacy.convert_long(obj.EnhanceNormalArmorRate(), password),
+        'ExtendBuffDuration': bacy.convert_long(obj.ExtendBuffDuration(), password),
+        'ExtendDebuffDuration': bacy.convert_long(obj.ExtendDebuffDuration(), password),
+        'ExtendCrowdControlDuration': bacy.convert_long(obj.ExtendCrowdControlDuration(), password),
+        'AmmoCount': bacy.convert_long(obj.AmmoCount(), password),
+        'AmmoCost': bacy.convert_long(obj.AmmoCost(), password),
+        'IgnoreDelayCount': bacy.convert_long(obj.IgnoreDelayCount(), password),
+        'NormalAttackSpeed': bacy.convert_long(obj.NormalAttackSpeed(), password),
+        'Range': bacy.convert_long(obj.Range(), password),
+        'InitialRangeRate': bacy.convert_long(obj.InitialRangeRate(), password),
+        'MoveSpeed': bacy.convert_long(obj.MoveSpeed(), password),
+        'SightPoint': bacy.convert_long(obj.SightPoint(), password),
+        'ActiveGauge': bacy.convert_long(obj.ActiveGauge(), password),
+        'GroggyGauge': bacy.convert_int(obj.GroggyGauge(), password),
+        'GroggyTime': bacy.convert_int(obj.GroggyTime(), password),
+        'StrategyMobility': bacy.convert_long(obj.StrategyMobility(), password),
+        'ActionCount': bacy.convert_long(obj.ActionCount(), password),
+        'StrategySightRange': bacy.convert_long(obj.StrategySightRange(), password),
+        'DamageRatio': bacy.convert_long(obj.DamageRatio(), password),
+        'DamagedRatio': bacy.convert_long(obj.DamagedRatio(), password),
+        'DamageRatio2Increase': bacy.convert_long(obj.DamageRatio2Increase(), password),
+        'DamageRatio2Decrease': bacy.convert_long(obj.DamageRatio2Decrease(), password),
+        'DamagedRatio2Increase': bacy.convert_long(obj.DamagedRatio2Increase(), password),
+        'DamagedRatio2Decrease': bacy.convert_long(obj.DamagedRatio2Decrease(), password),
+        'ExDamagedRatioIncrease': bacy.convert_long(obj.ExDamagedRatioIncrease(), password),
+        'ExDamagedRatioDecrease': bacy.convert_long(obj.ExDamagedRatioDecrease(), password),
+        'EnhanceExDamageRate': bacy.convert_long(obj.EnhanceExDamageRate(), password),
+        'ReduceExDamagedRate': bacy.convert_long(obj.ReduceExDamagedRate(), password),
+        'HealRate': bacy.convert_long(obj.HealRate(), password),
+        'HealLightArmorRate': bacy.convert_long(obj.HealLightArmorRate(), password),
+        'HealHeavyArmorRate': bacy.convert_long(obj.HealHeavyArmorRate(), password),
+        'HealUnarmedRate': bacy.convert_long(obj.HealUnarmedRate(), password),
+        'HealElasticArmorRate': bacy.convert_long(obj.HealElasticArmorRate(), password),
+        'HealNormalArmorRate': bacy.convert_long(obj.HealNormalArmorRate(), password),
+        'HealedExplosionRate': bacy.convert_long(obj.HealedExplosionRate(), password),
+        'HealedPierceRate': bacy.convert_long(obj.HealedPierceRate(), password),
+        'HealedMysticRate': bacy.convert_long(obj.HealedMysticRate(), password),
+        'HealedSonicRate': bacy.convert_long(obj.HealedSonicRate(), password),
+        'HealedNormalRate': bacy.convert_long(obj.HealedNormalRate(), password),
+        'StreetBattleAdaptation': TerrainAdaptationStat(bacy.convert_int(obj.StreetBattleAdaptation(), password)).name,
+        'OutdoorBattleAdaptation': TerrainAdaptationStat(bacy.convert_int(obj.OutdoorBattleAdaptation(), password)).name,
+        'IndoorBattleAdaptation': TerrainAdaptationStat(bacy.convert_int(obj.IndoorBattleAdaptation(), password)).name,
+        'RegenCost': bacy.convert_long(obj.RegenCost(), password),
     }
 
 
 def dump_CharacterStatLimitExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'TacticEntityType': TacticEntityType(table_encryption.convert_int(obj.TacticEntityType_(), password)).name,
-        'StatType': StatType(table_encryption.convert_int(obj.StatType_(), password)).name,
-        'StatMinValue': table_encryption.convert_long(obj.StatMinValue(), password),
-        'StatMaxValue': table_encryption.convert_long(obj.StatMaxValue(), password),
-        'StatRatioMinValue': table_encryption.convert_long(obj.StatRatioMinValue(), password),
-        'StatRatioMaxValue': table_encryption.convert_long(obj.StatRatioMaxValue(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'TacticEntityType': TacticEntityType(bacy.convert_int(obj.TacticEntityType_(), password)).name,
+        'StatType': StatType(bacy.convert_int(obj.StatType_(), password)).name,
+        'StatMinValue': bacy.convert_long(obj.StatMinValue(), password),
+        'StatMaxValue': bacy.convert_long(obj.StatMaxValue(), password),
+        'StatRatioMinValue': bacy.convert_long(obj.StatRatioMinValue(), password),
+        'StatRatioMaxValue': bacy.convert_long(obj.StatRatioMaxValue(), password),
     }
 
 
 def dump_CharacterStatsDetailExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'DetailShowStats': [StatType(table_encryption.convert_int(obj.DetailShowStats(j), password)).name for j in range(obj.DetailShowStatsLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'DetailShowStats': [StatType(bacy.convert_int(obj.DetailShowStats(j), password)).name for j in range(obj.DetailShowStatsLength())],
         'IsStatsPercent': [obj.IsStatsPercent(j) for j in range(obj.IsStatsPercentLength())],
     }
 
 
 def dump_CharacterStatsTransExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'TransSupportStats': StatType(table_encryption.convert_int(obj.TransSupportStats(), password)).name,
-        'EchelonExtensionType': EchelonExtensionType(table_encryption.convert_int(obj.EchelonExtensionType_(), password)).name,
-        'TransSupportStatsFactor': table_encryption.convert_int(obj.TransSupportStatsFactor(), password),
-        'StatTransType': StatTransType(table_encryption.convert_int(obj.StatTransType_(), password)).name,
+        'TransSupportStats': StatType(bacy.convert_int(obj.TransSupportStats(), password)).name,
+        'EchelonExtensionType': EchelonExtensionType(bacy.convert_int(obj.EchelonExtensionType_(), password)).name,
+        'TransSupportStatsFactor': bacy.convert_int(obj.TransSupportStatsFactor(), password),
+        'StatTransType': StatTransType(bacy.convert_int(obj.StatTransType_(), password)).name,
     }
 
 
 def dump_CharacterTranscendenceExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'MaxFavorLevel': [table_encryption.convert_int(obj.MaxFavorLevel(j), password) for j in range(obj.MaxFavorLevelLength())],
-        'StatBonusRateAttack': [table_encryption.convert_long(obj.StatBonusRateAttack(j), password) for j in range(obj.StatBonusRateAttackLength())],
-        'StatBonusRateHP': [table_encryption.convert_long(obj.StatBonusRateHP(j), password) for j in range(obj.StatBonusRateHPLength())],
-        'StatBonusRateHeal': [table_encryption.convert_long(obj.StatBonusRateHeal(j), password) for j in range(obj.StatBonusRateHealLength())],
-        'RecipeId': [table_encryption.convert_long(obj.RecipeId(j), password) for j in range(obj.RecipeIdLength())],
-        'SkillSlotA': [table_encryption.convert_string(obj.SkillSlotA(j), password) for j in range(obj.SkillSlotALength())],
-        'SkillSlotB': [table_encryption.convert_string(obj.SkillSlotB(j), password) for j in range(obj.SkillSlotBLength())],
-        'SkillSlotC': [table_encryption.convert_string(obj.SkillSlotC(j), password) for j in range(obj.SkillSlotCLength())],
-        'MaxlevelStar': [table_encryption.convert_int(obj.MaxlevelStar(j), password) for j in range(obj.MaxlevelStarLength())],
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'MaxFavorLevel': [bacy.convert_int(obj.MaxFavorLevel(j), password) for j in range(obj.MaxFavorLevelLength())],
+        'StatBonusRateAttack': [bacy.convert_long(obj.StatBonusRateAttack(j), password) for j in range(obj.StatBonusRateAttackLength())],
+        'StatBonusRateHP': [bacy.convert_long(obj.StatBonusRateHP(j), password) for j in range(obj.StatBonusRateHPLength())],
+        'StatBonusRateHeal': [bacy.convert_long(obj.StatBonusRateHeal(j), password) for j in range(obj.StatBonusRateHealLength())],
+        'RecipeId': [bacy.convert_long(obj.RecipeId(j), password) for j in range(obj.RecipeIdLength())],
+        'SkillSlotA': [bacy.convert_string(obj.SkillSlotA(j), password) for j in range(obj.SkillSlotALength())],
+        'SkillSlotB': [bacy.convert_string(obj.SkillSlotB(j), password) for j in range(obj.SkillSlotBLength())],
+        'SkillSlotC': [bacy.convert_string(obj.SkillSlotC(j), password) for j in range(obj.SkillSlotCLength())],
+        'MaxlevelStar': [bacy.convert_int(obj.MaxlevelStar(j), password) for j in range(obj.MaxlevelStarLength())],
     }
 
 
 def dump_CharacterVictoryInteractionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'InteractionId': table_encryption.convert_long(obj.InteractionId(), password),
-        'CostumeId01': table_encryption.convert_long(obj.CostumeId01(), password),
-        'PositionIndex01': table_encryption.convert_int(obj.PositionIndex01(), password),
-        'VictoryStartAnimationPath01': table_encryption.convert_string(obj.VictoryStartAnimationPath01(), password),
-        'VictoryEndAnimationPath01': table_encryption.convert_string(obj.VictoryEndAnimationPath01(), password),
-        'CostumeId02': table_encryption.convert_long(obj.CostumeId02(), password),
-        'PositionIndex02': table_encryption.convert_int(obj.PositionIndex02(), password),
-        'VictoryStartAnimationPath02': table_encryption.convert_string(obj.VictoryStartAnimationPath02(), password),
-        'VictoryEndAnimationPath02': table_encryption.convert_string(obj.VictoryEndAnimationPath02(), password),
-        'CostumeId03': table_encryption.convert_long(obj.CostumeId03(), password),
-        'PositionIndex03': table_encryption.convert_int(obj.PositionIndex03(), password),
-        'VictoryStartAnimationPath03': table_encryption.convert_string(obj.VictoryStartAnimationPath03(), password),
-        'VictoryEndAnimationPath03': table_encryption.convert_string(obj.VictoryEndAnimationPath03(), password),
-        'CostumeId04': table_encryption.convert_long(obj.CostumeId04(), password),
-        'PositionIndex04': table_encryption.convert_int(obj.PositionIndex04(), password),
-        'VictoryStartAnimationPath04': table_encryption.convert_string(obj.VictoryStartAnimationPath04(), password),
-        'VictoryEndAnimationPath04': table_encryption.convert_string(obj.VictoryEndAnimationPath04(), password),
-        'CostumeId05': table_encryption.convert_long(obj.CostumeId05(), password),
-        'PositionIndex05': table_encryption.convert_int(obj.PositionIndex05(), password),
-        'VictoryStartAnimationPath05': table_encryption.convert_string(obj.VictoryStartAnimationPath05(), password),
-        'VictoryEndAnimationPath05': table_encryption.convert_string(obj.VictoryEndAnimationPath05(), password),
-        'CostumeId06': table_encryption.convert_long(obj.CostumeId06(), password),
-        'PositionIndex06': table_encryption.convert_int(obj.PositionIndex06(), password),
-        'VictoryStartAnimationPath06': table_encryption.convert_string(obj.VictoryStartAnimationPath06(), password),
-        'VictoryEndAnimationPath06': table_encryption.convert_string(obj.VictoryEndAnimationPath06(), password),
+        'InteractionId': bacy.convert_long(obj.InteractionId(), password),
+        'CostumeId01': bacy.convert_long(obj.CostumeId01(), password),
+        'PositionIndex01': bacy.convert_int(obj.PositionIndex01(), password),
+        'VictoryStartAnimationPath01': bacy.convert_string(obj.VictoryStartAnimationPath01(), password),
+        'VictoryEndAnimationPath01': bacy.convert_string(obj.VictoryEndAnimationPath01(), password),
+        'CostumeId02': bacy.convert_long(obj.CostumeId02(), password),
+        'PositionIndex02': bacy.convert_int(obj.PositionIndex02(), password),
+        'VictoryStartAnimationPath02': bacy.convert_string(obj.VictoryStartAnimationPath02(), password),
+        'VictoryEndAnimationPath02': bacy.convert_string(obj.VictoryEndAnimationPath02(), password),
+        'CostumeId03': bacy.convert_long(obj.CostumeId03(), password),
+        'PositionIndex03': bacy.convert_int(obj.PositionIndex03(), password),
+        'VictoryStartAnimationPath03': bacy.convert_string(obj.VictoryStartAnimationPath03(), password),
+        'VictoryEndAnimationPath03': bacy.convert_string(obj.VictoryEndAnimationPath03(), password),
+        'CostumeId04': bacy.convert_long(obj.CostumeId04(), password),
+        'PositionIndex04': bacy.convert_int(obj.PositionIndex04(), password),
+        'VictoryStartAnimationPath04': bacy.convert_string(obj.VictoryStartAnimationPath04(), password),
+        'VictoryEndAnimationPath04': bacy.convert_string(obj.VictoryEndAnimationPath04(), password),
+        'CostumeId05': bacy.convert_long(obj.CostumeId05(), password),
+        'PositionIndex05': bacy.convert_int(obj.PositionIndex05(), password),
+        'VictoryStartAnimationPath05': bacy.convert_string(obj.VictoryStartAnimationPath05(), password),
+        'VictoryEndAnimationPath05': bacy.convert_string(obj.VictoryEndAnimationPath05(), password),
+        'CostumeId06': bacy.convert_long(obj.CostumeId06(), password),
+        'PositionIndex06': bacy.convert_int(obj.PositionIndex06(), password),
+        'VictoryStartAnimationPath06': bacy.convert_string(obj.VictoryStartAnimationPath06(), password),
+        'VictoryEndAnimationPath06': bacy.convert_string(obj.VictoryEndAnimationPath06(), password),
     }
 
 
 def dump_CharacterWeaponExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'ImagePath': table_encryption.convert_string(obj.ImagePath(), password),
-        'SetRecipe': table_encryption.convert_long(obj.SetRecipe(), password),
-        'StatLevelUpType': StatLevelUpType(table_encryption.convert_int(obj.StatLevelUpType_(), password)).name,
-        'AttackPower': table_encryption.convert_long(obj.AttackPower(), password),
-        'AttackPower100': table_encryption.convert_long(obj.AttackPower100(), password),
-        'MaxHP': table_encryption.convert_long(obj.MaxHP(), password),
-        'MaxHP100': table_encryption.convert_long(obj.MaxHP100(), password),
-        'HealPower': table_encryption.convert_long(obj.HealPower(), password),
-        'HealPower100': table_encryption.convert_long(obj.HealPower100(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'ImagePath': bacy.convert_string(obj.ImagePath(), password),
+        'SetRecipe': bacy.convert_long(obj.SetRecipe(), password),
+        'StatLevelUpType': StatLevelUpType(bacy.convert_int(obj.StatLevelUpType_(), password)).name,
+        'AttackPower': bacy.convert_long(obj.AttackPower(), password),
+        'AttackPower100': bacy.convert_long(obj.AttackPower100(), password),
+        'MaxHP': bacy.convert_long(obj.MaxHP(), password),
+        'MaxHP100': bacy.convert_long(obj.MaxHP100(), password),
+        'HealPower': bacy.convert_long(obj.HealPower(), password),
+        'HealPower100': bacy.convert_long(obj.HealPower100(), password),
         'Unlock': [obj.Unlock(j) for j in range(obj.UnlockLength())],
-        'RecipeId': [table_encryption.convert_long(obj.RecipeId(j), password) for j in range(obj.RecipeIdLength())],
-        'MaxLevel': [table_encryption.convert_int(obj.MaxLevel(j), password) for j in range(obj.MaxLevelLength())],
-        'LearnSkillSlot': [table_encryption.convert_string(obj.LearnSkillSlot(j), password) for j in range(obj.LearnSkillSlotLength())],
-        'StatType': [EquipmentOptionType(table_encryption.convert_int(obj.StatType(j), password)).name for j in range(obj.StatTypeLength())],
-        'StatValue': [table_encryption.convert_long(obj.StatValue(j), password) for j in range(obj.StatValueLength())],
+        'RecipeId': [bacy.convert_long(obj.RecipeId(j), password) for j in range(obj.RecipeIdLength())],
+        'MaxLevel': [bacy.convert_int(obj.MaxLevel(j), password) for j in range(obj.MaxLevelLength())],
+        'LearnSkillSlot': [bacy.convert_string(obj.LearnSkillSlot(j), password) for j in range(obj.LearnSkillSlotLength())],
+        'StatType': [EquipmentOptionType(bacy.convert_int(obj.StatType(j), password)).name for j in range(obj.StatTypeLength())],
+        'StatValue': [bacy.convert_long(obj.StatValue(j), password) for j in range(obj.StatValueLength())],
     }
 
 
 def dump_CharacterWeaponExpBonusExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'WeaponType': WeaponType(table_encryption.convert_int(obj.WeaponType_(), password)).name,
-        'WeaponExpGrowthA': table_encryption.convert_int(obj.WeaponExpGrowthA(), password),
-        'WeaponExpGrowthB': table_encryption.convert_int(obj.WeaponExpGrowthB(), password),
-        'WeaponExpGrowthC': table_encryption.convert_int(obj.WeaponExpGrowthC(), password),
-        'WeaponExpGrowthZ': table_encryption.convert_int(obj.WeaponExpGrowthZ(), password),
+        'WeaponType': WeaponType(bacy.convert_int(obj.WeaponType_(), password)).name,
+        'WeaponExpGrowthA': bacy.convert_int(obj.WeaponExpGrowthA(), password),
+        'WeaponExpGrowthB': bacy.convert_int(obj.WeaponExpGrowthB(), password),
+        'WeaponExpGrowthC': bacy.convert_int(obj.WeaponExpGrowthC(), password),
+        'WeaponExpGrowthZ': bacy.convert_int(obj.WeaponExpGrowthZ(), password),
     }
 
 
 def dump_CharacterWeaponLevelExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Level': table_encryption.convert_int(obj.Level(), password),
-        'Exp': table_encryption.convert_long(obj.Exp(), password),
-        'TotalExp': table_encryption.convert_long(obj.TotalExp(), password),
+        'Level': bacy.convert_int(obj.Level(), password),
+        'Exp': bacy.convert_long(obj.Exp(), password),
+        'TotalExp': bacy.convert_long(obj.TotalExp(), password),
     }
 
 
 def dump_ClanAssistSlotExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'SlotId': table_encryption.convert_long(obj.SlotId(), password),
-        'EchelonType': EchelonType(table_encryption.convert_int(obj.EchelonType_(), password)).name,
-        'SlotNumber': table_encryption.convert_long(obj.SlotNumber(), password),
-        'AssistTermRewardPeriodFromSec': table_encryption.convert_long(obj.AssistTermRewardPeriodFromSec(), password),
-        'AssistRewardLimit': table_encryption.convert_long(obj.AssistRewardLimit(), password),
-        'AssistRentRewardDailyMaxCount': table_encryption.convert_long(obj.AssistRentRewardDailyMaxCount(), password),
-        'AssistRentalFeeAmount': table_encryption.convert_long(obj.AssistRentalFeeAmount(), password),
-        'AssistRentalFeeAmountStranger': table_encryption.convert_long(obj.AssistRentalFeeAmountStranger(), password),
+        'SlotId': bacy.convert_long(obj.SlotId(), password),
+        'EchelonType': EchelonType(bacy.convert_int(obj.EchelonType_(), password)).name,
+        'SlotNumber': bacy.convert_long(obj.SlotNumber(), password),
+        'AssistTermRewardPeriodFromSec': bacy.convert_long(obj.AssistTermRewardPeriodFromSec(), password),
+        'AssistRewardLimit': bacy.convert_long(obj.AssistRewardLimit(), password),
+        'AssistRentRewardDailyMaxCount': bacy.convert_long(obj.AssistRentRewardDailyMaxCount(), password),
+        'AssistRentalFeeAmount': bacy.convert_long(obj.AssistRentalFeeAmount(), password),
+        'AssistRentalFeeAmountStranger': bacy.convert_long(obj.AssistRentalFeeAmountStranger(), password),
     }
 
 
 def dump_ClanRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ClanRewardType': ClanRewardType(table_encryption.convert_int(obj.ClanRewardType_(), password)).name,
-        'EchelonType': EchelonType(table_encryption.convert_int(obj.EchelonType_(), password)).name,
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardParcelId': table_encryption.convert_long(obj.RewardParcelId(), password),
-        'RewardParcelAmount': table_encryption.convert_long(obj.RewardParcelAmount(), password),
+        'ClanRewardType': ClanRewardType(bacy.convert_int(obj.ClanRewardType_(), password)).name,
+        'EchelonType': EchelonType(bacy.convert_int(obj.EchelonType_(), password)).name,
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardParcelId': bacy.convert_long(obj.RewardParcelId(), password),
+        'RewardParcelAmount': bacy.convert_long(obj.RewardParcelAmount(), password),
     }
 
 
 def dump_ClearDeckRuleExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ContentType': ContentType(table_encryption.convert_int(obj.ContentType_(), password)).name,
-        'SizeLimit': table_encryption.convert_long(obj.SizeLimit(), password),
+        'ContentType': ContentType(bacy.convert_int(obj.ContentType_(), password)).name,
+        'SizeLimit': bacy.convert_long(obj.SizeLimit(), password),
     }
 
 
 def dump_ConquestCalculateExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'CalculateConditionParcelType': ParcelType(table_encryption.convert_int(obj.CalculateConditionParcelType(), password)).name,
-        'CalculateConditionParcelUniqueId': table_encryption.convert_long(obj.CalculateConditionParcelUniqueId(), password),
-        'CalculateConditionParcelAmount': table_encryption.convert_long(obj.CalculateConditionParcelAmount(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'CalculateConditionParcelType': ParcelType(bacy.convert_int(obj.CalculateConditionParcelType(), password)).name,
+        'CalculateConditionParcelUniqueId': bacy.convert_long(obj.CalculateConditionParcelUniqueId(), password),
+        'CalculateConditionParcelAmount': bacy.convert_long(obj.CalculateConditionParcelAmount(), password),
     }
 
 
 def dump_ConquestCameraSettingExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'ConquestMapBoundaryOffsetLeft': table_encryption.convert_float(obj.ConquestMapBoundaryOffsetLeft(), password),
-        'ConquestMapBoundaryOffsetRight': table_encryption.convert_float(obj.ConquestMapBoundaryOffsetRight(), password),
-        'ConquestMapBoundaryOffsetTop': table_encryption.convert_float(obj.ConquestMapBoundaryOffsetTop(), password),
-        'ConquestMapBoundaryOffsetBottom': table_encryption.convert_float(obj.ConquestMapBoundaryOffsetBottom(), password),
-        'ConquestMapCenterOffsetX': table_encryption.convert_float(obj.ConquestMapCenterOffsetX(), password),
-        'ConquestMapCenterOffsetY': table_encryption.convert_float(obj.ConquestMapCenterOffsetY(), password),
-        'CameraAngle': table_encryption.convert_float(obj.CameraAngle(), password),
-        'CameraZoomMax': table_encryption.convert_float(obj.CameraZoomMax(), password),
-        'CameraZoomMin': table_encryption.convert_float(obj.CameraZoomMin(), password),
-        'CameraZoomDefault': table_encryption.convert_float(obj.CameraZoomDefault(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'ConquestMapBoundaryOffsetLeft': bacy.convert_float(obj.ConquestMapBoundaryOffsetLeft(), password),
+        'ConquestMapBoundaryOffsetRight': bacy.convert_float(obj.ConquestMapBoundaryOffsetRight(), password),
+        'ConquestMapBoundaryOffsetTop': bacy.convert_float(obj.ConquestMapBoundaryOffsetTop(), password),
+        'ConquestMapBoundaryOffsetBottom': bacy.convert_float(obj.ConquestMapBoundaryOffsetBottom(), password),
+        'ConquestMapCenterOffsetX': bacy.convert_float(obj.ConquestMapCenterOffsetX(), password),
+        'ConquestMapCenterOffsetY': bacy.convert_float(obj.ConquestMapCenterOffsetY(), password),
+        'CameraAngle': bacy.convert_float(obj.CameraAngle(), password),
+        'CameraZoomMax': bacy.convert_float(obj.CameraZoomMax(), password),
+        'CameraZoomMin': bacy.convert_float(obj.CameraZoomMin(), password),
+        'CameraZoomDefault': bacy.convert_float(obj.CameraZoomDefault(), password),
     }
 
 
 def dump_ConquestErosionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'ErosionType': ConquestErosionType(table_encryption.convert_int(obj.ErosionType(), password)).name,
-        'Phase': table_encryption.convert_int(obj.Phase(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'ErosionType': ConquestErosionType(bacy.convert_int(obj.ErosionType(), password)).name,
+        'Phase': bacy.convert_int(obj.Phase(), password),
         'PhaseAlarm': obj.PhaseAlarm(),
-        'StepIndex': table_encryption.convert_int(obj.StepIndex(), password),
-        'PhaseStartConditionType': [ConquestConditionType(table_encryption.convert_int(obj.PhaseStartConditionType(j), password)).name for j in range(obj.PhaseStartConditionTypeLength())],
-        'PhaseStartConditionParameter': [table_encryption.convert_string(obj.PhaseStartConditionParameter(j), password) for j in range(obj.PhaseStartConditionParameterLength())],
-        'PhaseBeforeExposeConditionType': [ConquestConditionType(table_encryption.convert_int(obj.PhaseBeforeExposeConditionType(j), password)).name for j in range(obj.PhaseBeforeExposeConditionTypeLength())],
-        'PhaseBeforeExposeConditionParameter': [table_encryption.convert_string(obj.PhaseBeforeExposeConditionParameter(j), password) for j in range(obj.PhaseBeforeExposeConditionParameterLength())],
-        'ErosionBattleConditionParcelType': ParcelType(table_encryption.convert_int(obj.ErosionBattleConditionParcelType(), password)).name,
-        'ErosionBattleConditionParcelUniqueId': table_encryption.convert_long(obj.ErosionBattleConditionParcelUniqueId(), password),
-        'ErosionBattleConditionParcelAmount': table_encryption.convert_long(obj.ErosionBattleConditionParcelAmount(), password),
-        'ConquestRewardId': table_encryption.convert_long(obj.ConquestRewardId(), password),
+        'StepIndex': bacy.convert_int(obj.StepIndex(), password),
+        'PhaseStartConditionType': [ConquestConditionType(bacy.convert_int(obj.PhaseStartConditionType(j), password)).name for j in range(obj.PhaseStartConditionTypeLength())],
+        'PhaseStartConditionParameter': [bacy.convert_string(obj.PhaseStartConditionParameter(j), password) for j in range(obj.PhaseStartConditionParameterLength())],
+        'PhaseBeforeExposeConditionType': [ConquestConditionType(bacy.convert_int(obj.PhaseBeforeExposeConditionType(j), password)).name for j in range(obj.PhaseBeforeExposeConditionTypeLength())],
+        'PhaseBeforeExposeConditionParameter': [bacy.convert_string(obj.PhaseBeforeExposeConditionParameter(j), password) for j in range(obj.PhaseBeforeExposeConditionParameterLength())],
+        'ErosionBattleConditionParcelType': ParcelType(bacy.convert_int(obj.ErosionBattleConditionParcelType(), password)).name,
+        'ErosionBattleConditionParcelUniqueId': bacy.convert_long(obj.ErosionBattleConditionParcelUniqueId(), password),
+        'ErosionBattleConditionParcelAmount': bacy.convert_long(obj.ErosionBattleConditionParcelAmount(), password),
+        'ConquestRewardId': bacy.convert_long(obj.ConquestRewardId(), password),
     }
 
 
 def dump_ConquestErosionUnitExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'TilePrefabId': table_encryption.convert_long(obj.TilePrefabId(), password),
-        'MassErosionUnitId': table_encryption.convert_long(obj.MassErosionUnitId(), password),
-        'MassErosionUnitRotationY': table_encryption.convert_float(obj.MassErosionUnitRotationY(), password),
-        'IndividualErosionUnitId': table_encryption.convert_long(obj.IndividualErosionUnitId(), password),
-        'IndividualErosionUnitRotationY': table_encryption.convert_float(obj.IndividualErosionUnitRotationY(), password),
+        'TilePrefabId': bacy.convert_long(obj.TilePrefabId(), password),
+        'MassErosionUnitId': bacy.convert_long(obj.MassErosionUnitId(), password),
+        'MassErosionUnitRotationY': bacy.convert_float(obj.MassErosionUnitRotationY(), password),
+        'IndividualErosionUnitId': bacy.convert_long(obj.IndividualErosionUnitId(), password),
+        'IndividualErosionUnitRotationY': bacy.convert_float(obj.IndividualErosionUnitRotationY(), password),
     }
 
 
 def dump_ConquestEventExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'MainStoryEventContentId': table_encryption.convert_long(obj.MainStoryEventContentId(), password),
-        'ConquestEventType': ConquestEventType(table_encryption.convert_int(obj.ConquestEventType_(), password)).name,
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'MainStoryEventContentId': bacy.convert_long(obj.MainStoryEventContentId(), password),
+        'ConquestEventType': ConquestEventType(bacy.convert_int(obj.ConquestEventType_(), password)).name,
         'UseErosion': obj.UseErosion(),
         'UseUnexpectedEvent': obj.UseUnexpectedEvent(),
         'UseCalculate': obj.UseCalculate(),
         'UseConquestObject': obj.UseConquestObject(),
-        'EvnetMapGoalLocalize': table_encryption.convert_string(obj.EvnetMapGoalLocalize(), password),
-        'EvnetMapNameLocalize': table_encryption.convert_string(obj.EvnetMapNameLocalize(), password),
-        'MapEnterScenarioGroupId': table_encryption.convert_long(obj.MapEnterScenarioGroupId(), password),
-        'EvnetScenarioBG': table_encryption.convert_string(obj.EvnetScenarioBG(), password),
-        'ManageUnitChange': table_encryption.convert_int(obj.ManageUnitChange(), password),
-        'AssistCount': table_encryption.convert_int(obj.AssistCount(), password),
-        'PlayTimeLimitInSeconds': table_encryption.convert_int(obj.PlayTimeLimitInSeconds(), password),
-        'AnimationUnitAmountMin': table_encryption.convert_int(obj.AnimationUnitAmountMin(), password),
-        'AnimationUnitAmountMax': table_encryption.convert_int(obj.AnimationUnitAmountMax(), password),
-        'AnimationUnitDelay': table_encryption.convert_float(obj.AnimationUnitDelay(), password),
-        'LocalizeUnexpected': table_encryption.convert_string(obj.LocalizeUnexpected(), password),
-        'LocalizeErosions': table_encryption.convert_string(obj.LocalizeErosions(), password),
-        'LocalizeStep': table_encryption.convert_string(obj.LocalizeStep(), password),
-        'LocalizeTile': table_encryption.convert_string(obj.LocalizeTile(), password),
-        'LocalizeMapInfo': table_encryption.convert_string(obj.LocalizeMapInfo(), password),
-        'LocalizeManage': table_encryption.convert_string(obj.LocalizeManage(), password),
-        'LocalizeUpgrade': table_encryption.convert_string(obj.LocalizeUpgrade(), password),
-        'LocalizeTreasureBox': table_encryption.convert_string(obj.LocalizeTreasureBox(), password),
-        'IndividualErosionDailyCount': table_encryption.convert_long(obj.IndividualErosionDailyCount(), password),
+        'EvnetMapGoalLocalize': bacy.convert_string(obj.EvnetMapGoalLocalize(), password),
+        'EvnetMapNameLocalize': bacy.convert_string(obj.EvnetMapNameLocalize(), password),
+        'MapEnterScenarioGroupId': bacy.convert_long(obj.MapEnterScenarioGroupId(), password),
+        'EvnetScenarioBG': bacy.convert_string(obj.EvnetScenarioBG(), password),
+        'ManageUnitChange': bacy.convert_int(obj.ManageUnitChange(), password),
+        'AssistCount': bacy.convert_int(obj.AssistCount(), password),
+        'PlayTimeLimitInSeconds': bacy.convert_int(obj.PlayTimeLimitInSeconds(), password),
+        'AnimationUnitAmountMin': bacy.convert_int(obj.AnimationUnitAmountMin(), password),
+        'AnimationUnitAmountMax': bacy.convert_int(obj.AnimationUnitAmountMax(), password),
+        'AnimationUnitDelay': bacy.convert_float(obj.AnimationUnitDelay(), password),
+        'LocalizeUnexpected': bacy.convert_string(obj.LocalizeUnexpected(), password),
+        'LocalizeErosions': bacy.convert_string(obj.LocalizeErosions(), password),
+        'LocalizeStep': bacy.convert_string(obj.LocalizeStep(), password),
+        'LocalizeTile': bacy.convert_string(obj.LocalizeTile(), password),
+        'LocalizeMapInfo': bacy.convert_string(obj.LocalizeMapInfo(), password),
+        'LocalizeManage': bacy.convert_string(obj.LocalizeManage(), password),
+        'LocalizeUpgrade': bacy.convert_string(obj.LocalizeUpgrade(), password),
+        'LocalizeTreasureBox': bacy.convert_string(obj.LocalizeTreasureBox(), password),
+        'IndividualErosionDailyCount': bacy.convert_long(obj.IndividualErosionDailyCount(), password),
     }
 
 
 def dump_ConquestGroupBonusExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ConquestBonusId': table_encryption.convert_long(obj.ConquestBonusId(), password),
-        'School': [School(table_encryption.convert_int(obj.School_(j), password)).name for j in range(obj.SchoolLength())],
-        'RecommandLocalizeEtcId': table_encryption.convert_uint(obj.RecommandLocalizeEtcId(), password),
-        'BonusParcelType': [ParcelType(table_encryption.convert_int(obj.BonusParcelType(j), password)).name for j in range(obj.BonusParcelTypeLength())],
-        'BonusId': [table_encryption.convert_long(obj.BonusId(j), password) for j in range(obj.BonusIdLength())],
-        'BonusCharacterCount1': [table_encryption.convert_int(obj.BonusCharacterCount1(j), password) for j in range(obj.BonusCharacterCount1Length())],
-        'BonusPercentage1': [table_encryption.convert_long(obj.BonusPercentage1(j), password) for j in range(obj.BonusPercentage1Length())],
-        'BonusCharacterCount2': [table_encryption.convert_int(obj.BonusCharacterCount2(j), password) for j in range(obj.BonusCharacterCount2Length())],
-        'BonusPercentage2': [table_encryption.convert_long(obj.BonusPercentage2(j), password) for j in range(obj.BonusPercentage2Length())],
-        'BonusCharacterCount3': [table_encryption.convert_int(obj.BonusCharacterCount3(j), password) for j in range(obj.BonusCharacterCount3Length())],
-        'BonusPercentage3': [table_encryption.convert_long(obj.BonusPercentage3(j), password) for j in range(obj.BonusPercentage3Length())],
+        'ConquestBonusId': bacy.convert_long(obj.ConquestBonusId(), password),
+        'School': [School(bacy.convert_int(obj.School_(j), password)).name for j in range(obj.SchoolLength())],
+        'RecommandLocalizeEtcId': bacy.convert_uint(obj.RecommandLocalizeEtcId(), password),
+        'BonusParcelType': [ParcelType(bacy.convert_int(obj.BonusParcelType(j), password)).name for j in range(obj.BonusParcelTypeLength())],
+        'BonusId': [bacy.convert_long(obj.BonusId(j), password) for j in range(obj.BonusIdLength())],
+        'BonusCharacterCount1': [bacy.convert_int(obj.BonusCharacterCount1(j), password) for j in range(obj.BonusCharacterCount1Length())],
+        'BonusPercentage1': [bacy.convert_long(obj.BonusPercentage1(j), password) for j in range(obj.BonusPercentage1Length())],
+        'BonusCharacterCount2': [bacy.convert_int(obj.BonusCharacterCount2(j), password) for j in range(obj.BonusCharacterCount2Length())],
+        'BonusPercentage2': [bacy.convert_long(obj.BonusPercentage2(j), password) for j in range(obj.BonusPercentage2Length())],
+        'BonusCharacterCount3': [bacy.convert_int(obj.BonusCharacterCount3(j), password) for j in range(obj.BonusCharacterCount3Length())],
+        'BonusPercentage3': [bacy.convert_long(obj.BonusPercentage3(j), password) for j in range(obj.BonusPercentage3Length())],
     }
 
 
 def dump_ConquestGroupBuffExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ConquestBuffId': table_encryption.convert_long(obj.ConquestBuffId(), password),
-        'School': [School(table_encryption.convert_int(obj.School_(j), password)).name for j in range(obj.SchoolLength())],
-        'RecommandLocalizeEtcId': table_encryption.convert_uint(obj.RecommandLocalizeEtcId(), password),
-        'SkillGroupId': table_encryption.convert_string(obj.SkillGroupId(), password),
+        'ConquestBuffId': bacy.convert_long(obj.ConquestBuffId(), password),
+        'School': [School(bacy.convert_int(obj.School_(j), password)).name for j in range(obj.SchoolLength())],
+        'RecommandLocalizeEtcId': bacy.convert_uint(obj.RecommandLocalizeEtcId(), password),
+        'SkillGroupId': bacy.convert_string(obj.SkillGroupId(), password),
     }
 
 
 def dump_ConquestMapExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'DevName': table_encryption.convert_string(obj.DevName(), password),
-        'MapDifficulty': StageDifficulty(table_encryption.convert_int(obj.MapDifficulty(), password)).name,
-        'StepIndex': table_encryption.convert_int(obj.StepIndex(), password),
-        'ConquestMap': table_encryption.convert_string(obj.ConquestMap(), password),
-        'StepEnterScenarioGroupId': table_encryption.convert_long(obj.StepEnterScenarioGroupId(), password),
-        'StepOpenConditionType': [ConquestConditionType(table_encryption.convert_int(obj.StepOpenConditionType(j), password)).name for j in range(obj.StepOpenConditionTypeLength())],
-        'StepOpenConditionParameter': [table_encryption.convert_string(obj.StepOpenConditionParameter(j), password) for j in range(obj.StepOpenConditionParameterLength())],
-        'MapGoalLocalize': table_encryption.convert_string(obj.MapGoalLocalize(), password),
-        'StepGoalLocalize': table_encryption.convert_string(obj.StepGoalLocalize(), password),
-        'StepNameLocalize': table_encryption.convert_string(obj.StepNameLocalize(), password),
-        'ConquestMapBG': table_encryption.convert_string(obj.ConquestMapBG(), password),
-        'CameraSettingId': table_encryption.convert_long(obj.CameraSettingId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'DevName': bacy.convert_string(obj.DevName(), password),
+        'MapDifficulty': StageDifficulty(bacy.convert_int(obj.MapDifficulty(), password)).name,
+        'StepIndex': bacy.convert_int(obj.StepIndex(), password),
+        'ConquestMap': bacy.convert_string(obj.ConquestMap(), password),
+        'StepEnterScenarioGroupId': bacy.convert_long(obj.StepEnterScenarioGroupId(), password),
+        'StepOpenConditionType': [ConquestConditionType(bacy.convert_int(obj.StepOpenConditionType(j), password)).name for j in range(obj.StepOpenConditionTypeLength())],
+        'StepOpenConditionParameter': [bacy.convert_string(obj.StepOpenConditionParameter(j), password) for j in range(obj.StepOpenConditionParameterLength())],
+        'MapGoalLocalize': bacy.convert_string(obj.MapGoalLocalize(), password),
+        'StepGoalLocalize': bacy.convert_string(obj.StepGoalLocalize(), password),
+        'StepNameLocalize': bacy.convert_string(obj.StepNameLocalize(), password),
+        'ConquestMapBG': bacy.convert_string(obj.ConquestMapBG(), password),
+        'CameraSettingId': bacy.convert_long(obj.CameraSettingId(), password),
     }
 
 
 def dump_ConquestObjectExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'ConquestObjectType': ConquestObjectType(table_encryption.convert_int(obj.ConquestObjectType_(), password)).name,
-        'Key': table_encryption.convert_uint(obj.Key(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'PrefabName': table_encryption.convert_string(obj.PrefabName(), password),
-        'ConquestRewardParcelType': ParcelType(table_encryption.convert_int(obj.ConquestRewardParcelType(), password)).name,
-        'ConquestRewardID': table_encryption.convert_long(obj.ConquestRewardID(), password),
-        'ConquestRewardAmount': table_encryption.convert_int(obj.ConquestRewardAmount(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'ConquestObjectType': ConquestObjectType(bacy.convert_int(obj.ConquestObjectType_(), password)).name,
+        'Key': bacy.convert_uint(obj.Key(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
+        'PrefabName': bacy.convert_string(obj.PrefabName(), password),
+        'ConquestRewardParcelType': ParcelType(bacy.convert_int(obj.ConquestRewardParcelType(), password)).name,
+        'ConquestRewardID': bacy.convert_long(obj.ConquestRewardID(), password),
+        'ConquestRewardAmount': bacy.convert_int(obj.ConquestRewardAmount(), password),
         'Disposable': obj.Disposable(),
-        'StepIndex': table_encryption.convert_int(obj.StepIndex(), password),
-        'StepObjectCount': table_encryption.convert_int(obj.StepObjectCount(), password),
+        'StepIndex': bacy.convert_int(obj.StepIndex(), password),
+        'StepObjectCount': bacy.convert_int(obj.StepObjectCount(), password),
     }
 
 
 def dump_ConquestPlayGuideExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'DisplayOrder': table_encryption.convert_int(obj.DisplayOrder(), password),
-        'GuideTitle': table_encryption.convert_string(obj.GuideTitle(), password),
-        'GuideImagePath': table_encryption.convert_string(obj.GuideImagePath(), password),
-        'GuideText': table_encryption.convert_string(obj.GuideText(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'DisplayOrder': bacy.convert_int(obj.DisplayOrder(), password),
+        'GuideTitle': bacy.convert_string(obj.GuideTitle(), password),
+        'GuideImagePath': bacy.convert_string(obj.GuideImagePath(), password),
+        'GuideText': bacy.convert_string(obj.GuideText(), password),
     }
 
 
 def dump_ConquestProgressResourceExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'Group': ConquestProgressType(table_encryption.convert_int(obj.Group(), password)).name,
-        'ProgressResource': table_encryption.convert_string(obj.ProgressResource(), password),
-        'VoiceId': [table_encryption.convert_uint(obj.VoiceId(j), password) for j in range(obj.VoiceIdLength())],
-        'ProgressLocalizeCode': table_encryption.convert_string(obj.ProgressLocalizeCode(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'Group': ConquestProgressType(bacy.convert_int(obj.Group(), password)).name,
+        'ProgressResource': bacy.convert_string(obj.ProgressResource(), password),
+        'VoiceId': [bacy.convert_uint(obj.VoiceId(j), password) for j in range(obj.VoiceIdLength())],
+        'ProgressLocalizeCode': bacy.convert_string(obj.ProgressLocalizeCode(), password),
     }
 
 
 def dump_ConquestRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'RewardTag': RewardTag(table_encryption.convert_int(obj.RewardTag_(), password)).name,
-        'RewardProb': table_encryption.convert_int(obj.RewardProb(), password),
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardId': table_encryption.convert_long(obj.RewardId(), password),
-        'RewardAmount': table_encryption.convert_int(obj.RewardAmount(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'RewardTag': RewardTag(bacy.convert_int(obj.RewardTag_(), password)).name,
+        'RewardProb': bacy.convert_int(obj.RewardProb(), password),
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardId': bacy.convert_long(obj.RewardId(), password),
+        'RewardAmount': bacy.convert_int(obj.RewardAmount(), password),
         'IsDisplayed': obj.IsDisplayed(),
     }
 
 
 def dump_ConquestStepExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'MapDifficulty': StageDifficulty(table_encryption.convert_int(obj.MapDifficulty(), password)).name,
-        'Step': table_encryption.convert_int(obj.Step(), password),
-        'StepGoalLocalize': table_encryption.convert_string(obj.StepGoalLocalize(), password),
-        'StepEnterScenarioGroupId': table_encryption.convert_long(obj.StepEnterScenarioGroupId(), password),
-        'StepEnterItemType': ParcelType(table_encryption.convert_int(obj.StepEnterItemType(), password)).name,
-        'StepEnterItemUniqueId': table_encryption.convert_long(obj.StepEnterItemUniqueId(), password),
-        'StepEnterItemAmount': table_encryption.convert_long(obj.StepEnterItemAmount(), password),
-        'UnexpectedEventUnitId': [table_encryption.convert_long(obj.UnexpectedEventUnitId(j), password) for j in range(obj.UnexpectedEventUnitIdLength())],
-        'UnexpectedEventPrefab': table_encryption.convert_string(obj.UnexpectedEventPrefab(), password),
-        'TreasureBoxObjectId': table_encryption.convert_long(obj.TreasureBoxObjectId(), password),
-        'TreasureBoxCountPerStepOpen': table_encryption.convert_int(obj.TreasureBoxCountPerStepOpen(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'MapDifficulty': StageDifficulty(bacy.convert_int(obj.MapDifficulty(), password)).name,
+        'Step': bacy.convert_int(obj.Step(), password),
+        'StepGoalLocalize': bacy.convert_string(obj.StepGoalLocalize(), password),
+        'StepEnterScenarioGroupId': bacy.convert_long(obj.StepEnterScenarioGroupId(), password),
+        'StepEnterItemType': ParcelType(bacy.convert_int(obj.StepEnterItemType(), password)).name,
+        'StepEnterItemUniqueId': bacy.convert_long(obj.StepEnterItemUniqueId(), password),
+        'StepEnterItemAmount': bacy.convert_long(obj.StepEnterItemAmount(), password),
+        'UnexpectedEventUnitId': [bacy.convert_long(obj.UnexpectedEventUnitId(j), password) for j in range(obj.UnexpectedEventUnitIdLength())],
+        'UnexpectedEventPrefab': bacy.convert_string(obj.UnexpectedEventPrefab(), password),
+        'TreasureBoxObjectId': bacy.convert_long(obj.TreasureBoxObjectId(), password),
+        'TreasureBoxCountPerStepOpen': bacy.convert_int(obj.TreasureBoxCountPerStepOpen(), password),
     }
 
 
 def dump_ConquestTileExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'EventId': table_encryption.convert_long(obj.EventId(), password),
-        'Step': table_encryption.convert_int(obj.Step(), password),
-        'PrefabName': table_encryption.convert_string(obj.PrefabName(), password),
-        'TileNameLocalize': table_encryption.convert_string(obj.TileNameLocalize(), password),
-        'TileImageName': table_encryption.convert_string(obj.TileImageName(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
+        'EventId': bacy.convert_long(obj.EventId(), password),
+        'Step': bacy.convert_int(obj.Step(), password),
+        'PrefabName': bacy.convert_string(obj.PrefabName(), password),
+        'TileNameLocalize': bacy.convert_string(obj.TileNameLocalize(), password),
+        'TileImageName': bacy.convert_string(obj.TileImageName(), password),
         'Playable': obj.Playable(),
-        'TileType': ConquestTileType(table_encryption.convert_int(obj.TileType(), password)).name,
+        'TileType': ConquestTileType(bacy.convert_int(obj.TileType(), password)).name,
         'NotMapFog': obj.NotMapFog(),
-        'GroupBonusId': table_encryption.convert_long(obj.GroupBonusId(), password),
-        'ConquestCostType': ParcelType(table_encryption.convert_int(obj.ConquestCostType(), password)).name,
-        'ConquestCostId': table_encryption.convert_long(obj.ConquestCostId(), password),
-        'ConquestCostAmount': table_encryption.convert_int(obj.ConquestCostAmount(), password),
-        'ManageCostType': ParcelType(table_encryption.convert_int(obj.ManageCostType(), password)).name,
-        'ManageCostId': table_encryption.convert_long(obj.ManageCostId(), password),
-        'ManageCostAmount': table_encryption.convert_int(obj.ManageCostAmount(), password),
-        'ConquestRewardId': table_encryption.convert_long(obj.ConquestRewardId(), password),
-        'MassErosionId': table_encryption.convert_long(obj.MassErosionId(), password),
-        'Upgrade2CostType': ParcelType(table_encryption.convert_int(obj.Upgrade2CostType(), password)).name,
-        'Upgrade2CostId': table_encryption.convert_long(obj.Upgrade2CostId(), password),
-        'Upgrade2CostAmount': table_encryption.convert_int(obj.Upgrade2CostAmount(), password),
-        'Upgrade3CostType': ParcelType(table_encryption.convert_int(obj.Upgrade3CostType(), password)).name,
-        'Upgrade3CostId': table_encryption.convert_long(obj.Upgrade3CostId(), password),
-        'Upgrade3CostAmount': table_encryption.convert_int(obj.Upgrade3CostAmount(), password),
+        'GroupBonusId': bacy.convert_long(obj.GroupBonusId(), password),
+        'ConquestCostType': ParcelType(bacy.convert_int(obj.ConquestCostType(), password)).name,
+        'ConquestCostId': bacy.convert_long(obj.ConquestCostId(), password),
+        'ConquestCostAmount': bacy.convert_int(obj.ConquestCostAmount(), password),
+        'ManageCostType': ParcelType(bacy.convert_int(obj.ManageCostType(), password)).name,
+        'ManageCostId': bacy.convert_long(obj.ManageCostId(), password),
+        'ManageCostAmount': bacy.convert_int(obj.ManageCostAmount(), password),
+        'ConquestRewardId': bacy.convert_long(obj.ConquestRewardId(), password),
+        'MassErosionId': bacy.convert_long(obj.MassErosionId(), password),
+        'Upgrade2CostType': ParcelType(bacy.convert_int(obj.Upgrade2CostType(), password)).name,
+        'Upgrade2CostId': bacy.convert_long(obj.Upgrade2CostId(), password),
+        'Upgrade2CostAmount': bacy.convert_int(obj.Upgrade2CostAmount(), password),
+        'Upgrade3CostType': ParcelType(bacy.convert_int(obj.Upgrade3CostType(), password)).name,
+        'Upgrade3CostId': bacy.convert_long(obj.Upgrade3CostId(), password),
+        'Upgrade3CostAmount': bacy.convert_int(obj.Upgrade3CostAmount(), password),
     }
 
 
 def dump_ConquestUnexpectedEventExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'UnexpectedEventConditionType': ParcelType(table_encryption.convert_int(obj.UnexpectedEventConditionType(), password)).name,
-        'UnexpectedEventConditionUniqueId': table_encryption.convert_long(obj.UnexpectedEventConditionUniqueId(), password),
-        'UnexpectedEventConditionAmount': table_encryption.convert_long(obj.UnexpectedEventConditionAmount(), password),
-        'UnexpectedEventOccurDailyLimitCount': table_encryption.convert_int(obj.UnexpectedEventOccurDailyLimitCount(), password),
-        'UnitCountPerStep': table_encryption.convert_int(obj.UnitCountPerStep(), password),
-        'UnexpectedEventPrefab': [table_encryption.convert_string(obj.UnexpectedEventPrefab(j), password) for j in range(obj.UnexpectedEventPrefabLength())],
-        'UnexpectedEventUnitId': [table_encryption.convert_long(obj.UnexpectedEventUnitId(j), password) for j in range(obj.UnexpectedEventUnitIdLength())],
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'UnexpectedEventConditionType': ParcelType(bacy.convert_int(obj.UnexpectedEventConditionType(), password)).name,
+        'UnexpectedEventConditionUniqueId': bacy.convert_long(obj.UnexpectedEventConditionUniqueId(), password),
+        'UnexpectedEventConditionAmount': bacy.convert_long(obj.UnexpectedEventConditionAmount(), password),
+        'UnexpectedEventOccurDailyLimitCount': bacy.convert_int(obj.UnexpectedEventOccurDailyLimitCount(), password),
+        'UnitCountPerStep': bacy.convert_int(obj.UnitCountPerStep(), password),
+        'UnexpectedEventPrefab': [bacy.convert_string(obj.UnexpectedEventPrefab(j), password) for j in range(obj.UnexpectedEventPrefabLength())],
+        'UnexpectedEventUnitId': [bacy.convert_long(obj.UnexpectedEventUnitId(j), password) for j in range(obj.UnexpectedEventUnitIdLength())],
     }
 
 
 def dump_ConquestUnitExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Key': table_encryption.convert_uint(obj.Key(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'PrefabName': table_encryption.convert_string(obj.PrefabName(), password),
-        'StrategyPrefabName': table_encryption.convert_string(obj.StrategyPrefabName(), password),
-        'Scale': table_encryption.convert_float(obj.Scale(), password),
-        'ShieldEffectScale': table_encryption.convert_float(obj.ShieldEffectScale(), password),
-        'UnitFxPrefabName': table_encryption.convert_string(obj.UnitFxPrefabName(), password),
-        'PointAnimation': table_encryption.convert_string(obj.PointAnimation(), password),
-        'EnemyType': ConquestEnemyType(table_encryption.convert_int(obj.EnemyType(), password)).name,
-        'Team': ConquestTeamType(table_encryption.convert_int(obj.Team(), password)).name,
-        'UnitGroup': table_encryption.convert_long(obj.UnitGroup(), password),
-        'PrevUnitGroup': table_encryption.convert_long(obj.PrevUnitGroup(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
-        'StarGoal': [StarGoalType(table_encryption.convert_int(obj.StarGoal(j), password)).name for j in range(obj.StarGoalLength())],
-        'StarGoalAmount': [table_encryption.convert_int(obj.StarGoalAmount(j), password) for j in range(obj.StarGoalAmountLength())],
-        'GroupBuffId': table_encryption.convert_long(obj.GroupBuffId(), password),
-        'StageEnterCostType': ParcelType(table_encryption.convert_int(obj.StageEnterCostType(), password)).name,
-        'StageEnterCostId': table_encryption.convert_long(obj.StageEnterCostId(), password),
-        'StageEnterCostAmount': table_encryption.convert_int(obj.StageEnterCostAmount(), password),
-        'ManageEchelonStageEnterCostType': ParcelType(table_encryption.convert_int(obj.ManageEchelonStageEnterCostType(), password)).name,
-        'ManageEchelonStageEnterCostId': table_encryption.convert_long(obj.ManageEchelonStageEnterCostId(), password),
-        'ManageEchelonStageEnterCostAmount': table_encryption.convert_int(obj.ManageEchelonStageEnterCostAmount(), password),
-        'EnterScenarioGroupId': table_encryption.convert_long(obj.EnterScenarioGroupId(), password),
-        'ClearScenarioGroupId': table_encryption.convert_long(obj.ClearScenarioGroupId(), password),
-        'ConquestRewardId': table_encryption.convert_long(obj.ConquestRewardId(), password),
-        'StageTopography': StageTopography(table_encryption.convert_int(obj.StageTopography_(), password)).name,
-        'RecommandLevel': table_encryption.convert_int(obj.RecommandLevel(), password),
-        'TacticRewardExp': table_encryption.convert_long(obj.TacticRewardExp(), password),
-        'FixedEchelonId': table_encryption.convert_long(obj.FixedEchelonId(), password),
-        'EchelonExtensionType': EchelonExtensionType(table_encryption.convert_int(obj.EchelonExtensionType_(), password)).name,
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Key': bacy.convert_uint(obj.Key(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
+        'PrefabName': bacy.convert_string(obj.PrefabName(), password),
+        'StrategyPrefabName': bacy.convert_string(obj.StrategyPrefabName(), password),
+        'Scale': bacy.convert_float(obj.Scale(), password),
+        'ShieldEffectScale': bacy.convert_float(obj.ShieldEffectScale(), password),
+        'UnitFxPrefabName': bacy.convert_string(obj.UnitFxPrefabName(), password),
+        'PointAnimation': bacy.convert_string(obj.PointAnimation(), password),
+        'EnemyType': ConquestEnemyType(bacy.convert_int(obj.EnemyType(), password)).name,
+        'Team': ConquestTeamType(bacy.convert_int(obj.Team(), password)).name,
+        'UnitGroup': bacy.convert_long(obj.UnitGroup(), password),
+        'PrevUnitGroup': bacy.convert_long(obj.PrevUnitGroup(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
+        'StarGoal': [StarGoalType(bacy.convert_int(obj.StarGoal(j), password)).name for j in range(obj.StarGoalLength())],
+        'StarGoalAmount': [bacy.convert_int(obj.StarGoalAmount(j), password) for j in range(obj.StarGoalAmountLength())],
+        'GroupBuffId': bacy.convert_long(obj.GroupBuffId(), password),
+        'StageEnterCostType': ParcelType(bacy.convert_int(obj.StageEnterCostType(), password)).name,
+        'StageEnterCostId': bacy.convert_long(obj.StageEnterCostId(), password),
+        'StageEnterCostAmount': bacy.convert_int(obj.StageEnterCostAmount(), password),
+        'ManageEchelonStageEnterCostType': ParcelType(bacy.convert_int(obj.ManageEchelonStageEnterCostType(), password)).name,
+        'ManageEchelonStageEnterCostId': bacy.convert_long(obj.ManageEchelonStageEnterCostId(), password),
+        'ManageEchelonStageEnterCostAmount': bacy.convert_int(obj.ManageEchelonStageEnterCostAmount(), password),
+        'EnterScenarioGroupId': bacy.convert_long(obj.EnterScenarioGroupId(), password),
+        'ClearScenarioGroupId': bacy.convert_long(obj.ClearScenarioGroupId(), password),
+        'ConquestRewardId': bacy.convert_long(obj.ConquestRewardId(), password),
+        'StageTopography': StageTopography(bacy.convert_int(obj.StageTopography_(), password)).name,
+        'RecommandLevel': bacy.convert_int(obj.RecommandLevel(), password),
+        'TacticRewardExp': bacy.convert_long(obj.TacticRewardExp(), password),
+        'FixedEchelonId': bacy.convert_long(obj.FixedEchelonId(), password),
+        'EchelonExtensionType': EchelonExtensionType(bacy.convert_int(obj.EchelonExtensionType_(), password)).name,
     }
 
 
 def dump_ConstArenaExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'AttackCoolTime': table_encryption.convert_long(obj.AttackCoolTime(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'DefenseCoolTime': table_encryption.convert_long(obj.DefenseCoolTime(), password),
-        'TSSStartCoolTime': table_encryption.convert_long(obj.TSSStartCoolTime(), password),
-        'EndAlarm': table_encryption.convert_long(obj.EndAlarm(), password),
-        'TimeRewardMaxAmount': table_encryption.convert_long(obj.TimeRewardMaxAmount(), password),
-        'EnterCostType': ParcelType(table_encryption.convert_int(obj.EnterCostType(), password)).name,
-        'EnterCostId': table_encryption.convert_long(obj.EnterCostId(), password),
-        'TicketCost': table_encryption.convert_long(obj.TicketCost(), password),
-        'DailyRewardResetTime': table_encryption.convert_string(obj.DailyRewardResetTime(), password),
-        'OpenScenarioId': table_encryption.convert_string(obj.OpenScenarioId(), password),
-        'CharacterSlotHideRank': [table_encryption.convert_long(obj.CharacterSlotHideRank(j), password) for j in range(obj.CharacterSlotHideRankLength())],
-        'MapSlotHideRank': table_encryption.convert_long(obj.MapSlotHideRank(), password),
-        'RelativeOpponentRankStart': [table_encryption.convert_long(obj.RelativeOpponentRankStart(j), password) for j in range(obj.RelativeOpponentRankStartLength())],
-        'RelativeOpponentRankEnd': [table_encryption.convert_long(obj.RelativeOpponentRankEnd(j), password) for j in range(obj.RelativeOpponentRankEndLength())],
-        'ModifiedStatType': [StatType(table_encryption.convert_int(obj.ModifiedStatType(j), password)).name for j in range(obj.ModifiedStatTypeLength())],
-        'StatMulFactor': [table_encryption.convert_long(obj.StatMulFactor(j), password) for j in range(obj.StatMulFactorLength())],
-        'StatSumFactor': [table_encryption.convert_long(obj.StatSumFactor(j), password) for j in range(obj.StatSumFactorLength())],
-        'NPCName': [table_encryption.convert_string(obj.NPCName(j), password) for j in range(obj.NPCNameLength())],
-        'NPCMainCharacterCount': table_encryption.convert_long(obj.NPCMainCharacterCount(), password),
-        'NPCSupportCharacterCount': table_encryption.convert_long(obj.NPCSupportCharacterCount(), password),
-        'NPCCharacterSkillLevel': table_encryption.convert_long(obj.NPCCharacterSkillLevel(), password),
-        'TimeSpanInDaysForBattleHistory': table_encryption.convert_long(obj.TimeSpanInDaysForBattleHistory(), password),
-        'HiddenCharacterImagePath': table_encryption.convert_string(obj.HiddenCharacterImagePath(), password),
-        'DefenseVictoryRewardMaxCount': table_encryption.convert_long(obj.DefenseVictoryRewardMaxCount(), password),
-        'TopRankerCountLimit': table_encryption.convert_long(obj.TopRankerCountLimit(), password),
-        'AutoRefreshIntervalMilliSeconds': table_encryption.convert_long(obj.AutoRefreshIntervalMilliSeconds(), password),
-        'EchelonSettingIntervalMilliSeconds': table_encryption.convert_long(obj.EchelonSettingIntervalMilliSeconds(), password),
-        'SkipAllowedTimeMilliSeconds': table_encryption.convert_long(obj.SkipAllowedTimeMilliSeconds(), password),
-        'ShowSeasonChangeInfoStartTime': table_encryption.convert_string(obj.ShowSeasonChangeInfoStartTime(), password),
-        'ShowSeasonChangeInfoEndTime': table_encryption.convert_string(obj.ShowSeasonChangeInfoEndTime(), password),
-        'ShowSeasonId': table_encryption.convert_long(obj.ShowSeasonId(), password),
+        'AttackCoolTime': bacy.convert_long(obj.AttackCoolTime(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'DefenseCoolTime': bacy.convert_long(obj.DefenseCoolTime(), password),
+        'TSSStartCoolTime': bacy.convert_long(obj.TSSStartCoolTime(), password),
+        'EndAlarm': bacy.convert_long(obj.EndAlarm(), password),
+        'TimeRewardMaxAmount': bacy.convert_long(obj.TimeRewardMaxAmount(), password),
+        'EnterCostType': ParcelType(bacy.convert_int(obj.EnterCostType(), password)).name,
+        'EnterCostId': bacy.convert_long(obj.EnterCostId(), password),
+        'TicketCost': bacy.convert_long(obj.TicketCost(), password),
+        'DailyRewardResetTime': bacy.convert_string(obj.DailyRewardResetTime(), password),
+        'OpenScenarioId': bacy.convert_string(obj.OpenScenarioId(), password),
+        'CharacterSlotHideRank': [bacy.convert_long(obj.CharacterSlotHideRank(j), password) for j in range(obj.CharacterSlotHideRankLength())],
+        'MapSlotHideRank': bacy.convert_long(obj.MapSlotHideRank(), password),
+        'RelativeOpponentRankStart': [bacy.convert_long(obj.RelativeOpponentRankStart(j), password) for j in range(obj.RelativeOpponentRankStartLength())],
+        'RelativeOpponentRankEnd': [bacy.convert_long(obj.RelativeOpponentRankEnd(j), password) for j in range(obj.RelativeOpponentRankEndLength())],
+        'ModifiedStatType': [StatType(bacy.convert_int(obj.ModifiedStatType(j), password)).name for j in range(obj.ModifiedStatTypeLength())],
+        'StatMulFactor': [bacy.convert_long(obj.StatMulFactor(j), password) for j in range(obj.StatMulFactorLength())],
+        'StatSumFactor': [bacy.convert_long(obj.StatSumFactor(j), password) for j in range(obj.StatSumFactorLength())],
+        'NPCName': [bacy.convert_string(obj.NPCName(j), password) for j in range(obj.NPCNameLength())],
+        'NPCMainCharacterCount': bacy.convert_long(obj.NPCMainCharacterCount(), password),
+        'NPCSupportCharacterCount': bacy.convert_long(obj.NPCSupportCharacterCount(), password),
+        'NPCCharacterSkillLevel': bacy.convert_long(obj.NPCCharacterSkillLevel(), password),
+        'TimeSpanInDaysForBattleHistory': bacy.convert_long(obj.TimeSpanInDaysForBattleHistory(), password),
+        'HiddenCharacterImagePath': bacy.convert_string(obj.HiddenCharacterImagePath(), password),
+        'DefenseVictoryRewardMaxCount': bacy.convert_long(obj.DefenseVictoryRewardMaxCount(), password),
+        'TopRankerCountLimit': bacy.convert_long(obj.TopRankerCountLimit(), password),
+        'AutoRefreshIntervalMilliSeconds': bacy.convert_long(obj.AutoRefreshIntervalMilliSeconds(), password),
+        'EchelonSettingIntervalMilliSeconds': bacy.convert_long(obj.EchelonSettingIntervalMilliSeconds(), password),
+        'SkipAllowedTimeMilliSeconds': bacy.convert_long(obj.SkipAllowedTimeMilliSeconds(), password),
+        'ShowSeasonChangeInfoStartTime': bacy.convert_string(obj.ShowSeasonChangeInfoStartTime(), password),
+        'ShowSeasonChangeInfoEndTime': bacy.convert_string(obj.ShowSeasonChangeInfoEndTime(), password),
+        'ShowSeasonId': bacy.convert_long(obj.ShowSeasonId(), password),
     }
 
 
 def dump_ConstAudioExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'DefaultSnapShotName': table_encryption.convert_string(obj.DefaultSnapShotName(), password),
-        'BattleSnapShotName': table_encryption.convert_string(obj.BattleSnapShotName(), password),
-        'RaidSnapShotName': table_encryption.convert_string(obj.RaidSnapShotName(), password),
-        'ExSkillCutInSnapShotName': table_encryption.convert_string(obj.ExSkillCutInSnapShotName(), password),
+        'DefaultSnapShotName': bacy.convert_string(obj.DefaultSnapShotName(), password),
+        'BattleSnapShotName': bacy.convert_string(obj.BattleSnapShotName(), password),
+        'RaidSnapShotName': bacy.convert_string(obj.RaidSnapShotName(), password),
+        'ExSkillCutInSnapShotName': bacy.convert_string(obj.ExSkillCutInSnapShotName(), password),
     }
 
 
 def dump_ConstCombatExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'SkillHandCount': table_encryption.convert_int(obj.SkillHandCount(), password),
-        'DyingTime': table_encryption.convert_int(obj.DyingTime(), password),
-        'BuffIconBlinkTime': table_encryption.convert_int(obj.BuffIconBlinkTime(), password),
+        'SkillHandCount': bacy.convert_int(obj.SkillHandCount(), password),
+        'DyingTime': bacy.convert_int(obj.DyingTime(), password),
+        'BuffIconBlinkTime': bacy.convert_int(obj.BuffIconBlinkTime(), password),
         'ShowBufficonEXSkill': obj.ShowBufficonEXSkill(),
         'ShowBufficonPassiveSkill': obj.ShowBufficonPassiveSkill(),
         'ShowBufficonExtraPassiveSkill': obj.ShowBufficonExtraPassiveSkill(),
         'ShowBufficonLeaderSkill': obj.ShowBufficonLeaderSkill(),
         'ShowBufficonGroundPassiveSkill': obj.ShowBufficonGroundPassiveSkill(),
-        'SuppliesConditionStringId': table_encryption.convert_string(obj.SuppliesConditionStringId(), password),
-        'PublicSpeechBubbleOffsetX': table_encryption.convert_float(obj.PublicSpeechBubbleOffsetX(), password),
-        'PublicSpeechBubbleOffsetY': table_encryption.convert_float(obj.PublicSpeechBubbleOffsetY(), password),
-        'PublicSpeechBubbleOffsetZ': table_encryption.convert_float(obj.PublicSpeechBubbleOffsetZ(), password),
-        'ShowRaidListCount': table_encryption.convert_int(obj.ShowRaidListCount(), password),
-        'MaxRaidTicketCount': table_encryption.convert_long(obj.MaxRaidTicketCount(), password),
-        'MaxRaidBossSkillSlot': table_encryption.convert_long(obj.MaxRaidBossSkillSlot(), password),
-        'EngageTimelinePath': table_encryption.convert_string(obj.EngageTimelinePath(), password),
-        'EngageWithSupporterTimelinePath': table_encryption.convert_string(obj.EngageWithSupporterTimelinePath(), password),
-        'VictoryTimelinePath': table_encryption.convert_string(obj.VictoryTimelinePath(), password),
-        'TimeLimitAlarm': table_encryption.convert_long(obj.TimeLimitAlarm(), password),
-        'EchelonMaxCommonCost': table_encryption.convert_int(obj.EchelonMaxCommonCost(), password),
-        'EchelonInitCommonCost': table_encryption.convert_int(obj.EchelonInitCommonCost(), password),
-        'SkillSlotCoolTime': table_encryption.convert_long(obj.SkillSlotCoolTime(), password),
-        'EnemyRegenCost': table_encryption.convert_long(obj.EnemyRegenCost(), password),
-        'ChampionRegenCost': table_encryption.convert_long(obj.ChampionRegenCost(), password),
-        'PlayerRegenCostDelay': table_encryption.convert_long(obj.PlayerRegenCostDelay(), password),
-        'CrowdControlFactor': table_encryption.convert_long(obj.CrowdControlFactor(), password),
-        'RaidOpenScenarioId': table_encryption.convert_string(obj.RaidOpenScenarioId(), password),
-        'EliminateRaidOpenScenarioId': table_encryption.convert_string(obj.EliminateRaidOpenScenarioId(), password),
-        'DefenceConstA': table_encryption.convert_long(obj.DefenceConstA(), password),
-        'DefenceConstB': table_encryption.convert_long(obj.DefenceConstB(), password),
-        'DefenceConstC': table_encryption.convert_long(obj.DefenceConstC(), password),
-        'DefenceConstD': table_encryption.convert_long(obj.DefenceConstD(), password),
-        'AccuracyConstA': table_encryption.convert_long(obj.AccuracyConstA(), password),
-        'AccuracyConstB': table_encryption.convert_long(obj.AccuracyConstB(), password),
-        'AccuracyConstC': table_encryption.convert_long(obj.AccuracyConstC(), password),
-        'AccuracyConstD': table_encryption.convert_long(obj.AccuracyConstD(), password),
-        'CriticalConstA': table_encryption.convert_long(obj.CriticalConstA(), password),
-        'CriticalConstB': table_encryption.convert_long(obj.CriticalConstB(), password),
-        'CriticalConstC': table_encryption.convert_long(obj.CriticalConstC(), password),
-        'CriticalConstD': table_encryption.convert_long(obj.CriticalConstD(), password),
-        'MaxGroupBuffLevel': table_encryption.convert_int(obj.MaxGroupBuffLevel(), password),
-        'EmojiDefaultTime': table_encryption.convert_int(obj.EmojiDefaultTime(), password),
-        'TimeLineActionRotateSpeed': table_encryption.convert_long(obj.TimeLineActionRotateSpeed(), password),
-        'BodyRotateSpeed': table_encryption.convert_long(obj.BodyRotateSpeed(), password),
-        'NormalTimeScale': table_encryption.convert_long(obj.NormalTimeScale(), password),
-        'FastTimeScale': table_encryption.convert_long(obj.FastTimeScale(), password),
-        'BulletTimeScale': table_encryption.convert_long(obj.BulletTimeScale(), password),
-        'UIDisplayDelayAfterSkillCutIn': table_encryption.convert_long(obj.UIDisplayDelayAfterSkillCutIn(), password),
+        'SuppliesConditionStringId': bacy.convert_string(obj.SuppliesConditionStringId(), password),
+        'PublicSpeechBubbleOffsetX': bacy.convert_float(obj.PublicSpeechBubbleOffsetX(), password),
+        'PublicSpeechBubbleOffsetY': bacy.convert_float(obj.PublicSpeechBubbleOffsetY(), password),
+        'PublicSpeechBubbleOffsetZ': bacy.convert_float(obj.PublicSpeechBubbleOffsetZ(), password),
+        'ShowRaidListCount': bacy.convert_int(obj.ShowRaidListCount(), password),
+        'MaxRaidTicketCount': bacy.convert_long(obj.MaxRaidTicketCount(), password),
+        'MaxRaidBossSkillSlot': bacy.convert_long(obj.MaxRaidBossSkillSlot(), password),
+        'EngageTimelinePath': bacy.convert_string(obj.EngageTimelinePath(), password),
+        'EngageWithSupporterTimelinePath': bacy.convert_string(obj.EngageWithSupporterTimelinePath(), password),
+        'VictoryTimelinePath': bacy.convert_string(obj.VictoryTimelinePath(), password),
+        'TimeLimitAlarm': bacy.convert_long(obj.TimeLimitAlarm(), password),
+        'EchelonMaxCommonCost': bacy.convert_int(obj.EchelonMaxCommonCost(), password),
+        'EchelonInitCommonCost': bacy.convert_int(obj.EchelonInitCommonCost(), password),
+        'SkillSlotCoolTime': bacy.convert_long(obj.SkillSlotCoolTime(), password),
+        'EnemyRegenCost': bacy.convert_long(obj.EnemyRegenCost(), password),
+        'ChampionRegenCost': bacy.convert_long(obj.ChampionRegenCost(), password),
+        'PlayerRegenCostDelay': bacy.convert_long(obj.PlayerRegenCostDelay(), password),
+        'CrowdControlFactor': bacy.convert_long(obj.CrowdControlFactor(), password),
+        'RaidOpenScenarioId': bacy.convert_string(obj.RaidOpenScenarioId(), password),
+        'EliminateRaidOpenScenarioId': bacy.convert_string(obj.EliminateRaidOpenScenarioId(), password),
+        'DefenceConstA': bacy.convert_long(obj.DefenceConstA(), password),
+        'DefenceConstB': bacy.convert_long(obj.DefenceConstB(), password),
+        'DefenceConstC': bacy.convert_long(obj.DefenceConstC(), password),
+        'DefenceConstD': bacy.convert_long(obj.DefenceConstD(), password),
+        'AccuracyConstA': bacy.convert_long(obj.AccuracyConstA(), password),
+        'AccuracyConstB': bacy.convert_long(obj.AccuracyConstB(), password),
+        'AccuracyConstC': bacy.convert_long(obj.AccuracyConstC(), password),
+        'AccuracyConstD': bacy.convert_long(obj.AccuracyConstD(), password),
+        'CriticalConstA': bacy.convert_long(obj.CriticalConstA(), password),
+        'CriticalConstB': bacy.convert_long(obj.CriticalConstB(), password),
+        'CriticalConstC': bacy.convert_long(obj.CriticalConstC(), password),
+        'CriticalConstD': bacy.convert_long(obj.CriticalConstD(), password),
+        'MaxGroupBuffLevel': bacy.convert_int(obj.MaxGroupBuffLevel(), password),
+        'EmojiDefaultTime': bacy.convert_int(obj.EmojiDefaultTime(), password),
+        'TimeLineActionRotateSpeed': bacy.convert_long(obj.TimeLineActionRotateSpeed(), password),
+        'BodyRotateSpeed': bacy.convert_long(obj.BodyRotateSpeed(), password),
+        'NormalTimeScale': bacy.convert_long(obj.NormalTimeScale(), password),
+        'FastTimeScale': bacy.convert_long(obj.FastTimeScale(), password),
+        'BulletTimeScale': bacy.convert_long(obj.BulletTimeScale(), password),
+        'UIDisplayDelayAfterSkillCutIn': bacy.convert_long(obj.UIDisplayDelayAfterSkillCutIn(), password),
         'UseInitialRangeForCoverMove': obj.UseInitialRangeForCoverMove(),
-        'SlowTimeScale': table_encryption.convert_long(obj.SlowTimeScale(), password),
-        'AimIKMinDegree': table_encryption.convert_float(obj.AimIKMinDegree(), password),
-        'AimIKMaxDegree': table_encryption.convert_float(obj.AimIKMaxDegree(), password),
-        'MinimumClearTime': table_encryption.convert_int(obj.MinimumClearTime(), password),
-        'MinimumClearLevelGap': table_encryption.convert_int(obj.MinimumClearLevelGap(), password),
-        'CheckCheaterMaxUseCostNonArena': table_encryption.convert_int(obj.CheckCheaterMaxUseCostNonArena(), password),
-        'CheckCheaterMaxUseCostArena': table_encryption.convert_int(obj.CheckCheaterMaxUseCostArena(), password),
-        'AllowedMaxTimeScale': table_encryption.convert_long(obj.AllowedMaxTimeScale(), password),
-        'RandomAnimationOutput': table_encryption.convert_long(obj.RandomAnimationOutput(), password),
-        'SummonedTeleportDistance': table_encryption.convert_long(obj.SummonedTeleportDistance(), password),
-        'ArenaMinimumClearTime': table_encryption.convert_int(obj.ArenaMinimumClearTime(), password),
-        'WORLDBOSSBATTLELITTLE': table_encryption.convert_long(obj.WORLDBOSSBATTLELITTLE(), password),
-        'WORLDBOSSBATTLEMIDDLE': table_encryption.convert_long(obj.WORLDBOSSBATTLEMIDDLE(), password),
-        'WORLDBOSSBATTLEHIGH': table_encryption.convert_long(obj.WORLDBOSSBATTLEHIGH(), password),
-        'WORLDBOSSBATTLEVERYHIGH': table_encryption.convert_long(obj.WORLDBOSSBATTLEVERYHIGH(), password),
-        'WorldRaidAutoSyncTermSecond': table_encryption.convert_long(obj.WorldRaidAutoSyncTermSecond(), password),
-        'WorldRaidBossHpDecreaseTerm': table_encryption.convert_long(obj.WorldRaidBossHpDecreaseTerm(), password),
-        'WorldRaidBossParcelReactionDelay': table_encryption.convert_long(obj.WorldRaidBossParcelReactionDelay(), password),
-        'RaidRankingJumpMinimumWaitingTime': table_encryption.convert_long(obj.RaidRankingJumpMinimumWaitingTime(), password),
-        'EffectTeleportDistance': table_encryption.convert_float(obj.EffectTeleportDistance(), password),
-        'AuraExitThresholdMargin': table_encryption.convert_long(obj.AuraExitThresholdMargin(), password),
-        'TSAInteractionDamageFactor': table_encryption.convert_long(obj.TSAInteractionDamageFactor(), password),
-        'VictoryInteractionRate': table_encryption.convert_long(obj.VictoryInteractionRate(), password),
-        'EchelonExtensionEngageTimelinePath': table_encryption.convert_string(obj.EchelonExtensionEngageTimelinePath(), password),
-        'EchelonExtensionEngageWithSupporterTimelinePath': table_encryption.convert_string(obj.EchelonExtensionEngageWithSupporterTimelinePath(), password),
-        'EchelonExtensionVictoryTimelinePath': table_encryption.convert_string(obj.EchelonExtensionVictoryTimelinePath(), password),
-        'EchelonExtensionEchelonMaxCommonCost': table_encryption.convert_int(obj.EchelonExtensionEchelonMaxCommonCost(), password),
-        'EchelonExtensionEchelonInitCommonCost': table_encryption.convert_int(obj.EchelonExtensionEchelonInitCommonCost(), password),
-        'EchelonExtensionCostRegenRatio': table_encryption.convert_long(obj.EchelonExtensionCostRegenRatio(), password),
-        'CheckCheaterMaxUseCostMultiFloorRaid': table_encryption.convert_int(obj.CheckCheaterMaxUseCostMultiFloorRaid(), password),
+        'SlowTimeScale': bacy.convert_long(obj.SlowTimeScale(), password),
+        'AimIKMinDegree': bacy.convert_float(obj.AimIKMinDegree(), password),
+        'AimIKMaxDegree': bacy.convert_float(obj.AimIKMaxDegree(), password),
+        'MinimumClearTime': bacy.convert_int(obj.MinimumClearTime(), password),
+        'MinimumClearLevelGap': bacy.convert_int(obj.MinimumClearLevelGap(), password),
+        'CheckCheaterMaxUseCostNonArena': bacy.convert_int(obj.CheckCheaterMaxUseCostNonArena(), password),
+        'CheckCheaterMaxUseCostArena': bacy.convert_int(obj.CheckCheaterMaxUseCostArena(), password),
+        'AllowedMaxTimeScale': bacy.convert_long(obj.AllowedMaxTimeScale(), password),
+        'RandomAnimationOutput': bacy.convert_long(obj.RandomAnimationOutput(), password),
+        'SummonedTeleportDistance': bacy.convert_long(obj.SummonedTeleportDistance(), password),
+        'ArenaMinimumClearTime': bacy.convert_int(obj.ArenaMinimumClearTime(), password),
+        'WORLDBOSSBATTLELITTLE': bacy.convert_long(obj.WORLDBOSSBATTLELITTLE(), password),
+        'WORLDBOSSBATTLEMIDDLE': bacy.convert_long(obj.WORLDBOSSBATTLEMIDDLE(), password),
+        'WORLDBOSSBATTLEHIGH': bacy.convert_long(obj.WORLDBOSSBATTLEHIGH(), password),
+        'WORLDBOSSBATTLEVERYHIGH': bacy.convert_long(obj.WORLDBOSSBATTLEVERYHIGH(), password),
+        'WorldRaidAutoSyncTermSecond': bacy.convert_long(obj.WorldRaidAutoSyncTermSecond(), password),
+        'WorldRaidBossHpDecreaseTerm': bacy.convert_long(obj.WorldRaidBossHpDecreaseTerm(), password),
+        'WorldRaidBossParcelReactionDelay': bacy.convert_long(obj.WorldRaidBossParcelReactionDelay(), password),
+        'RaidRankingJumpMinimumWaitingTime': bacy.convert_long(obj.RaidRankingJumpMinimumWaitingTime(), password),
+        'EffectTeleportDistance': bacy.convert_float(obj.EffectTeleportDistance(), password),
+        'AuraExitThresholdMargin': bacy.convert_long(obj.AuraExitThresholdMargin(), password),
+        'TSAInteractionDamageFactor': bacy.convert_long(obj.TSAInteractionDamageFactor(), password),
+        'VictoryInteractionRate': bacy.convert_long(obj.VictoryInteractionRate(), password),
+        'EchelonExtensionEngageTimelinePath': bacy.convert_string(obj.EchelonExtensionEngageTimelinePath(), password),
+        'EchelonExtensionEngageWithSupporterTimelinePath': bacy.convert_string(obj.EchelonExtensionEngageWithSupporterTimelinePath(), password),
+        'EchelonExtensionVictoryTimelinePath': bacy.convert_string(obj.EchelonExtensionVictoryTimelinePath(), password),
+        'EchelonExtensionEchelonMaxCommonCost': bacy.convert_int(obj.EchelonExtensionEchelonMaxCommonCost(), password),
+        'EchelonExtensionEchelonInitCommonCost': bacy.convert_int(obj.EchelonExtensionEchelonInitCommonCost(), password),
+        'EchelonExtensionCostRegenRatio': bacy.convert_long(obj.EchelonExtensionCostRegenRatio(), password),
+        'CheckCheaterMaxUseCostMultiFloorRaid': bacy.convert_int(obj.CheckCheaterMaxUseCostMultiFloorRaid(), password),
     }
 
 
 def dump_ConstCommonExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CampaignMainStageMaxRank': table_encryption.convert_int(obj.CampaignMainStageMaxRank(), password),
-        'CampaignMainStageBestRecord': table_encryption.convert_int(obj.CampaignMainStageBestRecord(), password),
-        'HardAdventurePlayCountRecoverDailyNumber': table_encryption.convert_int(obj.HardAdventurePlayCountRecoverDailyNumber(), password),
-        'HardStageCount': table_encryption.convert_int(obj.HardStageCount(), password),
-        'TacticRankClearTime': table_encryption.convert_int(obj.TacticRankClearTime(), password),
-        'BaseTimeScale': table_encryption.convert_long(obj.BaseTimeScale(), password),
-        'GachaPercentage': table_encryption.convert_int(obj.GachaPercentage(), password),
-        'AcademyFavorZoneId': table_encryption.convert_long(obj.AcademyFavorZoneId(), password),
-        'CafePresetSlotCount': table_encryption.convert_int(obj.CafePresetSlotCount(), password),
-        'CafeMonologueIntervalMillisec': table_encryption.convert_long(obj.CafeMonologueIntervalMillisec(), password),
-        'CafeMonologueDefaultDuration': table_encryption.convert_long(obj.CafeMonologueDefaultDuration(), password),
-        'CafeBubbleIdleDurationMilliSec': table_encryption.convert_long(obj.CafeBubbleIdleDurationMilliSec(), password),
-        'FindGiftTimeLimit': table_encryption.convert_int(obj.FindGiftTimeLimit(), password),
-        'CafeAutoChargePeriodInMsc': table_encryption.convert_int(obj.CafeAutoChargePeriodInMsc(), password),
-        'CafeProductionDecimalPosition': table_encryption.convert_int(obj.CafeProductionDecimalPosition(), password),
-        'CafeSetGroupApplyCount': table_encryption.convert_int(obj.CafeSetGroupApplyCount(), password),
-        'WeekDungeonFindGiftRewardLimitCount': table_encryption.convert_int(obj.WeekDungeonFindGiftRewardLimitCount(), password),
-        'StageFailedCurrencyRefundRate': table_encryption.convert_int(obj.StageFailedCurrencyRefundRate(), password),
-        'EnterDeposit': table_encryption.convert_int(obj.EnterDeposit(), password),
-        'AccountMaxLevel': table_encryption.convert_int(obj.AccountMaxLevel(), password),
-        'MainSquadExpBonus': table_encryption.convert_int(obj.MainSquadExpBonus(), password),
-        'SupportSquadExpBonus': table_encryption.convert_int(obj.SupportSquadExpBonus(), password),
-        'AccountExpRatio': table_encryption.convert_int(obj.AccountExpRatio(), password),
-        'MissionToastLifeTime': table_encryption.convert_int(obj.MissionToastLifeTime(), password),
-        'ExpItemInsertLimit': table_encryption.convert_int(obj.ExpItemInsertLimit(), password),
-        'ExpItemInsertAccelTime': table_encryption.convert_int(obj.ExpItemInsertAccelTime(), password),
-        'CharacterLvUpCoefficient': table_encryption.convert_int(obj.CharacterLvUpCoefficient(), password),
-        'EquipmentLvUpCoefficient': table_encryption.convert_int(obj.EquipmentLvUpCoefficient(), password),
-        'ExpEquipInsertLimit': table_encryption.convert_int(obj.ExpEquipInsertLimit(), password),
-        'EquipLvUpCoefficient': table_encryption.convert_int(obj.EquipLvUpCoefficient(), password),
-        'NicknameLength': table_encryption.convert_int(obj.NicknameLength(), password),
-        'CraftDuration': [table_encryption.convert_int(obj.CraftDuration(j), password) for j in range(obj.CraftDurationLength())],
-        'CraftLimitTime': table_encryption.convert_int(obj.CraftLimitTime(), password),
-        'ShiftingCraftDuration': [table_encryption.convert_int(obj.ShiftingCraftDuration(j), password) for j in range(obj.ShiftingCraftDurationLength())],
-        'ShiftingCraftTicketConsumeAmount': table_encryption.convert_int(obj.ShiftingCraftTicketConsumeAmount(), password),
-        'ShiftingCraftSlotMaxCapacity': table_encryption.convert_int(obj.ShiftingCraftSlotMaxCapacity(), password),
-        'CraftTicketItemUniqueId': table_encryption.convert_int(obj.CraftTicketItemUniqueId(), password),
-        'CraftTicketConsumeAmount': table_encryption.convert_int(obj.CraftTicketConsumeAmount(), password),
-        'AcademyEnterCostType': ParcelType(table_encryption.convert_int(obj.AcademyEnterCostType(), password)).name,
-        'AcademyEnterCostId': table_encryption.convert_long(obj.AcademyEnterCostId(), password),
-        'AcademyTicketCost': table_encryption.convert_int(obj.AcademyTicketCost(), password),
-        'MassangerMessageExpireDay': table_encryption.convert_int(obj.MassangerMessageExpireDay(), password),
-        'CraftLeafNodeGenerateLv1Count': table_encryption.convert_int(obj.CraftLeafNodeGenerateLv1Count(), password),
-        'CraftLeafNodeGenerateLv2Count': table_encryption.convert_int(obj.CraftLeafNodeGenerateLv2Count(), password),
-        'TutorialGachaShopId': table_encryption.convert_int(obj.TutorialGachaShopId(), password),
-        'BeforehandGachaShopId': table_encryption.convert_int(obj.BeforehandGachaShopId(), password),
-        'TutorialGachaGoodsId': table_encryption.convert_int(obj.TutorialGachaGoodsId(), password),
-        'EquipmentSlotOpenLevel': [table_encryption.convert_int(obj.EquipmentSlotOpenLevel(j), password) for j in range(obj.EquipmentSlotOpenLevelLength())],
-        'ScenarioAutoDelayMillisec': table_encryption.convert_float(obj.ScenarioAutoDelayMillisec(), password),
-        'JoinOrCreateClanCoolTimeFromHour': table_encryption.convert_long(obj.JoinOrCreateClanCoolTimeFromHour(), password),
-        'ClanMaxMember': table_encryption.convert_long(obj.ClanMaxMember(), password),
-        'ClanSearchResultCount': table_encryption.convert_long(obj.ClanSearchResultCount(), password),
-        'ClanMaxApplicant': table_encryption.convert_long(obj.ClanMaxApplicant(), password),
-        'ClanRejoinCoolTimeFromSecond': table_encryption.convert_long(obj.ClanRejoinCoolTimeFromSecond(), password),
-        'ClanWordBalloonMaxCharacter': table_encryption.convert_int(obj.ClanWordBalloonMaxCharacter(), password),
-        'CallNameRenameCoolTimeFromHour': table_encryption.convert_long(obj.CallNameRenameCoolTimeFromHour(), password),
-        'CallNameMinimumLength': table_encryption.convert_long(obj.CallNameMinimumLength(), password),
-        'CallNameMaximumLength': table_encryption.convert_long(obj.CallNameMaximumLength(), password),
-        'LobbyToScreenModeWaitTime': table_encryption.convert_long(obj.LobbyToScreenModeWaitTime(), password),
-        'ScreenshotToLobbyButtonHideDelay': table_encryption.convert_long(obj.ScreenshotToLobbyButtonHideDelay(), password),
-        'PrologueScenarioID01': table_encryption.convert_long(obj.PrologueScenarioID01(), password),
-        'PrologueScenarioID02': table_encryption.convert_long(obj.PrologueScenarioID02(), password),
-        'TutorialHardStage11': table_encryption.convert_long(obj.TutorialHardStage11(), password),
-        'TutorialSpeedButtonStage': table_encryption.convert_long(obj.TutorialSpeedButtonStage(), password),
-        'TutorialCharacterDefaultCount': table_encryption.convert_long(obj.TutorialCharacterDefaultCount(), password),
-        'TutorialShopCategoryType': ShopCategoryType(table_encryption.convert_int(obj.TutorialShopCategoryType(), password)).name,
-        'AdventureStrategyPlayTimeLimitInSeconds': table_encryption.convert_long(obj.AdventureStrategyPlayTimeLimitInSeconds(), password),
-        'WeekDungoenTacticPlayTimeLimitInSeconds': table_encryption.convert_long(obj.WeekDungoenTacticPlayTimeLimitInSeconds(), password),
-        'RaidTacticPlayTimeLimitInSeconds': table_encryption.convert_long(obj.RaidTacticPlayTimeLimitInSeconds(), password),
-        'RaidOpponentListAmount': table_encryption.convert_long(obj.RaidOpponentListAmount(), password),
-        'CraftBaseGoldRequired': [table_encryption.convert_long(obj.CraftBaseGoldRequired(j), password) for j in range(obj.CraftBaseGoldRequiredLength())],
-        'PostExpiredDayAttendance': table_encryption.convert_int(obj.PostExpiredDayAttendance(), password),
-        'PostExpiredDayInventoryOverflow': table_encryption.convert_int(obj.PostExpiredDayInventoryOverflow(), password),
-        'PostExpiredDayGameManager': table_encryption.convert_int(obj.PostExpiredDayGameManager(), password),
-        'UILabelCharacterWrap': table_encryption.convert_string(obj.UILabelCharacterWrap(), password),
-        'RequestTimeOut': table_encryption.convert_float(obj.RequestTimeOut(), password),
-        'MailStorageSoftCap': table_encryption.convert_int(obj.MailStorageSoftCap(), password),
-        'MailStorageHardCap': table_encryption.convert_int(obj.MailStorageHardCap(), password),
-        'ClearDeckStorageSize': table_encryption.convert_int(obj.ClearDeckStorageSize(), password),
-        'ClearDeckNoStarViewCount': table_encryption.convert_int(obj.ClearDeckNoStarViewCount(), password),
-        'ClearDeck1StarViewCount': table_encryption.convert_int(obj.ClearDeck1StarViewCount(), password),
-        'ClearDeck2StarViewCount': table_encryption.convert_int(obj.ClearDeck2StarViewCount(), password),
-        'ClearDeck3StarViewCount': table_encryption.convert_int(obj.ClearDeck3StarViewCount(), password),
-        'ExSkillLevelMax': table_encryption.convert_int(obj.ExSkillLevelMax(), password),
-        'PublicSkillLevelMax': table_encryption.convert_int(obj.PublicSkillLevelMax(), password),
-        'PassiveSkillLevelMax': table_encryption.convert_int(obj.PassiveSkillLevelMax(), password),
-        'ExtraPassiveSkillLevelMax': table_encryption.convert_int(obj.ExtraPassiveSkillLevelMax(), password),
-        'AccountCommentMaxLength': table_encryption.convert_int(obj.AccountCommentMaxLength(), password),
-        'CafeSummonCoolTimeFromHour': table_encryption.convert_int(obj.CafeSummonCoolTimeFromHour(), password),
-        'LimitedStageDailyClearCount': table_encryption.convert_long(obj.LimitedStageDailyClearCount(), password),
-        'LimitedStageEntryTimeLimit': table_encryption.convert_long(obj.LimitedStageEntryTimeLimit(), password),
-        'LimitedStageEntryTimeBuffer': table_encryption.convert_long(obj.LimitedStageEntryTimeBuffer(), password),
-        'LimitedStagePointAmount': table_encryption.convert_long(obj.LimitedStagePointAmount(), password),
-        'LimitedStagePointPerApMin': table_encryption.convert_long(obj.LimitedStagePointPerApMin(), password),
-        'LimitedStagePointPerApMax': table_encryption.convert_long(obj.LimitedStagePointPerApMax(), password),
-        'AccountLinkReward': table_encryption.convert_int(obj.AccountLinkReward(), password),
-        'MonthlyProductCheckDays': table_encryption.convert_int(obj.MonthlyProductCheckDays(), password),
-        'WeaponLvUpCoefficient': table_encryption.convert_int(obj.WeaponLvUpCoefficient(), password),
-        'ShowRaidMyListCount': table_encryption.convert_int(obj.ShowRaidMyListCount(), password),
-        'MaxLevelExpMasterCoinRatio': table_encryption.convert_int(obj.MaxLevelExpMasterCoinRatio(), password),
-        'RaidEnterCostType': ParcelType(table_encryption.convert_int(obj.RaidEnterCostType(), password)).name,
-        'RaidEnterCostId': table_encryption.convert_long(obj.RaidEnterCostId(), password),
-        'RaidTicketCost': table_encryption.convert_long(obj.RaidTicketCost(), password),
-        'TimeAttackDungeonScenarioId': table_encryption.convert_string(obj.TimeAttackDungeonScenarioId(), password),
-        'TimeAttackDungoenPlayCountPerTicket': table_encryption.convert_int(obj.TimeAttackDungoenPlayCountPerTicket(), password),
-        'TimeAttackDungeonEnterCostType': ParcelType(table_encryption.convert_int(obj.TimeAttackDungeonEnterCostType(), password)).name,
-        'TimeAttackDungeonEnterCostId': table_encryption.convert_long(obj.TimeAttackDungeonEnterCostId(), password),
-        'TimeAttackDungeonEnterCost': table_encryption.convert_long(obj.TimeAttackDungeonEnterCost(), password),
-        'ClanLeaderTransferLastLoginLimit': table_encryption.convert_long(obj.ClanLeaderTransferLastLoginLimit(), password),
-        'MonthlyProductRepurchasePopupLimit': table_encryption.convert_int(obj.MonthlyProductRepurchasePopupLimit(), password),
-        'CommonFavorItemTags': [Tag(table_encryption.convert_int(obj.CommonFavorItemTags(j), password)).name for j in range(obj.CommonFavorItemTagsLength())],
-        'MaxApMasterCoinPerWeek': table_encryption.convert_long(obj.MaxApMasterCoinPerWeek(), password),
-        'CraftOpenExpTier1': table_encryption.convert_long(obj.CraftOpenExpTier1(), password),
-        'CraftOpenExpTier2': table_encryption.convert_long(obj.CraftOpenExpTier2(), password),
-        'CraftOpenExpTier3': table_encryption.convert_long(obj.CraftOpenExpTier3(), password),
-        'CharacterEquipmentGearSlot': table_encryption.convert_long(obj.CharacterEquipmentGearSlot(), password),
-        'BirthDayDDay': table_encryption.convert_int(obj.BirthDayDDay(), password),
-        'RecommendedFriendsLvDifferenceLimit': table_encryption.convert_int(obj.RecommendedFriendsLvDifferenceLimit(), password),
-        'DDosDetectCount': table_encryption.convert_int(obj.DDosDetectCount(), password),
-        'DDosCheckIntervalInSeconds': table_encryption.convert_int(obj.DDosCheckIntervalInSeconds(), password),
-        'MaxFriendsCount': table_encryption.convert_int(obj.MaxFriendsCount(), password),
-        'MaxFriendsRequest': table_encryption.convert_int(obj.MaxFriendsRequest(), password),
-        'FriendsSearchRequestCount': table_encryption.convert_int(obj.FriendsSearchRequestCount(), password),
-        'FriendsMaxApplicant': table_encryption.convert_int(obj.FriendsMaxApplicant(), password),
-        'IdCardDefaultCharacterId': table_encryption.convert_long(obj.IdCardDefaultCharacterId(), password),
-        'IdCardDefaultBgId': table_encryption.convert_long(obj.IdCardDefaultBgId(), password),
-        'WorldRaidGemEnterCost': table_encryption.convert_long(obj.WorldRaidGemEnterCost(), password),
-        'WorldRaidGemEnterAmout': table_encryption.convert_long(obj.WorldRaidGemEnterAmout(), password),
-        'FriendIdCardCommentMaxLength': table_encryption.convert_long(obj.FriendIdCardCommentMaxLength(), password),
-        'FormationPresetNumberOfEchelonTab': table_encryption.convert_int(obj.FormationPresetNumberOfEchelonTab(), password),
-        'FormationPresetNumberOfEchelon': table_encryption.convert_int(obj.FormationPresetNumberOfEchelon(), password),
-        'FormationPresetRecentNumberOfEchelon': table_encryption.convert_int(obj.FormationPresetRecentNumberOfEchelon(), password),
-        'FormationPresetEchelonTabTextLength': table_encryption.convert_int(obj.FormationPresetEchelonTabTextLength(), password),
-        'FormationPresetEchelonSlotTextLength': table_encryption.convert_int(obj.FormationPresetEchelonSlotTextLength(), password),
-        'CharProfileRowIntervalKr': table_encryption.convert_int(obj.CharProfileRowIntervalKr(), password),
-        'CharProfileRowIntervalJp': table_encryption.convert_int(obj.CharProfileRowIntervalJp(), password),
-        'CharProfilePopupRowIntervalKr': table_encryption.convert_int(obj.CharProfilePopupRowIntervalKr(), password),
-        'CharProfilePopupRowIntervalJp': table_encryption.convert_int(obj.CharProfilePopupRowIntervalJp(), password),
-        'BeforehandGachaCount': table_encryption.convert_int(obj.BeforehandGachaCount(), password),
-        'BeforehandGachaGroupId': table_encryption.convert_int(obj.BeforehandGachaGroupId(), password),
-        'RenewalDisplayOrderDay': table_encryption.convert_int(obj.RenewalDisplayOrderDay(), password),
-        'EmblemDefaultId': table_encryption.convert_long(obj.EmblemDefaultId(), password),
-        'BirthdayMailStartDate': table_encryption.convert_string(obj.BirthdayMailStartDate(), password),
-        'BirthdayMailRemainDate': table_encryption.convert_int(obj.BirthdayMailRemainDate(), password),
-        'BirthdayMailParcelType': ParcelType(table_encryption.convert_int(obj.BirthdayMailParcelType(), password)).name,
-        'BirthdayMailParcelId': table_encryption.convert_long(obj.BirthdayMailParcelId(), password),
-        'BirthdayMailParcelAmount': table_encryption.convert_int(obj.BirthdayMailParcelAmount(), password),
-        'ClearDeckAverageDeckCount': table_encryption.convert_int(obj.ClearDeckAverageDeckCount(), password),
-        'ClearDeckWorldRaidSaveConditionCoefficient': table_encryption.convert_int(obj.ClearDeckWorldRaidSaveConditionCoefficient(), password),
-        'ClearDeckShowCount': table_encryption.convert_int(obj.ClearDeckShowCount(), password),
-        'CharacterMaxLevel': table_encryption.convert_int(obj.CharacterMaxLevel(), password),
-        'PotentialBonusStatMaxLevelMaxHP': table_encryption.convert_int(obj.PotentialBonusStatMaxLevelMaxHP(), password),
-        'PotentialBonusStatMaxLevelAttackPower': table_encryption.convert_int(obj.PotentialBonusStatMaxLevelAttackPower(), password),
-        'PotentialBonusStatMaxLevelHealPower': table_encryption.convert_int(obj.PotentialBonusStatMaxLevelHealPower(), password),
-        'PotentialOpenConditionCharacterLevel': table_encryption.convert_int(obj.PotentialOpenConditionCharacterLevel(), password),
-        'AssistStrangerMinLevel': table_encryption.convert_int(obj.AssistStrangerMinLevel(), password),
-        'AssistStrangerMaxLevel': table_encryption.convert_int(obj.AssistStrangerMaxLevel(), password),
-        'MaxBlockedUserCount': table_encryption.convert_int(obj.MaxBlockedUserCount(), password),
+        'CampaignMainStageMaxRank': bacy.convert_int(obj.CampaignMainStageMaxRank(), password),
+        'CampaignMainStageBestRecord': bacy.convert_int(obj.CampaignMainStageBestRecord(), password),
+        'HardAdventurePlayCountRecoverDailyNumber': bacy.convert_int(obj.HardAdventurePlayCountRecoverDailyNumber(), password),
+        'HardStageCount': bacy.convert_int(obj.HardStageCount(), password),
+        'TacticRankClearTime': bacy.convert_int(obj.TacticRankClearTime(), password),
+        'BaseTimeScale': bacy.convert_long(obj.BaseTimeScale(), password),
+        'GachaPercentage': bacy.convert_int(obj.GachaPercentage(), password),
+        'AcademyFavorZoneId': bacy.convert_long(obj.AcademyFavorZoneId(), password),
+        'CafePresetSlotCount': bacy.convert_int(obj.CafePresetSlotCount(), password),
+        'CafeMonologueIntervalMillisec': bacy.convert_long(obj.CafeMonologueIntervalMillisec(), password),
+        'CafeMonologueDefaultDuration': bacy.convert_long(obj.CafeMonologueDefaultDuration(), password),
+        'CafeBubbleIdleDurationMilliSec': bacy.convert_long(obj.CafeBubbleIdleDurationMilliSec(), password),
+        'FindGiftTimeLimit': bacy.convert_int(obj.FindGiftTimeLimit(), password),
+        'CafeAutoChargePeriodInMsc': bacy.convert_int(obj.CafeAutoChargePeriodInMsc(), password),
+        'CafeProductionDecimalPosition': bacy.convert_int(obj.CafeProductionDecimalPosition(), password),
+        'CafeSetGroupApplyCount': bacy.convert_int(obj.CafeSetGroupApplyCount(), password),
+        'WeekDungeonFindGiftRewardLimitCount': bacy.convert_int(obj.WeekDungeonFindGiftRewardLimitCount(), password),
+        'StageFailedCurrencyRefundRate': bacy.convert_int(obj.StageFailedCurrencyRefundRate(), password),
+        'EnterDeposit': bacy.convert_int(obj.EnterDeposit(), password),
+        'AccountMaxLevel': bacy.convert_int(obj.AccountMaxLevel(), password),
+        'MainSquadExpBonus': bacy.convert_int(obj.MainSquadExpBonus(), password),
+        'SupportSquadExpBonus': bacy.convert_int(obj.SupportSquadExpBonus(), password),
+        'AccountExpRatio': bacy.convert_int(obj.AccountExpRatio(), password),
+        'MissionToastLifeTime': bacy.convert_int(obj.MissionToastLifeTime(), password),
+        'ExpItemInsertLimit': bacy.convert_int(obj.ExpItemInsertLimit(), password),
+        'ExpItemInsertAccelTime': bacy.convert_int(obj.ExpItemInsertAccelTime(), password),
+        'CharacterLvUpCoefficient': bacy.convert_int(obj.CharacterLvUpCoefficient(), password),
+        'EquipmentLvUpCoefficient': bacy.convert_int(obj.EquipmentLvUpCoefficient(), password),
+        'ExpEquipInsertLimit': bacy.convert_int(obj.ExpEquipInsertLimit(), password),
+        'EquipLvUpCoefficient': bacy.convert_int(obj.EquipLvUpCoefficient(), password),
+        'NicknameLength': bacy.convert_int(obj.NicknameLength(), password),
+        'CraftDuration': [bacy.convert_int(obj.CraftDuration(j), password) for j in range(obj.CraftDurationLength())],
+        'CraftLimitTime': bacy.convert_int(obj.CraftLimitTime(), password),
+        'ShiftingCraftDuration': [bacy.convert_int(obj.ShiftingCraftDuration(j), password) for j in range(obj.ShiftingCraftDurationLength())],
+        'ShiftingCraftTicketConsumeAmount': bacy.convert_int(obj.ShiftingCraftTicketConsumeAmount(), password),
+        'ShiftingCraftSlotMaxCapacity': bacy.convert_int(obj.ShiftingCraftSlotMaxCapacity(), password),
+        'CraftTicketItemUniqueId': bacy.convert_int(obj.CraftTicketItemUniqueId(), password),
+        'CraftTicketConsumeAmount': bacy.convert_int(obj.CraftTicketConsumeAmount(), password),
+        'AcademyEnterCostType': ParcelType(bacy.convert_int(obj.AcademyEnterCostType(), password)).name,
+        'AcademyEnterCostId': bacy.convert_long(obj.AcademyEnterCostId(), password),
+        'AcademyTicketCost': bacy.convert_int(obj.AcademyTicketCost(), password),
+        'MassangerMessageExpireDay': bacy.convert_int(obj.MassangerMessageExpireDay(), password),
+        'CraftLeafNodeGenerateLv1Count': bacy.convert_int(obj.CraftLeafNodeGenerateLv1Count(), password),
+        'CraftLeafNodeGenerateLv2Count': bacy.convert_int(obj.CraftLeafNodeGenerateLv2Count(), password),
+        'TutorialGachaShopId': bacy.convert_int(obj.TutorialGachaShopId(), password),
+        'BeforehandGachaShopId': bacy.convert_int(obj.BeforehandGachaShopId(), password),
+        'TutorialGachaGoodsId': bacy.convert_int(obj.TutorialGachaGoodsId(), password),
+        'EquipmentSlotOpenLevel': [bacy.convert_int(obj.EquipmentSlotOpenLevel(j), password) for j in range(obj.EquipmentSlotOpenLevelLength())],
+        'ScenarioAutoDelayMillisec': bacy.convert_float(obj.ScenarioAutoDelayMillisec(), password),
+        'JoinOrCreateClanCoolTimeFromHour': bacy.convert_long(obj.JoinOrCreateClanCoolTimeFromHour(), password),
+        'ClanMaxMember': bacy.convert_long(obj.ClanMaxMember(), password),
+        'ClanSearchResultCount': bacy.convert_long(obj.ClanSearchResultCount(), password),
+        'ClanMaxApplicant': bacy.convert_long(obj.ClanMaxApplicant(), password),
+        'ClanRejoinCoolTimeFromSecond': bacy.convert_long(obj.ClanRejoinCoolTimeFromSecond(), password),
+        'ClanWordBalloonMaxCharacter': bacy.convert_int(obj.ClanWordBalloonMaxCharacter(), password),
+        'CallNameRenameCoolTimeFromHour': bacy.convert_long(obj.CallNameRenameCoolTimeFromHour(), password),
+        'CallNameMinimumLength': bacy.convert_long(obj.CallNameMinimumLength(), password),
+        'CallNameMaximumLength': bacy.convert_long(obj.CallNameMaximumLength(), password),
+        'LobbyToScreenModeWaitTime': bacy.convert_long(obj.LobbyToScreenModeWaitTime(), password),
+        'ScreenshotToLobbyButtonHideDelay': bacy.convert_long(obj.ScreenshotToLobbyButtonHideDelay(), password),
+        'PrologueScenarioID01': bacy.convert_long(obj.PrologueScenarioID01(), password),
+        'PrologueScenarioID02': bacy.convert_long(obj.PrologueScenarioID02(), password),
+        'TutorialHardStage11': bacy.convert_long(obj.TutorialHardStage11(), password),
+        'TutorialSpeedButtonStage': bacy.convert_long(obj.TutorialSpeedButtonStage(), password),
+        'TutorialCharacterDefaultCount': bacy.convert_long(obj.TutorialCharacterDefaultCount(), password),
+        'TutorialShopCategoryType': ShopCategoryType(bacy.convert_int(obj.TutorialShopCategoryType(), password)).name,
+        'AdventureStrategyPlayTimeLimitInSeconds': bacy.convert_long(obj.AdventureStrategyPlayTimeLimitInSeconds(), password),
+        'WeekDungoenTacticPlayTimeLimitInSeconds': bacy.convert_long(obj.WeekDungoenTacticPlayTimeLimitInSeconds(), password),
+        'RaidTacticPlayTimeLimitInSeconds': bacy.convert_long(obj.RaidTacticPlayTimeLimitInSeconds(), password),
+        'RaidOpponentListAmount': bacy.convert_long(obj.RaidOpponentListAmount(), password),
+        'CraftBaseGoldRequired': [bacy.convert_long(obj.CraftBaseGoldRequired(j), password) for j in range(obj.CraftBaseGoldRequiredLength())],
+        'PostExpiredDayAttendance': bacy.convert_int(obj.PostExpiredDayAttendance(), password),
+        'PostExpiredDayInventoryOverflow': bacy.convert_int(obj.PostExpiredDayInventoryOverflow(), password),
+        'PostExpiredDayGameManager': bacy.convert_int(obj.PostExpiredDayGameManager(), password),
+        'UILabelCharacterWrap': bacy.convert_string(obj.UILabelCharacterWrap(), password),
+        'RequestTimeOut': bacy.convert_float(obj.RequestTimeOut(), password),
+        'MailStorageSoftCap': bacy.convert_int(obj.MailStorageSoftCap(), password),
+        'MailStorageHardCap': bacy.convert_int(obj.MailStorageHardCap(), password),
+        'ClearDeckStorageSize': bacy.convert_int(obj.ClearDeckStorageSize(), password),
+        'ClearDeckNoStarViewCount': bacy.convert_int(obj.ClearDeckNoStarViewCount(), password),
+        'ClearDeck1StarViewCount': bacy.convert_int(obj.ClearDeck1StarViewCount(), password),
+        'ClearDeck2StarViewCount': bacy.convert_int(obj.ClearDeck2StarViewCount(), password),
+        'ClearDeck3StarViewCount': bacy.convert_int(obj.ClearDeck3StarViewCount(), password),
+        'ExSkillLevelMax': bacy.convert_int(obj.ExSkillLevelMax(), password),
+        'PublicSkillLevelMax': bacy.convert_int(obj.PublicSkillLevelMax(), password),
+        'PassiveSkillLevelMax': bacy.convert_int(obj.PassiveSkillLevelMax(), password),
+        'ExtraPassiveSkillLevelMax': bacy.convert_int(obj.ExtraPassiveSkillLevelMax(), password),
+        'AccountCommentMaxLength': bacy.convert_int(obj.AccountCommentMaxLength(), password),
+        'CafeSummonCoolTimeFromHour': bacy.convert_int(obj.CafeSummonCoolTimeFromHour(), password),
+        'LimitedStageDailyClearCount': bacy.convert_long(obj.LimitedStageDailyClearCount(), password),
+        'LimitedStageEntryTimeLimit': bacy.convert_long(obj.LimitedStageEntryTimeLimit(), password),
+        'LimitedStageEntryTimeBuffer': bacy.convert_long(obj.LimitedStageEntryTimeBuffer(), password),
+        'LimitedStagePointAmount': bacy.convert_long(obj.LimitedStagePointAmount(), password),
+        'LimitedStagePointPerApMin': bacy.convert_long(obj.LimitedStagePointPerApMin(), password),
+        'LimitedStagePointPerApMax': bacy.convert_long(obj.LimitedStagePointPerApMax(), password),
+        'AccountLinkReward': bacy.convert_int(obj.AccountLinkReward(), password),
+        'MonthlyProductCheckDays': bacy.convert_int(obj.MonthlyProductCheckDays(), password),
+        'WeaponLvUpCoefficient': bacy.convert_int(obj.WeaponLvUpCoefficient(), password),
+        'ShowRaidMyListCount': bacy.convert_int(obj.ShowRaidMyListCount(), password),
+        'MaxLevelExpMasterCoinRatio': bacy.convert_int(obj.MaxLevelExpMasterCoinRatio(), password),
+        'RaidEnterCostType': ParcelType(bacy.convert_int(obj.RaidEnterCostType(), password)).name,
+        'RaidEnterCostId': bacy.convert_long(obj.RaidEnterCostId(), password),
+        'RaidTicketCost': bacy.convert_long(obj.RaidTicketCost(), password),
+        'TimeAttackDungeonScenarioId': bacy.convert_string(obj.TimeAttackDungeonScenarioId(), password),
+        'TimeAttackDungoenPlayCountPerTicket': bacy.convert_int(obj.TimeAttackDungoenPlayCountPerTicket(), password),
+        'TimeAttackDungeonEnterCostType': ParcelType(bacy.convert_int(obj.TimeAttackDungeonEnterCostType(), password)).name,
+        'TimeAttackDungeonEnterCostId': bacy.convert_long(obj.TimeAttackDungeonEnterCostId(), password),
+        'TimeAttackDungeonEnterCost': bacy.convert_long(obj.TimeAttackDungeonEnterCost(), password),
+        'ClanLeaderTransferLastLoginLimit': bacy.convert_long(obj.ClanLeaderTransferLastLoginLimit(), password),
+        'MonthlyProductRepurchasePopupLimit': bacy.convert_int(obj.MonthlyProductRepurchasePopupLimit(), password),
+        'CommonFavorItemTags': [Tag(bacy.convert_int(obj.CommonFavorItemTags(j), password)).name for j in range(obj.CommonFavorItemTagsLength())],
+        'MaxApMasterCoinPerWeek': bacy.convert_long(obj.MaxApMasterCoinPerWeek(), password),
+        'CraftOpenExpTier1': bacy.convert_long(obj.CraftOpenExpTier1(), password),
+        'CraftOpenExpTier2': bacy.convert_long(obj.CraftOpenExpTier2(), password),
+        'CraftOpenExpTier3': bacy.convert_long(obj.CraftOpenExpTier3(), password),
+        'CharacterEquipmentGearSlot': bacy.convert_long(obj.CharacterEquipmentGearSlot(), password),
+        'BirthDayDDay': bacy.convert_int(obj.BirthDayDDay(), password),
+        'RecommendedFriendsLvDifferenceLimit': bacy.convert_int(obj.RecommendedFriendsLvDifferenceLimit(), password),
+        'DDosDetectCount': bacy.convert_int(obj.DDosDetectCount(), password),
+        'DDosCheckIntervalInSeconds': bacy.convert_int(obj.DDosCheckIntervalInSeconds(), password),
+        'MaxFriendsCount': bacy.convert_int(obj.MaxFriendsCount(), password),
+        'MaxFriendsRequest': bacy.convert_int(obj.MaxFriendsRequest(), password),
+        'FriendsSearchRequestCount': bacy.convert_int(obj.FriendsSearchRequestCount(), password),
+        'FriendsMaxApplicant': bacy.convert_int(obj.FriendsMaxApplicant(), password),
+        'IdCardDefaultCharacterId': bacy.convert_long(obj.IdCardDefaultCharacterId(), password),
+        'IdCardDefaultBgId': bacy.convert_long(obj.IdCardDefaultBgId(), password),
+        'WorldRaidGemEnterCost': bacy.convert_long(obj.WorldRaidGemEnterCost(), password),
+        'WorldRaidGemEnterAmout': bacy.convert_long(obj.WorldRaidGemEnterAmout(), password),
+        'FriendIdCardCommentMaxLength': bacy.convert_long(obj.FriendIdCardCommentMaxLength(), password),
+        'FormationPresetNumberOfEchelonTab': bacy.convert_int(obj.FormationPresetNumberOfEchelonTab(), password),
+        'FormationPresetNumberOfEchelon': bacy.convert_int(obj.FormationPresetNumberOfEchelon(), password),
+        'FormationPresetRecentNumberOfEchelon': bacy.convert_int(obj.FormationPresetRecentNumberOfEchelon(), password),
+        'FormationPresetEchelonTabTextLength': bacy.convert_int(obj.FormationPresetEchelonTabTextLength(), password),
+        'FormationPresetEchelonSlotTextLength': bacy.convert_int(obj.FormationPresetEchelonSlotTextLength(), password),
+        'CharProfileRowIntervalKr': bacy.convert_int(obj.CharProfileRowIntervalKr(), password),
+        'CharProfileRowIntervalJp': bacy.convert_int(obj.CharProfileRowIntervalJp(), password),
+        'CharProfilePopupRowIntervalKr': bacy.convert_int(obj.CharProfilePopupRowIntervalKr(), password),
+        'CharProfilePopupRowIntervalJp': bacy.convert_int(obj.CharProfilePopupRowIntervalJp(), password),
+        'BeforehandGachaCount': bacy.convert_int(obj.BeforehandGachaCount(), password),
+        'BeforehandGachaGroupId': bacy.convert_int(obj.BeforehandGachaGroupId(), password),
+        'RenewalDisplayOrderDay': bacy.convert_int(obj.RenewalDisplayOrderDay(), password),
+        'EmblemDefaultId': bacy.convert_long(obj.EmblemDefaultId(), password),
+        'BirthdayMailStartDate': bacy.convert_string(obj.BirthdayMailStartDate(), password),
+        'BirthdayMailRemainDate': bacy.convert_int(obj.BirthdayMailRemainDate(), password),
+        'BirthdayMailParcelType': ParcelType(bacy.convert_int(obj.BirthdayMailParcelType(), password)).name,
+        'BirthdayMailParcelId': bacy.convert_long(obj.BirthdayMailParcelId(), password),
+        'BirthdayMailParcelAmount': bacy.convert_int(obj.BirthdayMailParcelAmount(), password),
+        'ClearDeckAverageDeckCount': bacy.convert_int(obj.ClearDeckAverageDeckCount(), password),
+        'ClearDeckWorldRaidSaveConditionCoefficient': bacy.convert_int(obj.ClearDeckWorldRaidSaveConditionCoefficient(), password),
+        'ClearDeckShowCount': bacy.convert_int(obj.ClearDeckShowCount(), password),
+        'CharacterMaxLevel': bacy.convert_int(obj.CharacterMaxLevel(), password),
+        'PotentialBonusStatMaxLevelMaxHP': bacy.convert_int(obj.PotentialBonusStatMaxLevelMaxHP(), password),
+        'PotentialBonusStatMaxLevelAttackPower': bacy.convert_int(obj.PotentialBonusStatMaxLevelAttackPower(), password),
+        'PotentialBonusStatMaxLevelHealPower': bacy.convert_int(obj.PotentialBonusStatMaxLevelHealPower(), password),
+        'PotentialOpenConditionCharacterLevel': bacy.convert_int(obj.PotentialOpenConditionCharacterLevel(), password),
+        'AssistStrangerMinLevel': bacy.convert_int(obj.AssistStrangerMinLevel(), password),
+        'AssistStrangerMaxLevel': bacy.convert_int(obj.AssistStrangerMaxLevel(), password),
+        'MaxBlockedUserCount': bacy.convert_int(obj.MaxBlockedUserCount(), password),
     }
 
 
 def dump_ConstConquestExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ManageUnitChange': table_encryption.convert_int(obj.ManageUnitChange(), password),
-        'AssistCount': table_encryption.convert_int(obj.AssistCount(), password),
-        'PlayTimeLimitInSeconds': table_encryption.convert_int(obj.PlayTimeLimitInSeconds(), password),
-        'AnimationUnitAmountMin': table_encryption.convert_int(obj.AnimationUnitAmountMin(), password),
-        'AnimationUnitAmountMax': table_encryption.convert_int(obj.AnimationUnitAmountMax(), password),
-        'AnimationUnitDelay': table_encryption.convert_float(obj.AnimationUnitDelay(), password),
+        'ManageUnitChange': bacy.convert_int(obj.ManageUnitChange(), password),
+        'AssistCount': bacy.convert_int(obj.AssistCount(), password),
+        'PlayTimeLimitInSeconds': bacy.convert_int(obj.PlayTimeLimitInSeconds(), password),
+        'AnimationUnitAmountMin': bacy.convert_int(obj.AnimationUnitAmountMin(), password),
+        'AnimationUnitAmountMax': bacy.convert_int(obj.AnimationUnitAmountMax(), password),
+        'AnimationUnitDelay': bacy.convert_float(obj.AnimationUnitDelay(), password),
     }
 
 
 def dump_ConstEventCommonExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentHardStageCount': table_encryption.convert_int(obj.EventContentHardStageCount(), password),
-        'EventStrategyPlayTimeLimitInSeconds': table_encryption.convert_long(obj.EventStrategyPlayTimeLimitInSeconds(), password),
-        'SubEventChangeLimitSeconds': table_encryption.convert_long(obj.SubEventChangeLimitSeconds(), password),
+        'EventContentHardStageCount': bacy.convert_int(obj.EventContentHardStageCount(), password),
+        'EventStrategyPlayTimeLimitInSeconds': bacy.convert_long(obj.EventStrategyPlayTimeLimitInSeconds(), password),
+        'SubEventChangeLimitSeconds': bacy.convert_long(obj.SubEventChangeLimitSeconds(), password),
         'SubEventInstantClear': obj.SubEventInstantClear(),
-        'CardShopProbWeightCount': table_encryption.convert_long(obj.CardShopProbWeightCount(), password),
-        'CardShopProbWeightRarity': Rarity(table_encryption.convert_int(obj.CardShopProbWeightRarity(), password)).name,
-        'MeetupScenarioReplayResource': table_encryption.convert_string(obj.MeetupScenarioReplayResource(), password),
-        'MeetupScenarioReplayTitleLocalize': table_encryption.convert_string(obj.MeetupScenarioReplayTitleLocalize(), password),
-        'SpecialOperactionCollectionGroupId': table_encryption.convert_long(obj.SpecialOperactionCollectionGroupId(), password),
-        'TreasureNormalVariationAmount': table_encryption.convert_int(obj.TreasureNormalVariationAmount(), password),
-        'TreasureLoopVariationAmount': table_encryption.convert_int(obj.TreasureLoopVariationAmount(), password),
-        'TreasureLimitVariationLoopCount': table_encryption.convert_int(obj.TreasureLimitVariationLoopCount(), password),
-        'TreasureLimitVariationClearLoopCount': table_encryption.convert_int(obj.TreasureLimitVariationClearLoopCount(), password),
+        'CardShopProbWeightCount': bacy.convert_long(obj.CardShopProbWeightCount(), password),
+        'CardShopProbWeightRarity': Rarity(bacy.convert_int(obj.CardShopProbWeightRarity(), password)).name,
+        'MeetupScenarioReplayResource': bacy.convert_string(obj.MeetupScenarioReplayResource(), password),
+        'MeetupScenarioReplayTitleLocalize': bacy.convert_string(obj.MeetupScenarioReplayTitleLocalize(), password),
+        'SpecialOperactionCollectionGroupId': bacy.convert_long(obj.SpecialOperactionCollectionGroupId(), password),
+        'TreasureNormalVariationAmount': bacy.convert_int(obj.TreasureNormalVariationAmount(), password),
+        'TreasureLoopVariationAmount': bacy.convert_int(obj.TreasureLoopVariationAmount(), password),
+        'TreasureLimitVariationLoopCount': bacy.convert_int(obj.TreasureLimitVariationLoopCount(), password),
+        'TreasureLimitVariationClearLoopCount': bacy.convert_int(obj.TreasureLimitVariationClearLoopCount(), password),
     }
 
 
 def dump_ConstFieldExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'DialogSmoothTime': table_encryption.convert_int(obj.DialogSmoothTime(), password),
-        'TalkDialogDurationDefault': table_encryption.convert_int(obj.TalkDialogDurationDefault(), password),
-        'ThinkDialogDurationDefault': table_encryption.convert_int(obj.ThinkDialogDurationDefault(), password),
-        'IdleThinkDelayMin': table_encryption.convert_int(obj.IdleThinkDelayMin(), password),
-        'IdleThinkDelayMax': table_encryption.convert_int(obj.IdleThinkDelayMax(), password),
-        'ExclaimDurationDefault': table_encryption.convert_int(obj.ExclaimDurationDefault(), password),
-        'QuestionDurationDefault': table_encryption.convert_int(obj.QuestionDurationDefault(), password),
-        'UpsetDurationDefault': table_encryption.convert_int(obj.UpsetDurationDefault(), password),
-        'SurpriseDurationDefault': table_encryption.convert_int(obj.SurpriseDurationDefault(), password),
-        'BulbDurationDefault': table_encryption.convert_int(obj.BulbDurationDefault(), password),
-        'HeartDurationDefault': table_encryption.convert_int(obj.HeartDurationDefault(), password),
-        'SweatDurationDefault': table_encryption.convert_int(obj.SweatDurationDefault(), password),
-        'AngryDurationDefault': table_encryption.convert_int(obj.AngryDurationDefault(), password),
-        'MusicDurationDefault': table_encryption.convert_int(obj.MusicDurationDefault(), password),
-        'DotDurationDefault': table_encryption.convert_int(obj.DotDurationDefault(), password),
-        'MomotalkDurationDefault': table_encryption.convert_int(obj.MomotalkDurationDefault(), password),
-        'PhoneDurationDefault': table_encryption.convert_int(obj.PhoneDurationDefault(), password),
-        'KeywordDurationDefault': table_encryption.convert_int(obj.KeywordDurationDefault(), password),
-        'EvidenceDurationDefault': table_encryption.convert_int(obj.EvidenceDurationDefault(), password),
+        'DialogSmoothTime': bacy.convert_int(obj.DialogSmoothTime(), password),
+        'TalkDialogDurationDefault': bacy.convert_int(obj.TalkDialogDurationDefault(), password),
+        'ThinkDialogDurationDefault': bacy.convert_int(obj.ThinkDialogDurationDefault(), password),
+        'IdleThinkDelayMin': bacy.convert_int(obj.IdleThinkDelayMin(), password),
+        'IdleThinkDelayMax': bacy.convert_int(obj.IdleThinkDelayMax(), password),
+        'ExclaimDurationDefault': bacy.convert_int(obj.ExclaimDurationDefault(), password),
+        'QuestionDurationDefault': bacy.convert_int(obj.QuestionDurationDefault(), password),
+        'UpsetDurationDefault': bacy.convert_int(obj.UpsetDurationDefault(), password),
+        'SurpriseDurationDefault': bacy.convert_int(obj.SurpriseDurationDefault(), password),
+        'BulbDurationDefault': bacy.convert_int(obj.BulbDurationDefault(), password),
+        'HeartDurationDefault': bacy.convert_int(obj.HeartDurationDefault(), password),
+        'SweatDurationDefault': bacy.convert_int(obj.SweatDurationDefault(), password),
+        'AngryDurationDefault': bacy.convert_int(obj.AngryDurationDefault(), password),
+        'MusicDurationDefault': bacy.convert_int(obj.MusicDurationDefault(), password),
+        'DotDurationDefault': bacy.convert_int(obj.DotDurationDefault(), password),
+        'MomotalkDurationDefault': bacy.convert_int(obj.MomotalkDurationDefault(), password),
+        'PhoneDurationDefault': bacy.convert_int(obj.PhoneDurationDefault(), password),
+        'KeywordDurationDefault': bacy.convert_int(obj.KeywordDurationDefault(), password),
+        'EvidenceDurationDefault': bacy.convert_int(obj.EvidenceDurationDefault(), password),
     }
 
 
 def dump_ConstMiniGameShootingExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'NormalStageId': table_encryption.convert_long(obj.NormalStageId(), password),
-        'NormalSectionCount': table_encryption.convert_int(obj.NormalSectionCount(), password),
-        'HardStageId': table_encryption.convert_long(obj.HardStageId(), password),
-        'HardSectionCount': table_encryption.convert_int(obj.HardSectionCount(), password),
-        'FreeStageId': table_encryption.convert_long(obj.FreeStageId(), password),
-        'FreeSectionCount': table_encryption.convert_int(obj.FreeSectionCount(), password),
-        'PlayerCharacterId': [table_encryption.convert_long(obj.PlayerCharacterId(j), password) for j in range(obj.PlayerCharacterIdLength())],
-        'HiddenPlayerCharacterId': table_encryption.convert_long(obj.HiddenPlayerCharacterId(), password),
-        'CameraSmoothTime': table_encryption.convert_float(obj.CameraSmoothTime(), password),
-        'SpawnEffectPath': table_encryption.convert_string(obj.SpawnEffectPath(), password),
-        'WaitTimeAfterSpawn': table_encryption.convert_float(obj.WaitTimeAfterSpawn(), password),
-        'FreeGearInterval': table_encryption.convert_int(obj.FreeGearInterval(), password),
+        'NormalStageId': bacy.convert_long(obj.NormalStageId(), password),
+        'NormalSectionCount': bacy.convert_int(obj.NormalSectionCount(), password),
+        'HardStageId': bacy.convert_long(obj.HardStageId(), password),
+        'HardSectionCount': bacy.convert_int(obj.HardSectionCount(), password),
+        'FreeStageId': bacy.convert_long(obj.FreeStageId(), password),
+        'FreeSectionCount': bacy.convert_int(obj.FreeSectionCount(), password),
+        'PlayerCharacterId': [bacy.convert_long(obj.PlayerCharacterId(j), password) for j in range(obj.PlayerCharacterIdLength())],
+        'HiddenPlayerCharacterId': bacy.convert_long(obj.HiddenPlayerCharacterId(), password),
+        'CameraSmoothTime': bacy.convert_float(obj.CameraSmoothTime(), password),
+        'SpawnEffectPath': bacy.convert_string(obj.SpawnEffectPath(), password),
+        'WaitTimeAfterSpawn': bacy.convert_float(obj.WaitTimeAfterSpawn(), password),
+        'FreeGearInterval': bacy.convert_int(obj.FreeGearInterval(), password),
     }
 
 
 def dump_ConstMinigameTBGExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ConquestMapBoundaryOffsetLeft': table_encryption.convert_float(obj.ConquestMapBoundaryOffsetLeft(), password),
-        'ConquestMapBoundaryOffsetRight': table_encryption.convert_float(obj.ConquestMapBoundaryOffsetRight(), password),
-        'ConquestMapBoundaryOffsetTop': table_encryption.convert_float(obj.ConquestMapBoundaryOffsetTop(), password),
-        'ConquestMapBoundaryOffsetBottom': table_encryption.convert_float(obj.ConquestMapBoundaryOffsetBottom(), password),
-        'ConquestMapCenterOffsetX': table_encryption.convert_float(obj.ConquestMapCenterOffsetX(), password),
-        'ConquestMapCenterOffsetY': table_encryption.convert_float(obj.ConquestMapCenterOffsetY(), password),
-        'CameraAngle': table_encryption.convert_float(obj.CameraAngle(), password),
-        'CameraZoomMax': table_encryption.convert_float(obj.CameraZoomMax(), password),
-        'CameraZoomMin': table_encryption.convert_float(obj.CameraZoomMin(), password),
-        'CameraZoomDefault': table_encryption.convert_float(obj.CameraZoomDefault(), password),
-        'ThemaLoadingProgressTime': table_encryption.convert_float(obj.ThemaLoadingProgressTime(), password),
-        'MapAllyRotation': table_encryption.convert_float(obj.MapAllyRotation(), password),
-        'AniAllyBattleAttack': table_encryption.convert_string(obj.AniAllyBattleAttack(), password),
-        'EffectAllyBattleAttack': table_encryption.convert_string(obj.EffectAllyBattleAttack(), password),
-        'EffectAllyBattleDamage': table_encryption.convert_string(obj.EffectAllyBattleDamage(), password),
-        'AniEnemyBattleAttack': table_encryption.convert_string(obj.AniEnemyBattleAttack(), password),
-        'EffectEnemyBattleAttack': table_encryption.convert_string(obj.EffectEnemyBattleAttack(), password),
-        'EffectEnemyBattleDamage': table_encryption.convert_string(obj.EffectEnemyBattleDamage(), password),
-        'EncounterAllyRotation': table_encryption.convert_float(obj.EncounterAllyRotation(), password),
-        'EncounterEnemyRotation': table_encryption.convert_float(obj.EncounterEnemyRotation(), password),
-        'EncounterRewardReceiveIndex': table_encryption.convert_int(obj.EncounterRewardReceiveIndex(), password),
+        'ConquestMapBoundaryOffsetLeft': bacy.convert_float(obj.ConquestMapBoundaryOffsetLeft(), password),
+        'ConquestMapBoundaryOffsetRight': bacy.convert_float(obj.ConquestMapBoundaryOffsetRight(), password),
+        'ConquestMapBoundaryOffsetTop': bacy.convert_float(obj.ConquestMapBoundaryOffsetTop(), password),
+        'ConquestMapBoundaryOffsetBottom': bacy.convert_float(obj.ConquestMapBoundaryOffsetBottom(), password),
+        'ConquestMapCenterOffsetX': bacy.convert_float(obj.ConquestMapCenterOffsetX(), password),
+        'ConquestMapCenterOffsetY': bacy.convert_float(obj.ConquestMapCenterOffsetY(), password),
+        'CameraAngle': bacy.convert_float(obj.CameraAngle(), password),
+        'CameraZoomMax': bacy.convert_float(obj.CameraZoomMax(), password),
+        'CameraZoomMin': bacy.convert_float(obj.CameraZoomMin(), password),
+        'CameraZoomDefault': bacy.convert_float(obj.CameraZoomDefault(), password),
+        'ThemaLoadingProgressTime': bacy.convert_float(obj.ThemaLoadingProgressTime(), password),
+        'MapAllyRotation': bacy.convert_float(obj.MapAllyRotation(), password),
+        'AniAllyBattleAttack': bacy.convert_string(obj.AniAllyBattleAttack(), password),
+        'EffectAllyBattleAttack': bacy.convert_string(obj.EffectAllyBattleAttack(), password),
+        'EffectAllyBattleDamage': bacy.convert_string(obj.EffectAllyBattleDamage(), password),
+        'AniEnemyBattleAttack': bacy.convert_string(obj.AniEnemyBattleAttack(), password),
+        'EffectEnemyBattleAttack': bacy.convert_string(obj.EffectEnemyBattleAttack(), password),
+        'EffectEnemyBattleDamage': bacy.convert_string(obj.EffectEnemyBattleDamage(), password),
+        'EncounterAllyRotation': bacy.convert_float(obj.EncounterAllyRotation(), password),
+        'EncounterEnemyRotation': bacy.convert_float(obj.EncounterEnemyRotation(), password),
+        'EncounterRewardReceiveIndex': bacy.convert_int(obj.EncounterRewardReceiveIndex(), password),
     }
 
 
 def dump_ConstNewbieContentExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'NewbieGachaReleaseDate': table_encryption.convert_string(obj.NewbieGachaReleaseDate(), password),
-        'NewbieGachaCheckDays': table_encryption.convert_int(obj.NewbieGachaCheckDays(), password),
-        'NewbieGachaTokenGraceTime': table_encryption.convert_int(obj.NewbieGachaTokenGraceTime(), password),
-        'NewbieAttendanceReleaseDate': table_encryption.convert_string(obj.NewbieAttendanceReleaseDate(), password),
-        'NewbieAttendanceStartableEndDay': table_encryption.convert_int(obj.NewbieAttendanceStartableEndDay(), password),
-        'NewbieAttendanceEndDay': table_encryption.convert_int(obj.NewbieAttendanceEndDay(), password),
+        'NewbieGachaReleaseDate': bacy.convert_string(obj.NewbieGachaReleaseDate(), password),
+        'NewbieGachaCheckDays': bacy.convert_int(obj.NewbieGachaCheckDays(), password),
+        'NewbieGachaTokenGraceTime': bacy.convert_int(obj.NewbieGachaTokenGraceTime(), password),
+        'NewbieAttendanceReleaseDate': bacy.convert_string(obj.NewbieAttendanceReleaseDate(), password),
+        'NewbieAttendanceStartableEndDay': bacy.convert_int(obj.NewbieAttendanceStartableEndDay(), password),
+        'NewbieAttendanceEndDay': bacy.convert_int(obj.NewbieAttendanceEndDay(), password),
     }
 
 
 def dump_ConstStrategyExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'HexaMapBoundaryOffset': table_encryption.convert_float(obj.HexaMapBoundaryOffset(), password),
-        'HexaMapStartCameraOffset': table_encryption.convert_float(obj.HexaMapStartCameraOffset(), password),
-        'CameraZoomMax': table_encryption.convert_float(obj.CameraZoomMax(), password),
-        'CameraZoomMin': table_encryption.convert_float(obj.CameraZoomMin(), password),
-        'CameraZoomDefault': table_encryption.convert_float(obj.CameraZoomDefault(), password),
-        'HealCostType': CurrencyTypes(table_encryption.convert_int(obj.HealCostType(), password)).name,
-        'HealCostAmount': [table_encryption.convert_long(obj.HealCostAmount(j), password) for j in range(obj.HealCostAmountLength())],
-        'CanHealHpRate': table_encryption.convert_int(obj.CanHealHpRate(), password),
-        'PlayTimeLimitInSeconds': table_encryption.convert_long(obj.PlayTimeLimitInSeconds(), password),
-        'AdventureEchelonCount': table_encryption.convert_int(obj.AdventureEchelonCount(), password),
-        'RaidEchelonCount': table_encryption.convert_int(obj.RaidEchelonCount(), password),
-        'DefaultEchelonCount': table_encryption.convert_int(obj.DefaultEchelonCount(), password),
-        'EventContentEchelonCount': table_encryption.convert_int(obj.EventContentEchelonCount(), password),
-        'TimeAttackDungeonEchelonCount': table_encryption.convert_int(obj.TimeAttackDungeonEchelonCount(), password),
-        'WorldRaidEchelonCount': table_encryption.convert_int(obj.WorldRaidEchelonCount(), password),
-        'TacticSkipClearTimeSeconds': table_encryption.convert_int(obj.TacticSkipClearTimeSeconds(), password),
-        'TacticSkipFramePerSecond': table_encryption.convert_int(obj.TacticSkipFramePerSecond(), password),
-        'ConquestEchelonCount': table_encryption.convert_int(obj.ConquestEchelonCount(), password),
-        'StoryEchelonCount': table_encryption.convert_int(obj.StoryEchelonCount(), password),
-        'MultiSweepPresetCount': table_encryption.convert_int(obj.MultiSweepPresetCount(), password),
-        'MultiSweepPresetNameMaxLength': table_encryption.convert_int(obj.MultiSweepPresetNameMaxLength(), password),
-        'MultiSweepPresetSelectStageMaxCount': table_encryption.convert_int(obj.MultiSweepPresetSelectStageMaxCount(), password),
-        'MultiSweepPresetMaxSweepCount': table_encryption.convert_int(obj.MultiSweepPresetMaxSweepCount(), password),
-        'MultiSweepPresetSelectParcelMaxCount': table_encryption.convert_int(obj.MultiSweepPresetSelectParcelMaxCount(), password),
+        'HexaMapBoundaryOffset': bacy.convert_float(obj.HexaMapBoundaryOffset(), password),
+        'HexaMapStartCameraOffset': bacy.convert_float(obj.HexaMapStartCameraOffset(), password),
+        'CameraZoomMax': bacy.convert_float(obj.CameraZoomMax(), password),
+        'CameraZoomMin': bacy.convert_float(obj.CameraZoomMin(), password),
+        'CameraZoomDefault': bacy.convert_float(obj.CameraZoomDefault(), password),
+        'HealCostType': CurrencyTypes(bacy.convert_int(obj.HealCostType(), password)).name,
+        'HealCostAmount': [bacy.convert_long(obj.HealCostAmount(j), password) for j in range(obj.HealCostAmountLength())],
+        'CanHealHpRate': bacy.convert_int(obj.CanHealHpRate(), password),
+        'PlayTimeLimitInSeconds': bacy.convert_long(obj.PlayTimeLimitInSeconds(), password),
+        'AdventureEchelonCount': bacy.convert_int(obj.AdventureEchelonCount(), password),
+        'RaidEchelonCount': bacy.convert_int(obj.RaidEchelonCount(), password),
+        'DefaultEchelonCount': bacy.convert_int(obj.DefaultEchelonCount(), password),
+        'EventContentEchelonCount': bacy.convert_int(obj.EventContentEchelonCount(), password),
+        'TimeAttackDungeonEchelonCount': bacy.convert_int(obj.TimeAttackDungeonEchelonCount(), password),
+        'WorldRaidEchelonCount': bacy.convert_int(obj.WorldRaidEchelonCount(), password),
+        'TacticSkipClearTimeSeconds': bacy.convert_int(obj.TacticSkipClearTimeSeconds(), password),
+        'TacticSkipFramePerSecond': bacy.convert_int(obj.TacticSkipFramePerSecond(), password),
+        'ConquestEchelonCount': bacy.convert_int(obj.ConquestEchelonCount(), password),
+        'StoryEchelonCount': bacy.convert_int(obj.StoryEchelonCount(), password),
+        'MultiSweepPresetCount': bacy.convert_int(obj.MultiSweepPresetCount(), password),
+        'MultiSweepPresetNameMaxLength': bacy.convert_int(obj.MultiSweepPresetNameMaxLength(), password),
+        'MultiSweepPresetSelectStageMaxCount': bacy.convert_int(obj.MultiSweepPresetSelectStageMaxCount(), password),
+        'MultiSweepPresetMaxSweepCount': bacy.convert_int(obj.MultiSweepPresetMaxSweepCount(), password),
+        'MultiSweepPresetSelectParcelMaxCount': bacy.convert_int(obj.MultiSweepPresetSelectParcelMaxCount(), password),
     }
 
 
 def dump_ContentEnterCostReduceExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EnterCostReduceGroupId': table_encryption.convert_long(obj.EnterCostReduceGroupId(), password),
-        'ContentType': ContentType(table_encryption.convert_int(obj.ContentType_(), password)).name,
-        'StageId': table_encryption.convert_long(obj.StageId(), password),
-        'ReduceEnterCostType': ParcelType(table_encryption.convert_int(obj.ReduceEnterCostType(), password)).name,
-        'ReduceEnterCostId': table_encryption.convert_long(obj.ReduceEnterCostId(), password),
-        'ReduceAmount': table_encryption.convert_long(obj.ReduceAmount(), password),
+        'EnterCostReduceGroupId': bacy.convert_long(obj.EnterCostReduceGroupId(), password),
+        'ContentType': ContentType(bacy.convert_int(obj.ContentType_(), password)).name,
+        'StageId': bacy.convert_long(obj.StageId(), password),
+        'ReduceEnterCostType': ParcelType(bacy.convert_int(obj.ReduceEnterCostType(), password)).name,
+        'ReduceEnterCostId': bacy.convert_long(obj.ReduceEnterCostId(), password),
+        'ReduceAmount': bacy.convert_long(obj.ReduceAmount(), password),
     }
 
 
 def dump_ContentsFeverExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ConditionContent': FeverBattleType(table_encryption.convert_int(obj.ConditionContent(), password)).name,
-        'SkillFeverCheckCondition': SkillPriorityCheckTarget(table_encryption.convert_int(obj.SkillFeverCheckCondition(), password)).name,
-        'SkillCostFever': table_encryption.convert_long(obj.SkillCostFever(), password),
-        'FeverStartTime': table_encryption.convert_long(obj.FeverStartTime(), password),
-        'FeverDurationTime': table_encryption.convert_long(obj.FeverDurationTime(), password),
+        'ConditionContent': FeverBattleType(bacy.convert_int(obj.ConditionContent(), password)).name,
+        'SkillFeverCheckCondition': SkillPriorityCheckTarget(bacy.convert_int(obj.SkillFeverCheckCondition(), password)).name,
+        'SkillCostFever': bacy.convert_long(obj.SkillCostFever(), password),
+        'FeverStartTime': bacy.convert_long(obj.FeverStartTime(), password),
+        'FeverDurationTime': bacy.convert_long(obj.FeverDurationTime(), password),
     }
 
 
 def dump_CostumeExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CostumeGroupId': table_encryption.convert_long(obj.CostumeGroupId(), password),
-        'CostumeUniqueId': table_encryption.convert_long(obj.CostumeUniqueId(), password),
-        'DevName': table_encryption.convert_string(obj.DevName(), password),
-        'ProductionStep': ProductionStep(table_encryption.convert_int(obj.ProductionStep_(), password)).name,
+        'CostumeGroupId': bacy.convert_long(obj.CostumeGroupId(), password),
+        'CostumeUniqueId': bacy.convert_long(obj.CostumeUniqueId(), password),
+        'DevName': bacy.convert_string(obj.DevName(), password),
+        'ProductionStep': ProductionStep(bacy.convert_int(obj.ProductionStep_(), password)).name,
         'IsDefault': obj.IsDefault(),
         'CollectionVisible': obj.CollectionVisible(),
-        'ReleaseDate': table_encryption.convert_string(obj.ReleaseDate(), password),
-        'CollectionVisibleStartDate': table_encryption.convert_string(obj.CollectionVisibleStartDate(), password),
-        'CollectionVisibleEndDate': table_encryption.convert_string(obj.CollectionVisibleEndDate(), password),
-        'Rarity': Rarity(table_encryption.convert_int(obj.Rarity_(), password)).name,
-        'CharacterSkillListGroupId': table_encryption.convert_long(obj.CharacterSkillListGroupId(), password),
-        'SpineResourceName': table_encryption.convert_string(obj.SpineResourceName(), password),
-        'SpineResourceNameDiorama': table_encryption.convert_string(obj.SpineResourceNameDiorama(), password),
-        'SpineResourceNameDioramaForFormConversion': [table_encryption.convert_string(obj.SpineResourceNameDioramaForFormConversion(j), password) for j in range(obj.SpineResourceNameDioramaForFormConversionLength())],
-        'EntityMaterialType': EntityMaterialType(table_encryption.convert_int(obj.EntityMaterialType_(), password)).name,
-        'ModelPrefabName': table_encryption.convert_string(obj.ModelPrefabName(), password),
-        'CafeModelPrefabName': table_encryption.convert_string(obj.CafeModelPrefabName(), password),
-        'EchelonModelPrefabName': table_encryption.convert_string(obj.EchelonModelPrefabName(), password),
-        'StrategyModelPrefabName': table_encryption.convert_string(obj.StrategyModelPrefabName(), password),
-        'TextureDir': table_encryption.convert_string(obj.TextureDir(), password),
-        'CollectionTexturePath': table_encryption.convert_string(obj.CollectionTexturePath(), password),
-        'CollectionBGTexturePath': table_encryption.convert_string(obj.CollectionBGTexturePath(), password),
-        'CombatStyleTexturePath': table_encryption.convert_string(obj.CombatStyleTexturePath(), password),
+        'ReleaseDate': bacy.convert_string(obj.ReleaseDate(), password),
+        'CollectionVisibleStartDate': bacy.convert_string(obj.CollectionVisibleStartDate(), password),
+        'CollectionVisibleEndDate': bacy.convert_string(obj.CollectionVisibleEndDate(), password),
+        'Rarity': Rarity(bacy.convert_int(obj.Rarity_(), password)).name,
+        'CharacterSkillListGroupId': bacy.convert_long(obj.CharacterSkillListGroupId(), password),
+        'SpineResourceName': bacy.convert_string(obj.SpineResourceName(), password),
+        'SpineResourceNameDiorama': bacy.convert_string(obj.SpineResourceNameDiorama(), password),
+        'SpineResourceNameDioramaForFormConversion': [bacy.convert_string(obj.SpineResourceNameDioramaForFormConversion(j), password) for j in range(obj.SpineResourceNameDioramaForFormConversionLength())],
+        'EntityMaterialType': EntityMaterialType(bacy.convert_int(obj.EntityMaterialType_(), password)).name,
+        'ModelPrefabName': bacy.convert_string(obj.ModelPrefabName(), password),
+        'CafeModelPrefabName': bacy.convert_string(obj.CafeModelPrefabName(), password),
+        'EchelonModelPrefabName': bacy.convert_string(obj.EchelonModelPrefabName(), password),
+        'StrategyModelPrefabName': bacy.convert_string(obj.StrategyModelPrefabName(), password),
+        'TextureDir': bacy.convert_string(obj.TextureDir(), password),
+        'CollectionTexturePath': bacy.convert_string(obj.CollectionTexturePath(), password),
+        'CollectionBGTexturePath': bacy.convert_string(obj.CollectionBGTexturePath(), password),
+        'CombatStyleTexturePath': bacy.convert_string(obj.CombatStyleTexturePath(), password),
         'UseObjectHPBAR': obj.UseObjectHPBAR(),
-        'TextureBoss': table_encryption.convert_string(obj.TextureBoss(), password),
-        'TextureSkillCard': [table_encryption.convert_string(obj.TextureSkillCard(j), password) for j in range(obj.TextureSkillCardLength())],
-        'InformationPacel': table_encryption.convert_string(obj.InformationPacel(), password),
-        'AnimationSSR': table_encryption.convert_string(obj.AnimationSSR(), password),
-        'EnterStrategyAnimationName': table_encryption.convert_string(obj.EnterStrategyAnimationName(), password),
+        'TextureBoss': bacy.convert_string(obj.TextureBoss(), password),
+        'TextureSkillCard': [bacy.convert_string(obj.TextureSkillCard(j), password) for j in range(obj.TextureSkillCardLength())],
+        'InformationPacel': bacy.convert_string(obj.InformationPacel(), password),
+        'AnimationSSR': bacy.convert_string(obj.AnimationSSR(), password),
+        'EnterStrategyAnimationName': bacy.convert_string(obj.EnterStrategyAnimationName(), password),
         'AnimationValidator': obj.AnimationValidator(),
-        'CharacterVoiceGroupId': table_encryption.convert_long(obj.CharacterVoiceGroupId(), password),
+        'CharacterVoiceGroupId': bacy.convert_long(obj.CharacterVoiceGroupId(), password),
         'ShowObjectHpStatus': obj.ShowObjectHpStatus(),
     }
 
 
 def dump_CouponStuffExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'StuffId': table_encryption.convert_long(obj.StuffId(), password),
-        'ParcelType': ParcelType(table_encryption.convert_int(obj.ParcelType_(), password)).name,
-        'ParcelId': table_encryption.convert_long(obj.ParcelId(), password),
-        'LimitAmount': table_encryption.convert_int(obj.LimitAmount(), password),
-        'CouponStuffNameLocalizeKey': table_encryption.convert_string(obj.CouponStuffNameLocalizeKey(), password),
+        'StuffId': bacy.convert_long(obj.StuffId(), password),
+        'ParcelType': ParcelType(bacy.convert_int(obj.ParcelType_(), password)).name,
+        'ParcelId': bacy.convert_long(obj.ParcelId(), password),
+        'LimitAmount': bacy.convert_int(obj.LimitAmount(), password),
+        'CouponStuffNameLocalizeKey': bacy.convert_string(obj.CouponStuffNameLocalizeKey(), password),
     }
 
 
 def dump_CurrencyExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ID': table_encryption.convert_long(obj.ID(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'CurrencyType': CurrencyTypes(table_encryption.convert_int(obj.CurrencyType(), password)).name,
-        'CurrencyName': table_encryption.convert_string(obj.CurrencyName(), password),
-        'Icon': table_encryption.convert_string(obj.Icon(), password),
-        'Rarity': Rarity(table_encryption.convert_int(obj.Rarity_(), password)).name,
-        'AutoChargeMsc': table_encryption.convert_int(obj.AutoChargeMsc(), password),
-        'AutoChargeAmount': table_encryption.convert_int(obj.AutoChargeAmount(), password),
-        'CurrencyOverChargeType': CurrencyOverChargeType(table_encryption.convert_int(obj.CurrencyOverChargeType_(), password)).name,
-        'CurrencyAdditionalChargeType': CurrencyAdditionalChargeType(table_encryption.convert_int(obj.CurrencyAdditionalChargeType_(), password)).name,
-        'ChargeLimit': table_encryption.convert_long(obj.ChargeLimit(), password),
-        'OverChargeLimit': table_encryption.convert_long(obj.OverChargeLimit(), password),
-        'SpriteName': table_encryption.convert_string(obj.SpriteName(), password),
-        'DailyRefillType': DailyRefillType(table_encryption.convert_int(obj.DailyRefillType_(), password)).name,
-        'DailyRefillAmount': table_encryption.convert_long(obj.DailyRefillAmount(), password),
-        'DailyRefillTime': [table_encryption.convert_long(obj.DailyRefillTime(j), password) for j in range(obj.DailyRefillTimeLength())],
-        'ExpirationDateTime': table_encryption.convert_string(obj.ExpirationDateTime(), password),
-        'ExpirationNotifyDateIn': table_encryption.convert_int(obj.ExpirationNotifyDateIn(), password),
-        'ExpiryChangeParcelType': ParcelType(table_encryption.convert_int(obj.ExpiryChangeParcelType(), password)).name,
-        'ExpiryChangeId': table_encryption.convert_long(obj.ExpiryChangeId(), password),
-        'ExpiryChangeAmount': table_encryption.convert_long(obj.ExpiryChangeAmount(), password),
+        'ID': bacy.convert_long(obj.ID(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'CurrencyType': CurrencyTypes(bacy.convert_int(obj.CurrencyType(), password)).name,
+        'CurrencyName': bacy.convert_string(obj.CurrencyName(), password),
+        'Icon': bacy.convert_string(obj.Icon(), password),
+        'Rarity': Rarity(bacy.convert_int(obj.Rarity_(), password)).name,
+        'AutoChargeMsc': bacy.convert_int(obj.AutoChargeMsc(), password),
+        'AutoChargeAmount': bacy.convert_int(obj.AutoChargeAmount(), password),
+        'CurrencyOverChargeType': CurrencyOverChargeType(bacy.convert_int(obj.CurrencyOverChargeType_(), password)).name,
+        'CurrencyAdditionalChargeType': CurrencyAdditionalChargeType(bacy.convert_int(obj.CurrencyAdditionalChargeType_(), password)).name,
+        'ChargeLimit': bacy.convert_long(obj.ChargeLimit(), password),
+        'OverChargeLimit': bacy.convert_long(obj.OverChargeLimit(), password),
+        'SpriteName': bacy.convert_string(obj.SpriteName(), password),
+        'DailyRefillType': DailyRefillType(bacy.convert_int(obj.DailyRefillType_(), password)).name,
+        'DailyRefillAmount': bacy.convert_long(obj.DailyRefillAmount(), password),
+        'DailyRefillTime': [bacy.convert_long(obj.DailyRefillTime(j), password) for j in range(obj.DailyRefillTimeLength())],
+        'ExpirationDateTime': bacy.convert_string(obj.ExpirationDateTime(), password),
+        'ExpirationNotifyDateIn': bacy.convert_int(obj.ExpirationNotifyDateIn(), password),
+        'ExpiryChangeParcelType': ParcelType(bacy.convert_int(obj.ExpiryChangeParcelType(), password)).name,
+        'ExpiryChangeId': bacy.convert_long(obj.ExpiryChangeId(), password),
+        'ExpiryChangeAmount': bacy.convert_long(obj.ExpiryChangeAmount(), password),
     }
 
 
 def dump_DefaultCharacterExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
         'FavoriteCharacter': obj.FavoriteCharacter(),
-        'Level': table_encryption.convert_int(obj.Level(), password),
-        'Exp': table_encryption.convert_int(obj.Exp(), password),
-        'FavorExp': table_encryption.convert_int(obj.FavorExp(), password),
-        'FavorRank': table_encryption.convert_int(obj.FavorRank(), password),
-        'StarGrade': table_encryption.convert_int(obj.StarGrade(), password),
-        'ExSkillLevel': table_encryption.convert_int(obj.ExSkillLevel(), password),
-        'PassiveSkillLevel': table_encryption.convert_int(obj.PassiveSkillLevel(), password),
-        'ExtraPassiveSkillLevel': table_encryption.convert_int(obj.ExtraPassiveSkillLevel(), password),
-        'CommonSkillLevel': table_encryption.convert_int(obj.CommonSkillLevel(), password),
-        'LeaderSkillLevel': table_encryption.convert_int(obj.LeaderSkillLevel(), password),
+        'Level': bacy.convert_int(obj.Level(), password),
+        'Exp': bacy.convert_int(obj.Exp(), password),
+        'FavorExp': bacy.convert_int(obj.FavorExp(), password),
+        'FavorRank': bacy.convert_int(obj.FavorRank(), password),
+        'StarGrade': bacy.convert_int(obj.StarGrade(), password),
+        'ExSkillLevel': bacy.convert_int(obj.ExSkillLevel(), password),
+        'PassiveSkillLevel': bacy.convert_int(obj.PassiveSkillLevel(), password),
+        'ExtraPassiveSkillLevel': bacy.convert_int(obj.ExtraPassiveSkillLevel(), password),
+        'CommonSkillLevel': bacy.convert_int(obj.CommonSkillLevel(), password),
+        'LeaderSkillLevel': bacy.convert_int(obj.LeaderSkillLevel(), password),
     }
 
 
 def dump_DefaultEchelonExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EchlonId': table_encryption.convert_int(obj.EchlonId(), password),
-        'LeaderId': table_encryption.convert_long(obj.LeaderId(), password),
-        'MainId': [table_encryption.convert_long(obj.MainId(j), password) for j in range(obj.MainIdLength())],
-        'SupportId': [table_encryption.convert_long(obj.SupportId(j), password) for j in range(obj.SupportIdLength())],
-        'TssId': table_encryption.convert_long(obj.TssId(), password),
+        'EchlonId': bacy.convert_int(obj.EchlonId(), password),
+        'LeaderId': bacy.convert_long(obj.LeaderId(), password),
+        'MainId': [bacy.convert_long(obj.MainId(j), password) for j in range(obj.MainIdLength())],
+        'SupportId': [bacy.convert_long(obj.SupportId(j), password) for j in range(obj.SupportIdLength())],
+        'TssId': bacy.convert_long(obj.TssId(), password),
     }
 
 
 def dump_DefaultFurnitureExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Location': FurnitureLocation(table_encryption.convert_int(obj.Location(), password)).name,
-        'PositionX': table_encryption.convert_float(obj.PositionX(), password),
-        'PositionY': table_encryption.convert_float(obj.PositionY(), password),
-        'Rotation': table_encryption.convert_float(obj.Rotation(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Location': FurnitureLocation(bacy.convert_int(obj.Location(), password)).name,
+        'PositionX': bacy.convert_float(obj.PositionX(), password),
+        'PositionY': bacy.convert_float(obj.PositionY(), password),
+        'Rotation': bacy.convert_float(obj.Rotation(), password),
     }
 
 
 def dump_DefaultMailExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'LocalizeCodeId': table_encryption.convert_uint(obj.LocalizeCodeId(), password),
-        'MailType': MailType(table_encryption.convert_int(obj.MailType_(), password)).name,
-        'MailSendPeriodFrom': table_encryption.convert_string(obj.MailSendPeriodFrom(), password),
-        'MailSendPeriodTo': table_encryption.convert_string(obj.MailSendPeriodTo(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardParcelAmount': [table_encryption.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'LocalizeCodeId': bacy.convert_uint(obj.LocalizeCodeId(), password),
+        'MailType': MailType(bacy.convert_int(obj.MailType_(), password)).name,
+        'MailSendPeriodFrom': bacy.convert_string(obj.MailSendPeriodFrom(), password),
+        'MailSendPeriodTo': bacy.convert_string(obj.MailSendPeriodTo(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardParcelAmount': [bacy.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
     }
 
 
 def dump_DefaultParcelExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ParcelType': ParcelType(table_encryption.convert_int(obj.ParcelType_(), password)).name,
-        'ParcelId': table_encryption.convert_long(obj.ParcelId(), password),
-        'ParcelAmount': table_encryption.convert_long(obj.ParcelAmount(), password),
+        'ParcelType': ParcelType(bacy.convert_int(obj.ParcelType_(), password)).name,
+        'ParcelId': bacy.convert_long(obj.ParcelId(), password),
+        'ParcelAmount': bacy.convert_long(obj.ParcelAmount(), password),
     }
 
 
 def dump_DuplicateBonusExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'ItemCategory': ItemCategory(table_encryption.convert_int(obj.ItemCategory_(), password)).name,
-        'ItemId': table_encryption.convert_long(obj.ItemId(), password),
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardParcelId': table_encryption.convert_long(obj.RewardParcelId(), password),
-        'RewardParcelAmount': table_encryption.convert_long(obj.RewardParcelAmount(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'ItemCategory': ItemCategory(bacy.convert_int(obj.ItemCategory_(), password)).name,
+        'ItemId': bacy.convert_long(obj.ItemId(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardParcelId': bacy.convert_long(obj.RewardParcelId(), password),
+        'RewardParcelAmount': bacy.convert_long(obj.RewardParcelAmount(), password),
     }
 
 
 def dump_EchelonConstraintExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
         'IsWhiteList': obj.IsWhiteList(),
-        'CharacterId': [table_encryption.convert_long(obj.CharacterId(j), password) for j in range(obj.CharacterIdLength())],
-        'PersonalityId': [table_encryption.convert_long(obj.PersonalityId(j), password) for j in range(obj.PersonalityIdLength())],
-        'WeaponType': WeaponType(table_encryption.convert_int(obj.WeaponType_(), password)).name,
-        'School': School(table_encryption.convert_int(obj.School_(), password)).name,
-        'Club': Club(table_encryption.convert_int(obj.Club_(), password)).name,
-        'Role': TacticRole(table_encryption.convert_int(obj.Role(), password)).name,
+        'CharacterId': [bacy.convert_long(obj.CharacterId(j), password) for j in range(obj.CharacterIdLength())],
+        'PersonalityId': [bacy.convert_long(obj.PersonalityId(j), password) for j in range(obj.PersonalityIdLength())],
+        'WeaponType': WeaponType(bacy.convert_int(obj.WeaponType_(), password)).name,
+        'School': School(bacy.convert_int(obj.School_(), password)).name,
+        'Club': Club(bacy.convert_int(obj.Club_(), password)).name,
+        'Role': TacticRole(bacy.convert_int(obj.Role(), password)).name,
     }
 
 
 def dump_EliminateRaidRankingRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'RankingRewardGroupId': table_encryption.convert_long(obj.RankingRewardGroupId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'RankStart': table_encryption.convert_long(obj.RankStart(), password),
-        'RankEnd': table_encryption.convert_long(obj.RankEnd(), password),
-        'PercentRankStart': table_encryption.convert_long(obj.PercentRankStart(), password),
-        'PercentRankEnd': table_encryption.convert_long(obj.PercentRankEnd(), password),
-        'Tier': table_encryption.convert_int(obj.Tier(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelUniqueId': [table_encryption.convert_long(obj.RewardParcelUniqueId(j), password) for j in range(obj.RewardParcelUniqueIdLength())],
-        'RewardParcelUniqueName': [table_encryption.convert_string(obj.RewardParcelUniqueName(j), password) for j in range(obj.RewardParcelUniqueNameLength())],
-        'RewardParcelAmount': [table_encryption.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'RankingRewardGroupId': bacy.convert_long(obj.RankingRewardGroupId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'RankStart': bacy.convert_long(obj.RankStart(), password),
+        'RankEnd': bacy.convert_long(obj.RankEnd(), password),
+        'PercentRankStart': bacy.convert_long(obj.PercentRankStart(), password),
+        'PercentRankEnd': bacy.convert_long(obj.PercentRankEnd(), password),
+        'Tier': bacy.convert_int(obj.Tier(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelUniqueId': [bacy.convert_long(obj.RewardParcelUniqueId(j), password) for j in range(obj.RewardParcelUniqueIdLength())],
+        'RewardParcelUniqueName': [bacy.convert_string(obj.RewardParcelUniqueName(j), password) for j in range(obj.RewardParcelUniqueNameLength())],
+        'RewardParcelAmount': [bacy.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
     }
 
 
 def dump_EliminateRaidSeasonManageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'SeasonId': table_encryption.convert_long(obj.SeasonId(), password),
-        'SeasonDisplay': table_encryption.convert_long(obj.SeasonDisplay(), password),
-        'SeasonStartData': table_encryption.convert_string(obj.SeasonStartData(), password),
-        'SeasonEndData': table_encryption.convert_string(obj.SeasonEndData(), password),
-        'SettlementEndDate': table_encryption.convert_string(obj.SettlementEndDate(), password),
-        'LobbyTableBGPath': table_encryption.convert_string(obj.LobbyTableBGPath(), password),
-        'LobbyScreenBGPath': table_encryption.convert_string(obj.LobbyScreenBGPath(), password),
-        'OpenRaidBossGroup01': table_encryption.convert_string(obj.OpenRaidBossGroup01(), password),
-        'OpenRaidBossGroup02': table_encryption.convert_string(obj.OpenRaidBossGroup02(), password),
-        'OpenRaidBossGroup03': table_encryption.convert_string(obj.OpenRaidBossGroup03(), password),
-        'RankingRewardGroupId': table_encryption.convert_long(obj.RankingRewardGroupId(), password),
-        'MaxSeasonRewardGauage': table_encryption.convert_int(obj.MaxSeasonRewardGauage(), password),
-        'StackedSeasonRewardGauge': [table_encryption.convert_long(obj.StackedSeasonRewardGauge(j), password) for j in range(obj.StackedSeasonRewardGaugeLength())],
-        'SeasonRewardId': [table_encryption.convert_long(obj.SeasonRewardId(j), password) for j in range(obj.SeasonRewardIdLength())],
-        'LimitedRewardIdNormal': table_encryption.convert_long(obj.LimitedRewardIdNormal(), password),
-        'LimitedRewardIdHard': table_encryption.convert_long(obj.LimitedRewardIdHard(), password),
-        'LimitedRewardIdVeryhard': table_encryption.convert_long(obj.LimitedRewardIdVeryhard(), password),
-        'LimitedRewardIdHardcore': table_encryption.convert_long(obj.LimitedRewardIdHardcore(), password),
-        'LimitedRewardIdExtreme': table_encryption.convert_long(obj.LimitedRewardIdExtreme(), password),
-        'LimitedRewardIdInsane': table_encryption.convert_long(obj.LimitedRewardIdInsane(), password),
-        'LimitedRewardIdTorment': table_encryption.convert_long(obj.LimitedRewardIdTorment(), password),
+        'SeasonId': bacy.convert_long(obj.SeasonId(), password),
+        'SeasonDisplay': bacy.convert_long(obj.SeasonDisplay(), password),
+        'SeasonStartData': bacy.convert_string(obj.SeasonStartData(), password),
+        'SeasonEndData': bacy.convert_string(obj.SeasonEndData(), password),
+        'SettlementEndDate': bacy.convert_string(obj.SettlementEndDate(), password),
+        'LobbyTableBGPath': bacy.convert_string(obj.LobbyTableBGPath(), password),
+        'LobbyScreenBGPath': bacy.convert_string(obj.LobbyScreenBGPath(), password),
+        'OpenRaidBossGroup01': bacy.convert_string(obj.OpenRaidBossGroup01(), password),
+        'OpenRaidBossGroup02': bacy.convert_string(obj.OpenRaidBossGroup02(), password),
+        'OpenRaidBossGroup03': bacy.convert_string(obj.OpenRaidBossGroup03(), password),
+        'RankingRewardGroupId': bacy.convert_long(obj.RankingRewardGroupId(), password),
+        'MaxSeasonRewardGauage': bacy.convert_int(obj.MaxSeasonRewardGauage(), password),
+        'StackedSeasonRewardGauge': [bacy.convert_long(obj.StackedSeasonRewardGauge(j), password) for j in range(obj.StackedSeasonRewardGaugeLength())],
+        'SeasonRewardId': [bacy.convert_long(obj.SeasonRewardId(j), password) for j in range(obj.SeasonRewardIdLength())],
+        'LimitedRewardIdNormal': bacy.convert_long(obj.LimitedRewardIdNormal(), password),
+        'LimitedRewardIdHard': bacy.convert_long(obj.LimitedRewardIdHard(), password),
+        'LimitedRewardIdVeryhard': bacy.convert_long(obj.LimitedRewardIdVeryhard(), password),
+        'LimitedRewardIdHardcore': bacy.convert_long(obj.LimitedRewardIdHardcore(), password),
+        'LimitedRewardIdExtreme': bacy.convert_long(obj.LimitedRewardIdExtreme(), password),
+        'LimitedRewardIdInsane': bacy.convert_long(obj.LimitedRewardIdInsane(), password),
+        'LimitedRewardIdTorment': bacy.convert_long(obj.LimitedRewardIdTorment(), password),
     }
 
 
 def dump_EliminateRaidStageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
         'UseBossIndex': obj.UseBossIndex(),
         'UseBossAIPhaseSync': obj.UseBossAIPhaseSync(),
-        'RaidBossGroup': table_encryption.convert_string(obj.RaidBossGroup(), password),
-        'RaidEnterCostType': ParcelType(table_encryption.convert_int(obj.RaidEnterCostType(), password)).name,
-        'RaidEnterCostId': table_encryption.convert_long(obj.RaidEnterCostId(), password),
-        'RaidEnterCostAmount': table_encryption.convert_int(obj.RaidEnterCostAmount(), password),
-        'BossSpinePath': table_encryption.convert_string(obj.BossSpinePath(), password),
-        'PortraitPath': table_encryption.convert_string(obj.PortraitPath(), password),
-        'BGPath': table_encryption.convert_string(obj.BGPath(), password),
-        'RaidCharacterId': table_encryption.convert_long(obj.RaidCharacterId(), password),
-        'BossCharacterId': [table_encryption.convert_long(obj.BossCharacterId(j), password) for j in range(obj.BossCharacterIdLength())],
-        'Difficulty': Difficulty(table_encryption.convert_int(obj.Difficulty_(), password)).name,
+        'RaidBossGroup': bacy.convert_string(obj.RaidBossGroup(), password),
+        'RaidEnterCostType': ParcelType(bacy.convert_int(obj.RaidEnterCostType(), password)).name,
+        'RaidEnterCostId': bacy.convert_long(obj.RaidEnterCostId(), password),
+        'RaidEnterCostAmount': bacy.convert_int(obj.RaidEnterCostAmount(), password),
+        'BossSpinePath': bacy.convert_string(obj.BossSpinePath(), password),
+        'PortraitPath': bacy.convert_string(obj.PortraitPath(), password),
+        'BGPath': bacy.convert_string(obj.BGPath(), password),
+        'RaidCharacterId': bacy.convert_long(obj.RaidCharacterId(), password),
+        'BossCharacterId': [bacy.convert_long(obj.BossCharacterId(j), password) for j in range(obj.BossCharacterIdLength())],
+        'Difficulty': Difficulty(bacy.convert_int(obj.Difficulty_(), password)).name,
         'IsOpen': obj.IsOpen(),
-        'MaxPlayerCount': table_encryption.convert_long(obj.MaxPlayerCount(), password),
-        'RaidRoomLifeTime': table_encryption.convert_int(obj.RaidRoomLifeTime(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
-        'GroundDevName': table_encryption.convert_string(obj.GroundDevName(), password),
-        'EnterTimeLine': table_encryption.convert_string(obj.EnterTimeLine(), password),
-        'TacticEnvironment': TacticEnvironment(table_encryption.convert_int(obj.TacticEnvironment_(), password)).name,
-        'DefaultClearScore': table_encryption.convert_long(obj.DefaultClearScore(), password),
-        'MaximumScore': table_encryption.convert_long(obj.MaximumScore(), password),
-        'PerSecondMinusScore': table_encryption.convert_long(obj.PerSecondMinusScore(), password),
-        'HPPercentScore': table_encryption.convert_long(obj.HPPercentScore(), password),
-        'MinimumAcquisitionScore': table_encryption.convert_long(obj.MinimumAcquisitionScore(), password),
-        'MaximumAcquisitionScore': table_encryption.convert_long(obj.MaximumAcquisitionScore(), password),
-        'RaidRewardGroupId': table_encryption.convert_long(obj.RaidRewardGroupId(), password),
-        'BattleReadyTimelinePath': [table_encryption.convert_string(obj.BattleReadyTimelinePath(j), password) for j in range(obj.BattleReadyTimelinePathLength())],
-        'BattleReadyTimelinePhaseStart': [table_encryption.convert_int(obj.BattleReadyTimelinePhaseStart(j), password) for j in range(obj.BattleReadyTimelinePhaseStartLength())],
-        'BattleReadyTimelinePhaseEnd': [table_encryption.convert_int(obj.BattleReadyTimelinePhaseEnd(j), password) for j in range(obj.BattleReadyTimelinePhaseEndLength())],
-        'VictoryTimelinePath': table_encryption.convert_string(obj.VictoryTimelinePath(), password),
-        'PhaseChangeTimelinePath': table_encryption.convert_string(obj.PhaseChangeTimelinePath(), password),
-        'TimeLinePhase': table_encryption.convert_long(obj.TimeLinePhase(), password),
-        'EnterScenarioKey': table_encryption.convert_uint(obj.EnterScenarioKey(), password),
-        'ClearScenarioKey': table_encryption.convert_uint(obj.ClearScenarioKey(), password),
+        'MaxPlayerCount': bacy.convert_long(obj.MaxPlayerCount(), password),
+        'RaidRoomLifeTime': bacy.convert_int(obj.RaidRoomLifeTime(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
+        'GroundDevName': bacy.convert_string(obj.GroundDevName(), password),
+        'EnterTimeLine': bacy.convert_string(obj.EnterTimeLine(), password),
+        'TacticEnvironment': TacticEnvironment(bacy.convert_int(obj.TacticEnvironment_(), password)).name,
+        'DefaultClearScore': bacy.convert_long(obj.DefaultClearScore(), password),
+        'MaximumScore': bacy.convert_long(obj.MaximumScore(), password),
+        'PerSecondMinusScore': bacy.convert_long(obj.PerSecondMinusScore(), password),
+        'HPPercentScore': bacy.convert_long(obj.HPPercentScore(), password),
+        'MinimumAcquisitionScore': bacy.convert_long(obj.MinimumAcquisitionScore(), password),
+        'MaximumAcquisitionScore': bacy.convert_long(obj.MaximumAcquisitionScore(), password),
+        'RaidRewardGroupId': bacy.convert_long(obj.RaidRewardGroupId(), password),
+        'BattleReadyTimelinePath': [bacy.convert_string(obj.BattleReadyTimelinePath(j), password) for j in range(obj.BattleReadyTimelinePathLength())],
+        'BattleReadyTimelinePhaseStart': [bacy.convert_int(obj.BattleReadyTimelinePhaseStart(j), password) for j in range(obj.BattleReadyTimelinePhaseStartLength())],
+        'BattleReadyTimelinePhaseEnd': [bacy.convert_int(obj.BattleReadyTimelinePhaseEnd(j), password) for j in range(obj.BattleReadyTimelinePhaseEndLength())],
+        'VictoryTimelinePath': bacy.convert_string(obj.VictoryTimelinePath(), password),
+        'PhaseChangeTimelinePath': bacy.convert_string(obj.PhaseChangeTimelinePath(), password),
+        'TimeLinePhase': bacy.convert_long(obj.TimeLinePhase(), password),
+        'EnterScenarioKey': bacy.convert_uint(obj.EnterScenarioKey(), password),
+        'ClearScenarioKey': bacy.convert_uint(obj.ClearScenarioKey(), password),
         'ShowSkillCard': obj.ShowSkillCard(),
-        'BossBGInfoKey': table_encryption.convert_uint(obj.BossBGInfoKey(), password),
-        'EchelonExtensionType': EchelonExtensionType(table_encryption.convert_int(obj.EchelonExtensionType_(), password)).name,
+        'BossBGInfoKey': bacy.convert_uint(obj.BossBGInfoKey(), password),
+        'EchelonExtensionType': EchelonExtensionType(bacy.convert_int(obj.EchelonExtensionType_(), password)).name,
     }
 
 
 def dump_EliminateRaidStageLimitedRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'LimitedRewardId': table_encryption.convert_long(obj.LimitedRewardId(), password),
-        'LimitedRewardParcelType': [ParcelType(table_encryption.convert_int(obj.LimitedRewardParcelType(j), password)).name for j in range(obj.LimitedRewardParcelTypeLength())],
-        'LimitedRewardParcelUniqueId': [table_encryption.convert_long(obj.LimitedRewardParcelUniqueId(j), password) for j in range(obj.LimitedRewardParcelUniqueIdLength())],
-        'LimitedRewardAmount': [table_encryption.convert_long(obj.LimitedRewardAmount(j), password) for j in range(obj.LimitedRewardAmountLength())],
+        'LimitedRewardId': bacy.convert_long(obj.LimitedRewardId(), password),
+        'LimitedRewardParcelType': [ParcelType(bacy.convert_int(obj.LimitedRewardParcelType(j), password)).name for j in range(obj.LimitedRewardParcelTypeLength())],
+        'LimitedRewardParcelUniqueId': [bacy.convert_long(obj.LimitedRewardParcelUniqueId(j), password) for j in range(obj.LimitedRewardParcelUniqueIdLength())],
+        'LimitedRewardAmount': [bacy.convert_long(obj.LimitedRewardAmount(j), password) for j in range(obj.LimitedRewardAmountLength())],
     }
 
 
 def dump_EliminateRaidStageRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
         'IsClearStageRewardHideInfo': obj.IsClearStageRewardHideInfo(),
-        'ClearStageRewardProb': table_encryption.convert_long(obj.ClearStageRewardProb(), password),
-        'ClearStageRewardParcelType': ParcelType(table_encryption.convert_int(obj.ClearStageRewardParcelType(), password)).name,
-        'ClearStageRewardParcelUniqueID': table_encryption.convert_long(obj.ClearStageRewardParcelUniqueID(), password),
-        'ClearStageRewardParcelUniqueName': table_encryption.convert_string(obj.ClearStageRewardParcelUniqueName(), password),
-        'ClearStageRewardAmount': table_encryption.convert_long(obj.ClearStageRewardAmount(), password),
+        'ClearStageRewardProb': bacy.convert_long(obj.ClearStageRewardProb(), password),
+        'ClearStageRewardParcelType': ParcelType(bacy.convert_int(obj.ClearStageRewardParcelType(), password)).name,
+        'ClearStageRewardParcelUniqueID': bacy.convert_long(obj.ClearStageRewardParcelUniqueID(), password),
+        'ClearStageRewardParcelUniqueName': bacy.convert_string(obj.ClearStageRewardParcelUniqueName(), password),
+        'ClearStageRewardAmount': bacy.convert_long(obj.ClearStageRewardAmount(), password),
     }
 
 
 def dump_EliminateRaidStageSeasonRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'SeasonRewardId': table_encryption.convert_long(obj.SeasonRewardId(), password),
-        'SeasonRewardParcelType': [ParcelType(table_encryption.convert_int(obj.SeasonRewardParcelType(j), password)).name for j in range(obj.SeasonRewardParcelTypeLength())],
-        'SeasonRewardParcelUniqueId': [table_encryption.convert_long(obj.SeasonRewardParcelUniqueId(j), password) for j in range(obj.SeasonRewardParcelUniqueIdLength())],
-        'SeasonRewardParcelUniqueName': [table_encryption.convert_string(obj.SeasonRewardParcelUniqueName(j), password) for j in range(obj.SeasonRewardParcelUniqueNameLength())],
-        'SeasonRewardAmount': [table_encryption.convert_long(obj.SeasonRewardAmount(j), password) for j in range(obj.SeasonRewardAmountLength())],
+        'SeasonRewardId': bacy.convert_long(obj.SeasonRewardId(), password),
+        'SeasonRewardParcelType': [ParcelType(bacy.convert_int(obj.SeasonRewardParcelType(j), password)).name for j in range(obj.SeasonRewardParcelTypeLength())],
+        'SeasonRewardParcelUniqueId': [bacy.convert_long(obj.SeasonRewardParcelUniqueId(j), password) for j in range(obj.SeasonRewardParcelUniqueIdLength())],
+        'SeasonRewardParcelUniqueName': [bacy.convert_string(obj.SeasonRewardParcelUniqueName(j), password) for j in range(obj.SeasonRewardParcelUniqueNameLength())],
+        'SeasonRewardAmount': [bacy.convert_long(obj.SeasonRewardAmount(j), password) for j in range(obj.SeasonRewardAmountLength())],
     }
 
 
 def dump_EmblemExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Category': EmblemCategory(table_encryption.convert_int(obj.Category(), password)).name,
-        'Rarity': Rarity(table_encryption.convert_int(obj.Rarity_(), password)).name,
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'LocalizeCodeId': table_encryption.convert_uint(obj.LocalizeCodeId(), password),
-        'UseAtLocalizeId': table_encryption.convert_long(obj.UseAtLocalizeId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Category': EmblemCategory(bacy.convert_int(obj.Category(), password)).name,
+        'Rarity': Rarity(bacy.convert_int(obj.Rarity_(), password)).name,
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'LocalizeCodeId': bacy.convert_uint(obj.LocalizeCodeId(), password),
+        'UseAtLocalizeId': bacy.convert_long(obj.UseAtLocalizeId(), password),
         'EmblemTextVisible': obj.EmblemTextVisible(),
-        'IconPath': table_encryption.convert_string(obj.IconPath(), password),
-        'EmblemIconPath': table_encryption.convert_string(obj.EmblemIconPath(), password),
-        'EmblemIconNumControl': table_encryption.convert_int(obj.EmblemIconNumControl(), password),
-        'EmblemIconBGPath': table_encryption.convert_string(obj.EmblemIconBGPath(), password),
-        'EmblemBGPathJp': table_encryption.convert_string(obj.EmblemBGPathJp(), password),
-        'EmblemBGPathKr': table_encryption.convert_string(obj.EmblemBGPathKr(), password),
-        'DisplayType': EmblemDisplayType(table_encryption.convert_int(obj.DisplayType(), password)).name,
-        'DisplayStartDate': table_encryption.convert_string(obj.DisplayStartDate(), password),
-        'DisplayEndDate': table_encryption.convert_string(obj.DisplayEndDate(), password),
-        'DislpayFavorLevel': table_encryption.convert_int(obj.DislpayFavorLevel(), password),
-        'CheckPassType': EmblemCheckPassType(table_encryption.convert_int(obj.CheckPassType(), password)).name,
-        'EmblemParameter': table_encryption.convert_long(obj.EmblemParameter(), password),
-        'CheckPassCount': table_encryption.convert_long(obj.CheckPassCount(), password),
+        'IconPath': bacy.convert_string(obj.IconPath(), password),
+        'EmblemIconPath': bacy.convert_string(obj.EmblemIconPath(), password),
+        'EmblemIconNumControl': bacy.convert_int(obj.EmblemIconNumControl(), password),
+        'EmblemIconBGPath': bacy.convert_string(obj.EmblemIconBGPath(), password),
+        'EmblemBGPathJp': bacy.convert_string(obj.EmblemBGPathJp(), password),
+        'EmblemBGPathKr': bacy.convert_string(obj.EmblemBGPathKr(), password),
+        'DisplayType': EmblemDisplayType(bacy.convert_int(obj.DisplayType(), password)).name,
+        'DisplayStartDate': bacy.convert_string(obj.DisplayStartDate(), password),
+        'DisplayEndDate': bacy.convert_string(obj.DisplayEndDate(), password),
+        'DislpayFavorLevel': bacy.convert_int(obj.DislpayFavorLevel(), password),
+        'CheckPassType': EmblemCheckPassType(bacy.convert_int(obj.CheckPassType(), password)).name,
+        'EmblemParameter': bacy.convert_long(obj.EmblemParameter(), password),
+        'CheckPassCount': bacy.convert_long(obj.CheckPassCount(), password),
     }
 
 
 def dump_EmoticonSpecialExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'CharacterUniqueId': table_encryption.convert_long(obj.CharacterUniqueId(), password),
-        'Random': table_encryption.convert_string(obj.Random(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'CharacterUniqueId': bacy.convert_long(obj.CharacterUniqueId(), password),
+        'Random': bacy.convert_string(obj.Random(), password),
     }
 
 
 def dump_EquipmentExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EquipmentCategory': EquipmentCategory(table_encryption.convert_int(obj.EquipmentCategory_(), password)).name,
-        'Rarity': Rarity(table_encryption.convert_int(obj.Rarity_(), password)).name,
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EquipmentCategory': EquipmentCategory(bacy.convert_int(obj.EquipmentCategory_(), password)).name,
+        'Rarity': Rarity(bacy.convert_int(obj.Rarity_(), password)).name,
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
         'Wear': obj.Wear(),
-        'MaxLevel': table_encryption.convert_int(obj.MaxLevel(), password),
-        'RecipeId': table_encryption.convert_int(obj.RecipeId(), password),
-        'TierInit': table_encryption.convert_long(obj.TierInit(), password),
-        'NextTierEquipment': table_encryption.convert_long(obj.NextTierEquipment(), password),
-        'StackableMax': table_encryption.convert_int(obj.StackableMax(), password),
-        'Icon': table_encryption.convert_string(obj.Icon(), password),
-        'ImageName': table_encryption.convert_string(obj.ImageName(), password),
-        'Tags': [Tag(table_encryption.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
-        'CraftQualityTier0': table_encryption.convert_long(obj.CraftQualityTier0(), password),
-        'CraftQualityTier1': table_encryption.convert_long(obj.CraftQualityTier1(), password),
-        'CraftQualityTier2': table_encryption.convert_long(obj.CraftQualityTier2(), password),
-        'ShiftingCraftQuality': table_encryption.convert_long(obj.ShiftingCraftQuality(), password),
-        'ShopCategory': [ShopCategoryType(table_encryption.convert_int(obj.ShopCategory(j), password)).name for j in range(obj.ShopCategoryLength())],
-        'ShortcutTypeId': table_encryption.convert_long(obj.ShortcutTypeId(), password),
+        'MaxLevel': bacy.convert_int(obj.MaxLevel(), password),
+        'RecipeId': bacy.convert_int(obj.RecipeId(), password),
+        'TierInit': bacy.convert_long(obj.TierInit(), password),
+        'NextTierEquipment': bacy.convert_long(obj.NextTierEquipment(), password),
+        'StackableMax': bacy.convert_int(obj.StackableMax(), password),
+        'Icon': bacy.convert_string(obj.Icon(), password),
+        'ImageName': bacy.convert_string(obj.ImageName(), password),
+        'Tags': [Tag(bacy.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
+        'CraftQualityTier0': bacy.convert_long(obj.CraftQualityTier0(), password),
+        'CraftQualityTier1': bacy.convert_long(obj.CraftQualityTier1(), password),
+        'CraftQualityTier2': bacy.convert_long(obj.CraftQualityTier2(), password),
+        'ShiftingCraftQuality': bacy.convert_long(obj.ShiftingCraftQuality(), password),
+        'ShopCategory': [ShopCategoryType(bacy.convert_int(obj.ShopCategory(j), password)).name for j in range(obj.ShopCategoryLength())],
+        'ShortcutTypeId': bacy.convert_long(obj.ShortcutTypeId(), password),
     }
 
 
 def dump_EquipmentLevelExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Level': table_encryption.convert_int(obj.Level(), password),
-        'TierLevelExp': [table_encryption.convert_long(obj.TierLevelExp(j), password) for j in range(obj.TierLevelExpLength())],
-        'TotalExp': [table_encryption.convert_long(obj.TotalExp(j), password) for j in range(obj.TotalExpLength())],
+        'Level': bacy.convert_int(obj.Level(), password),
+        'TierLevelExp': [bacy.convert_long(obj.TierLevelExp(j), password) for j in range(obj.TierLevelExpLength())],
+        'TotalExp': [bacy.convert_long(obj.TotalExp(j), password) for j in range(obj.TotalExpLength())],
     }
 
 
 def dump_EquipmentStatExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EquipmentId': table_encryption.convert_long(obj.EquipmentId(), password),
-        'StatLevelUpType': StatLevelUpType(table_encryption.convert_int(obj.StatLevelUpType_(), password)).name,
-        'StatType': [EquipmentOptionType(table_encryption.convert_int(obj.StatType(j), password)).name for j in range(obj.StatTypeLength())],
-        'MinStat': [table_encryption.convert_long(obj.MinStat(j), password) for j in range(obj.MinStatLength())],
-        'MaxStat': [table_encryption.convert_long(obj.MaxStat(j), password) for j in range(obj.MaxStatLength())],
-        'LevelUpInsertLimit': table_encryption.convert_int(obj.LevelUpInsertLimit(), password),
-        'LevelUpFeedExp': table_encryption.convert_long(obj.LevelUpFeedExp(), password),
-        'LevelUpFeedCostCurrency': CurrencyTypes(table_encryption.convert_int(obj.LevelUpFeedCostCurrency(), password)).name,
-        'LevelUpFeedCostAmount': table_encryption.convert_long(obj.LevelUpFeedCostAmount(), password),
-        'EquipmentCategory': EquipmentCategory(table_encryption.convert_int(obj.EquipmentCategory_(), password)).name,
-        'LevelUpFeedAddExp': table_encryption.convert_long(obj.LevelUpFeedAddExp(), password),
-        'DefaultMaxLevel': table_encryption.convert_int(obj.DefaultMaxLevel(), password),
-        'TranscendenceMax': table_encryption.convert_int(obj.TranscendenceMax(), password),
-        'DamageFactorGroupId': table_encryption.convert_string(obj.DamageFactorGroupId(), password),
+        'EquipmentId': bacy.convert_long(obj.EquipmentId(), password),
+        'StatLevelUpType': StatLevelUpType(bacy.convert_int(obj.StatLevelUpType_(), password)).name,
+        'StatType': [EquipmentOptionType(bacy.convert_int(obj.StatType(j), password)).name for j in range(obj.StatTypeLength())],
+        'MinStat': [bacy.convert_long(obj.MinStat(j), password) for j in range(obj.MinStatLength())],
+        'MaxStat': [bacy.convert_long(obj.MaxStat(j), password) for j in range(obj.MaxStatLength())],
+        'LevelUpInsertLimit': bacy.convert_int(obj.LevelUpInsertLimit(), password),
+        'LevelUpFeedExp': bacy.convert_long(obj.LevelUpFeedExp(), password),
+        'LevelUpFeedCostCurrency': CurrencyTypes(bacy.convert_int(obj.LevelUpFeedCostCurrency(), password)).name,
+        'LevelUpFeedCostAmount': bacy.convert_long(obj.LevelUpFeedCostAmount(), password),
+        'EquipmentCategory': EquipmentCategory(bacy.convert_int(obj.EquipmentCategory_(), password)).name,
+        'LevelUpFeedAddExp': bacy.convert_long(obj.LevelUpFeedAddExp(), password),
+        'DefaultMaxLevel': bacy.convert_int(obj.DefaultMaxLevel(), password),
+        'TranscendenceMax': bacy.convert_int(obj.TranscendenceMax(), password),
+        'DamageFactorGroupId': bacy.convert_string(obj.DamageFactorGroupId(), password),
     }
 
 
 def dump_EventContentArchiveBannerOffsetExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'OffsetX': table_encryption.convert_float(obj.OffsetX(), password),
-        'OffsetY': table_encryption.convert_float(obj.OffsetY(), password),
-        'ScaleX': table_encryption.convert_float(obj.ScaleX(), password),
-        'ScaleY': table_encryption.convert_float(obj.ScaleY(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'OffsetX': bacy.convert_float(obj.OffsetX(), password),
+        'OffsetY': bacy.convert_float(obj.OffsetY(), password),
+        'ScaleX': bacy.convert_float(obj.ScaleX(), password),
+        'ScaleY': bacy.convert_float(obj.ScaleY(), password),
     }
 
 
 def dump_EventContentBoxGachaElementExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Round': table_encryption.convert_long(obj.Round(), password),
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Round': bacy.convert_long(obj.Round(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
     }
 
 
 def dump_EventContentBoxGachaManageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'Round': table_encryption.convert_long(obj.Round(), password),
-        'GoodsId': table_encryption.convert_long(obj.GoodsId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'Round': bacy.convert_long(obj.Round(), password),
+        'GoodsId': bacy.convert_long(obj.GoodsId(), password),
         'IsLoop': obj.IsLoop(),
     }
 
 
 def dump_EventContentBoxGachaShopExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'GroupElementAmount': table_encryption.convert_long(obj.GroupElementAmount(), password),
-        'Round': table_encryption.convert_long(obj.Round(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'GroupElementAmount': bacy.convert_long(obj.GroupElementAmount(), password),
+        'Round': bacy.convert_long(obj.Round(), password),
         'IsLegacy': obj.IsLegacy(),
         'IsPrize': obj.IsPrize(),
-        'GoodsId': [table_encryption.convert_long(obj.GoodsId(j), password) for j in range(obj.GoodsIdLength())],
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
+        'GoodsId': [bacy.convert_long(obj.GoodsId(j), password) for j in range(obj.GoodsIdLength())],
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
     }
 
 
 def dump_EventContentBuffExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentBuffId': table_encryption.convert_long(obj.EventContentBuffId(), password),
+        'EventContentBuffId': bacy.convert_long(obj.EventContentBuffId(), password),
         'IsBuff': obj.IsBuff(),
-        'CharacterTag': Tag(table_encryption.convert_int(obj.CharacterTag(), password)).name,
-        'EnumType': EventContentBuffFindRule(table_encryption.convert_int(obj.EnumType(), password)).name,
-        'EnumTypeValue': [table_encryption.convert_string(obj.EnumTypeValue(j), password) for j in range(obj.EnumTypeValueLength())],
-        'SkillGroupId': table_encryption.convert_string(obj.SkillGroupId(), password),
-        'IconPath': table_encryption.convert_string(obj.IconPath(), password),
-        'SpriteName': table_encryption.convert_string(obj.SpriteName(), password),
-        'BuffDescriptionLocalizeCodeId': table_encryption.convert_string(obj.BuffDescriptionLocalizeCodeId(), password),
+        'CharacterTag': Tag(bacy.convert_int(obj.CharacterTag(), password)).name,
+        'EnumType': EventContentBuffFindRule(bacy.convert_int(obj.EnumType(), password)).name,
+        'EnumTypeValue': [bacy.convert_string(obj.EnumTypeValue(j), password) for j in range(obj.EnumTypeValueLength())],
+        'SkillGroupId': bacy.convert_string(obj.SkillGroupId(), password),
+        'IconPath': bacy.convert_string(obj.IconPath(), password),
+        'SpriteName': bacy.convert_string(obj.SpriteName(), password),
+        'BuffDescriptionLocalizeCodeId': bacy.convert_string(obj.BuffDescriptionLocalizeCodeId(), password),
     }
 
 
 def dump_EventContentBuffGroupExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'BuffContentId': table_encryption.convert_long(obj.BuffContentId(), password),
-        'BuffGroupId': table_encryption.convert_long(obj.BuffGroupId(), password),
-        'BuffGroupNameLocalizeCodeId': table_encryption.convert_string(obj.BuffGroupNameLocalizeCodeId(), password),
-        'EventContentBuffId1': table_encryption.convert_long(obj.EventContentBuffId1(), password),
-        'BuffNameLocalizeCodeId1': table_encryption.convert_string(obj.BuffNameLocalizeCodeId1(), password),
-        'BuffDescriptionIconPath1': table_encryption.convert_string(obj.BuffDescriptionIconPath1(), password),
-        'EventContentBuffId2': table_encryption.convert_long(obj.EventContentBuffId2(), password),
-        'BuffNameLocalizeCodeId2': table_encryption.convert_string(obj.BuffNameLocalizeCodeId2(), password),
-        'BuffDescriptionIconPath2': table_encryption.convert_string(obj.BuffDescriptionIconPath2(), password),
-        'EventContentDebuffId': table_encryption.convert_long(obj.EventContentDebuffId(), password),
-        'DebuffNameLocalizeCodeId': table_encryption.convert_string(obj.DebuffNameLocalizeCodeId(), password),
-        'DeBuffDescriptionIconPath': table_encryption.convert_string(obj.DeBuffDescriptionIconPath(), password),
-        'BuffGroupProb': table_encryption.convert_long(obj.BuffGroupProb(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'BuffContentId': bacy.convert_long(obj.BuffContentId(), password),
+        'BuffGroupId': bacy.convert_long(obj.BuffGroupId(), password),
+        'BuffGroupNameLocalizeCodeId': bacy.convert_string(obj.BuffGroupNameLocalizeCodeId(), password),
+        'EventContentBuffId1': bacy.convert_long(obj.EventContentBuffId1(), password),
+        'BuffNameLocalizeCodeId1': bacy.convert_string(obj.BuffNameLocalizeCodeId1(), password),
+        'BuffDescriptionIconPath1': bacy.convert_string(obj.BuffDescriptionIconPath1(), password),
+        'EventContentBuffId2': bacy.convert_long(obj.EventContentBuffId2(), password),
+        'BuffNameLocalizeCodeId2': bacy.convert_string(obj.BuffNameLocalizeCodeId2(), password),
+        'BuffDescriptionIconPath2': bacy.convert_string(obj.BuffDescriptionIconPath2(), password),
+        'EventContentDebuffId': bacy.convert_long(obj.EventContentDebuffId(), password),
+        'DebuffNameLocalizeCodeId': bacy.convert_string(obj.DebuffNameLocalizeCodeId(), password),
+        'DeBuffDescriptionIconPath': bacy.convert_string(obj.DeBuffDescriptionIconPath(), password),
+        'BuffGroupProb': bacy.convert_long(obj.BuffGroupProb(), password),
     }
 
 
 def dump_EventContentCardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CardGroupId': table_encryption.convert_int(obj.CardGroupId(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'IconPath': table_encryption.convert_string(obj.IconPath(), password),
-        'BackIconPath': table_encryption.convert_string(obj.BackIconPath(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'CardGroupId': bacy.convert_int(obj.CardGroupId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'IconPath': bacy.convert_string(obj.IconPath(), password),
+        'BackIconPath': bacy.convert_string(obj.BackIconPath(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
     }
 
 
 def dump_EventContentCardShopExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Rarity': Rarity(table_encryption.convert_int(obj.Rarity_(), password)).name,
-        'CostGoodsId': table_encryption.convert_long(obj.CostGoodsId(), password),
-        'CardGroupId': table_encryption.convert_int(obj.CardGroupId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Rarity': Rarity(bacy.convert_int(obj.Rarity_(), password)).name,
+        'CostGoodsId': bacy.convert_long(obj.CostGoodsId(), password),
+        'CardGroupId': bacy.convert_int(obj.CardGroupId(), password),
         'IsLegacy': obj.IsLegacy(),
-        'RefreshGroup': table_encryption.convert_int(obj.RefreshGroup(), password),
-        'Prob': table_encryption.convert_int(obj.Prob(), password),
-        'ProbWeight1': table_encryption.convert_int(obj.ProbWeight1(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardParcelAmount': [table_encryption.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'RefreshGroup': bacy.convert_int(obj.RefreshGroup(), password),
+        'Prob': bacy.convert_int(obj.Prob(), password),
+        'ProbWeight1': bacy.convert_int(obj.ProbWeight1(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardParcelAmount': [bacy.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
     }
 
 
 def dump_EventContentChangeExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'ChangeCount': table_encryption.convert_long(obj.ChangeCount(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'ChangeCount': bacy.convert_long(obj.ChangeCount(), password),
         'IsLast': obj.IsLast(),
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardId': table_encryption.convert_long(obj.RewardId(), password),
-        'RewardAmount': table_encryption.convert_int(obj.RewardAmount(), password),
-        'ChangeCostType': ParcelType(table_encryption.convert_int(obj.ChangeCostType(), password)).name,
-        'ChangeCostId': table_encryption.convert_long(obj.ChangeCostId(), password),
-        'ChangeCostAmount': table_encryption.convert_int(obj.ChangeCostAmount(), password),
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardId': bacy.convert_long(obj.RewardId(), password),
+        'RewardAmount': bacy.convert_int(obj.RewardAmount(), password),
+        'ChangeCostType': ParcelType(bacy.convert_int(obj.ChangeCostType(), password)).name,
+        'ChangeCostId': bacy.convert_long(obj.ChangeCostId(), password),
+        'ChangeCostAmount': bacy.convert_int(obj.ChangeCostAmount(), password),
     }
 
 
 def dump_EventContentChangeScenarioExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'ChangeType': EventChangeType(table_encryption.convert_int(obj.ChangeType(), password)).name,
-        'ChangeCount': table_encryption.convert_long(obj.ChangeCount(), password),
-        'ScenarioGroupId': table_encryption.convert_long(obj.ScenarioGroupId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'ChangeType': EventChangeType(bacy.convert_int(obj.ChangeType(), password)).name,
+        'ChangeCount': bacy.convert_long(obj.ChangeCount(), password),
+        'ScenarioGroupId': bacy.convert_long(obj.ScenarioGroupId(), password),
     }
 
 
 def dump_EventContentCharacterBonusExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'EventContentItemType': [EventContentItemType(table_encryption.convert_int(obj.EventContentItemType_(j), password)).name for j in range(obj.EventContentItemTypeLength())],
-        'BonusPercentage': [table_encryption.convert_long(obj.BonusPercentage(j), password) for j in range(obj.BonusPercentageLength())],
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'EventContentItemType': [EventContentItemType(bacy.convert_int(obj.EventContentItemType_(j), password)).name for j in range(obj.EventContentItemTypeLength())],
+        'BonusPercentage': [bacy.convert_long(obj.BonusPercentage(j), password) for j in range(obj.BonusPercentageLength())],
     }
 
 
 def dump_EventContentCollectionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'UnlockConditionType': CollectionUnlockType(table_encryption.convert_int(obj.UnlockConditionType(), password)).name,
-        'UnlockConditionParameter': [table_encryption.convert_long(obj.UnlockConditionParameter(j), password) for j in range(obj.UnlockConditionParameterLength())],
-        'MultipleConditionCheckType': MultipleConditionCheckType(table_encryption.convert_int(obj.MultipleConditionCheckType_(), password)).name,
-        'UnlockConditionCount': table_encryption.convert_long(obj.UnlockConditionCount(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'UnlockConditionType': CollectionUnlockType(bacy.convert_int(obj.UnlockConditionType(), password)).name,
+        'UnlockConditionParameter': [bacy.convert_long(obj.UnlockConditionParameter(j), password) for j in range(obj.UnlockConditionParameterLength())],
+        'MultipleConditionCheckType': MultipleConditionCheckType(bacy.convert_int(obj.MultipleConditionCheckType_(), password)).name,
+        'UnlockConditionCount': bacy.convert_long(obj.UnlockConditionCount(), password),
         'IsObject': obj.IsObject(),
         'IsObjectOnFullResource': obj.IsObjectOnFullResource(),
         'IsHorizon': obj.IsHorizon(),
-        'EmblemResource': table_encryption.convert_string(obj.EmblemResource(), password),
-        'ThumbResource': table_encryption.convert_string(obj.ThumbResource(), password),
-        'FullResource': table_encryption.convert_string(obj.FullResource(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'SubNameLocalizeCodeId': table_encryption.convert_string(obj.SubNameLocalizeCodeId(), password),
+        'EmblemResource': bacy.convert_string(obj.EmblemResource(), password),
+        'ThumbResource': bacy.convert_string(obj.ThumbResource(), password),
+        'FullResource': bacy.convert_string(obj.FullResource(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'SubNameLocalizeCodeId': bacy.convert_string(obj.SubNameLocalizeCodeId(), password),
     }
 
 
 def dump_EventContentCurrencyItemExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'EventContentItemType': EventContentItemType(table_encryption.convert_int(obj.EventContentItemType_(), password)).name,
-        'ItemUniqueId': table_encryption.convert_long(obj.ItemUniqueId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'EventContentItemType': EventContentItemType(bacy.convert_int(obj.EventContentItemType_(), password)).name,
+        'ItemUniqueId': bacy.convert_long(obj.ItemUniqueId(), password),
     }
 
 
 def dump_EventContentDebuffRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'EventStageId': table_encryption.convert_long(obj.EventStageId(), password),
-        'EventContentItemType': EventContentItemType(table_encryption.convert_int(obj.EventContentItemType_(), password)).name,
-        'RewardPercentage': table_encryption.convert_long(obj.RewardPercentage(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'EventStageId': bacy.convert_long(obj.EventStageId(), password),
+        'EventContentItemType': EventContentItemType(bacy.convert_int(obj.EventContentItemType_(), password)).name,
+        'RewardPercentage': bacy.convert_long(obj.RewardPercentage(), password),
     }
 
 
 def dump_EventContentDiceRaceEffectExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'EventContentDiceRaceResultType': EventContentDiceRaceResultType(table_encryption.convert_int(obj.EventContentDiceRaceResultType_(), password)).name,
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'EventContentDiceRaceResultType': EventContentDiceRaceResultType(bacy.convert_int(obj.EventContentDiceRaceResultType_(), password)).name,
         'IsDiceResult': obj.IsDiceResult(),
-        'AniClip': table_encryption.convert_string(obj.AniClip(), password),
-        'VoiceId': [table_encryption.convert_uint(obj.VoiceId(j), password) for j in range(obj.VoiceIdLength())],
+        'AniClip': bacy.convert_string(obj.AniClip(), password),
+        'VoiceId': [bacy.convert_uint(obj.VoiceId(j), password) for j in range(obj.VoiceIdLength())],
     }
 
 
 def dump_EventContentDiceRaceExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'DiceCostGoodsId': table_encryption.convert_long(obj.DiceCostGoodsId(), password),
-        'SkipableLap': table_encryption.convert_int(obj.SkipableLap(), password),
-        'DiceRacePawnPrefab': table_encryption.convert_string(obj.DiceRacePawnPrefab(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'DiceCostGoodsId': bacy.convert_long(obj.DiceCostGoodsId(), password),
+        'SkipableLap': bacy.convert_int(obj.SkipableLap(), password),
+        'DiceRacePawnPrefab': bacy.convert_string(obj.DiceRacePawnPrefab(), password),
         'IsUsingFixedDice': obj.IsUsingFixedDice(),
-        'DiceRaceEventType': [table_encryption.convert_string(obj.DiceRaceEventType(j), password) for j in range(obj.DiceRaceEventTypeLength())],
+        'DiceRaceEventType': [bacy.convert_string(obj.DiceRaceEventType(j), password) for j in range(obj.DiceRaceEventTypeLength())],
     }
 
 
 def dump_EventContentDiceRaceNodeExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'NodeId': table_encryption.convert_long(obj.NodeId(), password),
-        'EventContentDiceRaceNodeType': EventContentDiceRaceNodeType(table_encryption.convert_int(obj.EventContentDiceRaceNodeType_(), password)).name,
-        'MoveForwardTypeArg': table_encryption.convert_int(obj.MoveForwardTypeArg(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardAmount': [table_encryption.convert_long(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'NodeId': bacy.convert_long(obj.NodeId(), password),
+        'EventContentDiceRaceNodeType': EventContentDiceRaceNodeType(bacy.convert_int(obj.EventContentDiceRaceNodeType_(), password)).name,
+        'MoveForwardTypeArg': bacy.convert_int(obj.MoveForwardTypeArg(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardAmount': [bacy.convert_long(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
     }
 
 
 def dump_EventContentDiceRaceProbExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'EventContentDiceRaceResultType': EventContentDiceRaceResultType(table_encryption.convert_int(obj.EventContentDiceRaceResultType_(), password)).name,
-        'CostItemId': table_encryption.convert_long(obj.CostItemId(), password),
-        'CostItemAmount': table_encryption.convert_int(obj.CostItemAmount(), password),
-        'DiceResult': table_encryption.convert_int(obj.DiceResult(), password),
-        'Prob': table_encryption.convert_int(obj.Prob(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'EventContentDiceRaceResultType': EventContentDiceRaceResultType(bacy.convert_int(obj.EventContentDiceRaceResultType_(), password)).name,
+        'CostItemId': bacy.convert_long(obj.CostItemId(), password),
+        'CostItemAmount': bacy.convert_int(obj.CostItemAmount(), password),
+        'DiceResult': bacy.convert_int(obj.DiceResult(), password),
+        'Prob': bacy.convert_int(obj.Prob(), password),
     }
 
 
 def dump_EventContentDiceRaceTotalRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'RewardID': table_encryption.convert_long(obj.RewardID(), password),
-        'RequiredLapFinishCount': table_encryption.convert_int(obj.RequiredLapFinishCount(), password),
-        'DisplayLapFinishCount': table_encryption.convert_int(obj.DisplayLapFinishCount(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardParcelAmount': [table_encryption.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'RewardID': bacy.convert_long(obj.RewardID(), password),
+        'RequiredLapFinishCount': bacy.convert_int(obj.RequiredLapFinishCount(), password),
+        'DisplayLapFinishCount': bacy.convert_int(obj.DisplayLapFinishCount(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardParcelAmount': [bacy.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
     }
 
 
 def dump_EventContentExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'DevName': table_encryption.convert_string(obj.DevName(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'BgImagePath': table_encryption.convert_string(obj.BgImagePath(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'DevName': bacy.convert_string(obj.DevName(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'BgImagePath': bacy.convert_string(obj.BgImagePath(), password),
     }
 
 
 def dump_EventContentFortuneGachaExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'FortuneGachaGroupId': table_encryption.convert_int(obj.FortuneGachaGroupId(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'IconPath': table_encryption.convert_string(obj.IconPath(), password),
+        'FortuneGachaGroupId': bacy.convert_int(obj.FortuneGachaGroupId(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'IconPath': bacy.convert_string(obj.IconPath(), password),
     }
 
 
 def dump_EventContentFortuneGachaModifyExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_int(obj.EventContentId(), password),
-        'TargetGrade': table_encryption.convert_int(obj.TargetGrade(), password),
-        'ProbModifyStartCount': table_encryption.convert_int(obj.ProbModifyStartCount(), password),
-        'UsePrefabName': table_encryption.convert_string(obj.UsePrefabName(), password),
-        'BucketImagePath': table_encryption.convert_string(obj.BucketImagePath(), password),
-        'ShopBgImagePath': table_encryption.convert_string(obj.ShopBgImagePath(), password),
-        'TitleLocalizeKey': table_encryption.convert_string(obj.TitleLocalizeKey(), password),
+        'EventContentId': bacy.convert_int(obj.EventContentId(), password),
+        'TargetGrade': bacy.convert_int(obj.TargetGrade(), password),
+        'ProbModifyStartCount': bacy.convert_int(obj.ProbModifyStartCount(), password),
+        'UsePrefabName': bacy.convert_string(obj.UsePrefabName(), password),
+        'BucketImagePath': bacy.convert_string(obj.BucketImagePath(), password),
+        'ShopBgImagePath': bacy.convert_string(obj.ShopBgImagePath(), password),
+        'TitleLocalizeKey': bacy.convert_string(obj.TitleLocalizeKey(), password),
     }
 
 
 def dump_EventContentFortuneGachaShopExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Grade': table_encryption.convert_int(obj.Grade(), password),
-        'CostGoodsId': table_encryption.convert_long(obj.CostGoodsId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Grade': bacy.convert_int(obj.Grade(), password),
+        'CostGoodsId': bacy.convert_long(obj.CostGoodsId(), password),
         'IsLegacy': obj.IsLegacy(),
-        'FortuneGachaGroupId': table_encryption.convert_int(obj.FortuneGachaGroupId(), password),
-        'Prob': table_encryption.convert_int(obj.Prob(), password),
-        'ProbModifyValue': table_encryption.convert_int(obj.ProbModifyValue(), password),
-        'ProbModifyLimit': table_encryption.convert_int(obj.ProbModifyLimit(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardParcelAmount': [table_encryption.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'FortuneGachaGroupId': bacy.convert_int(obj.FortuneGachaGroupId(), password),
+        'Prob': bacy.convert_int(obj.Prob(), password),
+        'ProbModifyValue': bacy.convert_int(obj.ProbModifyValue(), password),
+        'ProbModifyLimit': bacy.convert_int(obj.ProbModifyLimit(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardParcelAmount': [bacy.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
     }
 
 
 def dump_EventContentLobbyMenuExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'EventContentType': EventContentType(table_encryption.convert_int(obj.EventContentType_(), password)).name,
-        'IconSpriteName': table_encryption.convert_string(obj.IconSpriteName(), password),
-        'ButtonText': table_encryption.convert_string(obj.ButtonText(), password),
-        'DisplayOrder': table_encryption.convert_int(obj.DisplayOrder(), password),
-        'IconOffsetX': table_encryption.convert_float(obj.IconOffsetX(), password),
-        'IconOffsetY': table_encryption.convert_float(obj.IconOffsetY(), password),
-        'ReddotSpriteName': table_encryption.convert_string(obj.ReddotSpriteName(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'EventContentType': EventContentType(bacy.convert_int(obj.EventContentType_(), password)).name,
+        'IconSpriteName': bacy.convert_string(obj.IconSpriteName(), password),
+        'ButtonText': bacy.convert_string(obj.ButtonText(), password),
+        'DisplayOrder': bacy.convert_int(obj.DisplayOrder(), password),
+        'IconOffsetX': bacy.convert_float(obj.IconOffsetX(), password),
+        'IconOffsetY': bacy.convert_float(obj.IconOffsetY(), password),
+        'ReddotSpriteName': bacy.convert_string(obj.ReddotSpriteName(), password),
     }
 
 
 def dump_EventContentLocationExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'PrefabPath': table_encryption.convert_string(obj.PrefabPath(), password),
-        'LocationResetScheduleCount': table_encryption.convert_int(obj.LocationResetScheduleCount(), password),
-        'ScheduleEventPointCostParcelType': ParcelType(table_encryption.convert_int(obj.ScheduleEventPointCostParcelType(), password)).name,
-        'ScheduleEventPointCostParcelId': table_encryption.convert_long(obj.ScheduleEventPointCostParcelId(), password),
-        'ScheduleEventPointCostParcelAmount': table_encryption.convert_long(obj.ScheduleEventPointCostParcelAmount(), password),
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardParcelId': table_encryption.convert_long(obj.RewardParcelId(), password),
-        'InformationGroupId': table_encryption.convert_long(obj.InformationGroupId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'PrefabPath': bacy.convert_string(obj.PrefabPath(), password),
+        'LocationResetScheduleCount': bacy.convert_int(obj.LocationResetScheduleCount(), password),
+        'ScheduleEventPointCostParcelType': ParcelType(bacy.convert_int(obj.ScheduleEventPointCostParcelType(), password)).name,
+        'ScheduleEventPointCostParcelId': bacy.convert_long(obj.ScheduleEventPointCostParcelId(), password),
+        'ScheduleEventPointCostParcelAmount': bacy.convert_long(obj.ScheduleEventPointCostParcelAmount(), password),
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardParcelId': bacy.convert_long(obj.RewardParcelId(), password),
+        'InformationGroupId': bacy.convert_long(obj.InformationGroupId(), password),
     }
 
 
 def dump_EventContentLocationRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Location': table_encryption.convert_string(obj.Location(), password),
-        'ScheduleGroupId': table_encryption.convert_long(obj.ScheduleGroupId(), password),
-        'OrderInGroup': table_encryption.convert_long(obj.OrderInGroup(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'ProgressTexture': table_encryption.convert_string(obj.ProgressTexture(), password),
-        'VoiceId': [table_encryption.convert_uint(obj.VoiceId(j), password) for j in range(obj.VoiceIdLength())],
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'LocationRank': table_encryption.convert_long(obj.LocationRank(), password),
-        'FavorExp': table_encryption.convert_long(obj.FavorExp(), password),
-        'SecretStoneAmount': table_encryption.convert_long(obj.SecretStoneAmount(), password),
-        'SecretStoneProb': table_encryption.convert_long(obj.SecretStoneProb(), password),
-        'ExtraFavorExp': table_encryption.convert_long(obj.ExtraFavorExp(), password),
-        'ExtraFavorExpProb': table_encryption.convert_long(obj.ExtraFavorExpProb(), password),
-        'ExtraRewardParcelType': [ParcelType(table_encryption.convert_int(obj.ExtraRewardParcelType(j), password)).name for j in range(obj.ExtraRewardParcelTypeLength())],
-        'ExtraRewardParcelId': [table_encryption.convert_long(obj.ExtraRewardParcelId(j), password) for j in range(obj.ExtraRewardParcelIdLength())],
-        'ExtraRewardAmount': [table_encryption.convert_long(obj.ExtraRewardAmount(j), password) for j in range(obj.ExtraRewardAmountLength())],
-        'ExtraRewardProb': [table_encryption.convert_long(obj.ExtraRewardProb(j), password) for j in range(obj.ExtraRewardProbLength())],
+        'Location': bacy.convert_string(obj.Location(), password),
+        'ScheduleGroupId': bacy.convert_long(obj.ScheduleGroupId(), password),
+        'OrderInGroup': bacy.convert_long(obj.OrderInGroup(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'ProgressTexture': bacy.convert_string(obj.ProgressTexture(), password),
+        'VoiceId': [bacy.convert_uint(obj.VoiceId(j), password) for j in range(obj.VoiceIdLength())],
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'LocationRank': bacy.convert_long(obj.LocationRank(), password),
+        'FavorExp': bacy.convert_long(obj.FavorExp(), password),
+        'SecretStoneAmount': bacy.convert_long(obj.SecretStoneAmount(), password),
+        'SecretStoneProb': bacy.convert_long(obj.SecretStoneProb(), password),
+        'ExtraFavorExp': bacy.convert_long(obj.ExtraFavorExp(), password),
+        'ExtraFavorExpProb': bacy.convert_long(obj.ExtraFavorExpProb(), password),
+        'ExtraRewardParcelType': [ParcelType(bacy.convert_int(obj.ExtraRewardParcelType(j), password)).name for j in range(obj.ExtraRewardParcelTypeLength())],
+        'ExtraRewardParcelId': [bacy.convert_long(obj.ExtraRewardParcelId(j), password) for j in range(obj.ExtraRewardParcelIdLength())],
+        'ExtraRewardAmount': [bacy.convert_long(obj.ExtraRewardAmount(j), password) for j in range(obj.ExtraRewardAmountLength())],
+        'ExtraRewardProb': [bacy.convert_long(obj.ExtraRewardProb(j), password) for j in range(obj.ExtraRewardProbLength())],
         'IsExtraRewardDisplayed': [obj.IsExtraRewardDisplayed(j) for j in range(obj.IsExtraRewardDisplayedLength())],
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardAmount': [table_encryption.convert_long(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardAmount': [bacy.convert_long(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
     }
 
 
 def dump_EventContentMeetupExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'ConditionScenarioGroupId': table_encryption.convert_long(obj.ConditionScenarioGroupId(), password),
-        'ConditionType': MeetupConditionType(table_encryption.convert_int(obj.ConditionType(), password)).name,
-        'ConditionParameter': [table_encryption.convert_long(obj.ConditionParameter(j), password) for j in range(obj.ConditionParameterLength())],
-        'ConditionPrintType': MeetupConditionPrintType(table_encryption.convert_int(obj.ConditionPrintType(), password)).name,
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'ConditionScenarioGroupId': bacy.convert_long(obj.ConditionScenarioGroupId(), password),
+        'ConditionType': MeetupConditionType(bacy.convert_int(obj.ConditionType(), password)).name,
+        'ConditionParameter': [bacy.convert_long(obj.ConditionParameter(j), password) for j in range(obj.ConditionParameterLength())],
+        'ConditionPrintType': MeetupConditionPrintType(bacy.convert_int(obj.ConditionPrintType(), password)).name,
     }
 
 
 def dump_EventContentMiniEventShortCutExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_int(obj.Id(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'ShorcutContentType': EventTargetType(table_encryption.convert_int(obj.ShorcutContentType(), password)).name,
+        'Id': bacy.convert_int(obj.Id(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'ShorcutContentType': EventTargetType(bacy.convert_int(obj.ShorcutContentType(), password)).name,
     }
 
 
 def dump_EventContentMiniEventTokenExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'ItemUniqueId': table_encryption.convert_long(obj.ItemUniqueId(), password),
-        'MaximumAmount': table_encryption.convert_long(obj.MaximumAmount(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'ItemUniqueId': bacy.convert_long(obj.ItemUniqueId(), password),
+        'MaximumAmount': bacy.convert_long(obj.MaximumAmount(), password),
     }
 
 
 def dump_EventContentMissionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'GroupName': table_encryption.convert_string(obj.GroupName(), password),
-        'Category': MissionCategory(table_encryption.convert_int(obj.Category(), password)).name,
-        'Description': table_encryption.convert_uint(obj.Description(), password),
-        'ResetType': MissionResetType(table_encryption.convert_int(obj.ResetType(), password)).name,
-        'ToastDisplayType': MissionToastDisplayConditionType(table_encryption.convert_int(obj.ToastDisplayType(), password)).name,
-        'ToastImagePath': table_encryption.convert_string(obj.ToastImagePath(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'GroupName': bacy.convert_string(obj.GroupName(), password),
+        'Category': MissionCategory(bacy.convert_int(obj.Category(), password)).name,
+        'Description': bacy.convert_uint(obj.Description(), password),
+        'ResetType': MissionResetType(bacy.convert_int(obj.ResetType(), password)).name,
+        'ToastDisplayType': MissionToastDisplayConditionType(bacy.convert_int(obj.ToastDisplayType(), password)).name,
+        'ToastImagePath': bacy.convert_string(obj.ToastImagePath(), password),
         'ViewFlag': obj.ViewFlag(),
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'PreMissionId': [table_encryption.convert_long(obj.PreMissionId(j), password) for j in range(obj.PreMissionIdLength())],
-        'AccountType': AccountState(table_encryption.convert_int(obj.AccountType(), password)).name,
-        'AccountLevel': table_encryption.convert_long(obj.AccountLevel(), password),
-        'ShortcutUI': [table_encryption.convert_string(obj.ShortcutUI(j), password) for j in range(obj.ShortcutUILength())],
-        'ChallengeStageShortcut': table_encryption.convert_long(obj.ChallengeStageShortcut(), password),
-        'CompleteConditionType': MissionCompleteConditionType(table_encryption.convert_int(obj.CompleteConditionType(), password)).name,
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'PreMissionId': [bacy.convert_long(obj.PreMissionId(j), password) for j in range(obj.PreMissionIdLength())],
+        'AccountType': AccountState(bacy.convert_int(obj.AccountType(), password)).name,
+        'AccountLevel': bacy.convert_long(obj.AccountLevel(), password),
+        'ShortcutUI': [bacy.convert_string(obj.ShortcutUI(j), password) for j in range(obj.ShortcutUILength())],
+        'ChallengeStageShortcut': bacy.convert_long(obj.ChallengeStageShortcut(), password),
+        'CompleteConditionType': MissionCompleteConditionType(bacy.convert_int(obj.CompleteConditionType(), password)).name,
         'IsCompleteExtensionTime': obj.IsCompleteExtensionTime(),
-        'CompleteConditionCount': table_encryption.convert_long(obj.CompleteConditionCount(), password),
-        'CompleteConditionParameter': [table_encryption.convert_long(obj.CompleteConditionParameter(j), password) for j in range(obj.CompleteConditionParameterLength())],
-        'CompleteConditionParameterTag': [Tag(table_encryption.convert_int(obj.CompleteConditionParameterTag(j), password)).name for j in range(obj.CompleteConditionParameterTagLength())],
-        'RewardIcon': table_encryption.convert_string(obj.RewardIcon(), password),
-        'CompleteConditionMissionId': [table_encryption.convert_long(obj.CompleteConditionMissionId(j), password) for j in range(obj.CompleteConditionMissionIdLength())],
-        'CompleteConditionMissionCount': table_encryption.convert_long(obj.CompleteConditionMissionCount(), password),
-        'MissionRewardParcelType': [ParcelType(table_encryption.convert_int(obj.MissionRewardParcelType(j), password)).name for j in range(obj.MissionRewardParcelTypeLength())],
-        'MissionRewardParcelId': [table_encryption.convert_long(obj.MissionRewardParcelId(j), password) for j in range(obj.MissionRewardParcelIdLength())],
-        'MissionRewardAmount': [table_encryption.convert_int(obj.MissionRewardAmount(j), password) for j in range(obj.MissionRewardAmountLength())],
-        'ConditionRewardParcelType': [ParcelType(table_encryption.convert_int(obj.ConditionRewardParcelType(j), password)).name for j in range(obj.ConditionRewardParcelTypeLength())],
-        'ConditionRewardParcelId': [table_encryption.convert_long(obj.ConditionRewardParcelId(j), password) for j in range(obj.ConditionRewardParcelIdLength())],
-        'ConditionRewardAmount': [table_encryption.convert_int(obj.ConditionRewardAmount(j), password) for j in range(obj.ConditionRewardAmountLength())],
+        'CompleteConditionCount': bacy.convert_long(obj.CompleteConditionCount(), password),
+        'CompleteConditionParameter': [bacy.convert_long(obj.CompleteConditionParameter(j), password) for j in range(obj.CompleteConditionParameterLength())],
+        'CompleteConditionParameterTag': [Tag(bacy.convert_int(obj.CompleteConditionParameterTag(j), password)).name for j in range(obj.CompleteConditionParameterTagLength())],
+        'RewardIcon': bacy.convert_string(obj.RewardIcon(), password),
+        'CompleteConditionMissionId': [bacy.convert_long(obj.CompleteConditionMissionId(j), password) for j in range(obj.CompleteConditionMissionIdLength())],
+        'CompleteConditionMissionCount': bacy.convert_long(obj.CompleteConditionMissionCount(), password),
+        'MissionRewardParcelType': [ParcelType(bacy.convert_int(obj.MissionRewardParcelType(j), password)).name for j in range(obj.MissionRewardParcelTypeLength())],
+        'MissionRewardParcelId': [bacy.convert_long(obj.MissionRewardParcelId(j), password) for j in range(obj.MissionRewardParcelIdLength())],
+        'MissionRewardAmount': [bacy.convert_int(obj.MissionRewardAmount(j), password) for j in range(obj.MissionRewardAmountLength())],
+        'ConditionRewardParcelType': [ParcelType(bacy.convert_int(obj.ConditionRewardParcelType(j), password)).name for j in range(obj.ConditionRewardParcelTypeLength())],
+        'ConditionRewardParcelId': [bacy.convert_long(obj.ConditionRewardParcelId(j), password) for j in range(obj.ConditionRewardParcelIdLength())],
+        'ConditionRewardAmount': [bacy.convert_int(obj.ConditionRewardAmount(j), password) for j in range(obj.ConditionRewardAmountLength())],
     }
 
 
 def dump_EventContentPlayGuideExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'DisplayOrder': table_encryption.convert_int(obj.DisplayOrder(), password),
-        'GuideTitle': table_encryption.convert_string(obj.GuideTitle(), password),
-        'GuideImagePath': table_encryption.convert_string(obj.GuideImagePath(), password),
-        'GuideText': table_encryption.convert_string(obj.GuideText(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'DisplayOrder': bacy.convert_int(obj.DisplayOrder(), password),
+        'GuideTitle': bacy.convert_string(obj.GuideTitle(), password),
+        'GuideImagePath': bacy.convert_string(obj.GuideImagePath(), password),
+        'GuideText': bacy.convert_string(obj.GuideText(), password),
     }
 
 
 def dump_EventContentScenarioExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'ReplayDisplayGroup': table_encryption.convert_int(obj.ReplayDisplayGroup(), password),
-        'Order': table_encryption.convert_long(obj.Order(), password),
-        'RecollectionNumber': table_encryption.convert_long(obj.RecollectionNumber(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'ReplayDisplayGroup': bacy.convert_int(obj.ReplayDisplayGroup(), password),
+        'Order': bacy.convert_long(obj.Order(), password),
+        'RecollectionNumber': bacy.convert_long(obj.RecollectionNumber(), password),
         'IsRecollection': obj.IsRecollection(),
         'IsMeetup': obj.IsMeetup(),
         'IsOmnibus': obj.IsOmnibus(),
-        'ScenarioGroupId': [table_encryption.convert_long(obj.ScenarioGroupId(j), password) for j in range(obj.ScenarioGroupIdLength())],
-        'ScenarioConditionType': EventContentScenarioConditionType(table_encryption.convert_int(obj.ScenarioConditionType(), password)).name,
-        'ConditionAmount': table_encryption.convert_long(obj.ConditionAmount(), password),
-        'ConditionEventContentId': table_encryption.convert_long(obj.ConditionEventContentId(), password),
-        'ClearedScenarioGroupId': table_encryption.convert_long(obj.ClearedScenarioGroupId(), password),
-        'RecollectionSummaryLocalizeScenarioId': table_encryption.convert_uint(obj.RecollectionSummaryLocalizeScenarioId(), password),
-        'RecollectionResource': table_encryption.convert_string(obj.RecollectionResource(), password),
+        'ScenarioGroupId': [bacy.convert_long(obj.ScenarioGroupId(j), password) for j in range(obj.ScenarioGroupIdLength())],
+        'ScenarioConditionType': EventContentScenarioConditionType(bacy.convert_int(obj.ScenarioConditionType(), password)).name,
+        'ConditionAmount': bacy.convert_long(obj.ConditionAmount(), password),
+        'ConditionEventContentId': bacy.convert_long(obj.ConditionEventContentId(), password),
+        'ClearedScenarioGroupId': bacy.convert_long(obj.ClearedScenarioGroupId(), password),
+        'RecollectionSummaryLocalizeScenarioId': bacy.convert_uint(obj.RecollectionSummaryLocalizeScenarioId(), password),
+        'RecollectionResource': bacy.convert_string(obj.RecollectionResource(), password),
         'IsRecollectionHorizon': obj.IsRecollectionHorizon(),
-        'CostParcelType': ParcelType(table_encryption.convert_int(obj.CostParcelType(), password)).name,
-        'CostId': table_encryption.convert_long(obj.CostId(), password),
-        'CostAmount': table_encryption.convert_int(obj.CostAmount(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardId': [table_encryption.convert_long(obj.RewardId(j), password) for j in range(obj.RewardIdLength())],
-        'RewardAmount': [table_encryption.convert_int(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
+        'CostParcelType': ParcelType(bacy.convert_int(obj.CostParcelType(), password)).name,
+        'CostId': bacy.convert_long(obj.CostId(), password),
+        'CostAmount': bacy.convert_int(obj.CostAmount(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardId': [bacy.convert_long(obj.RewardId(j), password) for j in range(obj.RewardIdLength())],
+        'RewardAmount': [bacy.convert_int(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
     }
 
 
 def dump_EventContentSeasonExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'OriginalEventContentId': table_encryption.convert_long(obj.OriginalEventContentId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'OriginalEventContentId': bacy.convert_long(obj.OriginalEventContentId(), password),
         'IsReturn': obj.IsReturn(),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'EventContentType': EventContentType(table_encryption.convert_int(obj.EventContentType_(), password)).name,
-        'OpenConditionContent': OpenConditionContent(table_encryption.convert_int(obj.OpenConditionContent_(), password)).name,
+        'Name': bacy.convert_string(obj.Name(), password),
+        'EventContentType': EventContentType(bacy.convert_int(obj.EventContentType_(), password)).name,
+        'OpenConditionContent': OpenConditionContent(bacy.convert_int(obj.OpenConditionContent_(), password)).name,
         'EventDisplay': obj.EventDisplay(),
-        'IconOrder': table_encryption.convert_int(obj.IconOrder(), password),
-        'SubEventType': SubEventType(table_encryption.convert_int(obj.SubEventType_(), password)).name,
+        'IconOrder': bacy.convert_int(obj.IconOrder(), password),
+        'SubEventType': SubEventType(bacy.convert_int(obj.SubEventType_(), password)).name,
         'SubEvent': obj.SubEvent(),
-        'EventItemId': table_encryption.convert_long(obj.EventItemId(), password),
-        'MainEventId': table_encryption.convert_long(obj.MainEventId(), password),
-        'EventChangeOpenCondition': table_encryption.convert_long(obj.EventChangeOpenCondition(), password),
-        'BeforehandExposedTime': table_encryption.convert_string(obj.BeforehandExposedTime(), password),
-        'EventContentOpenTime': table_encryption.convert_string(obj.EventContentOpenTime(), password),
-        'EventContentCloseTime': table_encryption.convert_string(obj.EventContentCloseTime(), password),
-        'ExtensionTime': table_encryption.convert_string(obj.ExtensionTime(), password),
-        'MainIconParcelPath': table_encryption.convert_string(obj.MainIconParcelPath(), password),
-        'SubIconParcelPath': table_encryption.convert_string(obj.SubIconParcelPath(), password),
-        'BeforehandBgImagePath': table_encryption.convert_string(obj.BeforehandBgImagePath(), password),
-        'MinigamePrologScenarioGroupId': table_encryption.convert_long(obj.MinigamePrologScenarioGroupId(), password),
-        'BeforehandScenarioGroupId': [table_encryption.convert_long(obj.BeforehandScenarioGroupId(j), password) for j in range(obj.BeforehandScenarioGroupIdLength())],
-        'MainBannerImagePath': table_encryption.convert_string(obj.MainBannerImagePath(), password),
-        'MainBgImagePath': table_encryption.convert_string(obj.MainBgImagePath(), password),
-        'ShiftTriggerStageId': table_encryption.convert_long(obj.ShiftTriggerStageId(), password),
-        'ShiftMainBgImagePath': table_encryption.convert_string(obj.ShiftMainBgImagePath(), password),
-        'MinigameLobbyPrefabName': table_encryption.convert_string(obj.MinigameLobbyPrefabName(), password),
-        'MinigameVictoryPrefabName': table_encryption.convert_string(obj.MinigameVictoryPrefabName(), password),
-        'MinigameMissionBgPrefabName': table_encryption.convert_string(obj.MinigameMissionBgPrefabName(), password),
-        'MinigameMissionBgImagePath': table_encryption.convert_string(obj.MinigameMissionBgImagePath(), password),
-        'CardBgImagePath': table_encryption.convert_string(obj.CardBgImagePath(), password),
+        'EventItemId': bacy.convert_long(obj.EventItemId(), password),
+        'MainEventId': bacy.convert_long(obj.MainEventId(), password),
+        'EventChangeOpenCondition': bacy.convert_long(obj.EventChangeOpenCondition(), password),
+        'BeforehandExposedTime': bacy.convert_string(obj.BeforehandExposedTime(), password),
+        'EventContentOpenTime': bacy.convert_string(obj.EventContentOpenTime(), password),
+        'EventContentCloseTime': bacy.convert_string(obj.EventContentCloseTime(), password),
+        'ExtensionTime': bacy.convert_string(obj.ExtensionTime(), password),
+        'MainIconParcelPath': bacy.convert_string(obj.MainIconParcelPath(), password),
+        'SubIconParcelPath': bacy.convert_string(obj.SubIconParcelPath(), password),
+        'BeforehandBgImagePath': bacy.convert_string(obj.BeforehandBgImagePath(), password),
+        'MinigamePrologScenarioGroupId': bacy.convert_long(obj.MinigamePrologScenarioGroupId(), password),
+        'BeforehandScenarioGroupId': [bacy.convert_long(obj.BeforehandScenarioGroupId(j), password) for j in range(obj.BeforehandScenarioGroupIdLength())],
+        'MainBannerImagePath': bacy.convert_string(obj.MainBannerImagePath(), password),
+        'MainBgImagePath': bacy.convert_string(obj.MainBgImagePath(), password),
+        'ShiftTriggerStageId': bacy.convert_long(obj.ShiftTriggerStageId(), password),
+        'ShiftMainBgImagePath': bacy.convert_string(obj.ShiftMainBgImagePath(), password),
+        'MinigameLobbyPrefabName': bacy.convert_string(obj.MinigameLobbyPrefabName(), password),
+        'MinigameVictoryPrefabName': bacy.convert_string(obj.MinigameVictoryPrefabName(), password),
+        'MinigameMissionBgPrefabName': bacy.convert_string(obj.MinigameMissionBgPrefabName(), password),
+        'MinigameMissionBgImagePath': bacy.convert_string(obj.MinigameMissionBgImagePath(), password),
+        'CardBgImagePath': bacy.convert_string(obj.CardBgImagePath(), password),
         'EventAssist': obj.EventAssist(),
-        'EventContentReleaseType': EventContentReleaseType(table_encryption.convert_int(obj.EventContentReleaseType_(), password)).name,
-        'EventContentStageRewardIdPermanent': table_encryption.convert_long(obj.EventContentStageRewardIdPermanent(), password),
-        'RewardTagPermanent': RewardTag(table_encryption.convert_int(obj.RewardTagPermanent(), password)).name,
-        'MiniEventShortCutScenarioModeId': table_encryption.convert_long(obj.MiniEventShortCutScenarioModeId(), password),
-        'ScenarioContentCollectionGroupId': table_encryption.convert_long(obj.ScenarioContentCollectionGroupId(), password),
+        'EventContentReleaseType': EventContentReleaseType(bacy.convert_int(obj.EventContentReleaseType_(), password)).name,
+        'EventContentStageRewardIdPermanent': bacy.convert_long(obj.EventContentStageRewardIdPermanent(), password),
+        'RewardTagPermanent': RewardTag(bacy.convert_int(obj.RewardTagPermanent(), password)).name,
+        'MiniEventShortCutScenarioModeId': bacy.convert_long(obj.MiniEventShortCutScenarioModeId(), password),
+        'ScenarioContentCollectionGroupId': bacy.convert_long(obj.ScenarioContentCollectionGroupId(), password),
     }
 
 
 def dump_EventContentShopExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'CategoryType': ShopCategoryType(table_encryption.convert_int(obj.CategoryType(), password)).name,
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'CategoryType': ShopCategoryType(bacy.convert_int(obj.CategoryType(), password)).name,
         'IsLegacy': obj.IsLegacy(),
-        'GoodsId': [table_encryption.convert_long(obj.GoodsId(j), password) for j in range(obj.GoodsIdLength())],
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'SalePeriodFrom': table_encryption.convert_string(obj.SalePeriodFrom(), password),
-        'SalePeriodTo': table_encryption.convert_string(obj.SalePeriodTo(), password),
-        'PurchaseCooltimeMin': table_encryption.convert_long(obj.PurchaseCooltimeMin(), password),
-        'PurchaseCountLimit': table_encryption.convert_long(obj.PurchaseCountLimit(), password),
-        'PurchaseCountResetType': PurchaseCountResetType(table_encryption.convert_int(obj.PurchaseCountResetType_(), password)).name,
-        'BuyReportEventName': table_encryption.convert_string(obj.BuyReportEventName(), password),
+        'GoodsId': [bacy.convert_long(obj.GoodsId(j), password) for j in range(obj.GoodsIdLength())],
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'SalePeriodFrom': bacy.convert_string(obj.SalePeriodFrom(), password),
+        'SalePeriodTo': bacy.convert_string(obj.SalePeriodTo(), password),
+        'PurchaseCooltimeMin': bacy.convert_long(obj.PurchaseCooltimeMin(), password),
+        'PurchaseCountLimit': bacy.convert_long(obj.PurchaseCountLimit(), password),
+        'PurchaseCountResetType': PurchaseCountResetType(bacy.convert_int(obj.PurchaseCountResetType_(), password)).name,
+        'BuyReportEventName': bacy.convert_string(obj.BuyReportEventName(), password),
         'RestrictBuyWhenInventoryFull': obj.RestrictBuyWhenInventoryFull(),
     }
 
 
 def dump_EventContentShopInfoExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'CategoryType': ShopCategoryType(table_encryption.convert_int(obj.CategoryType(), password)).name,
-        'LocalizeCode': table_encryption.convert_uint(obj.LocalizeCode(), password),
-        'CostParcelType': [ParcelType(table_encryption.convert_int(obj.CostParcelType(j), password)).name for j in range(obj.CostParcelTypeLength())],
-        'CostParcelId': [table_encryption.convert_long(obj.CostParcelId(j), password) for j in range(obj.CostParcelIdLength())],
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'CategoryType': ShopCategoryType(bacy.convert_int(obj.CategoryType(), password)).name,
+        'LocalizeCode': bacy.convert_uint(obj.LocalizeCode(), password),
+        'CostParcelType': [ParcelType(bacy.convert_int(obj.CostParcelType(j), password)).name for j in range(obj.CostParcelTypeLength())],
+        'CostParcelId': [bacy.convert_long(obj.CostParcelId(j), password) for j in range(obj.CostParcelIdLength())],
         'IsRefresh': obj.IsRefresh(),
         'IsSoldOutDimmed': obj.IsSoldOutDimmed(),
-        'AutoRefreshCoolTime': table_encryption.convert_long(obj.AutoRefreshCoolTime(), password),
-        'RefreshAbleCount': table_encryption.convert_long(obj.RefreshAbleCount(), password),
-        'GoodsId': [table_encryption.convert_long(obj.GoodsId(j), password) for j in range(obj.GoodsIdLength())],
-        'OpenPeriodFrom': table_encryption.convert_string(obj.OpenPeriodFrom(), password),
-        'OpenPeriodTo': table_encryption.convert_string(obj.OpenPeriodTo(), password),
-        'ShopProductUpdateDate': table_encryption.convert_string(obj.ShopProductUpdateDate(), password),
+        'AutoRefreshCoolTime': bacy.convert_long(obj.AutoRefreshCoolTime(), password),
+        'RefreshAbleCount': bacy.convert_long(obj.RefreshAbleCount(), password),
+        'GoodsId': [bacy.convert_long(obj.GoodsId(j), password) for j in range(obj.GoodsIdLength())],
+        'OpenPeriodFrom': bacy.convert_string(obj.OpenPeriodFrom(), password),
+        'OpenPeriodTo': bacy.convert_string(obj.OpenPeriodTo(), password),
+        'ShopProductUpdateDate': bacy.convert_string(obj.ShopProductUpdateDate(), password),
     }
 
 
 def dump_EventContentShopRefreshExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
         'IsLegacy': obj.IsLegacy(),
-        'GoodsId': table_encryption.convert_long(obj.GoodsId(), password),
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'CategoryType': ShopCategoryType(table_encryption.convert_int(obj.CategoryType(), password)).name,
-        'RefreshGroup': table_encryption.convert_int(obj.RefreshGroup(), password),
-        'Prob': table_encryption.convert_int(obj.Prob(), password),
-        'BuyReportEventName': table_encryption.convert_string(obj.BuyReportEventName(), password),
+        'GoodsId': bacy.convert_long(obj.GoodsId(), password),
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'CategoryType': ShopCategoryType(bacy.convert_int(obj.CategoryType(), password)).name,
+        'RefreshGroup': bacy.convert_int(obj.RefreshGroup(), password),
+        'Prob': bacy.convert_int(obj.Prob(), password),
+        'BuyReportEventName': bacy.convert_string(obj.BuyReportEventName(), password),
     }
 
 
 def dump_EventContentSpecialOperationsExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'PointItemId': table_encryption.convert_long(obj.PointItemId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'PointItemId': bacy.convert_long(obj.PointItemId(), password),
     }
 
 
 def dump_EventContentSpineDialogOffsetExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'EventContentType': EventContentType(table_encryption.convert_int(obj.EventContentType_(), password)).name,
-        'CostumeUniqueId': table_encryption.convert_long(obj.CostumeUniqueId(), password),
-        'SpineOffsetX': table_encryption.convert_float(obj.SpineOffsetX(), password),
-        'SpineOffsetY': table_encryption.convert_float(obj.SpineOffsetY(), password),
-        'DialogOffsetX': table_encryption.convert_float(obj.DialogOffsetX(), password),
-        'DialogOffsetY': table_encryption.convert_float(obj.DialogOffsetY(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'EventContentType': EventContentType(bacy.convert_int(obj.EventContentType_(), password)).name,
+        'CostumeUniqueId': bacy.convert_long(obj.CostumeUniqueId(), password),
+        'SpineOffsetX': bacy.convert_float(obj.SpineOffsetX(), password),
+        'SpineOffsetY': bacy.convert_float(obj.SpineOffsetY(), password),
+        'DialogOffsetX': bacy.convert_float(obj.DialogOffsetX(), password),
+        'DialogOffsetY': bacy.convert_float(obj.DialogOffsetY(), password),
     }
 
 
 def dump_EventContentStageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'StageDifficulty': StageDifficulty(table_encryption.convert_int(obj.StageDifficulty_(), password)).name,
-        'StageNumber': table_encryption.convert_string(obj.StageNumber(), password),
-        'StageDisplay': table_encryption.convert_int(obj.StageDisplay(), password),
-        'PrevStageId': table_encryption.convert_long(obj.PrevStageId(), password),
-        'OpenDate': table_encryption.convert_long(obj.OpenDate(), password),
-        'OpenEventPoint': table_encryption.convert_long(obj.OpenEventPoint(), password),
-        'OpenConditionScenarioPermanentSubEventId': table_encryption.convert_long(obj.OpenConditionScenarioPermanentSubEventId(), password),
-        'PrevStageSubEventId': table_encryption.convert_long(obj.PrevStageSubEventId(), password),
-        'OpenConditionScenarioId': table_encryption.convert_long(obj.OpenConditionScenarioId(), password),
-        'OpenConditionContentType': EventContentType(table_encryption.convert_int(obj.OpenConditionContentType(), password)).name,
-        'OpenConditionContentId': table_encryption.convert_long(obj.OpenConditionContentId(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'StageEnterCostType': ParcelType(table_encryption.convert_int(obj.StageEnterCostType(), password)).name,
-        'StageEnterCostId': table_encryption.convert_long(obj.StageEnterCostId(), password),
-        'StageEnterCostAmount': table_encryption.convert_int(obj.StageEnterCostAmount(), password),
-        'StageEnterEchelonCount': table_encryption.convert_int(obj.StageEnterEchelonCount(), password),
-        'StarConditionTacticRankSCount': table_encryption.convert_long(obj.StarConditionTacticRankSCount(), password),
-        'StarConditionTurnCount': table_encryption.convert_long(obj.StarConditionTurnCount(), password),
-        'EnterScenarioGroupId': [table_encryption.convert_long(obj.EnterScenarioGroupId(j), password) for j in range(obj.EnterScenarioGroupIdLength())],
-        'ClearScenarioGroupId': [table_encryption.convert_long(obj.ClearScenarioGroupId(j), password) for j in range(obj.ClearScenarioGroupIdLength())],
-        'StrategyMap': table_encryption.convert_string(obj.StrategyMap(), password),
-        'StrategyMapBG': table_encryption.convert_string(obj.StrategyMapBG(), password),
-        'EventContentStageRewardId': table_encryption.convert_long(obj.EventContentStageRewardId(), password),
-        'MaxTurn': table_encryption.convert_int(obj.MaxTurn(), password),
-        'StageTopography': StageTopography(table_encryption.convert_int(obj.StageTopography_(), password)).name,
-        'RecommandLevel': table_encryption.convert_int(obj.RecommandLevel(), password),
-        'BgmId': table_encryption.convert_string(obj.BgmId(), password),
-        'StrategyEnvironment': StrategyEnvironment(table_encryption.convert_int(obj.StrategyEnvironment_(), password)).name,
-        'GroundID': table_encryption.convert_long(obj.GroundID(), password),
-        'ContentType': ContentType(table_encryption.convert_int(obj.ContentType_(), password)).name,
-        'BGMId': table_encryption.convert_long(obj.BGMId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'StageDifficulty': StageDifficulty(bacy.convert_int(obj.StageDifficulty_(), password)).name,
+        'StageNumber': bacy.convert_string(obj.StageNumber(), password),
+        'StageDisplay': bacy.convert_int(obj.StageDisplay(), password),
+        'PrevStageId': bacy.convert_long(obj.PrevStageId(), password),
+        'OpenDate': bacy.convert_long(obj.OpenDate(), password),
+        'OpenEventPoint': bacy.convert_long(obj.OpenEventPoint(), password),
+        'OpenConditionScenarioPermanentSubEventId': bacy.convert_long(obj.OpenConditionScenarioPermanentSubEventId(), password),
+        'PrevStageSubEventId': bacy.convert_long(obj.PrevStageSubEventId(), password),
+        'OpenConditionScenarioId': bacy.convert_long(obj.OpenConditionScenarioId(), password),
+        'OpenConditionContentType': EventContentType(bacy.convert_int(obj.OpenConditionContentType(), password)).name,
+        'OpenConditionContentId': bacy.convert_long(obj.OpenConditionContentId(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'StageEnterCostType': ParcelType(bacy.convert_int(obj.StageEnterCostType(), password)).name,
+        'StageEnterCostId': bacy.convert_long(obj.StageEnterCostId(), password),
+        'StageEnterCostAmount': bacy.convert_int(obj.StageEnterCostAmount(), password),
+        'StageEnterEchelonCount': bacy.convert_int(obj.StageEnterEchelonCount(), password),
+        'StarConditionTacticRankSCount': bacy.convert_long(obj.StarConditionTacticRankSCount(), password),
+        'StarConditionTurnCount': bacy.convert_long(obj.StarConditionTurnCount(), password),
+        'EnterScenarioGroupId': [bacy.convert_long(obj.EnterScenarioGroupId(j), password) for j in range(obj.EnterScenarioGroupIdLength())],
+        'ClearScenarioGroupId': [bacy.convert_long(obj.ClearScenarioGroupId(j), password) for j in range(obj.ClearScenarioGroupIdLength())],
+        'StrategyMap': bacy.convert_string(obj.StrategyMap(), password),
+        'StrategyMapBG': bacy.convert_string(obj.StrategyMapBG(), password),
+        'EventContentStageRewardId': bacy.convert_long(obj.EventContentStageRewardId(), password),
+        'MaxTurn': bacy.convert_int(obj.MaxTurn(), password),
+        'StageTopography': StageTopography(bacy.convert_int(obj.StageTopography_(), password)).name,
+        'RecommandLevel': bacy.convert_int(obj.RecommandLevel(), password),
+        'BgmId': bacy.convert_string(obj.BgmId(), password),
+        'StrategyEnvironment': StrategyEnvironment(bacy.convert_int(obj.StrategyEnvironment_(), password)).name,
+        'GroundID': bacy.convert_long(obj.GroundID(), password),
+        'ContentType': ContentType(bacy.convert_int(obj.ContentType_(), password)).name,
+        'BGMId': bacy.convert_long(obj.BGMId(), password),
         'InstantClear': obj.InstantClear(),
-        'BuffContentId': table_encryption.convert_long(obj.BuffContentId(), password),
-        'FixedEchelonId': table_encryption.convert_long(obj.FixedEchelonId(), password),
+        'BuffContentId': bacy.convert_long(obj.BuffContentId(), password),
+        'FixedEchelonId': bacy.convert_long(obj.FixedEchelonId(), password),
         'ChallengeDisplay': obj.ChallengeDisplay(),
-        'StarGoal': [StarGoalType(table_encryption.convert_int(obj.StarGoal(j), password)).name for j in range(obj.StarGoalLength())],
-        'StarGoalAmount': [table_encryption.convert_int(obj.StarGoalAmount(j), password) for j in range(obj.StarGoalAmountLength())],
+        'StarGoal': [StarGoalType(bacy.convert_int(obj.StarGoal(j), password)).name for j in range(obj.StarGoalLength())],
+        'StarGoalAmount': [bacy.convert_int(obj.StarGoalAmount(j), password) for j in range(obj.StarGoalAmountLength())],
         'IsDefeatBattle': obj.IsDefeatBattle(),
-        'StageHint': table_encryption.convert_uint(obj.StageHint(), password),
-        'EchelonExtensionType': EchelonExtensionType(table_encryption.convert_int(obj.EchelonExtensionType_(), password)).name,
+        'StageHint': bacy.convert_uint(obj.StageHint(), password),
+        'EchelonExtensionType': EchelonExtensionType(bacy.convert_int(obj.EchelonExtensionType_(), password)).name,
     }
 
 
 def dump_EventContentStageRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'RewardTag': RewardTag(table_encryption.convert_int(obj.RewardTag_(), password)).name,
-        'RewardProb': table_encryption.convert_int(obj.RewardProb(), password),
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardId': table_encryption.convert_long(obj.RewardId(), password),
-        'RewardAmount': table_encryption.convert_int(obj.RewardAmount(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'RewardTag': RewardTag(bacy.convert_int(obj.RewardTag_(), password)).name,
+        'RewardProb': bacy.convert_int(obj.RewardProb(), password),
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardId': bacy.convert_long(obj.RewardId(), password),
+        'RewardAmount': bacy.convert_int(obj.RewardAmount(), password),
         'IsDisplayed': obj.IsDisplayed(),
     }
 
 
 def dump_EventContentStageTotalRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'RequiredEventItemAmount': table_encryption.convert_long(obj.RequiredEventItemAmount(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardParcelAmount': [table_encryption.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'RequiredEventItemAmount': bacy.convert_long(obj.RequiredEventItemAmount(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardParcelAmount': [bacy.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
     }
 
 
 def dump_EventContentZoneExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'OriginalZoneId': table_encryption.convert_long(obj.OriginalZoneId(), password),
-        'LocationId': table_encryption.convert_long(obj.LocationId(), password),
-        'LocationRank': table_encryption.convert_long(obj.LocationRank(), password),
-        'EventPointForLocationRank': table_encryption.convert_long(obj.EventPointForLocationRank(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'StudentVisitProb': [table_encryption.convert_long(obj.StudentVisitProb(j), password) for j in range(obj.StudentVisitProbLength())],
-        'RewardGroupId': table_encryption.convert_long(obj.RewardGroupId(), password),
-        'Tags': [Tag(table_encryption.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
-        'WhiteListTags': [Tag(table_encryption.convert_int(obj.WhiteListTags(j), password)).name for j in range(obj.WhiteListTagsLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'OriginalZoneId': bacy.convert_long(obj.OriginalZoneId(), password),
+        'LocationId': bacy.convert_long(obj.LocationId(), password),
+        'LocationRank': bacy.convert_long(obj.LocationRank(), password),
+        'EventPointForLocationRank': bacy.convert_long(obj.EventPointForLocationRank(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'StudentVisitProb': [bacy.convert_long(obj.StudentVisitProb(j), password) for j in range(obj.StudentVisitProbLength())],
+        'RewardGroupId': bacy.convert_long(obj.RewardGroupId(), password),
+        'Tags': [Tag(bacy.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
+        'WhiteListTags': [Tag(bacy.convert_int(obj.WhiteListTags(j), password)).name for j in range(obj.WhiteListTagsLength())],
     }
 
 
 def dump_EventContentZoneVisitRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'EventContentLocationId': table_encryption.convert_long(obj.EventContentLocationId(), password),
-        'DevName': table_encryption.convert_string(obj.DevName(), password),
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'CharacterDevName': table_encryption.convert_string(obj.CharacterDevName(), password),
-        'VisitRewardParcelType': [ParcelType(table_encryption.convert_int(obj.VisitRewardParcelType(j), password)).name for j in range(obj.VisitRewardParcelTypeLength())],
-        'VisitRewardParcelId': [table_encryption.convert_long(obj.VisitRewardParcelId(j), password) for j in range(obj.VisitRewardParcelIdLength())],
-        'VisitRewardAmount': [table_encryption.convert_long(obj.VisitRewardAmount(j), password) for j in range(obj.VisitRewardAmountLength())],
-        'VisitRewardProb': [table_encryption.convert_long(obj.VisitRewardProb(j), password) for j in range(obj.VisitRewardProbLength())],
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'EventContentLocationId': bacy.convert_long(obj.EventContentLocationId(), password),
+        'DevName': bacy.convert_string(obj.DevName(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'CharacterDevName': bacy.convert_string(obj.CharacterDevName(), password),
+        'VisitRewardParcelType': [ParcelType(bacy.convert_int(obj.VisitRewardParcelType(j), password)).name for j in range(obj.VisitRewardParcelTypeLength())],
+        'VisitRewardParcelId': [bacy.convert_long(obj.VisitRewardParcelId(j), password) for j in range(obj.VisitRewardParcelIdLength())],
+        'VisitRewardAmount': [bacy.convert_long(obj.VisitRewardAmount(j), password) for j in range(obj.VisitRewardAmountLength())],
+        'VisitRewardProb': [bacy.convert_long(obj.VisitRewardProb(j), password) for j in range(obj.VisitRewardProbLength())],
     }
 
 
 def dump_FarmingDungeonLocationManageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'FarmingDungeonLocationId': table_encryption.convert_long(obj.FarmingDungeonLocationId(), password),
-        'ContentType': ContentType(table_encryption.convert_int(obj.ContentType_(), password)).name,
-        'WeekDungeonType': WeekDungeonType(table_encryption.convert_int(obj.WeekDungeonType_(), password)).name,
-        'SchoolDungeonType': SchoolDungeonType(table_encryption.convert_int(obj.SchoolDungeonType_(), password)).name,
-        'Order': table_encryption.convert_long(obj.Order(), password),
-        'OpenStartDateTime': table_encryption.convert_string(obj.OpenStartDateTime(), password),
-        'OpenEndDateTime': table_encryption.convert_string(obj.OpenEndDateTime(), password),
-        'LocationButtonImagePath': table_encryption.convert_string(obj.LocationButtonImagePath(), password),
-        'LocalizeCodeTitle': table_encryption.convert_uint(obj.LocalizeCodeTitle(), password),
-        'LocalizeCodeInfo': table_encryption.convert_uint(obj.LocalizeCodeInfo(), password),
+        'FarmingDungeonLocationId': bacy.convert_long(obj.FarmingDungeonLocationId(), password),
+        'ContentType': ContentType(bacy.convert_int(obj.ContentType_(), password)).name,
+        'WeekDungeonType': WeekDungeonType(bacy.convert_int(obj.WeekDungeonType_(), password)).name,
+        'SchoolDungeonType': SchoolDungeonType(bacy.convert_int(obj.SchoolDungeonType_(), password)).name,
+        'Order': bacy.convert_long(obj.Order(), password),
+        'OpenStartDateTime': bacy.convert_string(obj.OpenStartDateTime(), password),
+        'OpenEndDateTime': bacy.convert_string(obj.OpenEndDateTime(), password),
+        'LocationButtonImagePath': bacy.convert_string(obj.LocationButtonImagePath(), password),
+        'LocalizeCodeTitle': bacy.convert_uint(obj.LocalizeCodeTitle(), password),
+        'LocalizeCodeInfo': bacy.convert_uint(obj.LocalizeCodeInfo(), password),
     }
 
 
 def dump_FavorLevelExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Level': table_encryption.convert_long(obj.Level(), password),
-        'ExpType': [table_encryption.convert_long(obj.ExpType(j), password) for j in range(obj.ExpTypeLength())],
+        'Level': bacy.convert_long(obj.Level(), password),
+        'ExpType': [bacy.convert_long(obj.ExpType(j), password) for j in range(obj.ExpTypeLength())],
     }
 
 
 def dump_FavorLevelRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'FavorLevel': table_encryption.convert_long(obj.FavorLevel(), password),
-        'StatType': [EquipmentOptionType(table_encryption.convert_int(obj.StatType(j), password)).name for j in range(obj.StatTypeLength())],
-        'StatValue': [table_encryption.convert_long(obj.StatValue(j), password) for j in range(obj.StatValueLength())],
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardAmount': [table_encryption.convert_long(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'FavorLevel': bacy.convert_long(obj.FavorLevel(), password),
+        'StatType': [EquipmentOptionType(bacy.convert_int(obj.StatType(j), password)).name for j in range(obj.StatTypeLength())],
+        'StatValue': [bacy.convert_long(obj.StatValue(j), password) for j in range(obj.StatValueLength())],
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardAmount': [bacy.convert_long(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
     }
 
 
 def dump_FieldContentStageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'SeasonId': table_encryption.convert_long(obj.SeasonId(), password),
-        'AreaId': table_encryption.convert_long(obj.AreaId(), password),
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'StageDifficulty': StageDifficulty(table_encryption.convert_int(obj.StageDifficulty_(), password)).name,
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'StageEnterCostType': ParcelType(table_encryption.convert_int(obj.StageEnterCostType(), password)).name,
-        'StageEnterCostId': table_encryption.convert_long(obj.StageEnterCostId(), password),
-        'StageEnterCostAmount': table_encryption.convert_int(obj.StageEnterCostAmount(), password),
-        'StageTopography': StageTopography(table_encryption.convert_int(obj.StageTopography_(), password)).name,
-        'RecommandLevel': table_encryption.convert_int(obj.RecommandLevel(), password),
-        'GroundID': table_encryption.convert_long(obj.GroundID(), password),
-        'BGMId': table_encryption.convert_long(obj.BGMId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'SeasonId': bacy.convert_long(obj.SeasonId(), password),
+        'AreaId': bacy.convert_long(obj.AreaId(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'StageDifficulty': StageDifficulty(bacy.convert_int(obj.StageDifficulty_(), password)).name,
+        'Name': bacy.convert_string(obj.Name(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'StageEnterCostType': ParcelType(bacy.convert_int(obj.StageEnterCostType(), password)).name,
+        'StageEnterCostId': bacy.convert_long(obj.StageEnterCostId(), password),
+        'StageEnterCostAmount': bacy.convert_int(obj.StageEnterCostAmount(), password),
+        'StageTopography': StageTopography(bacy.convert_int(obj.StageTopography_(), password)).name,
+        'RecommandLevel': bacy.convert_int(obj.RecommandLevel(), password),
+        'GroundID': bacy.convert_long(obj.GroundID(), password),
+        'BGMId': bacy.convert_long(obj.BGMId(), password),
         'InstantClear': obj.InstantClear(),
-        'FixedEchelonId': table_encryption.convert_long(obj.FixedEchelonId(), password),
+        'FixedEchelonId': bacy.convert_long(obj.FixedEchelonId(), password),
         'SkipFormationSettings': obj.SkipFormationSettings(),
     }
 
 
 def dump_FieldContentStageRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'RewardTag': RewardTag(table_encryption.convert_int(obj.RewardTag_(), password)).name,
-        'RewardProb': table_encryption.convert_int(obj.RewardProb(), password),
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardId': table_encryption.convert_long(obj.RewardId(), password),
-        'RewardAmount': table_encryption.convert_int(obj.RewardAmount(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'RewardTag': RewardTag(bacy.convert_int(obj.RewardTag_(), password)).name,
+        'RewardProb': bacy.convert_int(obj.RewardProb(), password),
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardId': bacy.convert_long(obj.RewardId(), password),
+        'RewardAmount': bacy.convert_int(obj.RewardAmount(), password),
         'IsDisplayed': obj.IsDisplayed(),
     }
 
 
 def dump_FieldCurtainCallFreeModeExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'OpenDate': table_encryption.convert_long(obj.OpenDate(), password),
-        'SetFieldDateID': table_encryption.convert_long(obj.SetFieldDateID(), password),
-        'SetFieldQuestOpenDate': table_encryption.convert_long(obj.SetFieldQuestOpenDate(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'OpenDate': bacy.convert_long(obj.OpenDate(), password),
+        'SetFieldDateID': bacy.convert_long(obj.SetFieldDateID(), password),
+        'SetFieldQuestOpenDate': bacy.convert_long(obj.SetFieldQuestOpenDate(), password),
     }
 
 
 def dump_FieldDateExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'SeasonId': table_encryption.convert_long(obj.SeasonId(), password),
-        'OpenDate': table_encryption.convert_long(obj.OpenDate(), password),
-        'DateLocalizeKey': table_encryption.convert_string(obj.DateLocalizeKey(), password),
-        'EntrySceneId': table_encryption.convert_long(obj.EntrySceneId(), password),
-        'StartConditionType': FieldConditionType(table_encryption.convert_int(obj.StartConditionType(), password)).name,
-        'StartConditionId': table_encryption.convert_long(obj.StartConditionId(), password),
-        'EndConditionType': FieldConditionType(table_encryption.convert_int(obj.EndConditionType(), password)).name,
-        'EndConditionId': table_encryption.convert_long(obj.EndConditionId(), password),
-        'OpenConditionStage': table_encryption.convert_long(obj.OpenConditionStage(), password),
-        'DateResultSpinePath': table_encryption.convert_string(obj.DateResultSpinePath(), password),
-        'DateResultSpineOffsetX': table_encryption.convert_float(obj.DateResultSpineOffsetX(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'SeasonId': bacy.convert_long(obj.SeasonId(), password),
+        'OpenDate': bacy.convert_long(obj.OpenDate(), password),
+        'DateLocalizeKey': bacy.convert_string(obj.DateLocalizeKey(), password),
+        'EntrySceneId': bacy.convert_long(obj.EntrySceneId(), password),
+        'StartConditionType': FieldConditionType(bacy.convert_int(obj.StartConditionType(), password)).name,
+        'StartConditionId': bacy.convert_long(obj.StartConditionId(), password),
+        'EndConditionType': FieldConditionType(bacy.convert_int(obj.EndConditionType(), password)).name,
+        'EndConditionId': bacy.convert_long(obj.EndConditionId(), password),
+        'OpenConditionStage': bacy.convert_long(obj.OpenConditionStage(), password),
+        'DateResultSpinePath': bacy.convert_string(obj.DateResultSpinePath(), password),
+        'DateResultSpineOffsetX': bacy.convert_float(obj.DateResultSpineOffsetX(), password),
     }
 
 
 def dump_FieldEvidenceExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'NameLocalizeKey': table_encryption.convert_string(obj.NameLocalizeKey(), password),
-        'DescriptionLocalizeKey': table_encryption.convert_string(obj.DescriptionLocalizeKey(), password),
-        'DetailLocalizeKey': table_encryption.convert_string(obj.DetailLocalizeKey(), password),
-        'ImagePath': table_encryption.convert_string(obj.ImagePath(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'NameLocalizeKey': bacy.convert_string(obj.NameLocalizeKey(), password),
+        'DescriptionLocalizeKey': bacy.convert_string(obj.DescriptionLocalizeKey(), password),
+        'DetailLocalizeKey': bacy.convert_string(obj.DetailLocalizeKey(), password),
+        'ImagePath': bacy.convert_string(obj.ImagePath(), password),
     }
 
 
 def dump_FieldInteractionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'FieldDateId': table_encryption.convert_long(obj.FieldDateId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'FieldDateId': bacy.convert_long(obj.FieldDateId(), password),
         'ShowEmoji': obj.ShowEmoji(),
-        'KeywordLocalize': table_encryption.convert_string(obj.KeywordLocalize(), password),
-        'FieldSeasonId': table_encryption.convert_long(obj.FieldSeasonId(), password),
-        'InteractionType': [FieldInteractionType(table_encryption.convert_int(obj.InteractionType(j), password)).name for j in range(obj.InteractionTypeLength())],
-        'InteractionId': [table_encryption.convert_long(obj.InteractionId(j), password) for j in range(obj.InteractionIdLength())],
-        'ConditionClass': FieldConditionClass(table_encryption.convert_int(obj.ConditionClass(), password)).name,
-        'ConditionClassParameters': [table_encryption.convert_long(obj.ConditionClassParameters(j), password) for j in range(obj.ConditionClassParametersLength())],
+        'KeywordLocalize': bacy.convert_string(obj.KeywordLocalize(), password),
+        'FieldSeasonId': bacy.convert_long(obj.FieldSeasonId(), password),
+        'InteractionType': [FieldInteractionType(bacy.convert_int(obj.InteractionType(j), password)).name for j in range(obj.InteractionTypeLength())],
+        'InteractionId': [bacy.convert_long(obj.InteractionId(j), password) for j in range(obj.InteractionIdLength())],
+        'ConditionClass': FieldConditionClass(bacy.convert_int(obj.ConditionClass(), password)).name,
+        'ConditionClassParameters': [bacy.convert_long(obj.ConditionClassParameters(j), password) for j in range(obj.ConditionClassParametersLength())],
         'OnceOnly': obj.OnceOnly(),
-        'ConditionIndex': [table_encryption.convert_long(obj.ConditionIndex(j), password) for j in range(obj.ConditionIndexLength())],
-        'ConditionType': [FieldConditionType(table_encryption.convert_int(obj.ConditionType(j), password)).name for j in range(obj.ConditionTypeLength())],
-        'ConditionId': [table_encryption.convert_long(obj.ConditionId(j), password) for j in range(obj.ConditionIdLength())],
+        'ConditionIndex': [bacy.convert_long(obj.ConditionIndex(j), password) for j in range(obj.ConditionIndexLength())],
+        'ConditionType': [FieldConditionType(bacy.convert_int(obj.ConditionType(j), password)).name for j in range(obj.ConditionTypeLength())],
+        'ConditionId': [bacy.convert_long(obj.ConditionId(j), password) for j in range(obj.ConditionIdLength())],
         'NegateCondition': [obj.NegateCondition(j) for j in range(obj.NegateConditionLength())],
     }
 
 
 def dump_FieldKeywordExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'NameLocalizeKey': table_encryption.convert_string(obj.NameLocalizeKey(), password),
-        'DescriptionLocalizeKey': table_encryption.convert_string(obj.DescriptionLocalizeKey(), password),
-        'ImagePath': table_encryption.convert_string(obj.ImagePath(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'NameLocalizeKey': bacy.convert_string(obj.NameLocalizeKey(), password),
+        'DescriptionLocalizeKey': bacy.convert_string(obj.DescriptionLocalizeKey(), password),
+        'ImagePath': bacy.convert_string(obj.ImagePath(), password),
     }
 
 
 def dump_FieldMasteryExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'SeasonId': table_encryption.convert_long(obj.SeasonId(), password),
-        'Order': table_encryption.convert_int(obj.Order(), password),
-        'ExpAmount': table_encryption.convert_long(obj.ExpAmount(), password),
-        'TokenType': ParcelType(table_encryption.convert_int(obj.TokenType(), password)).name,
-        'TokenId': table_encryption.convert_long(obj.TokenId(), password),
-        'TokenRequirement': table_encryption.convert_long(obj.TokenRequirement(), password),
-        'AccomplishmentConditionType': FieldConditionType(table_encryption.convert_int(obj.AccomplishmentConditionType(), password)).name,
-        'AccomplishmentConditionId': table_encryption.convert_long(obj.AccomplishmentConditionId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'SeasonId': bacy.convert_long(obj.SeasonId(), password),
+        'Order': bacy.convert_int(obj.Order(), password),
+        'ExpAmount': bacy.convert_long(obj.ExpAmount(), password),
+        'TokenType': ParcelType(bacy.convert_int(obj.TokenType(), password)).name,
+        'TokenId': bacy.convert_long(obj.TokenId(), password),
+        'TokenRequirement': bacy.convert_long(obj.TokenRequirement(), password),
+        'AccomplishmentConditionType': FieldConditionType(bacy.convert_int(obj.AccomplishmentConditionType(), password)).name,
+        'AccomplishmentConditionId': bacy.convert_long(obj.AccomplishmentConditionId(), password),
     }
 
 
 def dump_FieldMasteryLevelExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Level': table_encryption.convert_int(obj.Level(), password),
-        'Id': [table_encryption.convert_long(obj.Id(j), password) for j in range(obj.IdLength())],
-        'Exp': [table_encryption.convert_long(obj.Exp(j), password) for j in range(obj.ExpLength())],
-        'TotalExp': [table_encryption.convert_long(obj.TotalExp(j), password) for j in range(obj.TotalExpLength())],
-        'RewardId': [table_encryption.convert_long(obj.RewardId(j), password) for j in range(obj.RewardIdLength())],
+        'Level': bacy.convert_int(obj.Level(), password),
+        'Id': [bacy.convert_long(obj.Id(j), password) for j in range(obj.IdLength())],
+        'Exp': [bacy.convert_long(obj.Exp(j), password) for j in range(obj.ExpLength())],
+        'TotalExp': [bacy.convert_long(obj.TotalExp(j), password) for j in range(obj.TotalExpLength())],
+        'RewardId': [bacy.convert_long(obj.RewardId(j), password) for j in range(obj.RewardIdLength())],
     }
 
 
 def dump_FieldMasteryManageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'FieldSeason': table_encryption.convert_long(obj.FieldSeason(), password),
-        'LocalizeEtc': table_encryption.convert_uint(obj.LocalizeEtc(), password),
-        'ImagePath': table_encryption.convert_string(obj.ImagePath(), password),
-        'LevelId': table_encryption.convert_long(obj.LevelId(), password),
+        'FieldSeason': bacy.convert_long(obj.FieldSeason(), password),
+        'LocalizeEtc': bacy.convert_uint(obj.LocalizeEtc(), password),
+        'ImagePath': bacy.convert_string(obj.ImagePath(), password),
+        'LevelId': bacy.convert_long(obj.LevelId(), password),
     }
 
 
 def dump_FieldQuestExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'FieldSeasonId': table_encryption.convert_long(obj.FieldSeasonId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'FieldSeasonId': bacy.convert_long(obj.FieldSeasonId(), password),
         'IsDaily': obj.IsDaily(),
-        'FieldDateId': table_encryption.convert_long(obj.FieldDateId(), password),
-        'Opendate': table_encryption.convert_long(obj.Opendate(), password),
-        'AssetPath': table_encryption.convert_string(obj.AssetPath(), password),
-        'RewardId': table_encryption.convert_long(obj.RewardId(), password),
-        'Prob': table_encryption.convert_int(obj.Prob(), password),
-        'QuestNamKey': table_encryption.convert_uint(obj.QuestNamKey(), password),
-        'QuestDescKey': table_encryption.convert_uint(obj.QuestDescKey(), password),
+        'FieldDateId': bacy.convert_long(obj.FieldDateId(), password),
+        'Opendate': bacy.convert_long(obj.Opendate(), password),
+        'AssetPath': bacy.convert_string(obj.AssetPath(), password),
+        'RewardId': bacy.convert_long(obj.RewardId(), password),
+        'Prob': bacy.convert_int(obj.Prob(), password),
+        'QuestNamKey': bacy.convert_uint(obj.QuestNamKey(), password),
+        'QuestDescKey': bacy.convert_uint(obj.QuestDescKey(), password),
     }
 
 
 def dump_FieldRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'RewardProb': table_encryption.convert_int(obj.RewardProb(), password),
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardId': table_encryption.convert_long(obj.RewardId(), password),
-        'RewardAmount': table_encryption.convert_int(obj.RewardAmount(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'RewardProb': bacy.convert_int(obj.RewardProb(), password),
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardId': bacy.convert_long(obj.RewardId(), password),
+        'RewardAmount': bacy.convert_int(obj.RewardAmount(), password),
     }
 
 
 def dump_FieldSceneExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'DateId': table_encryption.convert_long(obj.DateId(), password),
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'ArtLevelPath': table_encryption.convert_string(obj.ArtLevelPath(), password),
-        'DesignLevelPath': table_encryption.convert_string(obj.DesignLevelPath(), password),
-        'BGMId': table_encryption.convert_long(obj.BGMId(), password),
-        'ConditionalBGMQuestId': [table_encryption.convert_long(obj.ConditionalBGMQuestId(j), password) for j in range(obj.ConditionalBGMQuestIdLength())],
-        'BeginConditionalBGMScenarioGroupId': [table_encryption.convert_long(obj.BeginConditionalBGMScenarioGroupId(j), password) for j in range(obj.BeginConditionalBGMScenarioGroupIdLength())],
-        'EndConditionalBGMScenarioGroupId': [table_encryption.convert_long(obj.EndConditionalBGMScenarioGroupId(j), password) for j in range(obj.EndConditionalBGMScenarioGroupIdLength())],
-        'ConditionalBGMId': [table_encryption.convert_long(obj.ConditionalBGMId(j), password) for j in range(obj.ConditionalBGMIdLength())],
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'DateId': bacy.convert_long(obj.DateId(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'ArtLevelPath': bacy.convert_string(obj.ArtLevelPath(), password),
+        'DesignLevelPath': bacy.convert_string(obj.DesignLevelPath(), password),
+        'BGMId': bacy.convert_long(obj.BGMId(), password),
+        'ConditionalBGMQuestId': [bacy.convert_long(obj.ConditionalBGMQuestId(j), password) for j in range(obj.ConditionalBGMQuestIdLength())],
+        'BeginConditionalBGMScenarioGroupId': [bacy.convert_long(obj.BeginConditionalBGMScenarioGroupId(j), password) for j in range(obj.BeginConditionalBGMScenarioGroupIdLength())],
+        'EndConditionalBGMScenarioGroupId': [bacy.convert_long(obj.EndConditionalBGMScenarioGroupId(j), password) for j in range(obj.EndConditionalBGMScenarioGroupIdLength())],
+        'ConditionalBGMId': [bacy.convert_long(obj.ConditionalBGMId(j), password) for j in range(obj.ConditionalBGMIdLength())],
     }
 
 
 def dump_FieldSeasonExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'EntryDateId': table_encryption.convert_long(obj.EntryDateId(), password),
-        'InstantEntryDateId': table_encryption.convert_long(obj.InstantEntryDateId(), password),
-        'StartDate': table_encryption.convert_string(obj.StartDate(), password),
-        'EndDate': table_encryption.convert_string(obj.EndDate(), password),
-        'LobbyBGMChangeStageId': table_encryption.convert_long(obj.LobbyBGMChangeStageId(), password),
-        'CharacterIconPath': table_encryption.convert_string(obj.CharacterIconPath(), password),
-        'MasteryImagePath': table_encryption.convert_string(obj.MasteryImagePath(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'EntryDateId': bacy.convert_long(obj.EntryDateId(), password),
+        'InstantEntryDateId': bacy.convert_long(obj.InstantEntryDateId(), password),
+        'StartDate': bacy.convert_string(obj.StartDate(), password),
+        'EndDate': bacy.convert_string(obj.EndDate(), password),
+        'LobbyBGMChangeStageId': bacy.convert_long(obj.LobbyBGMChangeStageId(), password),
+        'CharacterIconPath': bacy.convert_string(obj.CharacterIconPath(), password),
+        'MasteryImagePath': bacy.convert_string(obj.MasteryImagePath(), password),
     }
 
 
 def dump_FieldStoryStageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'SeasonId': table_encryption.convert_long(obj.SeasonId(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'StageTopography': StageTopography(table_encryption.convert_int(obj.StageTopography_(), password)).name,
-        'RecommandLevel': table_encryption.convert_int(obj.RecommandLevel(), password),
-        'GroundID': table_encryption.convert_long(obj.GroundID(), password),
-        'BGMId': table_encryption.convert_long(obj.BGMId(), password),
-        'FixedEchelonId': table_encryption.convert_long(obj.FixedEchelonId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'SeasonId': bacy.convert_long(obj.SeasonId(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'StageTopography': StageTopography(bacy.convert_int(obj.StageTopography_(), password)).name,
+        'RecommandLevel': bacy.convert_int(obj.RecommandLevel(), password),
+        'GroundID': bacy.convert_long(obj.GroundID(), password),
+        'BGMId': bacy.convert_long(obj.BGMId(), password),
+        'FixedEchelonId': bacy.convert_long(obj.FixedEchelonId(), password),
         'SkipFormationSettings': obj.SkipFormationSettings(),
     }
 
 
 def dump_FieldTutorialExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'SeasonId': table_encryption.convert_long(obj.SeasonId(), password),
-        'TutorialType': [FieldTutorialType(table_encryption.convert_int(obj.TutorialType(j), password)).name for j in range(obj.TutorialTypeLength())],
-        'ConditionType': [FieldConditionType(table_encryption.convert_int(obj.ConditionType(j), password)).name for j in range(obj.ConditionTypeLength())],
-        'ConditionId': [table_encryption.convert_long(obj.ConditionId(j), password) for j in range(obj.ConditionIdLength())],
+        'SeasonId': bacy.convert_long(obj.SeasonId(), password),
+        'TutorialType': [FieldTutorialType(bacy.convert_int(obj.TutorialType(j), password)).name for j in range(obj.TutorialTypeLength())],
+        'ConditionType': [FieldConditionType(bacy.convert_int(obj.ConditionType(j), password)).name for j in range(obj.ConditionTypeLength())],
+        'ConditionId': [bacy.convert_long(obj.ConditionId(j), password) for j in range(obj.ConditionIdLength())],
     }
 
 
 def dump_FieldWorldMapZoneExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'GroupId': table_encryption.convert_int(obj.GroupId(), password),
-        'Date': table_encryption.convert_int(obj.Date(), password),
-        'OpenConditionType': FieldConditionType(table_encryption.convert_int(obj.OpenConditionType(), password)).name,
-        'OpenConditionId': table_encryption.convert_long(obj.OpenConditionId(), password),
-        'CloseConditionType': FieldConditionType(table_encryption.convert_int(obj.CloseConditionType(), password)).name,
-        'CloseConditionId': table_encryption.convert_long(obj.CloseConditionId(), password),
-        'ResultFieldScene': table_encryption.convert_long(obj.ResultFieldScene(), password),
-        'FieldStageInteractionId': table_encryption.convert_long(obj.FieldStageInteractionId(), password),
-        'LocalizeCode': table_encryption.convert_uint(obj.LocalizeCode(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'GroupId': bacy.convert_int(obj.GroupId(), password),
+        'Date': bacy.convert_int(obj.Date(), password),
+        'OpenConditionType': FieldConditionType(bacy.convert_int(obj.OpenConditionType(), password)).name,
+        'OpenConditionId': bacy.convert_long(obj.OpenConditionId(), password),
+        'CloseConditionType': FieldConditionType(bacy.convert_int(obj.CloseConditionType(), password)).name,
+        'CloseConditionId': bacy.convert_long(obj.CloseConditionId(), password),
+        'ResultFieldScene': bacy.convert_long(obj.ResultFieldScene(), password),
+        'FieldStageInteractionId': bacy.convert_long(obj.FieldStageInteractionId(), password),
+        'LocalizeCode': bacy.convert_uint(obj.LocalizeCode(), password),
     }
 
 
 def dump_FixedEchelonSettingExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'FixedEchelonID': table_encryption.convert_long(obj.FixedEchelonID(), password),
+        'FixedEchelonID': bacy.convert_long(obj.FixedEchelonID(), password),
         'EchelonSceneSkip': obj.EchelonSceneSkip(),
-        'MainLeaderSlot': table_encryption.convert_int(obj.MainLeaderSlot(), password),
-        'MainCharacterID': [table_encryption.convert_long(obj.MainCharacterID(j), password) for j in range(obj.MainCharacterIDLength())],
-        'MainLevel': [table_encryption.convert_int(obj.MainLevel(j), password) for j in range(obj.MainLevelLength())],
-        'MainGrade': [table_encryption.convert_int(obj.MainGrade(j), password) for j in range(obj.MainGradeLength())],
-        'MainExSkillLevel': [table_encryption.convert_int(obj.MainExSkillLevel(j), password) for j in range(obj.MainExSkillLevelLength())],
-        'MainNoneExSkillLevel': [table_encryption.convert_int(obj.MainNoneExSkillLevel(j), password) for j in range(obj.MainNoneExSkillLevelLength())],
-        'MainEquipment1Tier': [table_encryption.convert_int(obj.MainEquipment1Tier(j), password) for j in range(obj.MainEquipment1TierLength())],
-        'MainEquipment1Level': [table_encryption.convert_int(obj.MainEquipment1Level(j), password) for j in range(obj.MainEquipment1LevelLength())],
-        'MainEquipment2Tier': [table_encryption.convert_int(obj.MainEquipment2Tier(j), password) for j in range(obj.MainEquipment2TierLength())],
-        'MainEquipment2Level': [table_encryption.convert_int(obj.MainEquipment2Level(j), password) for j in range(obj.MainEquipment2LevelLength())],
-        'MainEquipment3Tier': [table_encryption.convert_int(obj.MainEquipment3Tier(j), password) for j in range(obj.MainEquipment3TierLength())],
-        'MainEquipment3Level': [table_encryption.convert_int(obj.MainEquipment3Level(j), password) for j in range(obj.MainEquipment3LevelLength())],
-        'MainCharacterWeaponGrade': [table_encryption.convert_int(obj.MainCharacterWeaponGrade(j), password) for j in range(obj.MainCharacterWeaponGradeLength())],
-        'MainCharacterWeaponLevel': [table_encryption.convert_int(obj.MainCharacterWeaponLevel(j), password) for j in range(obj.MainCharacterWeaponLevelLength())],
-        'MainCharacterGearTier': [table_encryption.convert_int(obj.MainCharacterGearTier(j), password) for j in range(obj.MainCharacterGearTierLength())],
-        'MainCharacterGearLevel': [table_encryption.convert_int(obj.MainCharacterGearLevel(j), password) for j in range(obj.MainCharacterGearLevelLength())],
-        'SupportCharacterID': [table_encryption.convert_long(obj.SupportCharacterID(j), password) for j in range(obj.SupportCharacterIDLength())],
-        'SupportLevel': [table_encryption.convert_int(obj.SupportLevel(j), password) for j in range(obj.SupportLevelLength())],
-        'SupportGrade': [table_encryption.convert_int(obj.SupportGrade(j), password) for j in range(obj.SupportGradeLength())],
-        'SupportExSkillLevel': [table_encryption.convert_int(obj.SupportExSkillLevel(j), password) for j in range(obj.SupportExSkillLevelLength())],
-        'SupportNoneExSkillLevel': [table_encryption.convert_int(obj.SupportNoneExSkillLevel(j), password) for j in range(obj.SupportNoneExSkillLevelLength())],
-        'SupportEquipment1Tier': [table_encryption.convert_int(obj.SupportEquipment1Tier(j), password) for j in range(obj.SupportEquipment1TierLength())],
-        'SupportEquipment1Level': [table_encryption.convert_int(obj.SupportEquipment1Level(j), password) for j in range(obj.SupportEquipment1LevelLength())],
-        'SupportEquipment2Tier': [table_encryption.convert_int(obj.SupportEquipment2Tier(j), password) for j in range(obj.SupportEquipment2TierLength())],
-        'SupportEquipment2Level': [table_encryption.convert_int(obj.SupportEquipment2Level(j), password) for j in range(obj.SupportEquipment2LevelLength())],
-        'SupportEquipment3Tier': [table_encryption.convert_int(obj.SupportEquipment3Tier(j), password) for j in range(obj.SupportEquipment3TierLength())],
-        'SupportEquipment3Level': [table_encryption.convert_int(obj.SupportEquipment3Level(j), password) for j in range(obj.SupportEquipment3LevelLength())],
-        'SupportCharacterWeaponGrade': [table_encryption.convert_int(obj.SupportCharacterWeaponGrade(j), password) for j in range(obj.SupportCharacterWeaponGradeLength())],
-        'SupportCharacterWeaponLevel': [table_encryption.convert_int(obj.SupportCharacterWeaponLevel(j), password) for j in range(obj.SupportCharacterWeaponLevelLength())],
-        'SupportCharacterGearTier': [table_encryption.convert_int(obj.SupportCharacterGearTier(j), password) for j in range(obj.SupportCharacterGearTierLength())],
-        'SupportCharacterGearLevel': [table_encryption.convert_int(obj.SupportCharacterGearLevel(j), password) for j in range(obj.SupportCharacterGearLevelLength())],
-        'InteractionTSCharacterId': table_encryption.convert_long(obj.InteractionTSCharacterId(), password),
+        'MainLeaderSlot': bacy.convert_int(obj.MainLeaderSlot(), password),
+        'MainCharacterID': [bacy.convert_long(obj.MainCharacterID(j), password) for j in range(obj.MainCharacterIDLength())],
+        'MainLevel': [bacy.convert_int(obj.MainLevel(j), password) for j in range(obj.MainLevelLength())],
+        'MainGrade': [bacy.convert_int(obj.MainGrade(j), password) for j in range(obj.MainGradeLength())],
+        'MainExSkillLevel': [bacy.convert_int(obj.MainExSkillLevel(j), password) for j in range(obj.MainExSkillLevelLength())],
+        'MainNoneExSkillLevel': [bacy.convert_int(obj.MainNoneExSkillLevel(j), password) for j in range(obj.MainNoneExSkillLevelLength())],
+        'MainEquipment1Tier': [bacy.convert_int(obj.MainEquipment1Tier(j), password) for j in range(obj.MainEquipment1TierLength())],
+        'MainEquipment1Level': [bacy.convert_int(obj.MainEquipment1Level(j), password) for j in range(obj.MainEquipment1LevelLength())],
+        'MainEquipment2Tier': [bacy.convert_int(obj.MainEquipment2Tier(j), password) for j in range(obj.MainEquipment2TierLength())],
+        'MainEquipment2Level': [bacy.convert_int(obj.MainEquipment2Level(j), password) for j in range(obj.MainEquipment2LevelLength())],
+        'MainEquipment3Tier': [bacy.convert_int(obj.MainEquipment3Tier(j), password) for j in range(obj.MainEquipment3TierLength())],
+        'MainEquipment3Level': [bacy.convert_int(obj.MainEquipment3Level(j), password) for j in range(obj.MainEquipment3LevelLength())],
+        'MainCharacterWeaponGrade': [bacy.convert_int(obj.MainCharacterWeaponGrade(j), password) for j in range(obj.MainCharacterWeaponGradeLength())],
+        'MainCharacterWeaponLevel': [bacy.convert_int(obj.MainCharacterWeaponLevel(j), password) for j in range(obj.MainCharacterWeaponLevelLength())],
+        'MainCharacterGearTier': [bacy.convert_int(obj.MainCharacterGearTier(j), password) for j in range(obj.MainCharacterGearTierLength())],
+        'MainCharacterGearLevel': [bacy.convert_int(obj.MainCharacterGearLevel(j), password) for j in range(obj.MainCharacterGearLevelLength())],
+        'SupportCharacterID': [bacy.convert_long(obj.SupportCharacterID(j), password) for j in range(obj.SupportCharacterIDLength())],
+        'SupportLevel': [bacy.convert_int(obj.SupportLevel(j), password) for j in range(obj.SupportLevelLength())],
+        'SupportGrade': [bacy.convert_int(obj.SupportGrade(j), password) for j in range(obj.SupportGradeLength())],
+        'SupportExSkillLevel': [bacy.convert_int(obj.SupportExSkillLevel(j), password) for j in range(obj.SupportExSkillLevelLength())],
+        'SupportNoneExSkillLevel': [bacy.convert_int(obj.SupportNoneExSkillLevel(j), password) for j in range(obj.SupportNoneExSkillLevelLength())],
+        'SupportEquipment1Tier': [bacy.convert_int(obj.SupportEquipment1Tier(j), password) for j in range(obj.SupportEquipment1TierLength())],
+        'SupportEquipment1Level': [bacy.convert_int(obj.SupportEquipment1Level(j), password) for j in range(obj.SupportEquipment1LevelLength())],
+        'SupportEquipment2Tier': [bacy.convert_int(obj.SupportEquipment2Tier(j), password) for j in range(obj.SupportEquipment2TierLength())],
+        'SupportEquipment2Level': [bacy.convert_int(obj.SupportEquipment2Level(j), password) for j in range(obj.SupportEquipment2LevelLength())],
+        'SupportEquipment3Tier': [bacy.convert_int(obj.SupportEquipment3Tier(j), password) for j in range(obj.SupportEquipment3TierLength())],
+        'SupportEquipment3Level': [bacy.convert_int(obj.SupportEquipment3Level(j), password) for j in range(obj.SupportEquipment3LevelLength())],
+        'SupportCharacterWeaponGrade': [bacy.convert_int(obj.SupportCharacterWeaponGrade(j), password) for j in range(obj.SupportCharacterWeaponGradeLength())],
+        'SupportCharacterWeaponLevel': [bacy.convert_int(obj.SupportCharacterWeaponLevel(j), password) for j in range(obj.SupportCharacterWeaponLevelLength())],
+        'SupportCharacterGearTier': [bacy.convert_int(obj.SupportCharacterGearTier(j), password) for j in range(obj.SupportCharacterGearTierLength())],
+        'SupportCharacterGearLevel': [bacy.convert_int(obj.SupportCharacterGearLevel(j), password) for j in range(obj.SupportCharacterGearLevelLength())],
+        'InteractionTSCharacterId': bacy.convert_long(obj.InteractionTSCharacterId(), password),
     }
 
 
 def dump_FixedStrategyExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'StageEnterEchelon01FixedEchelonId': table_encryption.convert_long(obj.StageEnterEchelon01FixedEchelonId(), password),
-        'StageEnterEchelon01Starttile': table_encryption.convert_long(obj.StageEnterEchelon01Starttile(), password),
-        'StageEnterEchelon02FixedEchelonId': table_encryption.convert_long(obj.StageEnterEchelon02FixedEchelonId(), password),
-        'StageEnterEchelon02Starttile': table_encryption.convert_long(obj.StageEnterEchelon02Starttile(), password),
-        'StageEnterEchelon03FixedEchelonId': table_encryption.convert_long(obj.StageEnterEchelon03FixedEchelonId(), password),
-        'StageEnterEchelon03Starttile': table_encryption.convert_long(obj.StageEnterEchelon03Starttile(), password),
-        'StageEnterEchelon04FixedEchelonId': table_encryption.convert_long(obj.StageEnterEchelon04FixedEchelonId(), password),
-        'StageEnterEchelon04Starttile': table_encryption.convert_long(obj.StageEnterEchelon04Starttile(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'StageEnterEchelon01FixedEchelonId': bacy.convert_long(obj.StageEnterEchelon01FixedEchelonId(), password),
+        'StageEnterEchelon01Starttile': bacy.convert_long(obj.StageEnterEchelon01Starttile(), password),
+        'StageEnterEchelon02FixedEchelonId': bacy.convert_long(obj.StageEnterEchelon02FixedEchelonId(), password),
+        'StageEnterEchelon02Starttile': bacy.convert_long(obj.StageEnterEchelon02Starttile(), password),
+        'StageEnterEchelon03FixedEchelonId': bacy.convert_long(obj.StageEnterEchelon03FixedEchelonId(), password),
+        'StageEnterEchelon03Starttile': bacy.convert_long(obj.StageEnterEchelon03Starttile(), password),
+        'StageEnterEchelon04FixedEchelonId': bacy.convert_long(obj.StageEnterEchelon04FixedEchelonId(), password),
+        'StageEnterEchelon04Starttile': bacy.convert_long(obj.StageEnterEchelon04Starttile(), password),
     }
 
 
 def dump_FloaterCommonExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'TacticEntityType': TacticEntityType(table_encryption.convert_int(obj.TacticEntityType_(), password)).name,
-        'FloaterOffsetPosX': table_encryption.convert_int(obj.FloaterOffsetPosX(), password),
-        'FloaterOffsetPosY': table_encryption.convert_int(obj.FloaterOffsetPosY(), password),
-        'FloaterRandomPosRangeX': table_encryption.convert_int(obj.FloaterRandomPosRangeX(), password),
-        'FloaterRandomPosRangeY': table_encryption.convert_int(obj.FloaterRandomPosRangeY(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'TacticEntityType': TacticEntityType(bacy.convert_int(obj.TacticEntityType_(), password)).name,
+        'FloaterOffsetPosX': bacy.convert_int(obj.FloaterOffsetPosX(), password),
+        'FloaterOffsetPosY': bacy.convert_int(obj.FloaterOffsetPosY(), password),
+        'FloaterRandomPosRangeX': bacy.convert_int(obj.FloaterRandomPosRangeX(), password),
+        'FloaterRandomPosRangeY': bacy.convert_int(obj.FloaterRandomPosRangeY(), password),
     }
 
 
 def dump_FormationLocationExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'GroupID': table_encryption.convert_long(obj.GroupID(), password),
-        'SlotZ': [table_encryption.convert_float(obj.SlotZ(j), password) for j in range(obj.SlotZLength())],
-        'SlotX': [table_encryption.convert_float(obj.SlotX(j), password) for j in range(obj.SlotXLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'GroupID': bacy.convert_long(obj.GroupID(), password),
+        'SlotZ': [bacy.convert_float(obj.SlotZ(j), password) for j in range(obj.SlotZLength())],
+        'SlotX': [bacy.convert_float(obj.SlotX(j), password) for j in range(obj.SlotXLength())],
     }
 
 
 def dump_FurnitureExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'ProductionStep': ProductionStep(table_encryption.convert_int(obj.ProductionStep_(), password)).name,
-        'Rarity': Rarity(table_encryption.convert_int(obj.Rarity_(), password)).name,
-        'Category': FurnitureCategory(table_encryption.convert_int(obj.Category(), password)).name,
-        'SubCategory': FurnitureSubCategory(table_encryption.convert_int(obj.SubCategory(), password)).name,
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'StarGradeInit': table_encryption.convert_int(obj.StarGradeInit(), password),
-        'Tier': table_encryption.convert_long(obj.Tier(), password),
-        'Icon': table_encryption.convert_string(obj.Icon(), password),
-        'SizeWidth': table_encryption.convert_int(obj.SizeWidth(), password),
-        'SizeHeight': table_encryption.convert_int(obj.SizeHeight(), password),
-        'OtherSize': table_encryption.convert_int(obj.OtherSize(), password),
-        'ExpandWidth': table_encryption.convert_int(obj.ExpandWidth(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'ProductionStep': ProductionStep(bacy.convert_int(obj.ProductionStep_(), password)).name,
+        'Rarity': Rarity(bacy.convert_int(obj.Rarity_(), password)).name,
+        'Category': FurnitureCategory(bacy.convert_int(obj.Category(), password)).name,
+        'SubCategory': FurnitureSubCategory(bacy.convert_int(obj.SubCategory(), password)).name,
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'StarGradeInit': bacy.convert_int(obj.StarGradeInit(), password),
+        'Tier': bacy.convert_long(obj.Tier(), password),
+        'Icon': bacy.convert_string(obj.Icon(), password),
+        'SizeWidth': bacy.convert_int(obj.SizeWidth(), password),
+        'SizeHeight': bacy.convert_int(obj.SizeHeight(), password),
+        'OtherSize': bacy.convert_int(obj.OtherSize(), password),
+        'ExpandWidth': bacy.convert_int(obj.ExpandWidth(), password),
         'Enable': obj.Enable(),
         'ReverseRotation': obj.ReverseRotation(),
-        'Prefab': table_encryption.convert_string(obj.Prefab(), password),
-        'PrefabExpand': table_encryption.convert_string(obj.PrefabExpand(), password),
-        'SubPrefab': table_encryption.convert_string(obj.SubPrefab(), password),
-        'SubExpandPrefab': table_encryption.convert_string(obj.SubExpandPrefab(), password),
-        'CornerPrefab': table_encryption.convert_string(obj.CornerPrefab(), password),
-        'StackableMax': table_encryption.convert_long(obj.StackableMax(), password),
-        'RecipeCraftId': table_encryption.convert_long(obj.RecipeCraftId(), password),
-        'SetGroudpId': table_encryption.convert_long(obj.SetGroudpId(), password),
-        'ComfortBonus': table_encryption.convert_long(obj.ComfortBonus(), password),
-        'VisitOperationType': table_encryption.convert_long(obj.VisitOperationType(), password),
-        'VisitBonusOperationType': table_encryption.convert_long(obj.VisitBonusOperationType(), password),
-        'Tags': [Tag(table_encryption.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
-        'CraftQualityTier0': table_encryption.convert_long(obj.CraftQualityTier0(), password),
-        'CraftQualityTier1': table_encryption.convert_long(obj.CraftQualityTier1(), password),
-        'CraftQualityTier2': table_encryption.convert_long(obj.CraftQualityTier2(), password),
-        'ShiftingCraftQuality': table_encryption.convert_long(obj.ShiftingCraftQuality(), password),
-        'FurnitureFunctionType': FurnitureFunctionType(table_encryption.convert_int(obj.FurnitureFunctionType_(), password)).name,
-        'FurnitureFunctionParameter': table_encryption.convert_long(obj.FurnitureFunctionParameter(), password),
-        'VideoId': table_encryption.convert_long(obj.VideoId(), password),
-        'EventCollectionId': table_encryption.convert_long(obj.EventCollectionId(), password),
-        'FurnitureBubbleOffsetX': table_encryption.convert_long(obj.FurnitureBubbleOffsetX(), password),
-        'FurnitureBubbleOffsetY': table_encryption.convert_long(obj.FurnitureBubbleOffsetY(), password),
-        'CafeCharacterStateReq': [table_encryption.convert_string(obj.CafeCharacterStateReq(j), password) for j in range(obj.CafeCharacterStateReqLength())],
-        'CafeCharacterStateAdd': [table_encryption.convert_string(obj.CafeCharacterStateAdd(j), password) for j in range(obj.CafeCharacterStateAddLength())],
-        'CafeCharacterStateMake': [table_encryption.convert_string(obj.CafeCharacterStateMake(j), password) for j in range(obj.CafeCharacterStateMakeLength())],
-        'CafeCharacterStateOnly': [table_encryption.convert_string(obj.CafeCharacterStateOnly(j), password) for j in range(obj.CafeCharacterStateOnlyLength())],
+        'Prefab': bacy.convert_string(obj.Prefab(), password),
+        'PrefabExpand': bacy.convert_string(obj.PrefabExpand(), password),
+        'SubPrefab': bacy.convert_string(obj.SubPrefab(), password),
+        'SubExpandPrefab': bacy.convert_string(obj.SubExpandPrefab(), password),
+        'CornerPrefab': bacy.convert_string(obj.CornerPrefab(), password),
+        'StackableMax': bacy.convert_long(obj.StackableMax(), password),
+        'RecipeCraftId': bacy.convert_long(obj.RecipeCraftId(), password),
+        'SetGroudpId': bacy.convert_long(obj.SetGroudpId(), password),
+        'ComfortBonus': bacy.convert_long(obj.ComfortBonus(), password),
+        'VisitOperationType': bacy.convert_long(obj.VisitOperationType(), password),
+        'VisitBonusOperationType': bacy.convert_long(obj.VisitBonusOperationType(), password),
+        'Tags': [Tag(bacy.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
+        'CraftQualityTier0': bacy.convert_long(obj.CraftQualityTier0(), password),
+        'CraftQualityTier1': bacy.convert_long(obj.CraftQualityTier1(), password),
+        'CraftQualityTier2': bacy.convert_long(obj.CraftQualityTier2(), password),
+        'ShiftingCraftQuality': bacy.convert_long(obj.ShiftingCraftQuality(), password),
+        'FurnitureFunctionType': FurnitureFunctionType(bacy.convert_int(obj.FurnitureFunctionType_(), password)).name,
+        'FurnitureFunctionParameter': bacy.convert_long(obj.FurnitureFunctionParameter(), password),
+        'VideoId': bacy.convert_long(obj.VideoId(), password),
+        'EventCollectionId': bacy.convert_long(obj.EventCollectionId(), password),
+        'FurnitureBubbleOffsetX': bacy.convert_long(obj.FurnitureBubbleOffsetX(), password),
+        'FurnitureBubbleOffsetY': bacy.convert_long(obj.FurnitureBubbleOffsetY(), password),
+        'CafeCharacterStateReq': [bacy.convert_string(obj.CafeCharacterStateReq(j), password) for j in range(obj.CafeCharacterStateReqLength())],
+        'CafeCharacterStateAdd': [bacy.convert_string(obj.CafeCharacterStateAdd(j), password) for j in range(obj.CafeCharacterStateAddLength())],
+        'CafeCharacterStateMake': [bacy.convert_string(obj.CafeCharacterStateMake(j), password) for j in range(obj.CafeCharacterStateMakeLength())],
+        'CafeCharacterStateOnly': [bacy.convert_string(obj.CafeCharacterStateOnly(j), password) for j in range(obj.CafeCharacterStateOnlyLength())],
     }
 
 
 def dump_FurnitureGroupExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'GroupNameLocalize': table_encryption.convert_uint(obj.GroupNameLocalize(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'RequiredFurnitureCount': [table_encryption.convert_int(obj.RequiredFurnitureCount(j), password) for j in range(obj.RequiredFurnitureCountLength())],
-        'ComfortBonus': [table_encryption.convert_long(obj.ComfortBonus(j), password) for j in range(obj.ComfortBonusLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'GroupNameLocalize': bacy.convert_uint(obj.GroupNameLocalize(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'RequiredFurnitureCount': [bacy.convert_int(obj.RequiredFurnitureCount(j), password) for j in range(obj.RequiredFurnitureCountLength())],
+        'ComfortBonus': [bacy.convert_long(obj.ComfortBonus(j), password) for j in range(obj.ComfortBonusLength())],
     }
 
 
 def dump_FurnitureTemplateElementExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'FurnitureTemplateId': table_encryption.convert_long(obj.FurnitureTemplateId(), password),
-        'FurnitureId': table_encryption.convert_long(obj.FurnitureId(), password),
-        'Location': FurnitureLocation(table_encryption.convert_int(obj.Location(), password)).name,
-        'PositionX': table_encryption.convert_float(obj.PositionX(), password),
-        'PositionY': table_encryption.convert_float(obj.PositionY(), password),
-        'Rotation': table_encryption.convert_float(obj.Rotation(), password),
-        'Order': table_encryption.convert_long(obj.Order(), password),
+        'FurnitureTemplateId': bacy.convert_long(obj.FurnitureTemplateId(), password),
+        'FurnitureId': bacy.convert_long(obj.FurnitureId(), password),
+        'Location': FurnitureLocation(bacy.convert_int(obj.Location(), password)).name,
+        'PositionX': bacy.convert_float(obj.PositionX(), password),
+        'PositionY': bacy.convert_float(obj.PositionY(), password),
+        'Rotation': bacy.convert_float(obj.Rotation(), password),
+        'Order': bacy.convert_long(obj.Order(), password),
     }
 
 
 def dump_FurnitureTemplateExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'FurnitureTemplateId': table_encryption.convert_long(obj.FurnitureTemplateId(), password),
-        'FunitureTemplateTitle': table_encryption.convert_uint(obj.FunitureTemplateTitle(), password),
-        'ThumbnailImagePath': table_encryption.convert_string(obj.ThumbnailImagePath(), password),
-        'ImagePath': table_encryption.convert_string(obj.ImagePath(), password),
+        'FurnitureTemplateId': bacy.convert_long(obj.FurnitureTemplateId(), password),
+        'FunitureTemplateTitle': bacy.convert_uint(obj.FunitureTemplateTitle(), password),
+        'ThumbnailImagePath': bacy.convert_string(obj.ThumbnailImagePath(), password),
+        'ImagePath': bacy.convert_string(obj.ImagePath(), password),
     }
 
 
 def dump_GachaCraftNodeExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ID': table_encryption.convert_long(obj.ID(), password),
-        'Tier': table_encryption.convert_long(obj.Tier(), password),
-        'QuickCraftNodeDisplayOrder': table_encryption.convert_int(obj.QuickCraftNodeDisplayOrder(), password),
-        'NodeQuality': table_encryption.convert_long(obj.NodeQuality(), password),
-        'Icon': table_encryption.convert_string(obj.Icon(), password),
-        'LocalizeKey': table_encryption.convert_uint(obj.LocalizeKey(), password),
-        'Property': table_encryption.convert_long(obj.Property(), password),
+        'ID': bacy.convert_long(obj.ID(), password),
+        'Tier': bacy.convert_long(obj.Tier(), password),
+        'QuickCraftNodeDisplayOrder': bacy.convert_int(obj.QuickCraftNodeDisplayOrder(), password),
+        'NodeQuality': bacy.convert_long(obj.NodeQuality(), password),
+        'Icon': bacy.convert_string(obj.Icon(), password),
+        'LocalizeKey': bacy.convert_uint(obj.LocalizeKey(), password),
+        'Property': bacy.convert_long(obj.Property(), password),
     }
 
 
 def dump_GachaCraftNodeGroupExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'NodeId': table_encryption.convert_long(obj.NodeId(), password),
-        'GachaGroupId': table_encryption.convert_long(obj.GachaGroupId(), password),
-        'ProbWeight': table_encryption.convert_long(obj.ProbWeight(), password),
+        'NodeId': bacy.convert_long(obj.NodeId(), password),
+        'GachaGroupId': bacy.convert_long(obj.GachaGroupId(), password),
+        'ProbWeight': bacy.convert_long(obj.ProbWeight(), password),
     }
 
 
 def dump_GachaCraftOpenTagExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'NodeTier': CraftNodeTier(table_encryption.convert_int(obj.NodeTier(), password)).name,
-        'Tag': [Tag(table_encryption.convert_int(obj.Tag_(j), password)).name for j in range(obj.TagLength())],
+        'NodeTier': CraftNodeTier(bacy.convert_int(obj.NodeTier(), password)).name,
+        'Tag': [Tag(bacy.convert_int(obj.Tag_(j), password)).name for j in range(obj.TagLength())],
     }
 
 
 def dump_GachaElementExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ID': table_encryption.convert_long(obj.ID(), password),
-        'GachaGroupID': table_encryption.convert_long(obj.GachaGroupID(), password),
-        'ParcelType': ParcelType(table_encryption.convert_int(obj.ParcelType_(), password)).name,
-        'ParcelID': table_encryption.convert_long(obj.ParcelID(), password),
-        'Rarity': Rarity(table_encryption.convert_int(obj.Rarity_(), password)).name,
-        'ParcelAmountMin': table_encryption.convert_int(obj.ParcelAmountMin(), password),
-        'ParcelAmountMax': table_encryption.convert_int(obj.ParcelAmountMax(), password),
-        'Prob': table_encryption.convert_int(obj.Prob(), password),
-        'State': table_encryption.convert_int(obj.State(), password),
+        'ID': bacy.convert_long(obj.ID(), password),
+        'GachaGroupID': bacy.convert_long(obj.GachaGroupID(), password),
+        'ParcelType': ParcelType(bacy.convert_int(obj.ParcelType_(), password)).name,
+        'ParcelID': bacy.convert_long(obj.ParcelID(), password),
+        'Rarity': Rarity(bacy.convert_int(obj.Rarity_(), password)).name,
+        'ParcelAmountMin': bacy.convert_int(obj.ParcelAmountMin(), password),
+        'ParcelAmountMax': bacy.convert_int(obj.ParcelAmountMax(), password),
+        'Prob': bacy.convert_int(obj.Prob(), password),
+        'State': bacy.convert_int(obj.State(), password),
     }
 
 
 def dump_GachaElementRecursiveExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ID': table_encryption.convert_long(obj.ID(), password),
-        'GachaGroupID': table_encryption.convert_long(obj.GachaGroupID(), password),
-        'ParcelType': ParcelType(table_encryption.convert_int(obj.ParcelType_(), password)).name,
-        'ParcelID': table_encryption.convert_long(obj.ParcelID(), password),
-        'ParcelAmountMin': table_encryption.convert_int(obj.ParcelAmountMin(), password),
-        'ParcelAmountMax': table_encryption.convert_int(obj.ParcelAmountMax(), password),
-        'Prob': table_encryption.convert_int(obj.Prob(), password),
-        'State': table_encryption.convert_int(obj.State(), password),
+        'ID': bacy.convert_long(obj.ID(), password),
+        'GachaGroupID': bacy.convert_long(obj.GachaGroupID(), password),
+        'ParcelType': ParcelType(bacy.convert_int(obj.ParcelType_(), password)).name,
+        'ParcelID': bacy.convert_long(obj.ParcelID(), password),
+        'ParcelAmountMin': bacy.convert_int(obj.ParcelAmountMin(), password),
+        'ParcelAmountMax': bacy.convert_int(obj.ParcelAmountMax(), password),
+        'Prob': bacy.convert_int(obj.Prob(), password),
+        'State': bacy.convert_int(obj.State(), password),
     }
 
 
 def dump_GachaGroupExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ID': table_encryption.convert_long(obj.ID(), password),
-        'NameKr': table_encryption.convert_string(obj.NameKr(), password),
+        'ID': bacy.convert_long(obj.ID(), password),
+        'NameKr': bacy.convert_string(obj.NameKr(), password),
         'IsRecursive': obj.IsRecursive(),
-        'GroupType': GachaGroupType(table_encryption.convert_int(obj.GroupType(), password)).name,
+        'GroupType': GachaGroupType(bacy.convert_int(obj.GroupType(), password)).name,
     }
 
 
 def dump_GoodsExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Type': table_encryption.convert_int(obj.Type(), password),
-        'Rarity': Rarity(table_encryption.convert_int(obj.Rarity_(), password)).name,
-        'IconPath': table_encryption.convert_string(obj.IconPath(), password),
-        'ConsumeParcelType': [ParcelType(table_encryption.convert_int(obj.ConsumeParcelType(j), password)).name for j in range(obj.ConsumeParcelTypeLength())],
-        'ConsumeParcelId': [table_encryption.convert_long(obj.ConsumeParcelId(j), password) for j in range(obj.ConsumeParcelIdLength())],
-        'ConsumeParcelAmount': [table_encryption.convert_long(obj.ConsumeParcelAmount(j), password) for j in range(obj.ConsumeParcelAmountLength())],
-        'ConsumeCondition': [ConsumeCondition(table_encryption.convert_int(obj.ConsumeCondition_(j), password)).name for j in range(obj.ConsumeConditionLength())],
-        'ConsumeGachaTicketType': GachaTicketType(table_encryption.convert_int(obj.ConsumeGachaTicketType(), password)).name,
-        'ConsumeGachaTicketTypeAmount': table_encryption.convert_long(obj.ConsumeGachaTicketTypeAmount(), password),
-        'ProductIdAOS': table_encryption.convert_long(obj.ProductIdAOS(), password),
-        'ProductIdiOS': table_encryption.convert_long(obj.ProductIdiOS(), password),
-        'ConsumeExtraStep': [table_encryption.convert_long(obj.ConsumeExtraStep(j), password) for j in range(obj.ConsumeExtraStepLength())],
-        'ConsumeExtraAmount': [table_encryption.convert_long(obj.ConsumeExtraAmount(j), password) for j in range(obj.ConsumeExtraAmountLength())],
-        'State': table_encryption.convert_int(obj.State(), password),
-        'ParcelType': [ParcelType(table_encryption.convert_int(obj.ParcelType_(j), password)).name for j in range(obj.ParcelTypeLength())],
-        'ParcelId': [table_encryption.convert_long(obj.ParcelId(j), password) for j in range(obj.ParcelIdLength())],
-        'ParcelAmount': [table_encryption.convert_long(obj.ParcelAmount(j), password) for j in range(obj.ParcelAmountLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Type': bacy.convert_int(obj.Type(), password),
+        'Rarity': Rarity(bacy.convert_int(obj.Rarity_(), password)).name,
+        'IconPath': bacy.convert_string(obj.IconPath(), password),
+        'ConsumeParcelType': [ParcelType(bacy.convert_int(obj.ConsumeParcelType(j), password)).name for j in range(obj.ConsumeParcelTypeLength())],
+        'ConsumeParcelId': [bacy.convert_long(obj.ConsumeParcelId(j), password) for j in range(obj.ConsumeParcelIdLength())],
+        'ConsumeParcelAmount': [bacy.convert_long(obj.ConsumeParcelAmount(j), password) for j in range(obj.ConsumeParcelAmountLength())],
+        'ConsumeCondition': [ConsumeCondition(bacy.convert_int(obj.ConsumeCondition_(j), password)).name for j in range(obj.ConsumeConditionLength())],
+        'ConsumeGachaTicketType': GachaTicketType(bacy.convert_int(obj.ConsumeGachaTicketType(), password)).name,
+        'ConsumeGachaTicketTypeAmount': bacy.convert_long(obj.ConsumeGachaTicketTypeAmount(), password),
+        'ProductIdAOS': bacy.convert_long(obj.ProductIdAOS(), password),
+        'ProductIdiOS': bacy.convert_long(obj.ProductIdiOS(), password),
+        'ConsumeExtraStep': [bacy.convert_long(obj.ConsumeExtraStep(j), password) for j in range(obj.ConsumeExtraStepLength())],
+        'ConsumeExtraAmount': [bacy.convert_long(obj.ConsumeExtraAmount(j), password) for j in range(obj.ConsumeExtraAmountLength())],
+        'State': bacy.convert_int(obj.State(), password),
+        'ParcelType': [ParcelType(bacy.convert_int(obj.ParcelType_(j), password)).name for j in range(obj.ParcelTypeLength())],
+        'ParcelId': [bacy.convert_long(obj.ParcelId(j), password) for j in range(obj.ParcelIdLength())],
+        'ParcelAmount': [bacy.convert_long(obj.ParcelAmount(j), password) for j in range(obj.ParcelAmountLength())],
     }
 
 
 def dump_GroundExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'StageFileName': [table_encryption.convert_string(obj.StageFileName(j), password) for j in range(obj.StageFileNameLength())],
-        'GroundSceneName': table_encryption.convert_string(obj.GroundSceneName(), password),
-        'FormationGroupId': table_encryption.convert_long(obj.FormationGroupId(), password),
-        'StageTopography': StageTopography(table_encryption.convert_int(obj.StageTopography_(), password)).name,
-        'EnemyBulletType': BulletType(table_encryption.convert_int(obj.EnemyBulletType(), password)).name,
-        'EnemyArmorType': ArmorType(table_encryption.convert_int(obj.EnemyArmorType(), password)).name,
-        'LevelNPC': table_encryption.convert_long(obj.LevelNPC(), password),
-        'LevelMinion': table_encryption.convert_long(obj.LevelMinion(), password),
-        'LevelElite': table_encryption.convert_long(obj.LevelElite(), password),
-        'LevelChampion': table_encryption.convert_long(obj.LevelChampion(), password),
-        'LevelBoss': table_encryption.convert_long(obj.LevelBoss(), password),
-        'ObstacleLevel': table_encryption.convert_long(obj.ObstacleLevel(), password),
-        'GradeNPC': table_encryption.convert_long(obj.GradeNPC(), password),
-        'GradeMinion': table_encryption.convert_long(obj.GradeMinion(), password),
-        'GradeElite': table_encryption.convert_long(obj.GradeElite(), password),
-        'GradeChampion': table_encryption.convert_long(obj.GradeChampion(), password),
-        'GradeBoss': table_encryption.convert_long(obj.GradeBoss(), password),
-        'PlayerSightPointAdd': table_encryption.convert_long(obj.PlayerSightPointAdd(), password),
-        'PlayerSightPointRate': table_encryption.convert_long(obj.PlayerSightPointRate(), password),
-        'PlayerAttackRangeAdd': table_encryption.convert_long(obj.PlayerAttackRangeAdd(), password),
-        'PlayerAttackRangeRate': table_encryption.convert_long(obj.PlayerAttackRangeRate(), password),
-        'EnemySightPointAdd': table_encryption.convert_long(obj.EnemySightPointAdd(), password),
-        'EnemySightPointRate': table_encryption.convert_long(obj.EnemySightPointRate(), password),
-        'EnemyAttackRangeAdd': table_encryption.convert_long(obj.EnemyAttackRangeAdd(), password),
-        'EnemyAttackRangeRate': table_encryption.convert_long(obj.EnemyAttackRangeRate(), password),
-        'PlayerSkillRangeAdd': table_encryption.convert_long(obj.PlayerSkillRangeAdd(), password),
-        'PlayerSkillRangeRate': table_encryption.convert_long(obj.PlayerSkillRangeRate(), password),
-        'EnemySkillRangeAdd': table_encryption.convert_long(obj.EnemySkillRangeAdd(), password),
-        'EnemySkillRangeRate': table_encryption.convert_long(obj.EnemySkillRangeRate(), password),
-        'PlayerMinimumPositionGapRate': table_encryption.convert_long(obj.PlayerMinimumPositionGapRate(), password),
-        'EnemyMinimumPositionGapRate': table_encryption.convert_long(obj.EnemyMinimumPositionGapRate(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'StageFileName': [bacy.convert_string(obj.StageFileName(j), password) for j in range(obj.StageFileNameLength())],
+        'GroundSceneName': bacy.convert_string(obj.GroundSceneName(), password),
+        'FormationGroupId': bacy.convert_long(obj.FormationGroupId(), password),
+        'StageTopography': StageTopography(bacy.convert_int(obj.StageTopography_(), password)).name,
+        'EnemyBulletType': BulletType(bacy.convert_int(obj.EnemyBulletType(), password)).name,
+        'EnemyArmorType': ArmorType(bacy.convert_int(obj.EnemyArmorType(), password)).name,
+        'LevelNPC': bacy.convert_long(obj.LevelNPC(), password),
+        'LevelMinion': bacy.convert_long(obj.LevelMinion(), password),
+        'LevelElite': bacy.convert_long(obj.LevelElite(), password),
+        'LevelChampion': bacy.convert_long(obj.LevelChampion(), password),
+        'LevelBoss': bacy.convert_long(obj.LevelBoss(), password),
+        'ObstacleLevel': bacy.convert_long(obj.ObstacleLevel(), password),
+        'GradeNPC': bacy.convert_long(obj.GradeNPC(), password),
+        'GradeMinion': bacy.convert_long(obj.GradeMinion(), password),
+        'GradeElite': bacy.convert_long(obj.GradeElite(), password),
+        'GradeChampion': bacy.convert_long(obj.GradeChampion(), password),
+        'GradeBoss': bacy.convert_long(obj.GradeBoss(), password),
+        'PlayerSightPointAdd': bacy.convert_long(obj.PlayerSightPointAdd(), password),
+        'PlayerSightPointRate': bacy.convert_long(obj.PlayerSightPointRate(), password),
+        'PlayerAttackRangeAdd': bacy.convert_long(obj.PlayerAttackRangeAdd(), password),
+        'PlayerAttackRangeRate': bacy.convert_long(obj.PlayerAttackRangeRate(), password),
+        'EnemySightPointAdd': bacy.convert_long(obj.EnemySightPointAdd(), password),
+        'EnemySightPointRate': bacy.convert_long(obj.EnemySightPointRate(), password),
+        'EnemyAttackRangeAdd': bacy.convert_long(obj.EnemyAttackRangeAdd(), password),
+        'EnemyAttackRangeRate': bacy.convert_long(obj.EnemyAttackRangeRate(), password),
+        'PlayerSkillRangeAdd': bacy.convert_long(obj.PlayerSkillRangeAdd(), password),
+        'PlayerSkillRangeRate': bacy.convert_long(obj.PlayerSkillRangeRate(), password),
+        'EnemySkillRangeAdd': bacy.convert_long(obj.EnemySkillRangeAdd(), password),
+        'EnemySkillRangeRate': bacy.convert_long(obj.EnemySkillRangeRate(), password),
+        'PlayerMinimumPositionGapRate': bacy.convert_long(obj.PlayerMinimumPositionGapRate(), password),
+        'EnemyMinimumPositionGapRate': bacy.convert_long(obj.EnemyMinimumPositionGapRate(), password),
         'PlayerSightRangeMax': obj.PlayerSightRangeMax(),
         'EnemySightRangeMax': obj.EnemySightRangeMax(),
-        'TSSAirUnitHeight': table_encryption.convert_long(obj.TSSAirUnitHeight(), password),
+        'TSSAirUnitHeight': bacy.convert_long(obj.TSSAirUnitHeight(), password),
         'IsPhaseBGM': obj.IsPhaseBGM(),
-        'BGMId': table_encryption.convert_long(obj.BGMId(), password),
+        'BGMId': bacy.convert_long(obj.BGMId(), password),
         'WarningUI': obj.WarningUI(),
         'TSSHatchOpen': obj.TSSHatchOpen(),
-        'ForcedTacticSpeed': TacticSpeed(table_encryption.convert_int(obj.ForcedTacticSpeed(), password)).name,
-        'ForcedSkillUse': TacticSkillUse(table_encryption.convert_int(obj.ForcedSkillUse(), password)).name,
-        'ShowNPCSkillCutIn': ShowSkillCutIn(table_encryption.convert_int(obj.ShowNPCSkillCutIn(), password)).name,
+        'ForcedTacticSpeed': TacticSpeed(bacy.convert_int(obj.ForcedTacticSpeed(), password)).name,
+        'ForcedSkillUse': TacticSkillUse(bacy.convert_int(obj.ForcedSkillUse(), password)).name,
+        'ShowNPCSkillCutIn': ShowSkillCutIn(bacy.convert_int(obj.ShowNPCSkillCutIn(), password)).name,
         'ImmuneHitBeforeTimeOutEnd': obj.ImmuneHitBeforeTimeOutEnd(),
         'UIBattleHideFromScratch': obj.UIBattleHideFromScratch(),
-        'BattleReadyTimelinePath': table_encryption.convert_string(obj.BattleReadyTimelinePath(), password),
-        'BeforeVictoryTimelinePath': table_encryption.convert_string(obj.BeforeVictoryTimelinePath(), password),
+        'BattleReadyTimelinePath': bacy.convert_string(obj.BattleReadyTimelinePath(), password),
+        'BeforeVictoryTimelinePath': bacy.convert_string(obj.BeforeVictoryTimelinePath(), password),
         'SkipBattleEnd': obj.SkipBattleEnd(),
         'HideNPCWhenBattleEnd': obj.HideNPCWhenBattleEnd(),
         'CoverPointOff': obj.CoverPointOff(),
-        'UIHpScale': table_encryption.convert_float(obj.UIHpScale(), password),
-        'UIEmojiScale': table_encryption.convert_float(obj.UIEmojiScale(), password),
-        'UISkillMainLogScale': table_encryption.convert_float(obj.UISkillMainLogScale(), password),
-        'AllyPassiveSkillId': [table_encryption.convert_string(obj.AllyPassiveSkillId(j), password) for j in range(obj.AllyPassiveSkillIdLength())],
-        'AllyPassiveSkillLevel': [table_encryption.convert_int(obj.AllyPassiveSkillLevel(j), password) for j in range(obj.AllyPassiveSkillLevelLength())],
-        'EnemyPassiveSkillId': [table_encryption.convert_string(obj.EnemyPassiveSkillId(j), password) for j in range(obj.EnemyPassiveSkillIdLength())],
-        'EnemyPassiveSkillLevel': [table_encryption.convert_int(obj.EnemyPassiveSkillLevel(j), password) for j in range(obj.EnemyPassiveSkillLevelLength())],
+        'UIHpScale': bacy.convert_float(obj.UIHpScale(), password),
+        'UIEmojiScale': bacy.convert_float(obj.UIEmojiScale(), password),
+        'UISkillMainLogScale': bacy.convert_float(obj.UISkillMainLogScale(), password),
+        'AllyPassiveSkillId': [bacy.convert_string(obj.AllyPassiveSkillId(j), password) for j in range(obj.AllyPassiveSkillIdLength())],
+        'AllyPassiveSkillLevel': [bacy.convert_int(obj.AllyPassiveSkillLevel(j), password) for j in range(obj.AllyPassiveSkillLevelLength())],
+        'EnemyPassiveSkillId': [bacy.convert_string(obj.EnemyPassiveSkillId(j), password) for j in range(obj.EnemyPassiveSkillIdLength())],
+        'EnemyPassiveSkillLevel': [bacy.convert_int(obj.EnemyPassiveSkillLevel(j), password) for j in range(obj.EnemyPassiveSkillLevelLength())],
     }
 
 
 def dump_GroundGridFlat(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'X': table_encryption.convert_int(obj.X(), password),
-        'Y': table_encryption.convert_int(obj.Y(), password),
-        'StartX': table_encryption.convert_float(obj.StartX(), password),
-        'StartY': table_encryption.convert_float(obj.StartY(), password),
-        'Gap': table_encryption.convert_float(obj.Gap(), password),
+        'X': bacy.convert_int(obj.X(), password),
+        'Y': bacy.convert_int(obj.Y(), password),
+        'StartX': bacy.convert_float(obj.StartX(), password),
+        'StartY': bacy.convert_float(obj.StartY(), password),
+        'Gap': bacy.convert_float(obj.Gap(), password),
         'Nodes': [dump_GroundNodeFlat(obj.Nodes(j), password) for j in range(obj.NodesLength())],
-        'Version': table_encryption.convert_string(obj.Version(), password),
+        'Version': bacy.convert_string(obj.Version(), password),
     }
 
 
 def dump_GroundNodeFlat(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'X': table_encryption.convert_int(obj.X(), password),
-        'Y': table_encryption.convert_int(obj.Y(), password),
+        'X': bacy.convert_int(obj.X(), password),
+        'Y': bacy.convert_int(obj.Y(), password),
         'IsCanNotUseSkill': obj.IsCanNotUseSkill(),
         'Position': dump_GroundVector3(obj.Position(), password),
-        'NodeType': GroundNodeType(table_encryption.convert_int(obj.NodeType(), password)).name,
-        'OriginalNodeType': GroundNodeType(table_encryption.convert_int(obj.OriginalNodeType(), password)).name,
+        'NodeType': GroundNodeType(bacy.convert_int(obj.NodeType(), password)).name,
+        'OriginalNodeType': GroundNodeType(bacy.convert_int(obj.OriginalNodeType(), password)).name,
     }
 
 
 def dump_GroundModuleRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_uint(obj.GroupId(), password),
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardParcelId': table_encryption.convert_long(obj.RewardParcelId(), password),
-        'RewardParcelAmount': table_encryption.convert_long(obj.RewardParcelAmount(), password),
-        'RewardParcelProbability': table_encryption.convert_long(obj.RewardParcelProbability(), password),
+        'GroupId': bacy.convert_uint(obj.GroupId(), password),
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardParcelId': bacy.convert_long(obj.RewardParcelId(), password),
+        'RewardParcelAmount': bacy.convert_long(obj.RewardParcelAmount(), password),
+        'RewardParcelProbability': bacy.convert_long(obj.RewardParcelProbability(), password),
         'IsDisplayed': obj.IsDisplayed(),
-        'DropItemModelPrefabPath': table_encryption.convert_string(obj.DropItemModelPrefabPath(), password),
+        'DropItemModelPrefabPath': bacy.convert_string(obj.DropItemModelPrefabPath(), password),
     }
 
 
 def dump_GroundNodeLayerFlat(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Layers': [table_encryption.convert_ubyte(obj.Layers(j), password) for j in range(obj.LayersLength())],
+        'Layers': [bacy.convert_ubyte(obj.Layers(j), password) for j in range(obj.LayersLength())],
     }
 
 
 def dump_GuideMissionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'SeasonId': table_encryption.convert_long(obj.SeasonId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Category': MissionCategory(table_encryption.convert_int(obj.Category(), password)).name,
+        'SeasonId': bacy.convert_long(obj.SeasonId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Category': MissionCategory(bacy.convert_int(obj.Category(), password)).name,
         'IsLegacy': obj.IsLegacy(),
-        'TabNumber': table_encryption.convert_long(obj.TabNumber(), password),
-        'PreMissionId': [table_encryption.convert_long(obj.PreMissionId(j), password) for j in range(obj.PreMissionIdLength())],
-        'Description': table_encryption.convert_uint(obj.Description(), password),
-        'ToastDisplayType': MissionToastDisplayConditionType(table_encryption.convert_int(obj.ToastDisplayType(), password)).name,
-        'ToastImagePath': table_encryption.convert_string(obj.ToastImagePath(), password),
-        'ShortcutUI': [table_encryption.convert_string(obj.ShortcutUI(j), password) for j in range(obj.ShortcutUILength())],
-        'CompleteConditionType': MissionCompleteConditionType(table_encryption.convert_int(obj.CompleteConditionType(), password)).name,
-        'CompleteConditionCount': table_encryption.convert_long(obj.CompleteConditionCount(), password),
-        'CompleteConditionParameter': [table_encryption.convert_long(obj.CompleteConditionParameter(j), password) for j in range(obj.CompleteConditionParameterLength())],
-        'CompleteConditionParameterTag': [Tag(table_encryption.convert_int(obj.CompleteConditionParameterTag(j), password)).name for j in range(obj.CompleteConditionParameterTagLength())],
+        'TabNumber': bacy.convert_long(obj.TabNumber(), password),
+        'PreMissionId': [bacy.convert_long(obj.PreMissionId(j), password) for j in range(obj.PreMissionIdLength())],
+        'Description': bacy.convert_uint(obj.Description(), password),
+        'ToastDisplayType': MissionToastDisplayConditionType(bacy.convert_int(obj.ToastDisplayType(), password)).name,
+        'ToastImagePath': bacy.convert_string(obj.ToastImagePath(), password),
+        'ShortcutUI': [bacy.convert_string(obj.ShortcutUI(j), password) for j in range(obj.ShortcutUILength())],
+        'CompleteConditionType': MissionCompleteConditionType(bacy.convert_int(obj.CompleteConditionType(), password)).name,
+        'CompleteConditionCount': bacy.convert_long(obj.CompleteConditionCount(), password),
+        'CompleteConditionParameter': [bacy.convert_long(obj.CompleteConditionParameter(j), password) for j in range(obj.CompleteConditionParameterLength())],
+        'CompleteConditionParameterTag': [Tag(bacy.convert_int(obj.CompleteConditionParameterTag(j), password)).name for j in range(obj.CompleteConditionParameterTagLength())],
         'IsAutoClearForScenario': obj.IsAutoClearForScenario(),
-        'MissionRewardParcelType': [ParcelType(table_encryption.convert_int(obj.MissionRewardParcelType(j), password)).name for j in range(obj.MissionRewardParcelTypeLength())],
-        'MissionRewardParcelId': [table_encryption.convert_long(obj.MissionRewardParcelId(j), password) for j in range(obj.MissionRewardParcelIdLength())],
-        'MissionRewardAmount': [table_encryption.convert_int(obj.MissionRewardAmount(j), password) for j in range(obj.MissionRewardAmountLength())],
+        'MissionRewardParcelType': [ParcelType(bacy.convert_int(obj.MissionRewardParcelType(j), password)).name for j in range(obj.MissionRewardParcelTypeLength())],
+        'MissionRewardParcelId': [bacy.convert_long(obj.MissionRewardParcelId(j), password) for j in range(obj.MissionRewardParcelIdLength())],
+        'MissionRewardAmount': [bacy.convert_int(obj.MissionRewardAmount(j), password) for j in range(obj.MissionRewardAmountLength())],
     }
 
 
 def dump_GuideMissionOpenStageConditionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'SeasonId': table_encryption.convert_long(obj.SeasonId(), password),
-        'OrderNumber': table_encryption.convert_long(obj.OrderNumber(), password),
-        'TabLocalizeCode': table_encryption.convert_string(obj.TabLocalizeCode(), password),
-        'ClearScenarioModeId': table_encryption.convert_long(obj.ClearScenarioModeId(), password),
-        'LockScenarioTextLocailzeCode': table_encryption.convert_string(obj.LockScenarioTextLocailzeCode(), password),
-        'ShortcutScenarioUI': table_encryption.convert_string(obj.ShortcutScenarioUI(), password),
-        'ClearStageId': table_encryption.convert_long(obj.ClearStageId(), password),
-        'LockStageTextLocailzeCode': table_encryption.convert_string(obj.LockStageTextLocailzeCode(), password),
-        'ShortcutStageUI': table_encryption.convert_string(obj.ShortcutStageUI(), password),
+        'SeasonId': bacy.convert_long(obj.SeasonId(), password),
+        'OrderNumber': bacy.convert_long(obj.OrderNumber(), password),
+        'TabLocalizeCode': bacy.convert_string(obj.TabLocalizeCode(), password),
+        'ClearScenarioModeId': bacy.convert_long(obj.ClearScenarioModeId(), password),
+        'LockScenarioTextLocailzeCode': bacy.convert_string(obj.LockScenarioTextLocailzeCode(), password),
+        'ShortcutScenarioUI': bacy.convert_string(obj.ShortcutScenarioUI(), password),
+        'ClearStageId': bacy.convert_long(obj.ClearStageId(), password),
+        'LockStageTextLocailzeCode': bacy.convert_string(obj.LockStageTextLocailzeCode(), password),
+        'ShortcutStageUI': bacy.convert_string(obj.ShortcutStageUI(), password),
     }
 
 
 def dump_GuideMissionSeasonExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'TitleLocalizeCode': table_encryption.convert_string(obj.TitleLocalizeCode(), password),
-        'PermanentInfomationLocalizeCode': table_encryption.convert_string(obj.PermanentInfomationLocalizeCode(), password),
-        'InfomationLocalizeCode': table_encryption.convert_string(obj.InfomationLocalizeCode(), password),
-        'AccountType': AccountState(table_encryption.convert_int(obj.AccountType(), password)).name,
+        'Id': bacy.convert_long(obj.Id(), password),
+        'TitleLocalizeCode': bacy.convert_string(obj.TitleLocalizeCode(), password),
+        'PermanentInfomationLocalizeCode': bacy.convert_string(obj.PermanentInfomationLocalizeCode(), password),
+        'InfomationLocalizeCode': bacy.convert_string(obj.InfomationLocalizeCode(), password),
+        'AccountType': AccountState(bacy.convert_int(obj.AccountType(), password)).name,
         'Enabled': obj.Enabled(),
-        'BannerOpenDate': table_encryption.convert_string(obj.BannerOpenDate(), password),
-        'StartDate': table_encryption.convert_string(obj.StartDate(), password),
-        'StartableEndDate': table_encryption.convert_string(obj.StartableEndDate(), password),
-        'EndDate': table_encryption.convert_string(obj.EndDate(), password),
+        'BannerOpenDate': bacy.convert_string(obj.BannerOpenDate(), password),
+        'StartDate': bacy.convert_string(obj.StartDate(), password),
+        'StartableEndDate': bacy.convert_string(obj.StartableEndDate(), password),
+        'EndDate': bacy.convert_string(obj.EndDate(), password),
         'CloseBannerAfterCompletion': obj.CloseBannerAfterCompletion(),
-        'MaximumLoginCount': table_encryption.convert_long(obj.MaximumLoginCount(), password),
-        'ExpiryDate': table_encryption.convert_long(obj.ExpiryDate(), password),
-        'SpineCharacterId': table_encryption.convert_long(obj.SpineCharacterId(), password),
-        'RequirementParcelImage': table_encryption.convert_string(obj.RequirementParcelImage(), password),
-        'RewardImage': table_encryption.convert_string(obj.RewardImage(), password),
-        'LobbyBannerImage': table_encryption.convert_string(obj.LobbyBannerImage(), password),
-        'BackgroundImage': table_encryption.convert_string(obj.BackgroundImage(), password),
-        'TitleImage': table_encryption.convert_string(obj.TitleImage(), password),
-        'RequirementParcelType': ParcelType(table_encryption.convert_int(obj.RequirementParcelType(), password)).name,
-        'RequirementParcelId': table_encryption.convert_long(obj.RequirementParcelId(), password),
-        'RequirementParcelAmount': table_encryption.convert_int(obj.RequirementParcelAmount(), password),
-        'TabType': GuideMissionTabType(table_encryption.convert_int(obj.TabType(), password)).name,
+        'MaximumLoginCount': bacy.convert_long(obj.MaximumLoginCount(), password),
+        'ExpiryDate': bacy.convert_long(obj.ExpiryDate(), password),
+        'SpineCharacterId': bacy.convert_long(obj.SpineCharacterId(), password),
+        'RequirementParcelImage': bacy.convert_string(obj.RequirementParcelImage(), password),
+        'RewardImage': bacy.convert_string(obj.RewardImage(), password),
+        'LobbyBannerImage': bacy.convert_string(obj.LobbyBannerImage(), password),
+        'BackgroundImage': bacy.convert_string(obj.BackgroundImage(), password),
+        'TitleImage': bacy.convert_string(obj.TitleImage(), password),
+        'RequirementParcelType': ParcelType(bacy.convert_int(obj.RequirementParcelType(), password)).name,
+        'RequirementParcelId': bacy.convert_long(obj.RequirementParcelId(), password),
+        'RequirementParcelAmount': bacy.convert_int(obj.RequirementParcelAmount(), password),
+        'TabType': GuideMissionTabType(bacy.convert_int(obj.TabType(), password)).name,
         'IsPermanent': obj.IsPermanent(),
-        'PreSeasonId': table_encryption.convert_long(obj.PreSeasonId(), password),
+        'PreSeasonId': bacy.convert_long(obj.PreSeasonId(), password),
     }
 
 
 def dump_HpBarAbbreviationExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'MonsterLv': table_encryption.convert_int(obj.MonsterLv(), password),
-        'StandardHpBar': table_encryption.convert_int(obj.StandardHpBar(), password),
-        'RaidBossHpBar': table_encryption.convert_int(obj.RaidBossHpBar(), password),
+        'MonsterLv': bacy.convert_int(obj.MonsterLv(), password),
+        'StandardHpBar': bacy.convert_int(obj.StandardHpBar(), password),
+        'RaidBossHpBar': bacy.convert_int(obj.RaidBossHpBar(), password),
     }
 
 
 def dump_InformationStrategyObjectExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'StageId': table_encryption.convert_long(obj.StageId(), password),
-        'PageName': table_encryption.convert_string(obj.PageName(), password),
-        'LocalizeCodeId': table_encryption.convert_string(obj.LocalizeCodeId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'StageId': bacy.convert_long(obj.StageId(), password),
+        'PageName': bacy.convert_string(obj.PageName(), password),
+        'LocalizeCodeId': bacy.convert_string(obj.LocalizeCodeId(), password),
     }
 
 
 def dump_ItemExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'Rarity': Rarity(table_encryption.convert_int(obj.Rarity_(), password)).name,
-        'ProductionStep': ProductionStep(table_encryption.convert_int(obj.ProductionStep_(), password)).name,
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'ItemCategory': ItemCategory(table_encryption.convert_int(obj.ItemCategory_(), password)).name,
-        'Quality': table_encryption.convert_long(obj.Quality(), password),
-        'Icon': table_encryption.convert_string(obj.Icon(), password),
-        'SpriteName': table_encryption.convert_string(obj.SpriteName(), password),
-        'StackableMax': table_encryption.convert_int(obj.StackableMax(), password),
-        'StackableFunction': table_encryption.convert_int(obj.StackableFunction(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'Rarity': Rarity(bacy.convert_int(obj.Rarity_(), password)).name,
+        'ProductionStep': ProductionStep(bacy.convert_int(obj.ProductionStep_(), password)).name,
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'ItemCategory': ItemCategory(bacy.convert_int(obj.ItemCategory_(), password)).name,
+        'Quality': bacy.convert_long(obj.Quality(), password),
+        'Icon': bacy.convert_string(obj.Icon(), password),
+        'SpriteName': bacy.convert_string(obj.SpriteName(), password),
+        'StackableMax': bacy.convert_int(obj.StackableMax(), password),
+        'StackableFunction': bacy.convert_int(obj.StackableFunction(), password),
         'ImmediateUse': obj.ImmediateUse(),
-        'UsingResultParcelType': ParcelType(table_encryption.convert_int(obj.UsingResultParcelType(), password)).name,
-        'UsingResultId': table_encryption.convert_long(obj.UsingResultId(), password),
-        'UsingResultAmount': table_encryption.convert_long(obj.UsingResultAmount(), password),
-        'MailType': MailType(table_encryption.convert_int(obj.MailType_(), password)).name,
-        'ExpiryChangeParcelType': ParcelType(table_encryption.convert_int(obj.ExpiryChangeParcelType(), password)).name,
-        'ExpiryChangeId': table_encryption.convert_long(obj.ExpiryChangeId(), password),
-        'ExpiryChangeAmount': table_encryption.convert_long(obj.ExpiryChangeAmount(), password),
+        'UsingResultParcelType': ParcelType(bacy.convert_int(obj.UsingResultParcelType(), password)).name,
+        'UsingResultId': bacy.convert_long(obj.UsingResultId(), password),
+        'UsingResultAmount': bacy.convert_long(obj.UsingResultAmount(), password),
+        'MailType': MailType(bacy.convert_int(obj.MailType_(), password)).name,
+        'ExpiryChangeParcelType': ParcelType(bacy.convert_int(obj.ExpiryChangeParcelType(), password)).name,
+        'ExpiryChangeId': bacy.convert_long(obj.ExpiryChangeId(), password),
+        'ExpiryChangeAmount': bacy.convert_long(obj.ExpiryChangeAmount(), password),
         'CanTierUpgrade': obj.CanTierUpgrade(),
-        'TierUpgradeRecipeCraftId': table_encryption.convert_long(obj.TierUpgradeRecipeCraftId(), password),
-        'Tags': [Tag(table_encryption.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
-        'CraftQualityTier0': table_encryption.convert_long(obj.CraftQualityTier0(), password),
-        'CraftQualityTier1': table_encryption.convert_long(obj.CraftQualityTier1(), password),
-        'CraftQualityTier2': table_encryption.convert_long(obj.CraftQualityTier2(), password),
-        'ShiftingCraftQuality': table_encryption.convert_long(obj.ShiftingCraftQuality(), password),
-        'MaxGiftTags': table_encryption.convert_int(obj.MaxGiftTags(), password),
-        'ShopCategory': [ShopCategoryType(table_encryption.convert_int(obj.ShopCategory(j), password)).name for j in range(obj.ShopCategoryLength())],
-        'ExpirationDateTime': table_encryption.convert_string(obj.ExpirationDateTime(), password),
-        'ExpirationNotifyDateIn': table_encryption.convert_int(obj.ExpirationNotifyDateIn(), password),
-        'ShortcutTypeId': table_encryption.convert_long(obj.ShortcutTypeId(), password),
-        'GachaTicket': GachaTicketType(table_encryption.convert_int(obj.GachaTicket(), password)).name,
+        'TierUpgradeRecipeCraftId': bacy.convert_long(obj.TierUpgradeRecipeCraftId(), password),
+        'Tags': [Tag(bacy.convert_int(obj.Tags(j), password)).name for j in range(obj.TagsLength())],
+        'CraftQualityTier0': bacy.convert_long(obj.CraftQualityTier0(), password),
+        'CraftQualityTier1': bacy.convert_long(obj.CraftQualityTier1(), password),
+        'CraftQualityTier2': bacy.convert_long(obj.CraftQualityTier2(), password),
+        'ShiftingCraftQuality': bacy.convert_long(obj.ShiftingCraftQuality(), password),
+        'MaxGiftTags': bacy.convert_int(obj.MaxGiftTags(), password),
+        'ShopCategory': [ShopCategoryType(bacy.convert_int(obj.ShopCategory(j), password)).name for j in range(obj.ShopCategoryLength())],
+        'ExpirationDateTime': bacy.convert_string(obj.ExpirationDateTime(), password),
+        'ExpirationNotifyDateIn': bacy.convert_int(obj.ExpirationNotifyDateIn(), password),
+        'ShortcutTypeId': bacy.convert_long(obj.ShortcutTypeId(), password),
+        'GachaTicket': GachaTicketType(bacy.convert_int(obj.GachaTicket(), password)).name,
     }
 
 
 def dump_KnockBackExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Index': table_encryption.convert_long(obj.Index(), password),
-        'Dist': table_encryption.convert_float(obj.Dist(), password),
-        'Speed': table_encryption.convert_float(obj.Speed(), password),
+        'Index': bacy.convert_long(obj.Index(), password),
+        'Dist': bacy.convert_float(obj.Dist(), password),
+        'Speed': bacy.convert_float(obj.Speed(), password),
     }
 
 
 def dump_LimitedStageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'SeasonId': table_encryption.convert_long(obj.SeasonId(), password),
-        'StageDifficulty': StageDifficulty(table_encryption.convert_int(obj.StageDifficulty_(), password)).name,
-        'StageNumber': table_encryption.convert_string(obj.StageNumber(), password),
-        'StageDisplay': table_encryption.convert_int(obj.StageDisplay(), password),
-        'PrevStageId': table_encryption.convert_long(obj.PrevStageId(), password),
-        'OpenDate': table_encryption.convert_long(obj.OpenDate(), password),
-        'OpenEventPoint': table_encryption.convert_long(obj.OpenEventPoint(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'StageEnterCostType': ParcelType(table_encryption.convert_int(obj.StageEnterCostType(), password)).name,
-        'StageEnterCostId': table_encryption.convert_long(obj.StageEnterCostId(), password),
-        'StageEnterCostAmount': table_encryption.convert_int(obj.StageEnterCostAmount(), password),
-        'StageEnterEchelonCount': table_encryption.convert_int(obj.StageEnterEchelonCount(), password),
-        'StarConditionTacticRankSCount': table_encryption.convert_long(obj.StarConditionTacticRankSCount(), password),
-        'StarConditionTurnCount': table_encryption.convert_long(obj.StarConditionTurnCount(), password),
-        'EnterScenarioGroupId': [table_encryption.convert_long(obj.EnterScenarioGroupId(j), password) for j in range(obj.EnterScenarioGroupIdLength())],
-        'ClearScenarioGroupId': [table_encryption.convert_long(obj.ClearScenarioGroupId(j), password) for j in range(obj.ClearScenarioGroupIdLength())],
-        'StrategyMap': table_encryption.convert_string(obj.StrategyMap(), password),
-        'StrategyMapBG': table_encryption.convert_string(obj.StrategyMapBG(), password),
-        'StageRewardId': table_encryption.convert_long(obj.StageRewardId(), password),
-        'MaxTurn': table_encryption.convert_int(obj.MaxTurn(), password),
-        'StageTopography': StageTopography(table_encryption.convert_int(obj.StageTopography_(), password)).name,
-        'RecommandLevel': table_encryption.convert_int(obj.RecommandLevel(), password),
-        'BgmId': table_encryption.convert_string(obj.BgmId(), password),
-        'StrategyEnvironment': StrategyEnvironment(table_encryption.convert_int(obj.StrategyEnvironment_(), password)).name,
-        'GroundID': table_encryption.convert_long(obj.GroundID(), password),
-        'ContentType': ContentType(table_encryption.convert_int(obj.ContentType_(), password)).name,
-        'BGMId': table_encryption.convert_long(obj.BGMId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
+        'SeasonId': bacy.convert_long(obj.SeasonId(), password),
+        'StageDifficulty': StageDifficulty(bacy.convert_int(obj.StageDifficulty_(), password)).name,
+        'StageNumber': bacy.convert_string(obj.StageNumber(), password),
+        'StageDisplay': bacy.convert_int(obj.StageDisplay(), password),
+        'PrevStageId': bacy.convert_long(obj.PrevStageId(), password),
+        'OpenDate': bacy.convert_long(obj.OpenDate(), password),
+        'OpenEventPoint': bacy.convert_long(obj.OpenEventPoint(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'StageEnterCostType': ParcelType(bacy.convert_int(obj.StageEnterCostType(), password)).name,
+        'StageEnterCostId': bacy.convert_long(obj.StageEnterCostId(), password),
+        'StageEnterCostAmount': bacy.convert_int(obj.StageEnterCostAmount(), password),
+        'StageEnterEchelonCount': bacy.convert_int(obj.StageEnterEchelonCount(), password),
+        'StarConditionTacticRankSCount': bacy.convert_long(obj.StarConditionTacticRankSCount(), password),
+        'StarConditionTurnCount': bacy.convert_long(obj.StarConditionTurnCount(), password),
+        'EnterScenarioGroupId': [bacy.convert_long(obj.EnterScenarioGroupId(j), password) for j in range(obj.EnterScenarioGroupIdLength())],
+        'ClearScenarioGroupId': [bacy.convert_long(obj.ClearScenarioGroupId(j), password) for j in range(obj.ClearScenarioGroupIdLength())],
+        'StrategyMap': bacy.convert_string(obj.StrategyMap(), password),
+        'StrategyMapBG': bacy.convert_string(obj.StrategyMapBG(), password),
+        'StageRewardId': bacy.convert_long(obj.StageRewardId(), password),
+        'MaxTurn': bacy.convert_int(obj.MaxTurn(), password),
+        'StageTopography': StageTopography(bacy.convert_int(obj.StageTopography_(), password)).name,
+        'RecommandLevel': bacy.convert_int(obj.RecommandLevel(), password),
+        'BgmId': bacy.convert_string(obj.BgmId(), password),
+        'StrategyEnvironment': StrategyEnvironment(bacy.convert_int(obj.StrategyEnvironment_(), password)).name,
+        'GroundID': bacy.convert_long(obj.GroundID(), password),
+        'ContentType': ContentType(bacy.convert_int(obj.ContentType_(), password)).name,
+        'BGMId': bacy.convert_long(obj.BGMId(), password),
         'InstantClear': obj.InstantClear(),
-        'BuffContentId': table_encryption.convert_long(obj.BuffContentId(), password),
+        'BuffContentId': bacy.convert_long(obj.BuffContentId(), password),
         'ChallengeDisplay': obj.ChallengeDisplay(),
     }
 
 
 def dump_LimitedStageRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'RewardTag': RewardTag(table_encryption.convert_int(obj.RewardTag_(), password)).name,
-        'RewardProb': table_encryption.convert_int(obj.RewardProb(), password),
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardId': table_encryption.convert_long(obj.RewardId(), password),
-        'RewardAmount': table_encryption.convert_int(obj.RewardAmount(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'RewardTag': RewardTag(bacy.convert_int(obj.RewardTag_(), password)).name,
+        'RewardProb': bacy.convert_int(obj.RewardProb(), password),
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardId': bacy.convert_long(obj.RewardId(), password),
+        'RewardAmount': bacy.convert_int(obj.RewardAmount(), password),
         'IsDisplayed': obj.IsDisplayed(),
     }
 
 
 def dump_LimitedStageSeasonExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'StartDate': table_encryption.convert_string(obj.StartDate(), password),
-        'EndDate': table_encryption.convert_string(obj.EndDate(), password),
-        'TypeACount': table_encryption.convert_long(obj.TypeACount(), password),
-        'TypeBCount': table_encryption.convert_long(obj.TypeBCount(), password),
-        'TypeCCount': table_encryption.convert_long(obj.TypeCCount(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'StartDate': bacy.convert_string(obj.StartDate(), password),
+        'EndDate': bacy.convert_string(obj.EndDate(), password),
+        'TypeACount': bacy.convert_long(obj.TypeACount(), password),
+        'TypeBCount': bacy.convert_long(obj.TypeBCount(), password),
+        'TypeCCount': bacy.convert_long(obj.TypeCCount(), password),
     }
 
 
 def dump_LocalizeCharProfileExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'StatusMessageKr': table_encryption.convert_string(obj.StatusMessageKr(), password),
-        'StatusMessageJp': table_encryption.convert_string(obj.StatusMessageJp(), password),
-        'FullNameKr': table_encryption.convert_string(obj.FullNameKr(), password),
-        'FullNameJp': table_encryption.convert_string(obj.FullNameJp(), password),
-        'FamilyNameKr': table_encryption.convert_string(obj.FamilyNameKr(), password),
-        'FamilyNameRubyKr': table_encryption.convert_string(obj.FamilyNameRubyKr(), password),
-        'PersonalNameKr': table_encryption.convert_string(obj.PersonalNameKr(), password),
-        'PersonalNameRubyKr': table_encryption.convert_string(obj.PersonalNameRubyKr(), password),
-        'FamilyNameJp': table_encryption.convert_string(obj.FamilyNameJp(), password),
-        'FamilyNameRubyJp': table_encryption.convert_string(obj.FamilyNameRubyJp(), password),
-        'PersonalNameJp': table_encryption.convert_string(obj.PersonalNameJp(), password),
-        'PersonalNameRubyJp': table_encryption.convert_string(obj.PersonalNameRubyJp(), password),
-        'SchoolYearKr': table_encryption.convert_string(obj.SchoolYearKr(), password),
-        'SchoolYearJp': table_encryption.convert_string(obj.SchoolYearJp(), password),
-        'CharacterAgeKr': table_encryption.convert_string(obj.CharacterAgeKr(), password),
-        'CharacterAgeJp': table_encryption.convert_string(obj.CharacterAgeJp(), password),
-        'BirthDay': table_encryption.convert_string(obj.BirthDay(), password),
-        'BirthdayKr': table_encryption.convert_string(obj.BirthdayKr(), password),
-        'BirthdayJp': table_encryption.convert_string(obj.BirthdayJp(), password),
-        'CharHeightKr': table_encryption.convert_string(obj.CharHeightKr(), password),
-        'CharHeightJp': table_encryption.convert_string(obj.CharHeightJp(), password),
-        'DesignerNameKr': table_encryption.convert_string(obj.DesignerNameKr(), password),
-        'DesignerNameJp': table_encryption.convert_string(obj.DesignerNameJp(), password),
-        'IllustratorNameKr': table_encryption.convert_string(obj.IllustratorNameKr(), password),
-        'IllustratorNameJp': table_encryption.convert_string(obj.IllustratorNameJp(), password),
-        'CharacterVoiceKr': table_encryption.convert_string(obj.CharacterVoiceKr(), password),
-        'CharacterVoiceJp': table_encryption.convert_string(obj.CharacterVoiceJp(), password),
-        'HobbyKr': table_encryption.convert_string(obj.HobbyKr(), password),
-        'HobbyJp': table_encryption.convert_string(obj.HobbyJp(), password),
-        'WeaponNameKr': table_encryption.convert_string(obj.WeaponNameKr(), password),
-        'WeaponDescKr': table_encryption.convert_string(obj.WeaponDescKr(), password),
-        'WeaponNameJp': table_encryption.convert_string(obj.WeaponNameJp(), password),
-        'WeaponDescJp': table_encryption.convert_string(obj.WeaponDescJp(), password),
-        'ProfileIntroductionKr': table_encryption.convert_string(obj.ProfileIntroductionKr(), password),
-        'ProfileIntroductionJp': table_encryption.convert_string(obj.ProfileIntroductionJp(), password),
-        'CharacterSSRNewKr': table_encryption.convert_string(obj.CharacterSSRNewKr(), password),
-        'CharacterSSRNewJp': table_encryption.convert_string(obj.CharacterSSRNewJp(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'StatusMessageKr': bacy.convert_string(obj.StatusMessageKr(), password),
+        'StatusMessageJp': bacy.convert_string(obj.StatusMessageJp(), password),
+        'FullNameKr': bacy.convert_string(obj.FullNameKr(), password),
+        'FullNameJp': bacy.convert_string(obj.FullNameJp(), password),
+        'FamilyNameKr': bacy.convert_string(obj.FamilyNameKr(), password),
+        'FamilyNameRubyKr': bacy.convert_string(obj.FamilyNameRubyKr(), password),
+        'PersonalNameKr': bacy.convert_string(obj.PersonalNameKr(), password),
+        'PersonalNameRubyKr': bacy.convert_string(obj.PersonalNameRubyKr(), password),
+        'FamilyNameJp': bacy.convert_string(obj.FamilyNameJp(), password),
+        'FamilyNameRubyJp': bacy.convert_string(obj.FamilyNameRubyJp(), password),
+        'PersonalNameJp': bacy.convert_string(obj.PersonalNameJp(), password),
+        'PersonalNameRubyJp': bacy.convert_string(obj.PersonalNameRubyJp(), password),
+        'SchoolYearKr': bacy.convert_string(obj.SchoolYearKr(), password),
+        'SchoolYearJp': bacy.convert_string(obj.SchoolYearJp(), password),
+        'CharacterAgeKr': bacy.convert_string(obj.CharacterAgeKr(), password),
+        'CharacterAgeJp': bacy.convert_string(obj.CharacterAgeJp(), password),
+        'BirthDay': bacy.convert_string(obj.BirthDay(), password),
+        'BirthdayKr': bacy.convert_string(obj.BirthdayKr(), password),
+        'BirthdayJp': bacy.convert_string(obj.BirthdayJp(), password),
+        'CharHeightKr': bacy.convert_string(obj.CharHeightKr(), password),
+        'CharHeightJp': bacy.convert_string(obj.CharHeightJp(), password),
+        'DesignerNameKr': bacy.convert_string(obj.DesignerNameKr(), password),
+        'DesignerNameJp': bacy.convert_string(obj.DesignerNameJp(), password),
+        'IllustratorNameKr': bacy.convert_string(obj.IllustratorNameKr(), password),
+        'IllustratorNameJp': bacy.convert_string(obj.IllustratorNameJp(), password),
+        'CharacterVoiceKr': bacy.convert_string(obj.CharacterVoiceKr(), password),
+        'CharacterVoiceJp': bacy.convert_string(obj.CharacterVoiceJp(), password),
+        'HobbyKr': bacy.convert_string(obj.HobbyKr(), password),
+        'HobbyJp': bacy.convert_string(obj.HobbyJp(), password),
+        'WeaponNameKr': bacy.convert_string(obj.WeaponNameKr(), password),
+        'WeaponDescKr': bacy.convert_string(obj.WeaponDescKr(), password),
+        'WeaponNameJp': bacy.convert_string(obj.WeaponNameJp(), password),
+        'WeaponDescJp': bacy.convert_string(obj.WeaponDescJp(), password),
+        'ProfileIntroductionKr': bacy.convert_string(obj.ProfileIntroductionKr(), password),
+        'ProfileIntroductionJp': bacy.convert_string(obj.ProfileIntroductionJp(), password),
+        'CharacterSSRNewKr': bacy.convert_string(obj.CharacterSSRNewKr(), password),
+        'CharacterSSRNewJp': bacy.convert_string(obj.CharacterSSRNewJp(), password),
     }
 
 
 def dump_LocalizeFieldExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Key': table_encryption.convert_uint(obj.Key(), password),
-        'Kr': table_encryption.convert_string(obj.Kr(), password),
-        'Jp': table_encryption.convert_string(obj.Jp(), password),
+        'Key': bacy.convert_uint(obj.Key(), password),
+        'Kr': bacy.convert_string(obj.Kr(), password),
+        'Jp': bacy.convert_string(obj.Jp(), password),
     }
 
 
 def dump_LocalizeGachaShopExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GachaShopId': table_encryption.convert_long(obj.GachaShopId(), password),
-        'TabNameKr': table_encryption.convert_string(obj.TabNameKr(), password),
-        'TabNameJp': table_encryption.convert_string(obj.TabNameJp(), password),
-        'TitleNameKr': table_encryption.convert_string(obj.TitleNameKr(), password),
-        'TitleNameJp': table_encryption.convert_string(obj.TitleNameJp(), password),
-        'SubTitleKr': table_encryption.convert_string(obj.SubTitleKr(), password),
-        'SubTitleJp': table_encryption.convert_string(obj.SubTitleJp(), password),
-        'GachaDescriptionKr': table_encryption.convert_string(obj.GachaDescriptionKr(), password),
-        'GachaDescriptionJp': table_encryption.convert_string(obj.GachaDescriptionJp(), password),
+        'GachaShopId': bacy.convert_long(obj.GachaShopId(), password),
+        'TabNameKr': bacy.convert_string(obj.TabNameKr(), password),
+        'TabNameJp': bacy.convert_string(obj.TabNameJp(), password),
+        'TitleNameKr': bacy.convert_string(obj.TitleNameKr(), password),
+        'TitleNameJp': bacy.convert_string(obj.TitleNameJp(), password),
+        'SubTitleKr': bacy.convert_string(obj.SubTitleKr(), password),
+        'SubTitleJp': bacy.convert_string(obj.SubTitleJp(), password),
+        'GachaDescriptionKr': bacy.convert_string(obj.GachaDescriptionKr(), password),
+        'GachaDescriptionJp': bacy.convert_string(obj.GachaDescriptionJp(), password),
     }
 
 
 def dump_LogicEffectCommonVisualExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'StringID': table_encryption.convert_uint(obj.StringID(), password),
-        'IconSpriteName': table_encryption.convert_string(obj.IconSpriteName(), password),
-        'IconDispelColor': [table_encryption.convert_float(obj.IconDispelColor(j), password) for j in range(obj.IconDispelColorLength())],
-        'ParticleEnterPath': table_encryption.convert_string(obj.ParticleEnterPath(), password),
-        'ParticleEnterSocket': EffectBone(table_encryption.convert_int(obj.ParticleEnterSocket(), password)).name,
-        'ParticleLoopPath': table_encryption.convert_string(obj.ParticleLoopPath(), password),
-        'ParticleLoopSocket': EffectBone(table_encryption.convert_int(obj.ParticleLoopSocket(), password)).name,
-        'ParticleEndPath': table_encryption.convert_string(obj.ParticleEndPath(), password),
-        'ParticleEndSocket': EffectBone(table_encryption.convert_int(obj.ParticleEndSocket(), password)).name,
-        'ParticleApplyPath': table_encryption.convert_string(obj.ParticleApplyPath(), password),
-        'ParticleApplySocket': EffectBone(table_encryption.convert_int(obj.ParticleApplySocket(), password)).name,
-        'ParticleRemovedPath': table_encryption.convert_string(obj.ParticleRemovedPath(), password),
-        'ParticleRemovedSocket': EffectBone(table_encryption.convert_int(obj.ParticleRemovedSocket(), password)).name,
+        'StringID': bacy.convert_uint(obj.StringID(), password),
+        'IconSpriteName': bacy.convert_string(obj.IconSpriteName(), password),
+        'IconDispelColor': [bacy.convert_float(obj.IconDispelColor(j), password) for j in range(obj.IconDispelColorLength())],
+        'ParticleEnterPath': bacy.convert_string(obj.ParticleEnterPath(), password),
+        'ParticleEnterSocket': EffectBone(bacy.convert_int(obj.ParticleEnterSocket(), password)).name,
+        'ParticleLoopPath': bacy.convert_string(obj.ParticleLoopPath(), password),
+        'ParticleLoopSocket': EffectBone(bacy.convert_int(obj.ParticleLoopSocket(), password)).name,
+        'ParticleEndPath': bacy.convert_string(obj.ParticleEndPath(), password),
+        'ParticleEndSocket': EffectBone(bacy.convert_int(obj.ParticleEndSocket(), password)).name,
+        'ParticleApplyPath': bacy.convert_string(obj.ParticleApplyPath(), password),
+        'ParticleApplySocket': EffectBone(bacy.convert_int(obj.ParticleApplySocket(), password)).name,
+        'ParticleRemovedPath': bacy.convert_string(obj.ParticleRemovedPath(), password),
+        'ParticleRemovedSocket': EffectBone(bacy.convert_int(obj.ParticleRemovedSocket(), password)).name,
     }
 
 
 def dump_MiniGameAudioAnimatorExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ControllerNameHash': table_encryption.convert_uint(obj.ControllerNameHash(), password),
-        'VoiceNamePrefix': table_encryption.convert_string(obj.VoiceNamePrefix(), password),
-        'StateNameHash': table_encryption.convert_uint(obj.StateNameHash(), password),
-        'StateName': table_encryption.convert_string(obj.StateName(), password),
+        'ControllerNameHash': bacy.convert_uint(obj.ControllerNameHash(), password),
+        'VoiceNamePrefix': bacy.convert_string(obj.VoiceNamePrefix(), password),
+        'StateNameHash': bacy.convert_uint(obj.StateNameHash(), password),
+        'StateName': bacy.convert_string(obj.StateName(), password),
         'IgnoreInterruptDelay': obj.IgnoreInterruptDelay(),
         'IgnoreInterruptPlay': obj.IgnoreInterruptPlay(),
-        'Volume': table_encryption.convert_float(obj.Volume(), password),
-        'Delay': table_encryption.convert_float(obj.Delay(), password),
-        'AudioPriority': table_encryption.convert_int(obj.AudioPriority(), password),
-        'AudioClipPath': [table_encryption.convert_string(obj.AudioClipPath(j), password) for j in range(obj.AudioClipPathLength())],
-        'VoiceHash': [table_encryption.convert_uint(obj.VoiceHash(j), password) for j in range(obj.VoiceHashLength())],
+        'Volume': bacy.convert_float(obj.Volume(), password),
+        'Delay': bacy.convert_float(obj.Delay(), password),
+        'AudioPriority': bacy.convert_int(obj.AudioPriority(), password),
+        'AudioClipPath': [bacy.convert_string(obj.AudioClipPath(j), password) for j in range(obj.AudioClipPathLength())],
+        'VoiceHash': [bacy.convert_uint(obj.VoiceHash(j), password) for j in range(obj.VoiceHashLength())],
     }
 
 
 def dump_MiniGameMissionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'GroupName': table_encryption.convert_string(obj.GroupName(), password),
-        'Category': MissionCategory(table_encryption.convert_int(obj.Category(), password)).name,
-        'Description': table_encryption.convert_uint(obj.Description(), password),
-        'ResetType': MissionResetType(table_encryption.convert_int(obj.ResetType(), password)).name,
-        'ToastDisplayType': MissionToastDisplayConditionType(table_encryption.convert_int(obj.ToastDisplayType(), password)).name,
-        'ToastImagePath': table_encryption.convert_string(obj.ToastImagePath(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'GroupName': bacy.convert_string(obj.GroupName(), password),
+        'Category': MissionCategory(bacy.convert_int(obj.Category(), password)).name,
+        'Description': bacy.convert_uint(obj.Description(), password),
+        'ResetType': MissionResetType(bacy.convert_int(obj.ResetType(), password)).name,
+        'ToastDisplayType': MissionToastDisplayConditionType(bacy.convert_int(obj.ToastDisplayType(), password)).name,
+        'ToastImagePath': bacy.convert_string(obj.ToastImagePath(), password),
         'ViewFlag': obj.ViewFlag(),
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'PreMissionId': [table_encryption.convert_long(obj.PreMissionId(j), password) for j in range(obj.PreMissionIdLength())],
-        'AccountType': AccountState(table_encryption.convert_int(obj.AccountType(), password)).name,
-        'AccountLevel': table_encryption.convert_long(obj.AccountLevel(), password),
-        'ShortcutUI': [table_encryption.convert_string(obj.ShortcutUI(j), password) for j in range(obj.ShortcutUILength())],
-        'CompleteConditionType': MissionCompleteConditionType(table_encryption.convert_int(obj.CompleteConditionType(), password)).name,
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'PreMissionId': [bacy.convert_long(obj.PreMissionId(j), password) for j in range(obj.PreMissionIdLength())],
+        'AccountType': AccountState(bacy.convert_int(obj.AccountType(), password)).name,
+        'AccountLevel': bacy.convert_long(obj.AccountLevel(), password),
+        'ShortcutUI': [bacy.convert_string(obj.ShortcutUI(j), password) for j in range(obj.ShortcutUILength())],
+        'CompleteConditionType': MissionCompleteConditionType(bacy.convert_int(obj.CompleteConditionType(), password)).name,
         'IsCompleteExtensionTime': obj.IsCompleteExtensionTime(),
-        'CompleteConditionCount': table_encryption.convert_long(obj.CompleteConditionCount(), password),
-        'CompleteConditionParameter': [table_encryption.convert_long(obj.CompleteConditionParameter(j), password) for j in range(obj.CompleteConditionParameterLength())],
-        'CompleteConditionParameterTag': [Tag(table_encryption.convert_int(obj.CompleteConditionParameterTag(j), password)).name for j in range(obj.CompleteConditionParameterTagLength())],
-        'RewardIcon': table_encryption.convert_string(obj.RewardIcon(), password),
-        'MissionRewardParcelType': [ParcelType(table_encryption.convert_int(obj.MissionRewardParcelType(j), password)).name for j in range(obj.MissionRewardParcelTypeLength())],
-        'MissionRewardParcelId': [table_encryption.convert_long(obj.MissionRewardParcelId(j), password) for j in range(obj.MissionRewardParcelIdLength())],
-        'MissionRewardAmount': [table_encryption.convert_int(obj.MissionRewardAmount(j), password) for j in range(obj.MissionRewardAmountLength())],
+        'CompleteConditionCount': bacy.convert_long(obj.CompleteConditionCount(), password),
+        'CompleteConditionParameter': [bacy.convert_long(obj.CompleteConditionParameter(j), password) for j in range(obj.CompleteConditionParameterLength())],
+        'CompleteConditionParameterTag': [Tag(bacy.convert_int(obj.CompleteConditionParameterTag(j), password)).name for j in range(obj.CompleteConditionParameterTagLength())],
+        'RewardIcon': bacy.convert_string(obj.RewardIcon(), password),
+        'MissionRewardParcelType': [ParcelType(bacy.convert_int(obj.MissionRewardParcelType(j), password)).name for j in range(obj.MissionRewardParcelTypeLength())],
+        'MissionRewardParcelId': [bacy.convert_long(obj.MissionRewardParcelId(j), password) for j in range(obj.MissionRewardParcelIdLength())],
+        'MissionRewardAmount': [bacy.convert_int(obj.MissionRewardAmount(j), password) for j in range(obj.MissionRewardAmountLength())],
     }
 
 
 def dump_MiniGamePlayGuideExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'DisplayOrder': table_encryption.convert_int(obj.DisplayOrder(), password),
-        'GuideTitle': table_encryption.convert_string(obj.GuideTitle(), password),
-        'GuideImagePath': table_encryption.convert_string(obj.GuideImagePath(), password),
-        'GuideText': table_encryption.convert_string(obj.GuideText(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'DisplayOrder': bacy.convert_int(obj.DisplayOrder(), password),
+        'GuideTitle': bacy.convert_string(obj.GuideTitle(), password),
+        'GuideImagePath': bacy.convert_string(obj.GuideImagePath(), password),
+        'GuideText': bacy.convert_string(obj.GuideText(), password),
     }
 
 
 def dump_MiniGameRhythmBgmExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'RhythmBgmId': table_encryption.convert_long(obj.RhythmBgmId(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'StageSelectImagePath': table_encryption.convert_string(obj.StageSelectImagePath(), password),
-        'Bpm': table_encryption.convert_long(obj.Bpm(), password),
-        'Bgm': table_encryption.convert_long(obj.Bgm(), password),
-        'BgmNameText': table_encryption.convert_string(obj.BgmNameText(), password),
-        'BgmArtistText': table_encryption.convert_string(obj.BgmArtistText(), password),
+        'RhythmBgmId': bacy.convert_long(obj.RhythmBgmId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'StageSelectImagePath': bacy.convert_string(obj.StageSelectImagePath(), password),
+        'Bpm': bacy.convert_long(obj.Bpm(), password),
+        'Bgm': bacy.convert_long(obj.Bgm(), password),
+        'BgmNameText': bacy.convert_string(obj.BgmNameText(), password),
+        'BgmArtistText': bacy.convert_string(obj.BgmArtistText(), password),
         'HasLyricist': obj.HasLyricist(),
-        'BgmComposerText': table_encryption.convert_string(obj.BgmComposerText(), password),
-        'BgmLength': table_encryption.convert_int(obj.BgmLength(), password),
+        'BgmComposerText': bacy.convert_string(obj.BgmComposerText(), password),
+        'BgmLength': bacy.convert_int(obj.BgmLength(), password),
     }
 
 
 def dump_MiniGameRhythmExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'RhythmBgmId': table_encryption.convert_long(obj.RhythmBgmId(), password),
-        'PresetName': table_encryption.convert_string(obj.PresetName(), password),
-        'StageDifficulty': Difficulty(table_encryption.convert_int(obj.StageDifficulty(), password)).name,
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'RhythmBgmId': bacy.convert_long(obj.RhythmBgmId(), password),
+        'PresetName': bacy.convert_string(obj.PresetName(), password),
+        'StageDifficulty': Difficulty(bacy.convert_int(obj.StageDifficulty(), password)).name,
         'IsSpecial': obj.IsSpecial(),
-        'OpenStageScoreAmount': table_encryption.convert_long(obj.OpenStageScoreAmount(), password),
-        'MaxHp': table_encryption.convert_long(obj.MaxHp(), password),
-        'MissDamage': table_encryption.convert_long(obj.MissDamage(), password),
-        'CriticalHPRestoreValue': table_encryption.convert_long(obj.CriticalHPRestoreValue(), password),
-        'MaxScore': table_encryption.convert_long(obj.MaxScore(), password),
-        'FeverScoreRate': table_encryption.convert_long(obj.FeverScoreRate(), password),
-        'NoteScoreRate': table_encryption.convert_long(obj.NoteScoreRate(), password),
-        'ComboScoreRate': table_encryption.convert_long(obj.ComboScoreRate(), password),
-        'AttackScoreRate': table_encryption.convert_long(obj.AttackScoreRate(), password),
-        'FeverCriticalRate': table_encryption.convert_float(obj.FeverCriticalRate(), password),
-        'FeverAttackRate': table_encryption.convert_float(obj.FeverAttackRate(), password),
-        'MaxHpScore': table_encryption.convert_long(obj.MaxHpScore(), password),
-        'RhythmFileName': table_encryption.convert_string(obj.RhythmFileName(), password),
-        'ArtLevelSceneName': table_encryption.convert_string(obj.ArtLevelSceneName(), password),
-        'ComboImagePath': table_encryption.convert_string(obj.ComboImagePath(), password),
+        'OpenStageScoreAmount': bacy.convert_long(obj.OpenStageScoreAmount(), password),
+        'MaxHp': bacy.convert_long(obj.MaxHp(), password),
+        'MissDamage': bacy.convert_long(obj.MissDamage(), password),
+        'CriticalHPRestoreValue': bacy.convert_long(obj.CriticalHPRestoreValue(), password),
+        'MaxScore': bacy.convert_long(obj.MaxScore(), password),
+        'FeverScoreRate': bacy.convert_long(obj.FeverScoreRate(), password),
+        'NoteScoreRate': bacy.convert_long(obj.NoteScoreRate(), password),
+        'ComboScoreRate': bacy.convert_long(obj.ComboScoreRate(), password),
+        'AttackScoreRate': bacy.convert_long(obj.AttackScoreRate(), password),
+        'FeverCriticalRate': bacy.convert_float(obj.FeverCriticalRate(), password),
+        'FeverAttackRate': bacy.convert_float(obj.FeverAttackRate(), password),
+        'MaxHpScore': bacy.convert_long(obj.MaxHpScore(), password),
+        'RhythmFileName': bacy.convert_string(obj.RhythmFileName(), password),
+        'ArtLevelSceneName': bacy.convert_string(obj.ArtLevelSceneName(), password),
+        'ComboImagePath': bacy.convert_string(obj.ComboImagePath(), password),
     }
 
 
 def dump_MiniGameShootingCharacterExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'SpineResourceName': table_encryption.convert_string(obj.SpineResourceName(), password),
-        'BodyRadius': table_encryption.convert_float(obj.BodyRadius(), password),
-        'ModelPrefabName': table_encryption.convert_string(obj.ModelPrefabName(), password),
-        'NormalAttackSkillData': table_encryption.convert_string(obj.NormalAttackSkillData(), password),
-        'PublicSkillData': [table_encryption.convert_string(obj.PublicSkillData(j), password) for j in range(obj.PublicSkillDataLength())],
-        'DeathSkillData': table_encryption.convert_string(obj.DeathSkillData(), password),
-        'MaxHP': table_encryption.convert_long(obj.MaxHP(), password),
-        'AttackPower': table_encryption.convert_long(obj.AttackPower(), password),
-        'DefensePower': table_encryption.convert_long(obj.DefensePower(), password),
-        'CriticalRate': table_encryption.convert_long(obj.CriticalRate(), password),
-        'CriticalDamageRate': table_encryption.convert_long(obj.CriticalDamageRate(), password),
-        'AttackRange': table_encryption.convert_long(obj.AttackRange(), password),
-        'MoveSpeed': table_encryption.convert_long(obj.MoveSpeed(), password),
-        'ShotTime': table_encryption.convert_long(obj.ShotTime(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'SpineResourceName': bacy.convert_string(obj.SpineResourceName(), password),
+        'BodyRadius': bacy.convert_float(obj.BodyRadius(), password),
+        'ModelPrefabName': bacy.convert_string(obj.ModelPrefabName(), password),
+        'NormalAttackSkillData': bacy.convert_string(obj.NormalAttackSkillData(), password),
+        'PublicSkillData': [bacy.convert_string(obj.PublicSkillData(j), password) for j in range(obj.PublicSkillDataLength())],
+        'DeathSkillData': bacy.convert_string(obj.DeathSkillData(), password),
+        'MaxHP': bacy.convert_long(obj.MaxHP(), password),
+        'AttackPower': bacy.convert_long(obj.AttackPower(), password),
+        'DefensePower': bacy.convert_long(obj.DefensePower(), password),
+        'CriticalRate': bacy.convert_long(obj.CriticalRate(), password),
+        'CriticalDamageRate': bacy.convert_long(obj.CriticalDamageRate(), password),
+        'AttackRange': bacy.convert_long(obj.AttackRange(), password),
+        'MoveSpeed': bacy.convert_long(obj.MoveSpeed(), password),
+        'ShotTime': bacy.convert_long(obj.ShotTime(), password),
         'IsBoss': obj.IsBoss(),
-        'Scale': table_encryption.convert_float(obj.Scale(), password),
+        'Scale': bacy.convert_float(obj.Scale(), password),
         'IgnoreObstacleCheck': obj.IgnoreObstacleCheck(),
-        'CharacterVoiceGroupId': table_encryption.convert_long(obj.CharacterVoiceGroupId(), password),
+        'CharacterVoiceGroupId': bacy.convert_long(obj.CharacterVoiceGroupId(), password),
     }
 
 
 def dump_MiniGameShootingGeasExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'GeasType': Geas(table_encryption.convert_int(obj.GeasType(), password)).name,
-        'Icon': table_encryption.convert_string(obj.Icon(), password),
-        'Probability': table_encryption.convert_long(obj.Probability(), password),
-        'MaxOverlapCount': table_encryption.convert_int(obj.MaxOverlapCount(), password),
-        'GeasData': table_encryption.convert_string(obj.GeasData(), password),
-        'NeedGeasId': table_encryption.convert_long(obj.NeedGeasId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'GeasType': Geas(bacy.convert_int(obj.GeasType(), password)).name,
+        'Icon': bacy.convert_string(obj.Icon(), password),
+        'Probability': bacy.convert_long(obj.Probability(), password),
+        'MaxOverlapCount': bacy.convert_int(obj.MaxOverlapCount(), password),
+        'GeasData': bacy.convert_string(obj.GeasData(), password),
+        'NeedGeasId': bacy.convert_long(obj.NeedGeasId(), password),
         'HideInPausePopup': obj.HideInPausePopup(),
     }
 
 
 def dump_MiniGameShootingStageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'BgmId': [table_encryption.convert_long(obj.BgmId(j), password) for j in range(obj.BgmIdLength())],
-        'CostGoodsId': table_encryption.convert_long(obj.CostGoodsId(), password),
-        'Difficulty': Difficulty(table_encryption.convert_int(obj.Difficulty_(), password)).name,
-        'DesignLevel': table_encryption.convert_string(obj.DesignLevel(), password),
-        'ArtLevel': table_encryption.convert_string(obj.ArtLevel(), password),
-        'StartBattleDuration': table_encryption.convert_long(obj.StartBattleDuration(), password),
-        'DefaultBattleDuration': table_encryption.convert_long(obj.DefaultBattleDuration(), password),
-        'DefaultLogicEffect': table_encryption.convert_string(obj.DefaultLogicEffect(), password),
-        'CameraSizeRate': table_encryption.convert_float(obj.CameraSizeRate(), password),
-        'EventContentStageRewardId': table_encryption.convert_long(obj.EventContentStageRewardId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'BgmId': [bacy.convert_long(obj.BgmId(j), password) for j in range(obj.BgmIdLength())],
+        'CostGoodsId': bacy.convert_long(obj.CostGoodsId(), password),
+        'Difficulty': Difficulty(bacy.convert_int(obj.Difficulty_(), password)).name,
+        'DesignLevel': bacy.convert_string(obj.DesignLevel(), password),
+        'ArtLevel': bacy.convert_string(obj.ArtLevel(), password),
+        'StartBattleDuration': bacy.convert_long(obj.StartBattleDuration(), password),
+        'DefaultBattleDuration': bacy.convert_long(obj.DefaultBattleDuration(), password),
+        'DefaultLogicEffect': bacy.convert_string(obj.DefaultLogicEffect(), password),
+        'CameraSizeRate': bacy.convert_float(obj.CameraSizeRate(), password),
+        'EventContentStageRewardId': bacy.convert_long(obj.EventContentStageRewardId(), password),
     }
 
 
 def dump_MiniGameShootingStageRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'RewardId': table_encryption.convert_long(obj.RewardId(), password),
-        'ClearSection': table_encryption.convert_long(obj.ClearSection(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardParcelAmount': [table_encryption.convert_int(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'RewardId': bacy.convert_long(obj.RewardId(), password),
+        'ClearSection': bacy.convert_long(obj.ClearSection(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardParcelAmount': [bacy.convert_int(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
     }
 
 
 def dump_MinigameTBGDiceExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'DiceGroup': table_encryption.convert_int(obj.DiceGroup(), password),
-        'DiceResult': table_encryption.convert_int(obj.DiceResult(), password),
-        'Prob': table_encryption.convert_int(obj.Prob(), password),
-        'ProbModifyCondition': [TBGProbModifyCondition(table_encryption.convert_int(obj.ProbModifyCondition(j), password)).name for j in range(obj.ProbModifyConditionLength())],
-        'ProbModifyValue': [table_encryption.convert_int(obj.ProbModifyValue(j), password) for j in range(obj.ProbModifyValueLength())],
-        'ProbModifyLimit': [table_encryption.convert_int(obj.ProbModifyLimit(j), password) for j in range(obj.ProbModifyLimitLength())],
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'DiceGroup': bacy.convert_int(obj.DiceGroup(), password),
+        'DiceResult': bacy.convert_int(obj.DiceResult(), password),
+        'Prob': bacy.convert_int(obj.Prob(), password),
+        'ProbModifyCondition': [TBGProbModifyCondition(bacy.convert_int(obj.ProbModifyCondition(j), password)).name for j in range(obj.ProbModifyConditionLength())],
+        'ProbModifyValue': [bacy.convert_int(obj.ProbModifyValue(j), password) for j in range(obj.ProbModifyValueLength())],
+        'ProbModifyLimit': [bacy.convert_int(obj.ProbModifyLimit(j), password) for j in range(obj.ProbModifyLimitLength())],
     }
 
 
 def dump_MinigameTBGEncounterExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
         'AllThema': obj.AllThema(),
-        'ThemaIndex': table_encryption.convert_int(obj.ThemaIndex(), password),
-        'ThemaType': TBGThemaType(table_encryption.convert_int(obj.ThemaType(), password)).name,
-        'ObjectType': TBGObjectType(table_encryption.convert_int(obj.ObjectType(), password)).name,
-        'EnemyImagePath': table_encryption.convert_string(obj.EnemyImagePath(), password),
-        'EnemyPrefabName': table_encryption.convert_string(obj.EnemyPrefabName(), password),
-        'EnemyNameLocalize': table_encryption.convert_string(obj.EnemyNameLocalize(), password),
-        'OptionGroupId': table_encryption.convert_long(obj.OptionGroupId(), password),
+        'ThemaIndex': bacy.convert_int(obj.ThemaIndex(), password),
+        'ThemaType': TBGThemaType(bacy.convert_int(obj.ThemaType(), password)).name,
+        'ObjectType': TBGObjectType(bacy.convert_int(obj.ObjectType(), password)).name,
+        'EnemyImagePath': bacy.convert_string(obj.EnemyImagePath(), password),
+        'EnemyPrefabName': bacy.convert_string(obj.EnemyPrefabName(), password),
+        'EnemyNameLocalize': bacy.convert_string(obj.EnemyNameLocalize(), password),
+        'OptionGroupId': bacy.convert_long(obj.OptionGroupId(), password),
         'RewardHide': obj.RewardHide(),
-        'EncounterTitleLocalize': table_encryption.convert_string(obj.EncounterTitleLocalize(), password),
-        'StoryImagePath': table_encryption.convert_string(obj.StoryImagePath(), password),
-        'BeforeStoryLocalize': table_encryption.convert_string(obj.BeforeStoryLocalize(), password),
-        'BeforeStoryOption1Localize': table_encryption.convert_string(obj.BeforeStoryOption1Localize(), password),
-        'BeforeStoryOption2Localize': table_encryption.convert_string(obj.BeforeStoryOption2Localize(), password),
-        'BeforeStoryOption3Localize': table_encryption.convert_string(obj.BeforeStoryOption3Localize(), password),
-        'AllyAttackLocalize': table_encryption.convert_string(obj.AllyAttackLocalize(), password),
-        'EnemyAttackLocalize': table_encryption.convert_string(obj.EnemyAttackLocalize(), password),
-        'AttackDefenceLocalize': table_encryption.convert_string(obj.AttackDefenceLocalize(), password),
-        'ClearStoryLocalize': table_encryption.convert_string(obj.ClearStoryLocalize(), password),
-        'DefeatStoryLocalize': table_encryption.convert_string(obj.DefeatStoryLocalize(), password),
-        'RunawayStoryLocalize': table_encryption.convert_string(obj.RunawayStoryLocalize(), password),
+        'EncounterTitleLocalize': bacy.convert_string(obj.EncounterTitleLocalize(), password),
+        'StoryImagePath': bacy.convert_string(obj.StoryImagePath(), password),
+        'BeforeStoryLocalize': bacy.convert_string(obj.BeforeStoryLocalize(), password),
+        'BeforeStoryOption1Localize': bacy.convert_string(obj.BeforeStoryOption1Localize(), password),
+        'BeforeStoryOption2Localize': bacy.convert_string(obj.BeforeStoryOption2Localize(), password),
+        'BeforeStoryOption3Localize': bacy.convert_string(obj.BeforeStoryOption3Localize(), password),
+        'AllyAttackLocalize': bacy.convert_string(obj.AllyAttackLocalize(), password),
+        'EnemyAttackLocalize': bacy.convert_string(obj.EnemyAttackLocalize(), password),
+        'AttackDefenceLocalize': bacy.convert_string(obj.AttackDefenceLocalize(), password),
+        'ClearStoryLocalize': bacy.convert_string(obj.ClearStoryLocalize(), password),
+        'DefeatStoryLocalize': bacy.convert_string(obj.DefeatStoryLocalize(), password),
+        'RunawayStoryLocalize': bacy.convert_string(obj.RunawayStoryLocalize(), password),
     }
 
 
 def dump_MinigameTBGEncounterOptionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'OptionGroupId': table_encryption.convert_long(obj.OptionGroupId(), password),
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'SlotIndex': table_encryption.convert_int(obj.SlotIndex(), password),
-        'OptionTitleLocalize': table_encryption.convert_string(obj.OptionTitleLocalize(), password),
-        'OptionSuccessLocalize': table_encryption.convert_string(obj.OptionSuccessLocalize(), password),
-        'OptionSuccessRewardGroupId': table_encryption.convert_long(obj.OptionSuccessRewardGroupId(), password),
-        'OptionSuccessOrHigherDiceCount': table_encryption.convert_int(obj.OptionSuccessOrHigherDiceCount(), password),
-        'OptionGreatSuccessOrHigherDiceCount': table_encryption.convert_int(obj.OptionGreatSuccessOrHigherDiceCount(), password),
-        'OptionFailLocalize': table_encryption.convert_string(obj.OptionFailLocalize(), password),
-        'OptionFailLessDiceCount': table_encryption.convert_int(obj.OptionFailLessDiceCount(), password),
-        'RunawayOrHigherDiceCount': table_encryption.convert_int(obj.RunawayOrHigherDiceCount(), password),
+        'OptionGroupId': bacy.convert_long(obj.OptionGroupId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'SlotIndex': bacy.convert_int(obj.SlotIndex(), password),
+        'OptionTitleLocalize': bacy.convert_string(obj.OptionTitleLocalize(), password),
+        'OptionSuccessLocalize': bacy.convert_string(obj.OptionSuccessLocalize(), password),
+        'OptionSuccessRewardGroupId': bacy.convert_long(obj.OptionSuccessRewardGroupId(), password),
+        'OptionSuccessOrHigherDiceCount': bacy.convert_int(obj.OptionSuccessOrHigherDiceCount(), password),
+        'OptionGreatSuccessOrHigherDiceCount': bacy.convert_int(obj.OptionGreatSuccessOrHigherDiceCount(), password),
+        'OptionFailLocalize': bacy.convert_string(obj.OptionFailLocalize(), password),
+        'OptionFailLessDiceCount': bacy.convert_int(obj.OptionFailLessDiceCount(), password),
+        'RunawayOrHigherDiceCount': bacy.convert_int(obj.RunawayOrHigherDiceCount(), password),
         'RewardHide': obj.RewardHide(),
     }
 
 
 def dump_MinigameTBGEncounterRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'TBGOptionSuccessType': TBGOptionSuccessType(table_encryption.convert_int(obj.TBGOptionSuccessType_(), password)).name,
-        'Paremeter': table_encryption.convert_long(obj.Paremeter(), password),
-        'ParcelType': ParcelType(table_encryption.convert_int(obj.ParcelType_(), password)).name,
-        'ParcelId': table_encryption.convert_long(obj.ParcelId(), password),
-        'Amount': table_encryption.convert_long(obj.Amount(), password),
-        'Prob': table_encryption.convert_int(obj.Prob(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'TBGOptionSuccessType': TBGOptionSuccessType(bacy.convert_int(obj.TBGOptionSuccessType_(), password)).name,
+        'Paremeter': bacy.convert_long(obj.Paremeter(), password),
+        'ParcelType': ParcelType(bacy.convert_int(obj.ParcelType_(), password)).name,
+        'ParcelId': bacy.convert_long(obj.ParcelId(), password),
+        'Amount': bacy.convert_long(obj.Amount(), password),
+        'Prob': bacy.convert_int(obj.Prob(), password),
     }
 
 
 def dump_MinigameTBGItemExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'ItemType': TBGItemType(table_encryption.convert_int(obj.ItemType(), password)).name,
-        'TBGItemEffectType': TBGItemEffectType(table_encryption.convert_int(obj.TBGItemEffectType_(), password)).name,
-        'ItemParameter': table_encryption.convert_int(obj.ItemParameter(), password),
-        'LocalizeETCId': table_encryption.convert_string(obj.LocalizeETCId(), password),
-        'Icon': table_encryption.convert_string(obj.Icon(), password),
-        'BuffIcon': table_encryption.convert_string(obj.BuffIcon(), password),
-        'EncounterCount': table_encryption.convert_int(obj.EncounterCount(), password),
-        'DiceEffectAniClip': table_encryption.convert_string(obj.DiceEffectAniClip(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'ItemType': TBGItemType(bacy.convert_int(obj.ItemType(), password)).name,
+        'TBGItemEffectType': TBGItemEffectType(bacy.convert_int(obj.TBGItemEffectType_(), password)).name,
+        'ItemParameter': bacy.convert_int(obj.ItemParameter(), password),
+        'LocalizeETCId': bacy.convert_string(obj.LocalizeETCId(), password),
+        'Icon': bacy.convert_string(obj.Icon(), password),
+        'BuffIcon': bacy.convert_string(obj.BuffIcon(), password),
+        'EncounterCount': bacy.convert_int(obj.EncounterCount(), password),
+        'DiceEffectAniClip': bacy.convert_string(obj.DiceEffectAniClip(), password),
         'BuffIconHUDVisible': obj.BuffIconHUDVisible(),
     }
 
 
 def dump_MinigameTBGObjectExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'Key': table_encryption.convert_string(obj.Key(), password),
-        'PrefabName': table_encryption.convert_string(obj.PrefabName(), password),
-        'ObjectType': TBGObjectType(table_encryption.convert_int(obj.ObjectType(), password)).name,
-        'ObjectCostType': ParcelType(table_encryption.convert_int(obj.ObjectCostType(), password)).name,
-        'ObjectCostId': table_encryption.convert_long(obj.ObjectCostId(), password),
-        'ObjectCostAmount': table_encryption.convert_int(obj.ObjectCostAmount(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'Key': bacy.convert_string(obj.Key(), password),
+        'PrefabName': bacy.convert_string(obj.PrefabName(), password),
+        'ObjectType': TBGObjectType(bacy.convert_int(obj.ObjectType(), password)).name,
+        'ObjectCostType': ParcelType(bacy.convert_int(obj.ObjectCostType(), password)).name,
+        'ObjectCostId': bacy.convert_long(obj.ObjectCostId(), password),
+        'ObjectCostAmount': bacy.convert_int(obj.ObjectCostAmount(), password),
         'Disposable': obj.Disposable(),
         'ReEncounterCost': obj.ReEncounterCost(),
     }
 
 
 def dump_MinigameTBGSeasonExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'ItemSlot': table_encryption.convert_int(obj.ItemSlot(), password),
-        'DefaultEchelonHp': table_encryption.convert_int(obj.DefaultEchelonHp(), password),
-        'DefaultItemDiceId': table_encryption.convert_long(obj.DefaultItemDiceId(), password),
-        'EchelonSlot1CharacterId': table_encryption.convert_long(obj.EchelonSlot1CharacterId(), password),
-        'EchelonSlot2CharacterId': table_encryption.convert_long(obj.EchelonSlot2CharacterId(), password),
-        'EchelonSlot3CharacterId': table_encryption.convert_long(obj.EchelonSlot3CharacterId(), password),
-        'EchelonSlot4CharacterId': table_encryption.convert_long(obj.EchelonSlot4CharacterId(), password),
-        'EchelonSlot1Portrait': table_encryption.convert_string(obj.EchelonSlot1Portrait(), password),
-        'EchelonSlot2Portrait': table_encryption.convert_string(obj.EchelonSlot2Portrait(), password),
-        'EchelonSlot3Portrait': table_encryption.convert_string(obj.EchelonSlot3Portrait(), password),
-        'EchelonSlot4Portrait': table_encryption.convert_string(obj.EchelonSlot4Portrait(), password),
-        'EventUseCostType': ParcelType(table_encryption.convert_int(obj.EventUseCostType(), password)).name,
-        'EventUseCostId': table_encryption.convert_long(obj.EventUseCostId(), password),
-        'EchelonRevivalCostType': ParcelType(table_encryption.convert_int(obj.EchelonRevivalCostType(), password)).name,
-        'EchelonRevivalCostId': table_encryption.convert_long(obj.EchelonRevivalCostId(), password),
-        'EchelonRevivalCostAmount': table_encryption.convert_int(obj.EchelonRevivalCostAmount(), password),
-        'EnemyBossHP': table_encryption.convert_int(obj.EnemyBossHP(), password),
-        'EnemyMinionHP': table_encryption.convert_int(obj.EnemyMinionHP(), password),
-        'AttackDamage': table_encryption.convert_int(obj.AttackDamage(), password),
-        'CriticalAttackDamage': table_encryption.convert_int(obj.CriticalAttackDamage(), password),
-        'RoundItemSelectLimit': table_encryption.convert_int(obj.RoundItemSelectLimit(), password),
-        'InstantClearRound': table_encryption.convert_int(obj.InstantClearRound(), password),
-        'MaxHp': table_encryption.convert_int(obj.MaxHp(), password),
-        'MapImagePath': table_encryption.convert_string(obj.MapImagePath(), password),
-        'MapNameLocalize': table_encryption.convert_string(obj.MapNameLocalize(), password),
-        'StartThemaIndex': table_encryption.convert_int(obj.StartThemaIndex(), password),
-        'LoopThemaIndex': table_encryption.convert_int(obj.LoopThemaIndex(), password),
-        'MaxDicePlus': table_encryption.convert_int(obj.MaxDicePlus(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'ItemSlot': bacy.convert_int(obj.ItemSlot(), password),
+        'DefaultEchelonHp': bacy.convert_int(obj.DefaultEchelonHp(), password),
+        'DefaultItemDiceId': bacy.convert_long(obj.DefaultItemDiceId(), password),
+        'EchelonSlot1CharacterId': bacy.convert_long(obj.EchelonSlot1CharacterId(), password),
+        'EchelonSlot2CharacterId': bacy.convert_long(obj.EchelonSlot2CharacterId(), password),
+        'EchelonSlot3CharacterId': bacy.convert_long(obj.EchelonSlot3CharacterId(), password),
+        'EchelonSlot4CharacterId': bacy.convert_long(obj.EchelonSlot4CharacterId(), password),
+        'EchelonSlot1Portrait': bacy.convert_string(obj.EchelonSlot1Portrait(), password),
+        'EchelonSlot2Portrait': bacy.convert_string(obj.EchelonSlot2Portrait(), password),
+        'EchelonSlot3Portrait': bacy.convert_string(obj.EchelonSlot3Portrait(), password),
+        'EchelonSlot4Portrait': bacy.convert_string(obj.EchelonSlot4Portrait(), password),
+        'EventUseCostType': ParcelType(bacy.convert_int(obj.EventUseCostType(), password)).name,
+        'EventUseCostId': bacy.convert_long(obj.EventUseCostId(), password),
+        'EchelonRevivalCostType': ParcelType(bacy.convert_int(obj.EchelonRevivalCostType(), password)).name,
+        'EchelonRevivalCostId': bacy.convert_long(obj.EchelonRevivalCostId(), password),
+        'EchelonRevivalCostAmount': bacy.convert_int(obj.EchelonRevivalCostAmount(), password),
+        'EnemyBossHP': bacy.convert_int(obj.EnemyBossHP(), password),
+        'EnemyMinionHP': bacy.convert_int(obj.EnemyMinionHP(), password),
+        'AttackDamage': bacy.convert_int(obj.AttackDamage(), password),
+        'CriticalAttackDamage': bacy.convert_int(obj.CriticalAttackDamage(), password),
+        'RoundItemSelectLimit': bacy.convert_int(obj.RoundItemSelectLimit(), password),
+        'InstantClearRound': bacy.convert_int(obj.InstantClearRound(), password),
+        'MaxHp': bacy.convert_int(obj.MaxHp(), password),
+        'MapImagePath': bacy.convert_string(obj.MapImagePath(), password),
+        'MapNameLocalize': bacy.convert_string(obj.MapNameLocalize(), password),
+        'StartThemaIndex': bacy.convert_int(obj.StartThemaIndex(), password),
+        'LoopThemaIndex': bacy.convert_int(obj.LoopThemaIndex(), password),
+        'MaxDicePlus': bacy.convert_int(obj.MaxDicePlus(), password),
     }
 
 
 def dump_MinigameTBGThemaExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'ThemaIndex': table_encryption.convert_int(obj.ThemaIndex(), password),
-        'ThemaType': TBGThemaType(table_encryption.convert_int(obj.ThemaType(), password)).name,
-        'ThemaMap': table_encryption.convert_string(obj.ThemaMap(), password),
-        'ThemaMapBG': table_encryption.convert_string(obj.ThemaMapBG(), password),
-        'PortalCondition': [TBGPortalCondition(table_encryption.convert_int(obj.PortalCondition(j), password)).name for j in range(obj.PortalConditionLength())],
-        'PortalConditionParameter': [table_encryption.convert_string(obj.PortalConditionParameter(j), password) for j in range(obj.PortalConditionParameterLength())],
-        'ThemaNameLocalize': table_encryption.convert_string(obj.ThemaNameLocalize(), password),
-        'ThemaLoadingImage': table_encryption.convert_string(obj.ThemaLoadingImage(), password),
-        'ThemaPlayerPrefab': table_encryption.convert_string(obj.ThemaPlayerPrefab(), password),
-        'ThemaLeaderId': table_encryption.convert_long(obj.ThemaLeaderId(), password),
-        'ThemaGoalLocalize': table_encryption.convert_string(obj.ThemaGoalLocalize(), password),
-        'InstantClearCostAmount': table_encryption.convert_long(obj.InstantClearCostAmount(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'ThemaIndex': bacy.convert_int(obj.ThemaIndex(), password),
+        'ThemaType': TBGThemaType(bacy.convert_int(obj.ThemaType(), password)).name,
+        'ThemaMap': bacy.convert_string(obj.ThemaMap(), password),
+        'ThemaMapBG': bacy.convert_string(obj.ThemaMapBG(), password),
+        'PortalCondition': [TBGPortalCondition(bacy.convert_int(obj.PortalCondition(j), password)).name for j in range(obj.PortalConditionLength())],
+        'PortalConditionParameter': [bacy.convert_string(obj.PortalConditionParameter(j), password) for j in range(obj.PortalConditionParameterLength())],
+        'ThemaNameLocalize': bacy.convert_string(obj.ThemaNameLocalize(), password),
+        'ThemaLoadingImage': bacy.convert_string(obj.ThemaLoadingImage(), password),
+        'ThemaPlayerPrefab': bacy.convert_string(obj.ThemaPlayerPrefab(), password),
+        'ThemaLeaderId': bacy.convert_long(obj.ThemaLeaderId(), password),
+        'ThemaGoalLocalize': bacy.convert_string(obj.ThemaGoalLocalize(), password),
+        'InstantClearCostAmount': bacy.convert_long(obj.InstantClearCostAmount(), password),
         'IsTutorial': obj.IsTutorial(),
     }
 
 
 def dump_MiniGameTBGThemaRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'ThemaRound': table_encryption.convert_int(obj.ThemaRound(), password),
-        'ThemaUniqueId': table_encryption.convert_int(obj.ThemaUniqueId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'ThemaRound': bacy.convert_int(obj.ThemaRound(), password),
+        'ThemaUniqueId': bacy.convert_int(obj.ThemaUniqueId(), password),
         'IsLoop': obj.IsLoop(),
-        'MiniGameTBGThemaRewardType': MiniGameTBGThemaRewardType(table_encryption.convert_int(obj.MiniGameTBGThemaRewardType_(), password)).name,
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardParcelAmount': [table_encryption.convert_int(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'MiniGameTBGThemaRewardType': MiniGameTBGThemaRewardType(bacy.convert_int(obj.MiniGameTBGThemaRewardType_(), password)).name,
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardParcelAmount': [bacy.convert_int(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
     }
 
 
 def dump_MinigameTBGVoiceExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'VoiceCondition': TBGVoiceCondition(table_encryption.convert_int(obj.VoiceCondition(), password)).name,
-        'VoiceId': table_encryption.convert_uint(obj.VoiceId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'VoiceCondition': TBGVoiceCondition(bacy.convert_int(obj.VoiceCondition(), password)).name,
+        'VoiceId': bacy.convert_uint(obj.VoiceId(), password),
     }
 
 
 def dump_MissionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Category': MissionCategory(table_encryption.convert_int(obj.Category(), password)).name,
-        'Description': table_encryption.convert_uint(obj.Description(), password),
-        'ResetType': MissionResetType(table_encryption.convert_int(obj.ResetType(), password)).name,
-        'ToastDisplayType': MissionToastDisplayConditionType(table_encryption.convert_int(obj.ToastDisplayType(), password)).name,
-        'ToastImagePath': table_encryption.convert_string(obj.ToastImagePath(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Category': MissionCategory(bacy.convert_int(obj.Category(), password)).name,
+        'Description': bacy.convert_uint(obj.Description(), password),
+        'ResetType': MissionResetType(bacy.convert_int(obj.ResetType(), password)).name,
+        'ToastDisplayType': MissionToastDisplayConditionType(bacy.convert_int(obj.ToastDisplayType(), password)).name,
+        'ToastImagePath': bacy.convert_string(obj.ToastImagePath(), password),
         'ViewFlag': obj.ViewFlag(),
         'Limit': obj.Limit(),
-        'StartDate': table_encryption.convert_string(obj.StartDate(), password),
-        'EndDate': table_encryption.convert_string(obj.EndDate(), password),
-        'EndDay': table_encryption.convert_long(obj.EndDay(), password),
-        'StartableEndDate': table_encryption.convert_string(obj.StartableEndDate(), password),
-        'DateAutoRefer': ContentType(table_encryption.convert_int(obj.DateAutoRefer(), password)).name,
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'PreMissionId': [table_encryption.convert_long(obj.PreMissionId(j), password) for j in range(obj.PreMissionIdLength())],
-        'AccountType': AccountState(table_encryption.convert_int(obj.AccountType(), password)).name,
-        'AccountLevel': table_encryption.convert_long(obj.AccountLevel(), password),
-        'ContentTags': [SuddenMissionContentType(table_encryption.convert_int(obj.ContentTags(j), password)).name for j in range(obj.ContentTagsLength())],
-        'ShortcutUI': [table_encryption.convert_string(obj.ShortcutUI(j), password) for j in range(obj.ShortcutUILength())],
-        'ChallengeStageShortcut': table_encryption.convert_long(obj.ChallengeStageShortcut(), password),
-        'CompleteConditionType': MissionCompleteConditionType(table_encryption.convert_int(obj.CompleteConditionType(), password)).name,
-        'CompleteConditionCount': table_encryption.convert_long(obj.CompleteConditionCount(), password),
-        'CompleteConditionParameter': [table_encryption.convert_long(obj.CompleteConditionParameter(j), password) for j in range(obj.CompleteConditionParameterLength())],
-        'CompleteConditionParameterTag': [Tag(table_encryption.convert_int(obj.CompleteConditionParameterTag(j), password)).name for j in range(obj.CompleteConditionParameterTagLength())],
-        'RewardIcon': table_encryption.convert_string(obj.RewardIcon(), password),
-        'MissionRewardParcelType': [ParcelType(table_encryption.convert_int(obj.MissionRewardParcelType(j), password)).name for j in range(obj.MissionRewardParcelTypeLength())],
-        'MissionRewardParcelId': [table_encryption.convert_long(obj.MissionRewardParcelId(j), password) for j in range(obj.MissionRewardParcelIdLength())],
-        'MissionRewardAmount': [table_encryption.convert_int(obj.MissionRewardAmount(j), password) for j in range(obj.MissionRewardAmountLength())],
+        'StartDate': bacy.convert_string(obj.StartDate(), password),
+        'EndDate': bacy.convert_string(obj.EndDate(), password),
+        'EndDay': bacy.convert_long(obj.EndDay(), password),
+        'StartableEndDate': bacy.convert_string(obj.StartableEndDate(), password),
+        'DateAutoRefer': ContentType(bacy.convert_int(obj.DateAutoRefer(), password)).name,
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'PreMissionId': [bacy.convert_long(obj.PreMissionId(j), password) for j in range(obj.PreMissionIdLength())],
+        'AccountType': AccountState(bacy.convert_int(obj.AccountType(), password)).name,
+        'AccountLevel': bacy.convert_long(obj.AccountLevel(), password),
+        'ContentTags': [SuddenMissionContentType(bacy.convert_int(obj.ContentTags(j), password)).name for j in range(obj.ContentTagsLength())],
+        'ShortcutUI': [bacy.convert_string(obj.ShortcutUI(j), password) for j in range(obj.ShortcutUILength())],
+        'ChallengeStageShortcut': bacy.convert_long(obj.ChallengeStageShortcut(), password),
+        'CompleteConditionType': MissionCompleteConditionType(bacy.convert_int(obj.CompleteConditionType(), password)).name,
+        'CompleteConditionCount': bacy.convert_long(obj.CompleteConditionCount(), password),
+        'CompleteConditionParameter': [bacy.convert_long(obj.CompleteConditionParameter(j), password) for j in range(obj.CompleteConditionParameterLength())],
+        'CompleteConditionParameterTag': [Tag(bacy.convert_int(obj.CompleteConditionParameterTag(j), password)).name for j in range(obj.CompleteConditionParameterTagLength())],
+        'RewardIcon': bacy.convert_string(obj.RewardIcon(), password),
+        'MissionRewardParcelType': [ParcelType(bacy.convert_int(obj.MissionRewardParcelType(j), password)).name for j in range(obj.MissionRewardParcelTypeLength())],
+        'MissionRewardParcelId': [bacy.convert_long(obj.MissionRewardParcelId(j), password) for j in range(obj.MissionRewardParcelIdLength())],
+        'MissionRewardAmount': [bacy.convert_int(obj.MissionRewardAmount(j), password) for j in range(obj.MissionRewardAmountLength())],
     }
 
 
 def dump_NormalSkillTemplateExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Index': table_encryption.convert_long(obj.Index(), password),
-        'FirstCoolTime': table_encryption.convert_float(obj.FirstCoolTime(), password),
-        'CoolTime': table_encryption.convert_float(obj.CoolTime(), password),
+        'Index': bacy.convert_long(obj.Index(), password),
+        'FirstCoolTime': bacy.convert_float(obj.FirstCoolTime(), password),
+        'CoolTime': bacy.convert_float(obj.CoolTime(), password),
         'MultiAni': obj.MultiAni(),
     }
 
 
 def dump_ObstacleExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Index': table_encryption.convert_long(obj.Index(), password),
-        'PrefabName': table_encryption.convert_string(obj.PrefabName(), password),
+        'Index': bacy.convert_long(obj.Index(), password),
+        'PrefabName': bacy.convert_string(obj.PrefabName(), password),
         'JumpAble': obj.JumpAble(),
-        'SubOffset': [table_encryption.convert_float(obj.SubOffset(j), password) for j in range(obj.SubOffsetLength())],
-        'X': table_encryption.convert_float(obj.X(), password),
-        'Z': table_encryption.convert_float(obj.Z(), password),
-        'Hp': table_encryption.convert_long(obj.Hp(), password),
-        'MaxHp': table_encryption.convert_long(obj.MaxHp(), password),
-        'BlockRate': table_encryption.convert_int(obj.BlockRate(), password),
-        'EvasionRate': table_encryption.convert_int(obj.EvasionRate(), password),
-        'DestroyType': ObstacleDestroyType(table_encryption.convert_int(obj.DestroyType(), password)).name,
-        'Point1Offeset': [table_encryption.convert_float(obj.Point1Offeset(j), password) for j in range(obj.Point1OffesetLength())],
-        'EnemyPoint1Osset': [table_encryption.convert_float(obj.EnemyPoint1Osset(j), password) for j in range(obj.EnemyPoint1OssetLength())],
-        'Point2Offeset': [table_encryption.convert_float(obj.Point2Offeset(j), password) for j in range(obj.Point2OffesetLength())],
-        'EnemyPoint2Osset': [table_encryption.convert_float(obj.EnemyPoint2Osset(j), password) for j in range(obj.EnemyPoint2OssetLength())],
-        'SubObstacleID': [table_encryption.convert_long(obj.SubObstacleID(j), password) for j in range(obj.SubObstacleIDLength())],
+        'SubOffset': [bacy.convert_float(obj.SubOffset(j), password) for j in range(obj.SubOffsetLength())],
+        'X': bacy.convert_float(obj.X(), password),
+        'Z': bacy.convert_float(obj.Z(), password),
+        'Hp': bacy.convert_long(obj.Hp(), password),
+        'MaxHp': bacy.convert_long(obj.MaxHp(), password),
+        'BlockRate': bacy.convert_int(obj.BlockRate(), password),
+        'EvasionRate': bacy.convert_int(obj.EvasionRate(), password),
+        'DestroyType': ObstacleDestroyType(bacy.convert_int(obj.DestroyType(), password)).name,
+        'Point1Offeset': [bacy.convert_float(obj.Point1Offeset(j), password) for j in range(obj.Point1OffesetLength())],
+        'EnemyPoint1Osset': [bacy.convert_float(obj.EnemyPoint1Osset(j), password) for j in range(obj.EnemyPoint1OssetLength())],
+        'Point2Offeset': [bacy.convert_float(obj.Point2Offeset(j), password) for j in range(obj.Point2OffesetLength())],
+        'EnemyPoint2Osset': [bacy.convert_float(obj.EnemyPoint2Osset(j), password) for j in range(obj.EnemyPoint2OssetLength())],
+        'SubObstacleID': [bacy.convert_long(obj.SubObstacleID(j), password) for j in range(obj.SubObstacleIDLength())],
     }
 
 
 def dump_ObstacleFireLineCheckExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
         'MyObstacleFireLineCheck': obj.MyObstacleFireLineCheck(),
         'AllyObstacleFireLineCheck': obj.AllyObstacleFireLineCheck(),
@@ -4488,227 +4016,199 @@ def dump_ObstacleFireLineCheckExcel(obj, password) -> dict:
 
 
 def dump_ObstacleStatExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'StringID': table_encryption.convert_uint(obj.StringID(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'MaxHP1': table_encryption.convert_long(obj.MaxHP1(), password),
-        'MaxHP100': table_encryption.convert_long(obj.MaxHP100(), password),
-        'BlockRate': table_encryption.convert_long(obj.BlockRate(), password),
-        'Dodge': table_encryption.convert_long(obj.Dodge(), password),
-        'CanNotStandRange': table_encryption.convert_long(obj.CanNotStandRange(), password),
-        'HighlightFloaterHeight': table_encryption.convert_float(obj.HighlightFloaterHeight(), password),
-        'EnhanceLightArmorRate': table_encryption.convert_long(obj.EnhanceLightArmorRate(), password),
-        'EnhanceHeavyArmorRate': table_encryption.convert_long(obj.EnhanceHeavyArmorRate(), password),
-        'EnhanceUnarmedRate': table_encryption.convert_long(obj.EnhanceUnarmedRate(), password),
-        'EnhanceElasticArmorRate': table_encryption.convert_long(obj.EnhanceElasticArmorRate(), password),
-        'EnhanceStructureRate': table_encryption.convert_long(obj.EnhanceStructureRate(), password),
-        'EnhanceNormalArmorRate': table_encryption.convert_long(obj.EnhanceNormalArmorRate(), password),
-        'ReduceExDamagedRate': table_encryption.convert_long(obj.ReduceExDamagedRate(), password),
+        'StringID': bacy.convert_uint(obj.StringID(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
+        'MaxHP1': bacy.convert_long(obj.MaxHP1(), password),
+        'MaxHP100': bacy.convert_long(obj.MaxHP100(), password),
+        'BlockRate': bacy.convert_long(obj.BlockRate(), password),
+        'Dodge': bacy.convert_long(obj.Dodge(), password),
+        'CanNotStandRange': bacy.convert_long(obj.CanNotStandRange(), password),
+        'HighlightFloaterHeight': bacy.convert_float(obj.HighlightFloaterHeight(), password),
+        'EnhanceLightArmorRate': bacy.convert_long(obj.EnhanceLightArmorRate(), password),
+        'EnhanceHeavyArmorRate': bacy.convert_long(obj.EnhanceHeavyArmorRate(), password),
+        'EnhanceUnarmedRate': bacy.convert_long(obj.EnhanceUnarmedRate(), password),
+        'EnhanceElasticArmorRate': bacy.convert_long(obj.EnhanceElasticArmorRate(), password),
+        'EnhanceStructureRate': bacy.convert_long(obj.EnhanceStructureRate(), password),
+        'EnhanceNormalArmorRate': bacy.convert_long(obj.EnhanceNormalArmorRate(), password),
+        'ReduceExDamagedRate': bacy.convert_long(obj.ReduceExDamagedRate(), password),
     }
 
 
 def dump_OpenConditionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'OpenConditionContentType': OpenConditionContent(table_encryption.convert_int(obj.OpenConditionContentType(), password)).name,
-        'LockUI': [table_encryption.convert_string(obj.LockUI(j), password) for j in range(obj.LockUILength())],
-        'ShortcutPopupPriority': table_encryption.convert_long(obj.ShortcutPopupPriority(), password),
-        'ShortcutUIName': [table_encryption.convert_string(obj.ShortcutUIName(j), password) for j in range(obj.ShortcutUINameLength())],
-        'ShortcutParam': table_encryption.convert_int(obj.ShortcutParam(), password),
-        'Scene': table_encryption.convert_string(obj.Scene(), password),
+        'OpenConditionContentType': OpenConditionContent(bacy.convert_int(obj.OpenConditionContentType(), password)).name,
+        'LockUI': [bacy.convert_string(obj.LockUI(j), password) for j in range(obj.LockUILength())],
+        'ShortcutPopupPriority': bacy.convert_long(obj.ShortcutPopupPriority(), password),
+        'ShortcutUIName': [bacy.convert_string(obj.ShortcutUIName(j), password) for j in range(obj.ShortcutUINameLength())],
+        'ShortcutParam': bacy.convert_int(obj.ShortcutParam(), password),
+        'Scene': bacy.convert_string(obj.Scene(), password),
         'HideWhenLocked': obj.HideWhenLocked(),
-        'AccountLevel': table_encryption.convert_long(obj.AccountLevel(), password),
-        'ScenarioModeId': table_encryption.convert_long(obj.ScenarioModeId(), password),
-        'CampaignStageId': table_encryption.convert_long(obj.CampaignStageId(), password),
-        'MultipleConditionCheckType': MultipleConditionCheckType(table_encryption.convert_int(obj.MultipleConditionCheckType_(), password)).name,
-        'OpenDayOfWeek': WeekDay(table_encryption.convert_int(obj.OpenDayOfWeek(), password)).name,
-        'OpenHour': table_encryption.convert_long(obj.OpenHour(), password),
-        'CloseDayOfWeek': WeekDay(table_encryption.convert_int(obj.CloseDayOfWeek(), password)).name,
-        'CloseHour': table_encryption.convert_long(obj.CloseHour(), password),
-        'OpenedCafeId': table_encryption.convert_long(obj.OpenedCafeId(), password),
-        'CafeIdforCafeRank': table_encryption.convert_long(obj.CafeIdforCafeRank(), password),
-        'CafeRank': table_encryption.convert_long(obj.CafeRank(), password),
+        'AccountLevel': bacy.convert_long(obj.AccountLevel(), password),
+        'ScenarioModeId': bacy.convert_long(obj.ScenarioModeId(), password),
+        'CampaignStageId': bacy.convert_long(obj.CampaignStageId(), password),
+        'MultipleConditionCheckType': MultipleConditionCheckType(bacy.convert_int(obj.MultipleConditionCheckType_(), password)).name,
+        'OpenDayOfWeek': WeekDay(bacy.convert_int(obj.OpenDayOfWeek(), password)).name,
+        'OpenHour': bacy.convert_long(obj.OpenHour(), password),
+        'CloseDayOfWeek': WeekDay(bacy.convert_int(obj.CloseDayOfWeek(), password)).name,
+        'CloseHour': bacy.convert_long(obj.CloseHour(), password),
+        'OpenedCafeId': bacy.convert_long(obj.OpenedCafeId(), password),
+        'CafeIdforCafeRank': bacy.convert_long(obj.CafeIdforCafeRank(), password),
+        'CafeRank': bacy.convert_long(obj.CafeRank(), password),
         'ContentsOpenShow': obj.ContentsOpenShow(),
-        'ContentsOpenShortcutUI': table_encryption.convert_string(obj.ContentsOpenShortcutUI(), password),
+        'ContentsOpenShortcutUI': bacy.convert_string(obj.ContentsOpenShortcutUI(), password),
     }
 
 
 def dump_ParcelAutoSynthExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'RequireParcelType': ParcelType(table_encryption.convert_int(obj.RequireParcelType(), password)).name,
-        'RequireParcelId': table_encryption.convert_long(obj.RequireParcelId(), password),
-        'RequireParcelAmount': table_encryption.convert_long(obj.RequireParcelAmount(), password),
-        'SynthStartAmount': table_encryption.convert_long(obj.SynthStartAmount(), password),
-        'SynthEndAmount': table_encryption.convert_long(obj.SynthEndAmount(), password),
+        'RequireParcelType': ParcelType(bacy.convert_int(obj.RequireParcelType(), password)).name,
+        'RequireParcelId': bacy.convert_long(obj.RequireParcelId(), password),
+        'RequireParcelAmount': bacy.convert_long(obj.RequireParcelAmount(), password),
+        'SynthStartAmount': bacy.convert_long(obj.SynthStartAmount(), password),
+        'SynthEndAmount': bacy.convert_long(obj.SynthEndAmount(), password),
         'SynthMaxItem': obj.SynthMaxItem(),
-        'ResultParcelType': ParcelType(table_encryption.convert_int(obj.ResultParcelType(), password)).name,
-        'ResultParcelId': table_encryption.convert_long(obj.ResultParcelId(), password),
-        'ResultParcelAmount': table_encryption.convert_long(obj.ResultParcelAmount(), password),
+        'ResultParcelType': ParcelType(bacy.convert_int(obj.ResultParcelType(), password)).name,
+        'ResultParcelId': bacy.convert_long(obj.ResultParcelId(), password),
+        'ResultParcelAmount': bacy.convert_long(obj.ResultParcelAmount(), password),
     }
 
 
 def dump_PersonalityExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
     }
 
 
 def dump_PickupDuplicateBonusExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'ShopCategoryType': ShopCategoryType(table_encryption.convert_int(obj.ShopCategoryType_(), password)).name,
-        'ShopId': table_encryption.convert_long(obj.ShopId(), password),
-        'PickupCharacterId': table_encryption.convert_long(obj.PickupCharacterId(), password),
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardParcelId': table_encryption.convert_long(obj.RewardParcelId(), password),
-        'RewardParcelAmount': table_encryption.convert_long(obj.RewardParcelAmount(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'ShopCategoryType': ShopCategoryType(bacy.convert_int(obj.ShopCategoryType_(), password)).name,
+        'ShopId': bacy.convert_long(obj.ShopId(), password),
+        'PickupCharacterId': bacy.convert_long(obj.PickupCharacterId(), password),
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardParcelId': bacy.convert_long(obj.RewardParcelId(), password),
+        'RewardParcelAmount': bacy.convert_long(obj.RewardParcelAmount(), password),
     }
 
 
 def dump_PresetCharacterGroupExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'PresetCharacterGroupId': table_encryption.convert_long(obj.PresetCharacterGroupId(), password),
-        'GetPresetType': table_encryption.convert_string(obj.GetPresetType(), password),
-        'Level': table_encryption.convert_int(obj.Level(), password),
-        'Exp': table_encryption.convert_int(obj.Exp(), password),
-        'FavorExp': table_encryption.convert_int(obj.FavorExp(), password),
-        'FavorRank': table_encryption.convert_int(obj.FavorRank(), password),
-        'StarGrade': table_encryption.convert_int(obj.StarGrade(), password),
-        'ExSkillLevel': table_encryption.convert_int(obj.ExSkillLevel(), password),
-        'PassiveSkillLevel': table_encryption.convert_int(obj.PassiveSkillLevel(), password),
-        'ExtraPassiveSkillLevel': table_encryption.convert_int(obj.ExtraPassiveSkillLevel(), password),
-        'CommonSkillLevel': table_encryption.convert_int(obj.CommonSkillLevel(), password),
-        'LeaderSkillLevel': table_encryption.convert_int(obj.LeaderSkillLevel(), password),
+        'PresetCharacterGroupId': bacy.convert_long(obj.PresetCharacterGroupId(), password),
+        'GetPresetType': bacy.convert_string(obj.GetPresetType(), password),
+        'Level': bacy.convert_int(obj.Level(), password),
+        'Exp': bacy.convert_int(obj.Exp(), password),
+        'FavorExp': bacy.convert_int(obj.FavorExp(), password),
+        'FavorRank': bacy.convert_int(obj.FavorRank(), password),
+        'StarGrade': bacy.convert_int(obj.StarGrade(), password),
+        'ExSkillLevel': bacy.convert_int(obj.ExSkillLevel(), password),
+        'PassiveSkillLevel': bacy.convert_int(obj.PassiveSkillLevel(), password),
+        'ExtraPassiveSkillLevel': bacy.convert_int(obj.ExtraPassiveSkillLevel(), password),
+        'CommonSkillLevel': bacy.convert_int(obj.CommonSkillLevel(), password),
+        'LeaderSkillLevel': bacy.convert_int(obj.LeaderSkillLevel(), password),
         'EquipSlot01': obj.EquipSlot01(),
-        'EquipSlotTier01': table_encryption.convert_int(obj.EquipSlotTier01(), password),
-        'EquipSlotLevel01': table_encryption.convert_int(obj.EquipSlotLevel01(), password),
+        'EquipSlotTier01': bacy.convert_int(obj.EquipSlotTier01(), password),
+        'EquipSlotLevel01': bacy.convert_int(obj.EquipSlotLevel01(), password),
         'EquipSlot02': obj.EquipSlot02(),
-        'EquipSlotTier02': table_encryption.convert_int(obj.EquipSlotTier02(), password),
-        'EquipSlotLevel02': table_encryption.convert_int(obj.EquipSlotLevel02(), password),
+        'EquipSlotTier02': bacy.convert_int(obj.EquipSlotTier02(), password),
+        'EquipSlotLevel02': bacy.convert_int(obj.EquipSlotLevel02(), password),
         'EquipSlot03': obj.EquipSlot03(),
-        'EquipSlotTier03': table_encryption.convert_int(obj.EquipSlotTier03(), password),
-        'EquipSlotLevel03': table_encryption.convert_int(obj.EquipSlotLevel03(), password),
+        'EquipSlotTier03': bacy.convert_int(obj.EquipSlotTier03(), password),
+        'EquipSlotLevel03': bacy.convert_int(obj.EquipSlotLevel03(), password),
         'EquipCharacterWeapon': obj.EquipCharacterWeapon(),
-        'EquipCharacterWeaponTier': table_encryption.convert_int(obj.EquipCharacterWeaponTier(), password),
-        'EquipCharacterWeaponLevel': table_encryption.convert_int(obj.EquipCharacterWeaponLevel(), password),
+        'EquipCharacterWeaponTier': bacy.convert_int(obj.EquipCharacterWeaponTier(), password),
+        'EquipCharacterWeaponLevel': bacy.convert_int(obj.EquipCharacterWeaponLevel(), password),
         'EquipCharacterGear': obj.EquipCharacterGear(),
-        'EquipCharacterGearTier': table_encryption.convert_int(obj.EquipCharacterGearTier(), password),
-        'EquipCharacterGearLevel': table_encryption.convert_int(obj.EquipCharacterGearLevel(), password),
-        'PotentialType01': PotentialStatBonusRateType(table_encryption.convert_int(obj.PotentialType01(), password)).name,
-        'PotentialLevel01': table_encryption.convert_int(obj.PotentialLevel01(), password),
-        'PotentialType02': PotentialStatBonusRateType(table_encryption.convert_int(obj.PotentialType02(), password)).name,
-        'PotentialLevel02': table_encryption.convert_int(obj.PotentialLevel02(), password),
-        'PotentialType03': PotentialStatBonusRateType(table_encryption.convert_int(obj.PotentialType03(), password)).name,
-        'PotentialLevel03': table_encryption.convert_int(obj.PotentialLevel03(), password),
+        'EquipCharacterGearTier': bacy.convert_int(obj.EquipCharacterGearTier(), password),
+        'EquipCharacterGearLevel': bacy.convert_int(obj.EquipCharacterGearLevel(), password),
+        'PotentialType01': PotentialStatBonusRateType(bacy.convert_int(obj.PotentialType01(), password)).name,
+        'PotentialLevel01': bacy.convert_int(obj.PotentialLevel01(), password),
+        'PotentialType02': PotentialStatBonusRateType(bacy.convert_int(obj.PotentialType02(), password)).name,
+        'PotentialLevel02': bacy.convert_int(obj.PotentialLevel02(), password),
+        'PotentialType03': PotentialStatBonusRateType(bacy.convert_int(obj.PotentialType03(), password)).name,
+        'PotentialLevel03': bacy.convert_int(obj.PotentialLevel03(), password),
     }
 
 
 def dump_PresetCharacterGroupSettingExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
         'ArenaSimulatorFixed': obj.ArenaSimulatorFixed(),
-        'PresetType': [table_encryption.convert_string(obj.PresetType(j), password) for j in range(obj.PresetTypeLength())],
+        'PresetType': [bacy.convert_string(obj.PresetType(j), password) for j in range(obj.PresetTypeLength())],
     }
 
 
 def dump_PresetParcelsExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ParcelType': ParcelType(table_encryption.convert_int(obj.ParcelType_(), password)).name,
-        'ParcelId': table_encryption.convert_long(obj.ParcelId(), password),
-        'PresetGroupId': table_encryption.convert_long(obj.PresetGroupId(), password),
-        'ParcelAmount': table_encryption.convert_long(obj.ParcelAmount(), password),
+        'ParcelType': ParcelType(bacy.convert_int(obj.ParcelType_(), password)).name,
+        'ParcelId': bacy.convert_long(obj.ParcelId(), password),
+        'PresetGroupId': bacy.convert_long(obj.PresetGroupId(), password),
+        'ParcelAmount': bacy.convert_long(obj.ParcelAmount(), password),
     }
 
 
 def dump_ProductExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'ProductId': table_encryption.convert_string(obj.ProductId(), password),
-        'StoreType': StoreType(table_encryption.convert_int(obj.StoreType_(), password)).name,
-        'Price': table_encryption.convert_long(obj.Price(), password),
-        'PriceReference': table_encryption.convert_string(obj.PriceReference(), password),
-        'PurchasePeriodType': PurchasePeriodType(table_encryption.convert_int(obj.PurchasePeriodType_(), password)).name,
-        'PurchasePeriodLimit': table_encryption.convert_long(obj.PurchasePeriodLimit(), password),
-        'ParcelType': [ParcelType(table_encryption.convert_int(obj.ParcelType_(j), password)).name for j in range(obj.ParcelTypeLength())],
-        'ParcelId': [table_encryption.convert_long(obj.ParcelId(j), password) for j in range(obj.ParcelIdLength())],
-        'ParcelAmount': [table_encryption.convert_long(obj.ParcelAmount(j), password) for j in range(obj.ParcelAmountLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'ProductId': bacy.convert_string(obj.ProductId(), password),
+        'StoreType': StoreType(bacy.convert_int(obj.StoreType_(), password)).name,
+        'Price': bacy.convert_long(obj.Price(), password),
+        'PriceReference': bacy.convert_string(obj.PriceReference(), password),
+        'PurchasePeriodType': PurchasePeriodType(bacy.convert_int(obj.PurchasePeriodType_(), password)).name,
+        'PurchasePeriodLimit': bacy.convert_long(obj.PurchasePeriodLimit(), password),
+        'ParcelType': [ParcelType(bacy.convert_int(obj.ParcelType_(j), password)).name for j in range(obj.ParcelTypeLength())],
+        'ParcelId': [bacy.convert_long(obj.ParcelId(j), password) for j in range(obj.ParcelIdLength())],
+        'ParcelAmount': [bacy.convert_long(obj.ParcelAmount(j), password) for j in range(obj.ParcelAmountLength())],
     }
 
 
 def dump_ProductMonthlyExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'ProductId': table_encryption.convert_string(obj.ProductId(), password),
-        'StoreType': StoreType(table_encryption.convert_int(obj.StoreType_(), password)).name,
-        'Price': table_encryption.convert_long(obj.Price(), password),
-        'PriceReference': table_encryption.convert_string(obj.PriceReference(), password),
-        'ProductTagType': ProductTagType(table_encryption.convert_int(obj.ProductTagType_(), password)).name,
-        'MonthlyDays': table_encryption.convert_long(obj.MonthlyDays(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'ProductId': bacy.convert_string(obj.ProductId(), password),
+        'StoreType': StoreType(bacy.convert_int(obj.StoreType_(), password)).name,
+        'Price': bacy.convert_long(obj.Price(), password),
+        'PriceReference': bacy.convert_string(obj.PriceReference(), password),
+        'ProductTagType': ProductTagType(bacy.convert_int(obj.ProductTagType_(), password)).name,
+        'MonthlyDays': bacy.convert_long(obj.MonthlyDays(), password),
         'UseMonthlyProductCheck': obj.UseMonthlyProductCheck(),
-        'ParcelType': [ParcelType(table_encryption.convert_int(obj.ParcelType_(j), password)).name for j in range(obj.ParcelTypeLength())],
-        'ParcelId': [table_encryption.convert_long(obj.ParcelId(j), password) for j in range(obj.ParcelIdLength())],
-        'ParcelAmount': [table_encryption.convert_long(obj.ParcelAmount(j), password) for j in range(obj.ParcelAmountLength())],
-        'EnterCostReduceGroupId': table_encryption.convert_long(obj.EnterCostReduceGroupId(), password),
-        'DailyParcelType': [ParcelType(table_encryption.convert_int(obj.DailyParcelType(j), password)).name for j in range(obj.DailyParcelTypeLength())],
-        'DailyParcelId': [table_encryption.convert_long(obj.DailyParcelId(j), password) for j in range(obj.DailyParcelIdLength())],
-        'DailyParcelAmount': [table_encryption.convert_long(obj.DailyParcelAmount(j), password) for j in range(obj.DailyParcelAmountLength())],
+        'ParcelType': [ParcelType(bacy.convert_int(obj.ParcelType_(j), password)).name for j in range(obj.ParcelTypeLength())],
+        'ParcelId': [bacy.convert_long(obj.ParcelId(j), password) for j in range(obj.ParcelIdLength())],
+        'ParcelAmount': [bacy.convert_long(obj.ParcelAmount(j), password) for j in range(obj.ParcelAmountLength())],
+        'EnterCostReduceGroupId': bacy.convert_long(obj.EnterCostReduceGroupId(), password),
+        'DailyParcelType': [ParcelType(bacy.convert_int(obj.DailyParcelType(j), password)).name for j in range(obj.DailyParcelTypeLength())],
+        'DailyParcelId': [bacy.convert_long(obj.DailyParcelId(j), password) for j in range(obj.DailyParcelIdLength())],
+        'DailyParcelAmount': [bacy.convert_long(obj.DailyParcelAmount(j), password) for j in range(obj.DailyParcelAmountLength())],
     }
 
 
 def dump_PropVector3(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'X': table_encryption.convert_float(obj.X(), password),
-        'Y': table_encryption.convert_float(obj.Y(), password),
-        'Z': table_encryption.convert_float(obj.Z(), password),
+        'X': bacy.convert_float(obj.X(), password),
+        'Y': bacy.convert_float(obj.Y(), password),
+        'Z': bacy.convert_float(obj.Z(), password),
     }
 
 
 def dump_PropMotion(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Name': table_encryption.convert_string(obj.Name(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
         'Positions': [dump_PropVector3(obj.Positions(j), password) for j in range(obj.PositionsLength())],
         'Rotations': [dump_PropVector3(obj.Rotations(j), password) for j in range(obj.RotationsLength())],
     }
 
 
 def dump_PropRootMotionFlat(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
         'RootMotions': [dump_PropMotion(obj.RootMotions(j), password) for j in range(obj.RootMotionsLength())],
     }
 
 
 def dump_ProtocolSettingExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Protocol': table_encryption.convert_string(obj.Protocol(), password),
-        'OpenConditionContent': OpenConditionContent(table_encryption.convert_int(obj.OpenConditionContent_(), password)).name,
+        'Protocol': bacy.convert_string(obj.Protocol(), password),
+        'OpenConditionContent': OpenConditionContent(bacy.convert_int(obj.OpenConditionContent_(), password)).name,
         'Currency': obj.Currency(),
         'Inventory': obj.Inventory(),
         'Mail': obj.Mail(),
@@ -4716,201 +4216,175 @@ def dump_ProtocolSettingExcel(obj, password) -> dict:
 
 
 def dump_RaidRankingRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'RankingRewardGroupId': table_encryption.convert_long(obj.RankingRewardGroupId(), password),
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'RankStart': table_encryption.convert_long(obj.RankStart(), password),
-        'RankEnd': table_encryption.convert_long(obj.RankEnd(), password),
-        'PercentRankStart': table_encryption.convert_long(obj.PercentRankStart(), password),
-        'PercentRankEnd': table_encryption.convert_long(obj.PercentRankEnd(), password),
-        'Tier': table_encryption.convert_int(obj.Tier(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelUniqueId': [table_encryption.convert_long(obj.RewardParcelUniqueId(j), password) for j in range(obj.RewardParcelUniqueIdLength())],
-        'RewardParcelUniqueName': [table_encryption.convert_string(obj.RewardParcelUniqueName(j), password) for j in range(obj.RewardParcelUniqueNameLength())],
-        'RewardParcelAmount': [table_encryption.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'RankingRewardGroupId': bacy.convert_long(obj.RankingRewardGroupId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'RankStart': bacy.convert_long(obj.RankStart(), password),
+        'RankEnd': bacy.convert_long(obj.RankEnd(), password),
+        'PercentRankStart': bacy.convert_long(obj.PercentRankStart(), password),
+        'PercentRankEnd': bacy.convert_long(obj.PercentRankEnd(), password),
+        'Tier': bacy.convert_int(obj.Tier(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelUniqueId': [bacy.convert_long(obj.RewardParcelUniqueId(j), password) for j in range(obj.RewardParcelUniqueIdLength())],
+        'RewardParcelUniqueName': [bacy.convert_string(obj.RewardParcelUniqueName(j), password) for j in range(obj.RewardParcelUniqueNameLength())],
+        'RewardParcelAmount': [bacy.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
     }
 
 
 def dump_RaidSeasonManageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'SeasonId': table_encryption.convert_long(obj.SeasonId(), password),
-        'SeasonDisplay': table_encryption.convert_long(obj.SeasonDisplay(), password),
-        'SeasonStartData': table_encryption.convert_string(obj.SeasonStartData(), password),
-        'SeasonEndData': table_encryption.convert_string(obj.SeasonEndData(), password),
-        'SettlementEndDate': table_encryption.convert_string(obj.SettlementEndDate(), password),
-        'OpenRaidBossGroup': [table_encryption.convert_string(obj.OpenRaidBossGroup(j), password) for j in range(obj.OpenRaidBossGroupLength())],
-        'RankingRewardGroupId': table_encryption.convert_long(obj.RankingRewardGroupId(), password),
-        'MaxSeasonRewardGauage': table_encryption.convert_int(obj.MaxSeasonRewardGauage(), password),
-        'StackedSeasonRewardGauge': [table_encryption.convert_long(obj.StackedSeasonRewardGauge(j), password) for j in range(obj.StackedSeasonRewardGaugeLength())],
-        'SeasonRewardId': [table_encryption.convert_long(obj.SeasonRewardId(j), password) for j in range(obj.SeasonRewardIdLength())],
+        'SeasonId': bacy.convert_long(obj.SeasonId(), password),
+        'SeasonDisplay': bacy.convert_long(obj.SeasonDisplay(), password),
+        'SeasonStartData': bacy.convert_string(obj.SeasonStartData(), password),
+        'SeasonEndData': bacy.convert_string(obj.SeasonEndData(), password),
+        'SettlementEndDate': bacy.convert_string(obj.SettlementEndDate(), password),
+        'OpenRaidBossGroup': [bacy.convert_string(obj.OpenRaidBossGroup(j), password) for j in range(obj.OpenRaidBossGroupLength())],
+        'RankingRewardGroupId': bacy.convert_long(obj.RankingRewardGroupId(), password),
+        'MaxSeasonRewardGauage': bacy.convert_int(obj.MaxSeasonRewardGauage(), password),
+        'StackedSeasonRewardGauge': [bacy.convert_long(obj.StackedSeasonRewardGauge(j), password) for j in range(obj.StackedSeasonRewardGaugeLength())],
+        'SeasonRewardId': [bacy.convert_long(obj.SeasonRewardId(j), password) for j in range(obj.SeasonRewardIdLength())],
     }
 
 
 def dump_RaidStageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
         'UseBossIndex': obj.UseBossIndex(),
         'UseBossAIPhaseSync': obj.UseBossAIPhaseSync(),
-        'RaidBossGroup': table_encryption.convert_string(obj.RaidBossGroup(), password),
-        'PortraitPath': table_encryption.convert_string(obj.PortraitPath(), password),
-        'BGPath': table_encryption.convert_string(obj.BGPath(), password),
-        'RaidCharacterId': table_encryption.convert_long(obj.RaidCharacterId(), password),
-        'BossCharacterId': [table_encryption.convert_long(obj.BossCharacterId(j), password) for j in range(obj.BossCharacterIdLength())],
-        'Difficulty': Difficulty(table_encryption.convert_int(obj.Difficulty_(), password)).name,
+        'RaidBossGroup': bacy.convert_string(obj.RaidBossGroup(), password),
+        'PortraitPath': bacy.convert_string(obj.PortraitPath(), password),
+        'BGPath': bacy.convert_string(obj.BGPath(), password),
+        'RaidCharacterId': bacy.convert_long(obj.RaidCharacterId(), password),
+        'BossCharacterId': [bacy.convert_long(obj.BossCharacterId(j), password) for j in range(obj.BossCharacterIdLength())],
+        'Difficulty': Difficulty(bacy.convert_int(obj.Difficulty_(), password)).name,
         'DifficultyOpenCondition': obj.DifficultyOpenCondition(),
-        'MaxPlayerCount': table_encryption.convert_long(obj.MaxPlayerCount(), password),
-        'RaidRoomLifeTime': table_encryption.convert_int(obj.RaidRoomLifeTime(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
-        'GroundDevName': table_encryption.convert_string(obj.GroundDevName(), password),
-        'EnterTimeLine': table_encryption.convert_string(obj.EnterTimeLine(), password),
-        'TacticEnvironment': TacticEnvironment(table_encryption.convert_int(obj.TacticEnvironment_(), password)).name,
-        'DefaultClearScore': table_encryption.convert_long(obj.DefaultClearScore(), password),
-        'MaximumScore': table_encryption.convert_long(obj.MaximumScore(), password),
-        'PerSecondMinusScore': table_encryption.convert_long(obj.PerSecondMinusScore(), password),
-        'HPPercentScore': table_encryption.convert_long(obj.HPPercentScore(), password),
-        'MinimumAcquisitionScore': table_encryption.convert_long(obj.MinimumAcquisitionScore(), password),
-        'MaximumAcquisitionScore': table_encryption.convert_long(obj.MaximumAcquisitionScore(), password),
-        'RaidRewardGroupId': table_encryption.convert_long(obj.RaidRewardGroupId(), password),
-        'BattleReadyTimelinePath': [table_encryption.convert_string(obj.BattleReadyTimelinePath(j), password) for j in range(obj.BattleReadyTimelinePathLength())],
-        'BattleReadyTimelinePhaseStart': [table_encryption.convert_int(obj.BattleReadyTimelinePhaseStart(j), password) for j in range(obj.BattleReadyTimelinePhaseStartLength())],
-        'BattleReadyTimelinePhaseEnd': [table_encryption.convert_int(obj.BattleReadyTimelinePhaseEnd(j), password) for j in range(obj.BattleReadyTimelinePhaseEndLength())],
-        'VictoryTimelinePath': table_encryption.convert_string(obj.VictoryTimelinePath(), password),
-        'PhaseChangeTimelinePath': table_encryption.convert_string(obj.PhaseChangeTimelinePath(), password),
-        'TimeLinePhase': table_encryption.convert_long(obj.TimeLinePhase(), password),
-        'EnterScenarioKey': table_encryption.convert_uint(obj.EnterScenarioKey(), password),
-        'ClearScenarioKey': table_encryption.convert_uint(obj.ClearScenarioKey(), password),
+        'MaxPlayerCount': bacy.convert_long(obj.MaxPlayerCount(), password),
+        'RaidRoomLifeTime': bacy.convert_int(obj.RaidRoomLifeTime(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
+        'GroundDevName': bacy.convert_string(obj.GroundDevName(), password),
+        'EnterTimeLine': bacy.convert_string(obj.EnterTimeLine(), password),
+        'TacticEnvironment': TacticEnvironment(bacy.convert_int(obj.TacticEnvironment_(), password)).name,
+        'DefaultClearScore': bacy.convert_long(obj.DefaultClearScore(), password),
+        'MaximumScore': bacy.convert_long(obj.MaximumScore(), password),
+        'PerSecondMinusScore': bacy.convert_long(obj.PerSecondMinusScore(), password),
+        'HPPercentScore': bacy.convert_long(obj.HPPercentScore(), password),
+        'MinimumAcquisitionScore': bacy.convert_long(obj.MinimumAcquisitionScore(), password),
+        'MaximumAcquisitionScore': bacy.convert_long(obj.MaximumAcquisitionScore(), password),
+        'RaidRewardGroupId': bacy.convert_long(obj.RaidRewardGroupId(), password),
+        'BattleReadyTimelinePath': [bacy.convert_string(obj.BattleReadyTimelinePath(j), password) for j in range(obj.BattleReadyTimelinePathLength())],
+        'BattleReadyTimelinePhaseStart': [bacy.convert_int(obj.BattleReadyTimelinePhaseStart(j), password) for j in range(obj.BattleReadyTimelinePhaseStartLength())],
+        'BattleReadyTimelinePhaseEnd': [bacy.convert_int(obj.BattleReadyTimelinePhaseEnd(j), password) for j in range(obj.BattleReadyTimelinePhaseEndLength())],
+        'VictoryTimelinePath': bacy.convert_string(obj.VictoryTimelinePath(), password),
+        'PhaseChangeTimelinePath': bacy.convert_string(obj.PhaseChangeTimelinePath(), password),
+        'TimeLinePhase': bacy.convert_long(obj.TimeLinePhase(), password),
+        'EnterScenarioKey': bacy.convert_uint(obj.EnterScenarioKey(), password),
+        'ClearScenarioKey': bacy.convert_uint(obj.ClearScenarioKey(), password),
         'ShowSkillCard': obj.ShowSkillCard(),
-        'BossBGInfoKey': table_encryption.convert_uint(obj.BossBGInfoKey(), password),
-        'EchelonExtensionType': EchelonExtensionType(table_encryption.convert_int(obj.EchelonExtensionType_(), password)).name,
+        'BossBGInfoKey': bacy.convert_uint(obj.BossBGInfoKey(), password),
+        'EchelonExtensionType': EchelonExtensionType(bacy.convert_int(obj.EchelonExtensionType_(), password)).name,
     }
 
 
 def dump_RaidStageRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
         'IsClearStageRewardHideInfo': obj.IsClearStageRewardHideInfo(),
-        'ClearStageRewardProb': table_encryption.convert_long(obj.ClearStageRewardProb(), password),
-        'ClearStageRewardParcelType': ParcelType(table_encryption.convert_int(obj.ClearStageRewardParcelType(), password)).name,
-        'ClearStageRewardParcelUniqueID': table_encryption.convert_long(obj.ClearStageRewardParcelUniqueID(), password),
-        'ClearStageRewardParcelUniqueName': table_encryption.convert_string(obj.ClearStageRewardParcelUniqueName(), password),
-        'ClearStageRewardAmount': table_encryption.convert_long(obj.ClearStageRewardAmount(), password),
+        'ClearStageRewardProb': bacy.convert_long(obj.ClearStageRewardProb(), password),
+        'ClearStageRewardParcelType': ParcelType(bacy.convert_int(obj.ClearStageRewardParcelType(), password)).name,
+        'ClearStageRewardParcelUniqueID': bacy.convert_long(obj.ClearStageRewardParcelUniqueID(), password),
+        'ClearStageRewardParcelUniqueName': bacy.convert_string(obj.ClearStageRewardParcelUniqueName(), password),
+        'ClearStageRewardAmount': bacy.convert_long(obj.ClearStageRewardAmount(), password),
     }
 
 
 def dump_RaidStageSeasonRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'SeasonRewardId': table_encryption.convert_long(obj.SeasonRewardId(), password),
-        'SeasonRewardParcelType': [ParcelType(table_encryption.convert_int(obj.SeasonRewardParcelType(j), password)).name for j in range(obj.SeasonRewardParcelTypeLength())],
-        'SeasonRewardParcelUniqueId': [table_encryption.convert_long(obj.SeasonRewardParcelUniqueId(j), password) for j in range(obj.SeasonRewardParcelUniqueIdLength())],
-        'SeasonRewardParcelUniqueName': [table_encryption.convert_string(obj.SeasonRewardParcelUniqueName(j), password) for j in range(obj.SeasonRewardParcelUniqueNameLength())],
-        'SeasonRewardAmount': [table_encryption.convert_long(obj.SeasonRewardAmount(j), password) for j in range(obj.SeasonRewardAmountLength())],
+        'SeasonRewardId': bacy.convert_long(obj.SeasonRewardId(), password),
+        'SeasonRewardParcelType': [ParcelType(bacy.convert_int(obj.SeasonRewardParcelType(j), password)).name for j in range(obj.SeasonRewardParcelTypeLength())],
+        'SeasonRewardParcelUniqueId': [bacy.convert_long(obj.SeasonRewardParcelUniqueId(j), password) for j in range(obj.SeasonRewardParcelUniqueIdLength())],
+        'SeasonRewardParcelUniqueName': [bacy.convert_string(obj.SeasonRewardParcelUniqueName(j), password) for j in range(obj.SeasonRewardParcelUniqueNameLength())],
+        'SeasonRewardAmount': [bacy.convert_long(obj.SeasonRewardAmount(j), password) for j in range(obj.SeasonRewardAmountLength())],
     }
 
 
 def dump_RecipeCraftExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'DevName': table_encryption.convert_string(obj.DevName(), password),
-        'RecipeType': RecipeType(table_encryption.convert_int(obj.RecipeType_(), password)).name,
-        'RecipeIngredientId': table_encryption.convert_long(obj.RecipeIngredientId(), password),
-        'RecipeIngredientDevName': table_encryption.convert_string(obj.RecipeIngredientDevName(), password),
-        'ParcelType': [ParcelType(table_encryption.convert_int(obj.ParcelType_(j), password)).name for j in range(obj.ParcelTypeLength())],
-        'ParcelId': [table_encryption.convert_long(obj.ParcelId(j), password) for j in range(obj.ParcelIdLength())],
-        'ParcelDevName': [table_encryption.convert_string(obj.ParcelDevName(j), password) for j in range(obj.ParcelDevNameLength())],
-        'ResultAmountMin': [table_encryption.convert_long(obj.ResultAmountMin(j), password) for j in range(obj.ResultAmountMinLength())],
-        'ResultAmountMax': [table_encryption.convert_long(obj.ResultAmountMax(j), password) for j in range(obj.ResultAmountMaxLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'DevName': bacy.convert_string(obj.DevName(), password),
+        'RecipeType': RecipeType(bacy.convert_int(obj.RecipeType_(), password)).name,
+        'RecipeIngredientId': bacy.convert_long(obj.RecipeIngredientId(), password),
+        'RecipeIngredientDevName': bacy.convert_string(obj.RecipeIngredientDevName(), password),
+        'ParcelType': [ParcelType(bacy.convert_int(obj.ParcelType_(j), password)).name for j in range(obj.ParcelTypeLength())],
+        'ParcelId': [bacy.convert_long(obj.ParcelId(j), password) for j in range(obj.ParcelIdLength())],
+        'ParcelDevName': [bacy.convert_string(obj.ParcelDevName(j), password) for j in range(obj.ParcelDevNameLength())],
+        'ResultAmountMin': [bacy.convert_long(obj.ResultAmountMin(j), password) for j in range(obj.ResultAmountMinLength())],
+        'ResultAmountMax': [bacy.convert_long(obj.ResultAmountMax(j), password) for j in range(obj.ResultAmountMaxLength())],
     }
 
 
 def dump_RecipeExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'RecipeType': RecipeType(table_encryption.convert_int(obj.RecipeType_(), password)).name,
-        'RecipeIngredientId': table_encryption.convert_long(obj.RecipeIngredientId(), password),
-        'RecipeSelectionGroupId': table_encryption.convert_long(obj.RecipeSelectionGroupId(), password),
-        'ParcelType': [ParcelType(table_encryption.convert_int(obj.ParcelType_(j), password)).name for j in range(obj.ParcelTypeLength())],
-        'ParcelId': [table_encryption.convert_long(obj.ParcelId(j), password) for j in range(obj.ParcelIdLength())],
-        'ResultAmountMin': [table_encryption.convert_long(obj.ResultAmountMin(j), password) for j in range(obj.ResultAmountMinLength())],
-        'ResultAmountMax': [table_encryption.convert_long(obj.ResultAmountMax(j), password) for j in range(obj.ResultAmountMaxLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'RecipeType': RecipeType(bacy.convert_int(obj.RecipeType_(), password)).name,
+        'RecipeIngredientId': bacy.convert_long(obj.RecipeIngredientId(), password),
+        'RecipeSelectionGroupId': bacy.convert_long(obj.RecipeSelectionGroupId(), password),
+        'ParcelType': [ParcelType(bacy.convert_int(obj.ParcelType_(j), password)).name for j in range(obj.ParcelTypeLength())],
+        'ParcelId': [bacy.convert_long(obj.ParcelId(j), password) for j in range(obj.ParcelIdLength())],
+        'ResultAmountMin': [bacy.convert_long(obj.ResultAmountMin(j), password) for j in range(obj.ResultAmountMinLength())],
+        'ResultAmountMax': [bacy.convert_long(obj.ResultAmountMax(j), password) for j in range(obj.ResultAmountMaxLength())],
     }
 
 
 def dump_RecipeIngredientExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'RecipeType': RecipeType(table_encryption.convert_int(obj.RecipeType_(), password)).name,
-        'CostParcelType': [ParcelType(table_encryption.convert_int(obj.CostParcelType(j), password)).name for j in range(obj.CostParcelTypeLength())],
-        'CostId': [table_encryption.convert_long(obj.CostId(j), password) for j in range(obj.CostIdLength())],
-        'CostAmount': [table_encryption.convert_long(obj.CostAmount(j), password) for j in range(obj.CostAmountLength())],
-        'IngredientParcelType': [ParcelType(table_encryption.convert_int(obj.IngredientParcelType(j), password)).name for j in range(obj.IngredientParcelTypeLength())],
-        'IngredientId': [table_encryption.convert_long(obj.IngredientId(j), password) for j in range(obj.IngredientIdLength())],
-        'IngredientAmount': [table_encryption.convert_long(obj.IngredientAmount(j), password) for j in range(obj.IngredientAmountLength())],
-        'CostTimeInSecond': table_encryption.convert_long(obj.CostTimeInSecond(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'RecipeType': RecipeType(bacy.convert_int(obj.RecipeType_(), password)).name,
+        'CostParcelType': [ParcelType(bacy.convert_int(obj.CostParcelType(j), password)).name for j in range(obj.CostParcelTypeLength())],
+        'CostId': [bacy.convert_long(obj.CostId(j), password) for j in range(obj.CostIdLength())],
+        'CostAmount': [bacy.convert_long(obj.CostAmount(j), password) for j in range(obj.CostAmountLength())],
+        'IngredientParcelType': [ParcelType(bacy.convert_int(obj.IngredientParcelType(j), password)).name for j in range(obj.IngredientParcelTypeLength())],
+        'IngredientId': [bacy.convert_long(obj.IngredientId(j), password) for j in range(obj.IngredientIdLength())],
+        'IngredientAmount': [bacy.convert_long(obj.IngredientAmount(j), password) for j in range(obj.IngredientAmountLength())],
+        'CostTimeInSecond': bacy.convert_long(obj.CostTimeInSecond(), password),
     }
 
 
 def dump_RecipeSelectionAutoUseExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'ParcelType': ParcelType(table_encryption.convert_int(obj.ParcelType_(), password)).name,
-        'TargetItemId': table_encryption.convert_long(obj.TargetItemId(), password),
-        'Priority': [table_encryption.convert_long(obj.Priority(j), password) for j in range(obj.PriorityLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'ParcelType': ParcelType(bacy.convert_int(obj.ParcelType_(), password)).name,
+        'TargetItemId': bacy.convert_long(obj.TargetItemId(), password),
+        'Priority': [bacy.convert_long(obj.Priority(j), password) for j in range(obj.PriorityLength())],
     }
 
 
 def dump_RecipeSelectionGroupExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'RecipeSelectionGroupId': table_encryption.convert_long(obj.RecipeSelectionGroupId(), password),
-        'RecipeSelectionGroupComponentId': table_encryption.convert_long(obj.RecipeSelectionGroupComponentId(), password),
-        'ParcelType': ParcelType(table_encryption.convert_int(obj.ParcelType_(), password)).name,
-        'ParcelId': table_encryption.convert_long(obj.ParcelId(), password),
-        'ResultAmountMin': table_encryption.convert_long(obj.ResultAmountMin(), password),
-        'ResultAmountMax': table_encryption.convert_long(obj.ResultAmountMax(), password),
+        'RecipeSelectionGroupId': bacy.convert_long(obj.RecipeSelectionGroupId(), password),
+        'RecipeSelectionGroupComponentId': bacy.convert_long(obj.RecipeSelectionGroupComponentId(), password),
+        'ParcelType': ParcelType(bacy.convert_int(obj.ParcelType_(), password)).name,
+        'ParcelId': bacy.convert_long(obj.ParcelId(), password),
+        'ResultAmountMin': bacy.convert_long(obj.ResultAmountMin(), password),
+        'ResultAmountMax': bacy.convert_long(obj.ResultAmountMax(), password),
     }
 
 
 def dump_Position(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'X': table_encryption.convert_float(obj.X(), password),
-        'Z': table_encryption.convert_float(obj.Z(), password),
+        'X': bacy.convert_float(obj.X(), password),
+        'Z': bacy.convert_float(obj.Z(), password),
     }
 
 
 def dump_Motion(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Name': table_encryption.convert_string(obj.Name(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
         'Positions': [dump_Position(obj.Positions(j), password) for j in range(obj.PositionsLength())],
     }
 
 
 def dump_MoveEnd(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
         'Normal': dump_Motion(obj.Normal(), password),
         'Stand': dump_Motion(obj.Stand(), password),
@@ -4919,8 +4393,6 @@ def dump_MoveEnd(obj, password) -> dict:
 
 
 def dump_Form(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
         'MoveEnd': dump_MoveEnd(obj.MoveEnd(), password),
         'PublicSkill': dump_Motion(obj.PublicSkill(), password),
@@ -4928,8 +4400,6 @@ def dump_Form(obj, password) -> dict:
 
 
 def dump_RootMotionFlat(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
         'Forms': [dump_Form(obj.Forms(j), password) for j in range(obj.FormsLength())],
         'ExSkills': [dump_Motion(obj.ExSkills(j), password) for j in range(obj.ExSkillsLength())],
@@ -4939,2128 +4409,1860 @@ def dump_RootMotionFlat(obj, password) -> dict:
 
 
 def dump_ScenarioExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'None_': [ScenarioBGType(table_encryption.convert_int(obj.None_(j), password)).name for j in range(obj.None_Length())],
-        'Idle': [ScenarioCharacterAction(table_encryption.convert_int(obj.Idle(j), password)).name for j in range(obj.IdleLength())],
-        'Cafe': DialogCategory(table_encryption.convert_int(obj.Cafe(), password)).name,
-        'Talk': DialogType(table_encryption.convert_int(obj.Talk(), password)).name,
-        'Open': StoryCondition(table_encryption.convert_int(obj.Open(), password)).name,
-        'EnterConver': EmojiEvent(table_encryption.convert_int(obj.EnterConver(), password)).name,
-        'Center': ScenarioZoomAnchors(table_encryption.convert_int(obj.Center(), password)).name,
-        'Instant': ScenarioZoomType(table_encryption.convert_int(obj.Instant(), password)).name,
-        'Prologue': ScenarioContentType(table_encryption.convert_int(obj.Prologue(), password)).name,
+        'None_': [ScenarioBGType(bacy.convert_int(obj.None_(j), password)).name for j in range(obj.None_Length())],
+        'Idle': [ScenarioCharacterAction(bacy.convert_int(obj.Idle(j), password)).name for j in range(obj.IdleLength())],
+        'Cafe': DialogCategory(bacy.convert_int(obj.Cafe(), password)).name,
+        'Talk': DialogType(bacy.convert_int(obj.Talk(), password)).name,
+        'Open': StoryCondition(bacy.convert_int(obj.Open(), password)).name,
+        'EnterConver': EmojiEvent(bacy.convert_int(obj.EnterConver(), password)).name,
+        'Center': ScenarioZoomAnchors(bacy.convert_int(obj.Center(), password)).name,
+        'Instant': ScenarioZoomType(bacy.convert_int(obj.Instant(), password)).name,
+        'Prologue': ScenarioContentType(bacy.convert_int(obj.Prologue(), password)).name,
     }
 
 
 def dump_ScenarioReplayExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ModeId': table_encryption.convert_long(obj.ModeId(), password),
-        'VolumeId': table_encryption.convert_long(obj.VolumeId(), password),
-        'ReplayType': ScenarioModeReplayTypes(table_encryption.convert_int(obj.ReplayType(), password)).name,
-        'ChapterId': table_encryption.convert_long(obj.ChapterId(), password),
-        'EpisodeId': table_encryption.convert_long(obj.EpisodeId(), password),
-        'FrontScenarioGroupId': [table_encryption.convert_long(obj.FrontScenarioGroupId(j), password) for j in range(obj.FrontScenarioGroupIdLength())],
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'BackScenarioGroupId': [table_encryption.convert_long(obj.BackScenarioGroupId(j), password) for j in range(obj.BackScenarioGroupIdLength())],
+        'ModeId': bacy.convert_long(obj.ModeId(), password),
+        'VolumeId': bacy.convert_long(obj.VolumeId(), password),
+        'ReplayType': ScenarioModeReplayTypes(bacy.convert_int(obj.ReplayType(), password)).name,
+        'ChapterId': bacy.convert_long(obj.ChapterId(), password),
+        'EpisodeId': bacy.convert_long(obj.EpisodeId(), password),
+        'FrontScenarioGroupId': [bacy.convert_long(obj.FrontScenarioGroupId(j), password) for j in range(obj.FrontScenarioGroupIdLength())],
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'BackScenarioGroupId': [bacy.convert_long(obj.BackScenarioGroupId(j), password) for j in range(obj.BackScenarioGroupIdLength())],
     }
 
 
 def dump_ScenarioScriptField1Excel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'SelectionGroup': table_encryption.convert_long(obj.SelectionGroup(), password),
-        'BGMId': table_encryption.convert_long(obj.BGMId(), password),
-        'Sound': table_encryption.convert_string(obj.Sound(), password),
-        'Transition': table_encryption.convert_uint(obj.Transition(), password),
-        'BGName': table_encryption.convert_uint(obj.BGName(), password),
-        'BGEffect': table_encryption.convert_uint(obj.BGEffect(), password),
-        'PopupFileName': table_encryption.convert_string(obj.PopupFileName(), password),
-        'ScriptKr': table_encryption.convert_string(obj.ScriptKr(), password),
-        'TextJp': table_encryption.convert_string(obj.TextJp(), password),
-        'VoiceJp': table_encryption.convert_string(obj.VoiceJp(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'SelectionGroup': bacy.convert_long(obj.SelectionGroup(), password),
+        'BGMId': bacy.convert_long(obj.BGMId(), password),
+        'Sound': bacy.convert_string(obj.Sound(), password),
+        'Transition': bacy.convert_uint(obj.Transition(), password),
+        'BGName': bacy.convert_uint(obj.BGName(), password),
+        'BGEffect': bacy.convert_uint(obj.BGEffect(), password),
+        'PopupFileName': bacy.convert_string(obj.PopupFileName(), password),
+        'ScriptKr': bacy.convert_string(obj.ScriptKr(), password),
+        'TextJp': bacy.convert_string(obj.TextJp(), password),
+        'VoiceJp': bacy.convert_string(obj.VoiceJp(), password),
     }
 
 
 def dump_SchoolDungeonRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'DungeonType': SchoolDungeonType(table_encryption.convert_int(obj.DungeonType(), password)).name,
-        'RewardTag': RewardTag(table_encryption.convert_int(obj.RewardTag_(), password)).name,
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardParcelId': table_encryption.convert_long(obj.RewardParcelId(), password),
-        'RewardParcelAmount': table_encryption.convert_long(obj.RewardParcelAmount(), password),
-        'RewardParcelProbability': table_encryption.convert_long(obj.RewardParcelProbability(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'DungeonType': SchoolDungeonType(bacy.convert_int(obj.DungeonType(), password)).name,
+        'RewardTag': RewardTag(bacy.convert_int(obj.RewardTag_(), password)).name,
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardParcelId': bacy.convert_long(obj.RewardParcelId(), password),
+        'RewardParcelAmount': bacy.convert_long(obj.RewardParcelAmount(), password),
+        'RewardParcelProbability': bacy.convert_long(obj.RewardParcelProbability(), password),
         'IsDisplayed': obj.IsDisplayed(),
     }
 
 
 def dump_SchoolDungeonStageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'StageId': table_encryption.convert_long(obj.StageId(), password),
-        'DungeonType': SchoolDungeonType(table_encryption.convert_int(obj.DungeonType(), password)).name,
-        'Difficulty': table_encryption.convert_int(obj.Difficulty(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'PrevStageId': table_encryption.convert_long(obj.PrevStageId(), password),
-        'StageEnterCostType': [ParcelType(table_encryption.convert_int(obj.StageEnterCostType(j), password)).name for j in range(obj.StageEnterCostTypeLength())],
-        'StageEnterCostId': [table_encryption.convert_long(obj.StageEnterCostId(j), password) for j in range(obj.StageEnterCostIdLength())],
-        'StageEnterCostAmount': [table_encryption.convert_long(obj.StageEnterCostAmount(j), password) for j in range(obj.StageEnterCostAmountLength())],
-        'StageEnterCostMinimumAmount': [table_encryption.convert_long(obj.StageEnterCostMinimumAmount(j), password) for j in range(obj.StageEnterCostMinimumAmountLength())],
-        'GroundId': table_encryption.convert_int(obj.GroundId(), password),
-        'StarGoal': [StarGoalType(table_encryption.convert_int(obj.StarGoal(j), password)).name for j in range(obj.StarGoalLength())],
-        'StarGoalAmount': [table_encryption.convert_int(obj.StarGoalAmount(j), password) for j in range(obj.StarGoalAmountLength())],
-        'StageTopography': StageTopography(table_encryption.convert_int(obj.StageTopography_(), password)).name,
-        'RecommandLevel': table_encryption.convert_long(obj.RecommandLevel(), password),
-        'StageRewardId': table_encryption.convert_long(obj.StageRewardId(), password),
-        'PlayTimeLimitInSeconds': table_encryption.convert_long(obj.PlayTimeLimitInSeconds(), password),
-        'EchelonExtensionType': EchelonExtensionType(table_encryption.convert_int(obj.EchelonExtensionType_(), password)).name,
+        'StageId': bacy.convert_long(obj.StageId(), password),
+        'DungeonType': SchoolDungeonType(bacy.convert_int(obj.DungeonType(), password)).name,
+        'Difficulty': bacy.convert_int(obj.Difficulty(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'PrevStageId': bacy.convert_long(obj.PrevStageId(), password),
+        'StageEnterCostType': [ParcelType(bacy.convert_int(obj.StageEnterCostType(j), password)).name for j in range(obj.StageEnterCostTypeLength())],
+        'StageEnterCostId': [bacy.convert_long(obj.StageEnterCostId(j), password) for j in range(obj.StageEnterCostIdLength())],
+        'StageEnterCostAmount': [bacy.convert_long(obj.StageEnterCostAmount(j), password) for j in range(obj.StageEnterCostAmountLength())],
+        'StageEnterCostMinimumAmount': [bacy.convert_long(obj.StageEnterCostMinimumAmount(j), password) for j in range(obj.StageEnterCostMinimumAmountLength())],
+        'GroundId': bacy.convert_int(obj.GroundId(), password),
+        'StarGoal': [StarGoalType(bacy.convert_int(obj.StarGoal(j), password)).name for j in range(obj.StarGoalLength())],
+        'StarGoalAmount': [bacy.convert_int(obj.StarGoalAmount(j), password) for j in range(obj.StarGoalAmountLength())],
+        'StageTopography': StageTopography(bacy.convert_int(obj.StageTopography_(), password)).name,
+        'RecommandLevel': bacy.convert_long(obj.RecommandLevel(), password),
+        'StageRewardId': bacy.convert_long(obj.StageRewardId(), password),
+        'PlayTimeLimitInSeconds': bacy.convert_long(obj.PlayTimeLimitInSeconds(), password),
+        'EchelonExtensionType': EchelonExtensionType(bacy.convert_int(obj.EchelonExtensionType_(), password)).name,
     }
 
 
 def dump_ShiftingCraftRecipeExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'NotificationId': table_encryption.convert_int(obj.NotificationId(), password),
-        'ResultParcel': ParcelType(table_encryption.convert_int(obj.ResultParcel(), password)).name,
-        'ResultId': table_encryption.convert_long(obj.ResultId(), password),
-        'ResultAmount': table_encryption.convert_long(obj.ResultAmount(), password),
-        'RequireItemId': table_encryption.convert_long(obj.RequireItemId(), password),
-        'RequireItemAmount': table_encryption.convert_long(obj.RequireItemAmount(), password),
-        'RequireGold': table_encryption.convert_long(obj.RequireGold(), password),
-        'IngredientTag': [Tag(table_encryption.convert_int(obj.IngredientTag(j), password)).name for j in range(obj.IngredientTagLength())],
-        'IngredientExp': table_encryption.convert_long(obj.IngredientExp(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'NotificationId': bacy.convert_int(obj.NotificationId(), password),
+        'ResultParcel': ParcelType(bacy.convert_int(obj.ResultParcel(), password)).name,
+        'ResultId': bacy.convert_long(obj.ResultId(), password),
+        'ResultAmount': bacy.convert_long(obj.ResultAmount(), password),
+        'RequireItemId': bacy.convert_long(obj.RequireItemId(), password),
+        'RequireItemAmount': bacy.convert_long(obj.RequireItemAmount(), password),
+        'RequireGold': bacy.convert_long(obj.RequireGold(), password),
+        'IngredientTag': [Tag(bacy.convert_int(obj.IngredientTag(j), password)).name for j in range(obj.IngredientTagLength())],
+        'IngredientExp': bacy.convert_long(obj.IngredientExp(), password),
     }
 
 
 def dump_ShopCashExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'CashProductId': table_encryption.convert_long(obj.CashProductId(), password),
-        'PackageType': PurchaseSourceType(table_encryption.convert_int(obj.PackageType(), password)).name,
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'IconPath': table_encryption.convert_string(obj.IconPath(), password),
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'RenewalDisplayOrder': table_encryption.convert_long(obj.RenewalDisplayOrder(), password),
-        'CategoryType': ProductCategory(table_encryption.convert_int(obj.CategoryType(), password)).name,
-        'DisplayTag': ProductDisplayTag(table_encryption.convert_int(obj.DisplayTag(), password)).name,
-        'SalePeriodFrom': table_encryption.convert_string(obj.SalePeriodFrom(), password),
-        'SalePeriodTo': table_encryption.convert_string(obj.SalePeriodTo(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'CashProductId': bacy.convert_long(obj.CashProductId(), password),
+        'PackageType': PurchaseSourceType(bacy.convert_int(obj.PackageType(), password)).name,
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'IconPath': bacy.convert_string(obj.IconPath(), password),
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'RenewalDisplayOrder': bacy.convert_long(obj.RenewalDisplayOrder(), password),
+        'CategoryType': ProductCategory(bacy.convert_int(obj.CategoryType(), password)).name,
+        'DisplayTag': ProductDisplayTag(bacy.convert_int(obj.DisplayTag(), password)).name,
+        'SalePeriodFrom': bacy.convert_string(obj.SalePeriodFrom(), password),
+        'SalePeriodTo': bacy.convert_string(obj.SalePeriodTo(), password),
         'PeriodTag': obj.PeriodTag(),
-        'AccountLevelLimit': table_encryption.convert_long(obj.AccountLevelLimit(), password),
+        'AccountLevelLimit': bacy.convert_long(obj.AccountLevelLimit(), password),
         'AccountLevelHide': obj.AccountLevelHide(),
-        'ClearMissionLimit': table_encryption.convert_long(obj.ClearMissionLimit(), password),
+        'ClearMissionLimit': bacy.convert_long(obj.ClearMissionLimit(), password),
         'ClearMissionHide': obj.ClearMissionHide(),
-        'PurchaseReportEventName': table_encryption.convert_string(obj.PurchaseReportEventName(), password),
+        'PurchaseReportEventName': bacy.convert_string(obj.PurchaseReportEventName(), password),
     }
 
 
 def dump_ShopCashScenarioResourceInfoExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ScenarioResrouceInfoId': table_encryption.convert_long(obj.ScenarioResrouceInfoId(), password),
-        'ShopCashId': table_encryption.convert_long(obj.ShopCashId(), password),
-        'IconPath': table_encryption.convert_string(obj.IconPath(), password),
+        'ScenarioResrouceInfoId': bacy.convert_long(obj.ScenarioResrouceInfoId(), password),
+        'ShopCashId': bacy.convert_long(obj.ShopCashId(), password),
+        'IconPath': bacy.convert_string(obj.IconPath(), password),
     }
 
 
 def dump_ShopExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'CategoryType': ShopCategoryType(table_encryption.convert_int(obj.CategoryType(), password)).name,
+        'Id': bacy.convert_long(obj.Id(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'CategoryType': ShopCategoryType(bacy.convert_int(obj.CategoryType(), password)).name,
         'IsLegacy': obj.IsLegacy(),
-        'GoodsId': [table_encryption.convert_long(obj.GoodsId(j), password) for j in range(obj.GoodsIdLength())],
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'SalePeriodFrom': table_encryption.convert_string(obj.SalePeriodFrom(), password),
-        'SalePeriodTo': table_encryption.convert_string(obj.SalePeriodTo(), password),
-        'PurchaseCooltimeMin': table_encryption.convert_long(obj.PurchaseCooltimeMin(), password),
-        'PurchaseCountLimit': table_encryption.convert_long(obj.PurchaseCountLimit(), password),
-        'PurchaseCountResetType': PurchaseCountResetType(table_encryption.convert_int(obj.PurchaseCountResetType_(), password)).name,
-        'BuyReportEventName': table_encryption.convert_string(obj.BuyReportEventName(), password),
+        'GoodsId': [bacy.convert_long(obj.GoodsId(j), password) for j in range(obj.GoodsIdLength())],
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'SalePeriodFrom': bacy.convert_string(obj.SalePeriodFrom(), password),
+        'SalePeriodTo': bacy.convert_string(obj.SalePeriodTo(), password),
+        'PurchaseCooltimeMin': bacy.convert_long(obj.PurchaseCooltimeMin(), password),
+        'PurchaseCountLimit': bacy.convert_long(obj.PurchaseCountLimit(), password),
+        'PurchaseCountResetType': PurchaseCountResetType(bacy.convert_int(obj.PurchaseCountResetType_(), password)).name,
+        'BuyReportEventName': bacy.convert_string(obj.BuyReportEventName(), password),
         'RestrictBuyWhenInventoryFull': obj.RestrictBuyWhenInventoryFull(),
-        'DisplayTag': ProductDisplayTag(table_encryption.convert_int(obj.DisplayTag(), password)).name,
-        'ShopUpdateGroupId': table_encryption.convert_int(obj.ShopUpdateGroupId(), password),
+        'DisplayTag': ProductDisplayTag(bacy.convert_int(obj.DisplayTag(), password)).name,
+        'ShopUpdateGroupId': bacy.convert_int(obj.ShopUpdateGroupId(), password),
     }
 
 
 def dump_ShopFilterClassifiedExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'CategoryType': ShopCategoryType(table_encryption.convert_int(obj.CategoryType(), password)).name,
-        'ConsumeParcelType': ParcelType(table_encryption.convert_int(obj.ConsumeParcelType(), password)).name,
-        'ConsumeParcelId': table_encryption.convert_long(obj.ConsumeParcelId(), password),
-        'ShopFilterType': ShopFilterType(table_encryption.convert_int(obj.ShopFilterType_(), password)).name,
-        'GoodsId': table_encryption.convert_long(obj.GoodsId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'CategoryType': ShopCategoryType(bacy.convert_int(obj.CategoryType(), password)).name,
+        'ConsumeParcelType': ParcelType(bacy.convert_int(obj.ConsumeParcelType(), password)).name,
+        'ConsumeParcelId': bacy.convert_long(obj.ConsumeParcelId(), password),
+        'ShopFilterType': ShopFilterType(bacy.convert_int(obj.ShopFilterType_(), password)).name,
+        'GoodsId': bacy.convert_long(obj.GoodsId(), password),
     }
 
 
 def dump_ShopFreeRecruitExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'FreeRecruitPeriodFrom': table_encryption.convert_string(obj.FreeRecruitPeriodFrom(), password),
-        'FreeRecruitPeriodTo': table_encryption.convert_string(obj.FreeRecruitPeriodTo(), password),
-        'FreeRecruitType': ShopFreeRecruitType(table_encryption.convert_int(obj.FreeRecruitType(), password)).name,
-        'FreeRecruitDecorationImagePath': table_encryption.convert_string(obj.FreeRecruitDecorationImagePath(), password),
-        'ShopRecruitId': [table_encryption.convert_long(obj.ShopRecruitId(j), password) for j in range(obj.ShopRecruitIdLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'FreeRecruitPeriodFrom': bacy.convert_string(obj.FreeRecruitPeriodFrom(), password),
+        'FreeRecruitPeriodTo': bacy.convert_string(obj.FreeRecruitPeriodTo(), password),
+        'FreeRecruitType': ShopFreeRecruitType(bacy.convert_int(obj.FreeRecruitType(), password)).name,
+        'FreeRecruitDecorationImagePath': bacy.convert_string(obj.FreeRecruitDecorationImagePath(), password),
+        'ShopRecruitId': [bacy.convert_long(obj.ShopRecruitId(j), password) for j in range(obj.ShopRecruitIdLength())],
     }
 
 
 def dump_ShopFreeRecruitPeriodExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ShopFreeRecruitId': table_encryption.convert_long(obj.ShopFreeRecruitId(), password),
-        'ShopFreeRecruitIntervalId': table_encryption.convert_long(obj.ShopFreeRecruitIntervalId(), password),
-        'IntervalDate': table_encryption.convert_string(obj.IntervalDate(), password),
-        'FreeRecruitCount': table_encryption.convert_int(obj.FreeRecruitCount(), password),
+        'ShopFreeRecruitId': bacy.convert_long(obj.ShopFreeRecruitId(), password),
+        'ShopFreeRecruitIntervalId': bacy.convert_long(obj.ShopFreeRecruitIntervalId(), password),
+        'IntervalDate': bacy.convert_string(obj.IntervalDate(), password),
+        'FreeRecruitCount': bacy.convert_int(obj.FreeRecruitCount(), password),
     }
 
 
 def dump_ShopInfoExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CategoryType': ShopCategoryType(table_encryption.convert_int(obj.CategoryType(), password)).name,
+        'CategoryType': ShopCategoryType(bacy.convert_int(obj.CategoryType(), password)).name,
         'IsRefresh': obj.IsRefresh(),
         'IsSoldOutDimmed': obj.IsSoldOutDimmed(),
-        'CostParcelType': [ParcelType(table_encryption.convert_int(obj.CostParcelType(j), password)).name for j in range(obj.CostParcelTypeLength())],
-        'CostParcelId': [table_encryption.convert_long(obj.CostParcelId(j), password) for j in range(obj.CostParcelIdLength())],
-        'AutoRefreshCoolTime': table_encryption.convert_long(obj.AutoRefreshCoolTime(), password),
-        'RefreshAbleCount': table_encryption.convert_long(obj.RefreshAbleCount(), password),
-        'GoodsId': [table_encryption.convert_long(obj.GoodsId(j), password) for j in range(obj.GoodsIdLength())],
-        'OpenPeriodFrom': table_encryption.convert_string(obj.OpenPeriodFrom(), password),
-        'OpenPeriodTo': table_encryption.convert_string(obj.OpenPeriodTo(), password),
-        'ShopProductUpdateTime': table_encryption.convert_string(obj.ShopProductUpdateTime(), password),
-        'DisplayParcelType': ParcelType(table_encryption.convert_int(obj.DisplayParcelType(), password)).name,
-        'DisplayParcelId': table_encryption.convert_long(obj.DisplayParcelId(), password),
+        'CostParcelType': [ParcelType(bacy.convert_int(obj.CostParcelType(j), password)).name for j in range(obj.CostParcelTypeLength())],
+        'CostParcelId': [bacy.convert_long(obj.CostParcelId(j), password) for j in range(obj.CostParcelIdLength())],
+        'AutoRefreshCoolTime': bacy.convert_long(obj.AutoRefreshCoolTime(), password),
+        'RefreshAbleCount': bacy.convert_long(obj.RefreshAbleCount(), password),
+        'GoodsId': [bacy.convert_long(obj.GoodsId(j), password) for j in range(obj.GoodsIdLength())],
+        'OpenPeriodFrom': bacy.convert_string(obj.OpenPeriodFrom(), password),
+        'OpenPeriodTo': bacy.convert_string(obj.OpenPeriodTo(), password),
+        'ShopProductUpdateTime': bacy.convert_string(obj.ShopProductUpdateTime(), password),
+        'DisplayParcelType': ParcelType(bacy.convert_int(obj.DisplayParcelType(), password)).name,
+        'DisplayParcelId': bacy.convert_long(obj.DisplayParcelId(), password),
         'IsShopVisible': obj.IsShopVisible(),
-        'DisplayOrder': table_encryption.convert_int(obj.DisplayOrder(), password),
-        'ShopUpdateDate': table_encryption.convert_int(obj.ShopUpdateDate(), password),
-        'ShopUpdateGroupId1': table_encryption.convert_int(obj.ShopUpdateGroupId1(), password),
-        'ShopUpdateGroupId2': table_encryption.convert_int(obj.ShopUpdateGroupId2(), password),
-        'ShopUpdateGroupId3': table_encryption.convert_int(obj.ShopUpdateGroupId3(), password),
-        'ShopUpdateGroupId4': table_encryption.convert_int(obj.ShopUpdateGroupId4(), password),
-        'ShopUpdateGroupId5': table_encryption.convert_int(obj.ShopUpdateGroupId5(), password),
-        'ShopUpdateGroupId6': table_encryption.convert_int(obj.ShopUpdateGroupId6(), password),
-        'ShopUpdateGroupId7': table_encryption.convert_int(obj.ShopUpdateGroupId7(), password),
-        'ShopUpdateGroupId8': table_encryption.convert_int(obj.ShopUpdateGroupId8(), password),
-        'ShopUpdateGroupId9': table_encryption.convert_int(obj.ShopUpdateGroupId9(), password),
-        'ShopUpdateGroupId10': table_encryption.convert_int(obj.ShopUpdateGroupId10(), password),
-        'ShopUpdateGroupId11': table_encryption.convert_int(obj.ShopUpdateGroupId11(), password),
-        'ShopUpdateGroupId12': table_encryption.convert_int(obj.ShopUpdateGroupId12(), password),
+        'DisplayOrder': bacy.convert_int(obj.DisplayOrder(), password),
+        'ShopUpdateDate': bacy.convert_int(obj.ShopUpdateDate(), password),
+        'ShopUpdateGroupId1': bacy.convert_int(obj.ShopUpdateGroupId1(), password),
+        'ShopUpdateGroupId2': bacy.convert_int(obj.ShopUpdateGroupId2(), password),
+        'ShopUpdateGroupId3': bacy.convert_int(obj.ShopUpdateGroupId3(), password),
+        'ShopUpdateGroupId4': bacy.convert_int(obj.ShopUpdateGroupId4(), password),
+        'ShopUpdateGroupId5': bacy.convert_int(obj.ShopUpdateGroupId5(), password),
+        'ShopUpdateGroupId6': bacy.convert_int(obj.ShopUpdateGroupId6(), password),
+        'ShopUpdateGroupId7': bacy.convert_int(obj.ShopUpdateGroupId7(), password),
+        'ShopUpdateGroupId8': bacy.convert_int(obj.ShopUpdateGroupId8(), password),
+        'ShopUpdateGroupId9': bacy.convert_int(obj.ShopUpdateGroupId9(), password),
+        'ShopUpdateGroupId10': bacy.convert_int(obj.ShopUpdateGroupId10(), password),
+        'ShopUpdateGroupId11': bacy.convert_int(obj.ShopUpdateGroupId11(), password),
+        'ShopUpdateGroupId12': bacy.convert_int(obj.ShopUpdateGroupId12(), password),
     }
 
 
 def dump_ShopRecruitExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'CategoryType': ShopCategoryType(table_encryption.convert_int(obj.CategoryType(), password)).name,
+        'Id': bacy.convert_long(obj.Id(), password),
+        'CategoryType': ShopCategoryType(bacy.convert_int(obj.CategoryType(), password)).name,
         'IsLegacy': obj.IsLegacy(),
-        'OneGachaGoodsId': table_encryption.convert_long(obj.OneGachaGoodsId(), password),
-        'TenGachaGoodsId': table_encryption.convert_long(obj.TenGachaGoodsId(), password),
-        'GoodsDevName': table_encryption.convert_string(obj.GoodsDevName(), password),
-        'DisplayTag': GachaDisplayTag(table_encryption.convert_int(obj.DisplayTag(), password)).name,
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'GachaBannerPath': table_encryption.convert_string(obj.GachaBannerPath(), password),
-        'VideoId': [table_encryption.convert_long(obj.VideoId(j), password) for j in range(obj.VideoIdLength())],
-        'LinkedRobbyBannerId': table_encryption.convert_long(obj.LinkedRobbyBannerId(), password),
-        'InfoCharacterId': [table_encryption.convert_long(obj.InfoCharacterId(j), password) for j in range(obj.InfoCharacterIdLength())],
-        'SalePeriodFrom': table_encryption.convert_string(obj.SalePeriodFrom(), password),
-        'SalePeriodTo': table_encryption.convert_string(obj.SalePeriodTo(), password),
-        'RecruitCoinId': table_encryption.convert_long(obj.RecruitCoinId(), password),
-        'RecruitSellectionShopId': table_encryption.convert_long(obj.RecruitSellectionShopId(), password),
-        'PurchaseCooltimeMin': table_encryption.convert_long(obj.PurchaseCooltimeMin(), password),
-        'PurchaseCountLimit': table_encryption.convert_long(obj.PurchaseCountLimit(), password),
-        'PurchaseCountResetType': PurchaseCountResetType(table_encryption.convert_int(obj.PurchaseCountResetType_(), password)).name,
+        'OneGachaGoodsId': bacy.convert_long(obj.OneGachaGoodsId(), password),
+        'TenGachaGoodsId': bacy.convert_long(obj.TenGachaGoodsId(), password),
+        'GoodsDevName': bacy.convert_string(obj.GoodsDevName(), password),
+        'DisplayTag': GachaDisplayTag(bacy.convert_int(obj.DisplayTag(), password)).name,
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'GachaBannerPath': bacy.convert_string(obj.GachaBannerPath(), password),
+        'VideoId': [bacy.convert_long(obj.VideoId(j), password) for j in range(obj.VideoIdLength())],
+        'LinkedRobbyBannerId': bacy.convert_long(obj.LinkedRobbyBannerId(), password),
+        'InfoCharacterId': [bacy.convert_long(obj.InfoCharacterId(j), password) for j in range(obj.InfoCharacterIdLength())],
+        'SalePeriodFrom': bacy.convert_string(obj.SalePeriodFrom(), password),
+        'SalePeriodTo': bacy.convert_string(obj.SalePeriodTo(), password),
+        'RecruitCoinId': bacy.convert_long(obj.RecruitCoinId(), password),
+        'RecruitSellectionShopId': bacy.convert_long(obj.RecruitSellectionShopId(), password),
+        'PurchaseCooltimeMin': bacy.convert_long(obj.PurchaseCooltimeMin(), password),
+        'PurchaseCountLimit': bacy.convert_long(obj.PurchaseCountLimit(), password),
+        'PurchaseCountResetType': PurchaseCountResetType(bacy.convert_int(obj.PurchaseCountResetType_(), password)).name,
         'IsNewbie': obj.IsNewbie(),
         'IsSelectRecruit': obj.IsSelectRecruit(),
-        'DirectPayInvisibleTokenId': table_encryption.convert_long(obj.DirectPayInvisibleTokenId(), password),
-        'DirectPayAndroidShopCashId': table_encryption.convert_long(obj.DirectPayAndroidShopCashId(), password),
-        'DirectPayAppleShopCashId': table_encryption.convert_long(obj.DirectPayAppleShopCashId(), password),
+        'DirectPayInvisibleTokenId': bacy.convert_long(obj.DirectPayInvisibleTokenId(), password),
+        'DirectPayAndroidShopCashId': bacy.convert_long(obj.DirectPayAndroidShopCashId(), password),
+        'DirectPayAppleShopCashId': bacy.convert_long(obj.DirectPayAppleShopCashId(), password),
     }
 
 
 def dump_ShopRefreshExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
         'IsLegacy': obj.IsLegacy(),
-        'GoodsId': table_encryption.convert_long(obj.GoodsId(), password),
+        'GoodsId': bacy.convert_long(obj.GoodsId(), password),
         'IsBundle': obj.IsBundle(),
-        'VisibleAmount': table_encryption.convert_long(obj.VisibleAmount(), password),
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'CategoryType': ShopCategoryType(table_encryption.convert_int(obj.CategoryType(), password)).name,
-        'RefreshGroup': table_encryption.convert_int(obj.RefreshGroup(), password),
-        'Prob': table_encryption.convert_int(obj.Prob(), password),
-        'BuyReportEventName': table_encryption.convert_string(obj.BuyReportEventName(), password),
-        'DisplayTag': ProductDisplayTag(table_encryption.convert_int(obj.DisplayTag(), password)).name,
+        'VisibleAmount': bacy.convert_long(obj.VisibleAmount(), password),
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'CategoryType': ShopCategoryType(bacy.convert_int(obj.CategoryType(), password)).name,
+        'RefreshGroup': bacy.convert_int(obj.RefreshGroup(), password),
+        'Prob': bacy.convert_int(obj.Prob(), password),
+        'BuyReportEventName': bacy.convert_string(obj.BuyReportEventName(), password),
+        'DisplayTag': ProductDisplayTag(bacy.convert_int(obj.DisplayTag(), password)).name,
     }
 
 
 def dump_SkillExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'LocalizeSkillId': table_encryption.convert_uint(obj.LocalizeSkillId(), password),
-        'GroupId': table_encryption.convert_string(obj.GroupId(), password),
-        'SkillDataKey': table_encryption.convert_string(obj.SkillDataKey(), password),
-        'VisualDataKey': table_encryption.convert_string(obj.VisualDataKey(), password),
-        'Level': table_encryption.convert_int(obj.Level(), password),
-        'SkillCost': table_encryption.convert_int(obj.SkillCost(), password),
-        'ExtraSkillCost': table_encryption.convert_int(obj.ExtraSkillCost(), password),
-        'EnemySkillCost': table_encryption.convert_int(obj.EnemySkillCost(), password),
-        'ExtraEnemySkillCost': table_encryption.convert_int(obj.ExtraEnemySkillCost(), password),
-        'NPCSkillCost': table_encryption.convert_int(obj.NPCSkillCost(), password),
-        'ExtraNPCSkillCost': table_encryption.convert_int(obj.ExtraNPCSkillCost(), password),
-        'BulletType': BulletType(table_encryption.convert_int(obj.BulletType_(), password)).name,
-        'StartCoolTime': table_encryption.convert_int(obj.StartCoolTime(), password),
-        'CoolTime': table_encryption.convert_int(obj.CoolTime(), password),
-        'EnemyStartCoolTime': table_encryption.convert_int(obj.EnemyStartCoolTime(), password),
-        'EnemyCoolTime': table_encryption.convert_int(obj.EnemyCoolTime(), password),
-        'NPCStartCoolTime': table_encryption.convert_int(obj.NPCStartCoolTime(), password),
-        'NPCCoolTime': table_encryption.convert_int(obj.NPCCoolTime(), password),
-        'UseAtg': table_encryption.convert_int(obj.UseAtg(), password),
-        'RequireCharacterLevel': table_encryption.convert_int(obj.RequireCharacterLevel(), password),
-        'RequireLevelUpMaterial': table_encryption.convert_long(obj.RequireLevelUpMaterial(), password),
-        'IconName': table_encryption.convert_string(obj.IconName(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'LocalizeSkillId': bacy.convert_uint(obj.LocalizeSkillId(), password),
+        'GroupId': bacy.convert_string(obj.GroupId(), password),
+        'SkillDataKey': bacy.convert_string(obj.SkillDataKey(), password),
+        'VisualDataKey': bacy.convert_string(obj.VisualDataKey(), password),
+        'Level': bacy.convert_int(obj.Level(), password),
+        'SkillCost': bacy.convert_int(obj.SkillCost(), password),
+        'ExtraSkillCost': bacy.convert_int(obj.ExtraSkillCost(), password),
+        'EnemySkillCost': bacy.convert_int(obj.EnemySkillCost(), password),
+        'ExtraEnemySkillCost': bacy.convert_int(obj.ExtraEnemySkillCost(), password),
+        'NPCSkillCost': bacy.convert_int(obj.NPCSkillCost(), password),
+        'ExtraNPCSkillCost': bacy.convert_int(obj.ExtraNPCSkillCost(), password),
+        'BulletType': BulletType(bacy.convert_int(obj.BulletType_(), password)).name,
+        'StartCoolTime': bacy.convert_int(obj.StartCoolTime(), password),
+        'CoolTime': bacy.convert_int(obj.CoolTime(), password),
+        'EnemyStartCoolTime': bacy.convert_int(obj.EnemyStartCoolTime(), password),
+        'EnemyCoolTime': bacy.convert_int(obj.EnemyCoolTime(), password),
+        'NPCStartCoolTime': bacy.convert_int(obj.NPCStartCoolTime(), password),
+        'NPCCoolTime': bacy.convert_int(obj.NPCCoolTime(), password),
+        'UseAtg': bacy.convert_int(obj.UseAtg(), password),
+        'RequireCharacterLevel': bacy.convert_int(obj.RequireCharacterLevel(), password),
+        'RequireLevelUpMaterial': bacy.convert_long(obj.RequireLevelUpMaterial(), password),
+        'IconName': bacy.convert_string(obj.IconName(), password),
         'IsShowInfo': obj.IsShowInfo(),
         'IsShowSpeechbubble': obj.IsShowSpeechbubble(),
-        'PublicSpeechDuration': table_encryption.convert_int(obj.PublicSpeechDuration(), password),
-        'AdditionalToolTipId': table_encryption.convert_long(obj.AdditionalToolTipId(), password),
-        'TextureSkillCardForFormConversion': table_encryption.convert_string(obj.TextureSkillCardForFormConversion(), password),
-        'SkillCardLabelPath': table_encryption.convert_string(obj.SkillCardLabelPath(), password),
+        'PublicSpeechDuration': bacy.convert_int(obj.PublicSpeechDuration(), password),
+        'AdditionalToolTipId': bacy.convert_long(obj.AdditionalToolTipId(), password),
+        'TextureSkillCardForFormConversion': bacy.convert_string(obj.TextureSkillCardForFormConversion(), password),
+        'SkillCardLabelPath': bacy.convert_string(obj.SkillCardLabelPath(), password),
     }
 
 
 def dump_SpecialLobbyIllustExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'DevName': table_encryption.convert_string(obj.DevName(), password),
-        'CharacterCostumeUniqueId': table_encryption.convert_long(obj.CharacterCostumeUniqueId(), password),
-        'PrefabName': table_encryption.convert_string(obj.PrefabName(), password),
-        'SlotTextureName': table_encryption.convert_string(obj.SlotTextureName(), password),
-        'RewardTextureName': table_encryption.convert_string(obj.RewardTextureName(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'DevName': bacy.convert_string(obj.DevName(), password),
+        'CharacterCostumeUniqueId': bacy.convert_long(obj.CharacterCostumeUniqueId(), password),
+        'PrefabName': bacy.convert_string(obj.PrefabName(), password),
+        'SlotTextureName': bacy.convert_string(obj.SlotTextureName(), password),
+        'RewardTextureName': bacy.convert_string(obj.RewardTextureName(), password),
     }
 
 
 def dump_StatLevelInterpolationExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Level': table_encryption.convert_long(obj.Level(), password),
-        'StatTypeIndex': [table_encryption.convert_long(obj.StatTypeIndex(j), password) for j in range(obj.StatTypeIndexLength())],
+        'Level': bacy.convert_long(obj.Level(), password),
+        'StatTypeIndex': [bacy.convert_long(obj.StatTypeIndex(j), password) for j in range(obj.StatTypeIndexLength())],
     }
 
 
 def dump_StickerGroupExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Layout': table_encryption.convert_string(obj.Layout(), password),
-        'UniqueLayoutPath': table_encryption.convert_string(obj.UniqueLayoutPath(), password),
-        'StickerGroupIconpath': table_encryption.convert_string(obj.StickerGroupIconpath(), password),
-        'PageCompleteSlot': table_encryption.convert_long(obj.PageCompleteSlot(), password),
-        'PageCompleteRewardParcelType': ParcelType(table_encryption.convert_int(obj.PageCompleteRewardParcelType(), password)).name,
-        'PageCompleteRewardParcelId': table_encryption.convert_long(obj.PageCompleteRewardParcelId(), password),
-        'PageCompleteRewardAmount': table_encryption.convert_int(obj.PageCompleteRewardAmount(), password),
-        'LocalizeTitle': table_encryption.convert_uint(obj.LocalizeTitle(), password),
-        'LocalizeDescription': table_encryption.convert_uint(obj.LocalizeDescription(), password),
-        'StickerGroupCoverpath': table_encryption.convert_string(obj.StickerGroupCoverpath(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Layout': bacy.convert_string(obj.Layout(), password),
+        'UniqueLayoutPath': bacy.convert_string(obj.UniqueLayoutPath(), password),
+        'StickerGroupIconpath': bacy.convert_string(obj.StickerGroupIconpath(), password),
+        'PageCompleteSlot': bacy.convert_long(obj.PageCompleteSlot(), password),
+        'PageCompleteRewardParcelType': ParcelType(bacy.convert_int(obj.PageCompleteRewardParcelType(), password)).name,
+        'PageCompleteRewardParcelId': bacy.convert_long(obj.PageCompleteRewardParcelId(), password),
+        'PageCompleteRewardAmount': bacy.convert_int(obj.PageCompleteRewardAmount(), password),
+        'LocalizeTitle': bacy.convert_uint(obj.LocalizeTitle(), password),
+        'LocalizeDescription': bacy.convert_uint(obj.LocalizeDescription(), password),
+        'StickerGroupCoverpath': bacy.convert_string(obj.StickerGroupCoverpath(), password),
     }
 
 
 def dump_StickerPageContentExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'StickerGroupId': table_encryption.convert_long(obj.StickerGroupId(), password),
-        'StickerPageId': table_encryption.convert_long(obj.StickerPageId(), password),
-        'StickerSlot': table_encryption.convert_long(obj.StickerSlot(), password),
-        'StickerGetConditionType': StickerGetConditionType(table_encryption.convert_int(obj.StickerGetConditionType_(), password)).name,
-        'StickerCheckPassType': StickerCheckPassType(table_encryption.convert_int(obj.StickerCheckPassType_(), password)).name,
-        'GetStickerConditionType': GetStickerConditionType(table_encryption.convert_int(obj.GetStickerConditionType_(), password)).name,
-        'StickerGetConditionCount': table_encryption.convert_long(obj.StickerGetConditionCount(), password),
-        'StickerGetConditionParameter': [table_encryption.convert_long(obj.StickerGetConditionParameter(j), password) for j in range(obj.StickerGetConditionParameterLength())],
-        'StickerGetConditionParameterTag': [Tag(table_encryption.convert_int(obj.StickerGetConditionParameterTag(j), password)).name for j in range(obj.StickerGetConditionParameterTagLength())],
-        'PackedStickerIconLocalizeEtcId': table_encryption.convert_uint(obj.PackedStickerIconLocalizeEtcId(), password),
-        'PackedStickerIconPath': table_encryption.convert_string(obj.PackedStickerIconPath(), password),
-        'IconPath': table_encryption.convert_string(obj.IconPath(), password),
-        'StickerDetailPath': table_encryption.convert_string(obj.StickerDetailPath(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'StickerGroupId': bacy.convert_long(obj.StickerGroupId(), password),
+        'StickerPageId': bacy.convert_long(obj.StickerPageId(), password),
+        'StickerSlot': bacy.convert_long(obj.StickerSlot(), password),
+        'StickerGetConditionType': StickerGetConditionType(bacy.convert_int(obj.StickerGetConditionType_(), password)).name,
+        'StickerCheckPassType': StickerCheckPassType(bacy.convert_int(obj.StickerCheckPassType_(), password)).name,
+        'GetStickerConditionType': GetStickerConditionType(bacy.convert_int(obj.GetStickerConditionType_(), password)).name,
+        'StickerGetConditionCount': bacy.convert_long(obj.StickerGetConditionCount(), password),
+        'StickerGetConditionParameter': [bacy.convert_long(obj.StickerGetConditionParameter(j), password) for j in range(obj.StickerGetConditionParameterLength())],
+        'StickerGetConditionParameterTag': [Tag(bacy.convert_int(obj.StickerGetConditionParameterTag(j), password)).name for j in range(obj.StickerGetConditionParameterTagLength())],
+        'PackedStickerIconLocalizeEtcId': bacy.convert_uint(obj.PackedStickerIconLocalizeEtcId(), password),
+        'PackedStickerIconPath': bacy.convert_string(obj.PackedStickerIconPath(), password),
+        'IconPath': bacy.convert_string(obj.IconPath(), password),
+        'StickerDetailPath': bacy.convert_string(obj.StickerDetailPath(), password),
     }
 
 
 def dump_StrategyObjectBuffDefineExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'StrategyObjectBuffID': table_encryption.convert_long(obj.StrategyObjectBuffID(), password),
-        'StrategyObjectTurn': table_encryption.convert_int(obj.StrategyObjectTurn(), password),
-        'SkillGroupId': table_encryption.convert_string(obj.SkillGroupId(), password),
-        'LocalizeCodeId': table_encryption.convert_uint(obj.LocalizeCodeId(), password),
-        'IconPath': table_encryption.convert_string(obj.IconPath(), password),
+        'StrategyObjectBuffID': bacy.convert_long(obj.StrategyObjectBuffID(), password),
+        'StrategyObjectTurn': bacy.convert_int(obj.StrategyObjectTurn(), password),
+        'SkillGroupId': bacy.convert_string(obj.SkillGroupId(), password),
+        'LocalizeCodeId': bacy.convert_uint(obj.LocalizeCodeId(), password),
+        'IconPath': bacy.convert_string(obj.IconPath(), password),
     }
 
 
 def dump_StringTestExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'String': [table_encryption.convert_string(obj.String(j), password) for j in range(obj.StringLength())],
-        'Sentence1': table_encryption.convert_string(obj.Sentence1(), password),
-        'Script': table_encryption.convert_string(obj.Script(), password),
+        'String': [bacy.convert_string(obj.String(j), password) for j in range(obj.StringLength())],
+        'Sentence1': bacy.convert_string(obj.Sentence1(), password),
+        'Script': bacy.convert_string(obj.Script(), password),
     }
 
 
 def dump_SystemMailExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'MailType': MailType(table_encryption.convert_int(obj.MailType_(), password)).name,
-        'ExpiredDay': table_encryption.convert_long(obj.ExpiredDay(), password),
-        'Sender': table_encryption.convert_string(obj.Sender(), password),
-        'Comment': table_encryption.convert_string(obj.Comment(), password),
+        'MailType': MailType(bacy.convert_int(obj.MailType_(), password)).name,
+        'ExpiredDay': bacy.convert_long(obj.ExpiredDay(), password),
+        'Sender': bacy.convert_string(obj.Sender(), password),
+        'Comment': bacy.convert_string(obj.Comment(), password),
     }
 
 
 def dump_TacticalSupportSystemExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'SummonedTime': table_encryption.convert_long(obj.SummonedTime(), password),
-        'DefaultPersonalityId': table_encryption.convert_long(obj.DefaultPersonalityId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'SummonedTime': bacy.convert_long(obj.SummonedTime(), password),
+        'DefaultPersonalityId': bacy.convert_long(obj.DefaultPersonalityId(), password),
         'CanTargeting': obj.CanTargeting(),
         'CanCover': obj.CanCover(),
-        'ObstacleUniqueName': table_encryption.convert_string(obj.ObstacleUniqueName(), password),
-        'ObstacleCoverRange': table_encryption.convert_long(obj.ObstacleCoverRange(), password),
-        'SummonSkilllGroupId': table_encryption.convert_string(obj.SummonSkilllGroupId(), password),
-        'CrashObstacleOBBWidth': table_encryption.convert_long(obj.CrashObstacleOBBWidth(), password),
-        'CrashObstacleOBBHeight': table_encryption.convert_long(obj.CrashObstacleOBBHeight(), password),
+        'ObstacleUniqueName': bacy.convert_string(obj.ObstacleUniqueName(), password),
+        'ObstacleCoverRange': bacy.convert_long(obj.ObstacleCoverRange(), password),
+        'SummonSkilllGroupId': bacy.convert_string(obj.SummonSkilllGroupId(), password),
+        'CrashObstacleOBBWidth': bacy.convert_long(obj.CrashObstacleOBBWidth(), password),
+        'CrashObstacleOBBHeight': bacy.convert_long(obj.CrashObstacleOBBHeight(), password),
         'IsTSSBlockedNodeCheck': obj.IsTSSBlockedNodeCheck(),
-        'NumberOfUses': table_encryption.convert_int(obj.NumberOfUses(), password),
-        'InventoryOffsetX': table_encryption.convert_float(obj.InventoryOffsetX(), password),
-        'InventoryOffsetY': table_encryption.convert_float(obj.InventoryOffsetY(), password),
-        'InventoryOffsetZ': table_encryption.convert_float(obj.InventoryOffsetZ(), password),
-        'InteractionChar': table_encryption.convert_long(obj.InteractionChar(), password),
-        'CharacterInteractionStartDelay': table_encryption.convert_long(obj.CharacterInteractionStartDelay(), password),
-        'GetOnStartEffectPath': table_encryption.convert_string(obj.GetOnStartEffectPath(), password),
-        'GetOnEndEffectPath': table_encryption.convert_string(obj.GetOnEndEffectPath(), password),
-        'SummonerCharacterId': table_encryption.convert_long(obj.SummonerCharacterId(), password),
-        'InteractionFrame': table_encryption.convert_int(obj.InteractionFrame(), password),
-        'TSAInteractionAddDuration': table_encryption.convert_long(obj.TSAInteractionAddDuration(), password),
-        'InteractionStudentExSkillGroupId': table_encryption.convert_string(obj.InteractionStudentExSkillGroupId(), password),
-        'InteractionSkillCardTexture': table_encryption.convert_string(obj.InteractionSkillCardTexture(), password),
-        'InteractionSkillSpine': table_encryption.convert_string(obj.InteractionSkillSpine(), password),
-        'RetreatFrame': table_encryption.convert_int(obj.RetreatFrame(), password),
-        'DestroyFrame': table_encryption.convert_int(obj.DestroyFrame(), password),
+        'NumberOfUses': bacy.convert_int(obj.NumberOfUses(), password),
+        'InventoryOffsetX': bacy.convert_float(obj.InventoryOffsetX(), password),
+        'InventoryOffsetY': bacy.convert_float(obj.InventoryOffsetY(), password),
+        'InventoryOffsetZ': bacy.convert_float(obj.InventoryOffsetZ(), password),
+        'InteractionChar': bacy.convert_long(obj.InteractionChar(), password),
+        'CharacterInteractionStartDelay': bacy.convert_long(obj.CharacterInteractionStartDelay(), password),
+        'GetOnStartEffectPath': bacy.convert_string(obj.GetOnStartEffectPath(), password),
+        'GetOnEndEffectPath': bacy.convert_string(obj.GetOnEndEffectPath(), password),
+        'SummonerCharacterId': bacy.convert_long(obj.SummonerCharacterId(), password),
+        'InteractionFrame': bacy.convert_int(obj.InteractionFrame(), password),
+        'TSAInteractionAddDuration': bacy.convert_long(obj.TSAInteractionAddDuration(), password),
+        'InteractionStudentExSkillGroupId': bacy.convert_string(obj.InteractionStudentExSkillGroupId(), password),
+        'InteractionSkillCardTexture': bacy.convert_string(obj.InteractionSkillCardTexture(), password),
+        'InteractionSkillSpine': bacy.convert_string(obj.InteractionSkillSpine(), password),
+        'RetreatFrame': bacy.convert_int(obj.RetreatFrame(), password),
+        'DestroyFrame': bacy.convert_int(obj.DestroyFrame(), password),
     }
 
 
 def dump_TacticArenaSimulatorSettingExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Order': table_encryption.convert_long(obj.Order(), password),
-        'Repeat': table_encryption.convert_long(obj.Repeat(), password),
-        'AttackerFrom': ArenaSimulatorServer(table_encryption.convert_int(obj.AttackerFrom(), password)).name,
-        'AttackerUserArenaGroup': table_encryption.convert_long(obj.AttackerUserArenaGroup(), password),
-        'AttackerUserArenaRank': table_encryption.convert_long(obj.AttackerUserArenaRank(), password),
-        'AttackerPresetGroupId': table_encryption.convert_long(obj.AttackerPresetGroupId(), password),
-        'AttackerStrikerNum': table_encryption.convert_long(obj.AttackerStrikerNum(), password),
-        'AttackerSpecialNum': table_encryption.convert_long(obj.AttackerSpecialNum(), password),
-        'DefenderFrom': ArenaSimulatorServer(table_encryption.convert_int(obj.DefenderFrom(), password)).name,
-        'DefenderUserArenaGroup': table_encryption.convert_long(obj.DefenderUserArenaGroup(), password),
-        'DefenderUserArenaRank': table_encryption.convert_long(obj.DefenderUserArenaRank(), password),
-        'DefenderPresetGroupId': table_encryption.convert_long(obj.DefenderPresetGroupId(), password),
-        'DefenderStrikerNum': table_encryption.convert_long(obj.DefenderStrikerNum(), password),
-        'DefenderSpecialNum': table_encryption.convert_long(obj.DefenderSpecialNum(), password),
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
+        'Order': bacy.convert_long(obj.Order(), password),
+        'Repeat': bacy.convert_long(obj.Repeat(), password),
+        'AttackerFrom': ArenaSimulatorServer(bacy.convert_int(obj.AttackerFrom(), password)).name,
+        'AttackerUserArenaGroup': bacy.convert_long(obj.AttackerUserArenaGroup(), password),
+        'AttackerUserArenaRank': bacy.convert_long(obj.AttackerUserArenaRank(), password),
+        'AttackerPresetGroupId': bacy.convert_long(obj.AttackerPresetGroupId(), password),
+        'AttackerStrikerNum': bacy.convert_long(obj.AttackerStrikerNum(), password),
+        'AttackerSpecialNum': bacy.convert_long(obj.AttackerSpecialNum(), password),
+        'DefenderFrom': ArenaSimulatorServer(bacy.convert_int(obj.DefenderFrom(), password)).name,
+        'DefenderUserArenaGroup': bacy.convert_long(obj.DefenderUserArenaGroup(), password),
+        'DefenderUserArenaRank': bacy.convert_long(obj.DefenderUserArenaRank(), password),
+        'DefenderPresetGroupId': bacy.convert_long(obj.DefenderPresetGroupId(), password),
+        'DefenderStrikerNum': bacy.convert_long(obj.DefenderStrikerNum(), password),
+        'DefenderSpecialNum': bacy.convert_long(obj.DefenderSpecialNum(), password),
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
     }
 
 
 def dump_TacticDamageSimulatorSettingExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Order': table_encryption.convert_int(obj.Order(), password),
-        'Repeat': table_encryption.convert_int(obj.Repeat(), password),
-        'TestPreset': table_encryption.convert_long(obj.TestPreset(), password),
-        'TestBattleTime': table_encryption.convert_long(obj.TestBattleTime(), password),
-        'StrikerSquard': table_encryption.convert_long(obj.StrikerSquard(), password),
-        'SpecialSquard': table_encryption.convert_long(obj.SpecialSquard(), password),
+        'Order': bacy.convert_int(obj.Order(), password),
+        'Repeat': bacy.convert_int(obj.Repeat(), password),
+        'TestPreset': bacy.convert_long(obj.TestPreset(), password),
+        'TestBattleTime': bacy.convert_long(obj.TestBattleTime(), password),
+        'StrikerSquard': bacy.convert_long(obj.StrikerSquard(), password),
+        'SpecialSquard': bacy.convert_long(obj.SpecialSquard(), password),
         'ReplaceCharacterCostRegen': obj.ReplaceCharacterCostRegen(),
-        'ReplaceCostRegenValue': table_encryption.convert_int(obj.ReplaceCostRegenValue(), password),
+        'ReplaceCostRegenValue': bacy.convert_int(obj.ReplaceCostRegenValue(), password),
         'UseAutoSkill': obj.UseAutoSkill(),
-        'OverrideStreetAdaptation': TerrainAdaptationStat(table_encryption.convert_int(obj.OverrideStreetAdaptation(), password)).name,
-        'OverrideOutdoorAdaptation': TerrainAdaptationStat(table_encryption.convert_int(obj.OverrideOutdoorAdaptation(), password)).name,
-        'OverrideIndoorAdaptation': TerrainAdaptationStat(table_encryption.convert_int(obj.OverrideIndoorAdaptation(), password)).name,
+        'OverrideStreetAdaptation': TerrainAdaptationStat(bacy.convert_int(obj.OverrideStreetAdaptation(), password)).name,
+        'OverrideOutdoorAdaptation': TerrainAdaptationStat(bacy.convert_int(obj.OverrideOutdoorAdaptation(), password)).name,
+        'OverrideIndoorAdaptation': TerrainAdaptationStat(bacy.convert_int(obj.OverrideIndoorAdaptation(), password)).name,
         'ApplyOverrideAdaptation': obj.ApplyOverrideAdaptation(),
-        'OverrideFavorLevel': table_encryption.convert_int(obj.OverrideFavorLevel(), password),
+        'OverrideFavorLevel': bacy.convert_int(obj.OverrideFavorLevel(), password),
         'ApplyOverrideFavorLevel': obj.ApplyOverrideFavorLevel(),
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
-        'FixedCharacter': [table_encryption.convert_long(obj.FixedCharacter(j), password) for j in range(obj.FixedCharacterLength())],
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
+        'FixedCharacter': [bacy.convert_long(obj.FixedCharacter(j), password) for j in range(obj.FixedCharacterLength())],
     }
 
 
 def dump_TacticEntityEffectFilterExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'TargetEffectName': table_encryption.convert_string(obj.TargetEffectName(), password),
+        'TargetEffectName': bacy.convert_string(obj.TargetEffectName(), password),
         'ShowEffectToVehicle': obj.ShowEffectToVehicle(),
         'ShowEffectToBoss': obj.ShowEffectToBoss(),
     }
 
 
 def dump_TacticSimulatorSettingExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
-        'GetExp': table_encryption.convert_long(obj.GetExp(), password),
-        'GetStarGrade': table_encryption.convert_long(obj.GetStarGrade(), password),
-        'Equipment': table_encryption.convert_long(obj.Equipment(), password),
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
+        'GetExp': bacy.convert_long(obj.GetExp(), password),
+        'GetStarGrade': bacy.convert_long(obj.GetStarGrade(), password),
+        'Equipment': bacy.convert_long(obj.Equipment(), password),
     }
 
 
 def dump_TacticSkipExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'LevelDiff': table_encryption.convert_int(obj.LevelDiff(), password),
-        'HPResult': table_encryption.convert_long(obj.HPResult(), password),
+        'LevelDiff': bacy.convert_int(obj.LevelDiff(), password),
+        'HPResult': bacy.convert_long(obj.HPResult(), password),
     }
 
 
 def dump_TacticTimeAttackSimulatorConfigExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Order': table_encryption.convert_long(obj.Order(), password),
-        'Repeat': table_encryption.convert_long(obj.Repeat(), password),
-        'PresetGroupId': table_encryption.convert_long(obj.PresetGroupId(), password),
-        'AttackStrikerNum': table_encryption.convert_long(obj.AttackStrikerNum(), password),
-        'AttackSpecialNum': table_encryption.convert_long(obj.AttackSpecialNum(), password),
-        'GeasId': table_encryption.convert_long(obj.GeasId(), password),
+        'Order': bacy.convert_long(obj.Order(), password),
+        'Repeat': bacy.convert_long(obj.Repeat(), password),
+        'PresetGroupId': bacy.convert_long(obj.PresetGroupId(), password),
+        'AttackStrikerNum': bacy.convert_long(obj.AttackStrikerNum(), password),
+        'AttackSpecialNum': bacy.convert_long(obj.AttackSpecialNum(), password),
+        'GeasId': bacy.convert_long(obj.GeasId(), password),
     }
 
 
 def dump_TerrainAdaptationFactorExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'TerrainAdaptation': StageTopography(table_encryption.convert_int(obj.TerrainAdaptation(), password)).name,
-        'TerrainAdaptationStat': TerrainAdaptationStat(table_encryption.convert_int(obj.TerrainAdaptationStat_(), password)).name,
-        'ShotFactor': table_encryption.convert_long(obj.ShotFactor(), password),
-        'BlockFactor': table_encryption.convert_long(obj.BlockFactor(), password),
-        'AccuracyFactor': table_encryption.convert_long(obj.AccuracyFactor(), password),
-        'DodgeFactor': table_encryption.convert_long(obj.DodgeFactor(), password),
-        'AttackPowerFactor': table_encryption.convert_long(obj.AttackPowerFactor(), password),
+        'TerrainAdaptation': StageTopography(bacy.convert_int(obj.TerrainAdaptation(), password)).name,
+        'TerrainAdaptationStat': TerrainAdaptationStat(bacy.convert_int(obj.TerrainAdaptationStat_(), password)).name,
+        'ShotFactor': bacy.convert_long(obj.ShotFactor(), password),
+        'BlockFactor': bacy.convert_long(obj.BlockFactor(), password),
+        'AccuracyFactor': bacy.convert_long(obj.AccuracyFactor(), password),
+        'DodgeFactor': bacy.convert_long(obj.DodgeFactor(), password),
+        'AttackPowerFactor': bacy.convert_long(obj.AttackPowerFactor(), password),
     }
 
 
 def dump_TimeAttackDungeonExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'TimeAttackDungeonType': TimeAttackDungeonType(table_encryption.convert_int(obj.TimeAttackDungeonType_(), password)).name,
-        'LocalizeEtcKey': table_encryption.convert_uint(obj.LocalizeEtcKey(), password),
-        'IconPath': table_encryption.convert_string(obj.IconPath(), password),
-        'InformationGroupID': table_encryption.convert_long(obj.InformationGroupID(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'TimeAttackDungeonType': TimeAttackDungeonType(bacy.convert_int(obj.TimeAttackDungeonType_(), password)).name,
+        'LocalizeEtcKey': bacy.convert_uint(obj.LocalizeEtcKey(), password),
+        'IconPath': bacy.convert_string(obj.IconPath(), password),
+        'InformationGroupID': bacy.convert_long(obj.InformationGroupID(), password),
     }
 
 
 def dump_TimeAttackDungeonGeasExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'TimeAttackDungeonType': TimeAttackDungeonType(table_encryption.convert_int(obj.TimeAttackDungeonType_(), password)).name,
-        'LocalizeEtcKey': table_encryption.convert_uint(obj.LocalizeEtcKey(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'ClearDefaultPoint': table_encryption.convert_long(obj.ClearDefaultPoint(), password),
-        'ClearTimeWeightPoint': table_encryption.convert_long(obj.ClearTimeWeightPoint(), password),
-        'TimeWeightConst': table_encryption.convert_long(obj.TimeWeightConst(), password),
-        'Difficulty': table_encryption.convert_int(obj.Difficulty(), password),
-        'RecommandLevel': table_encryption.convert_int(obj.RecommandLevel(), password),
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
-        'AllyPassiveSkillId': [table_encryption.convert_string(obj.AllyPassiveSkillId(j), password) for j in range(obj.AllyPassiveSkillIdLength())],
-        'AllyPassiveSkillLevel': [table_encryption.convert_int(obj.AllyPassiveSkillLevel(j), password) for j in range(obj.AllyPassiveSkillLevelLength())],
-        'EnemyPassiveSkillId': [table_encryption.convert_string(obj.EnemyPassiveSkillId(j), password) for j in range(obj.EnemyPassiveSkillIdLength())],
-        'EnemyPassiveSkillLevel': [table_encryption.convert_int(obj.EnemyPassiveSkillLevel(j), password) for j in range(obj.EnemyPassiveSkillLevelLength())],
-        'GeasIconPath': [table_encryption.convert_string(obj.GeasIconPath(j), password) for j in range(obj.GeasIconPathLength())],
-        'GeasLocalizeEtcKey': [table_encryption.convert_uint(obj.GeasLocalizeEtcKey(j), password) for j in range(obj.GeasLocalizeEtcKeyLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'TimeAttackDungeonType': TimeAttackDungeonType(bacy.convert_int(obj.TimeAttackDungeonType_(), password)).name,
+        'LocalizeEtcKey': bacy.convert_uint(obj.LocalizeEtcKey(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'ClearDefaultPoint': bacy.convert_long(obj.ClearDefaultPoint(), password),
+        'ClearTimeWeightPoint': bacy.convert_long(obj.ClearTimeWeightPoint(), password),
+        'TimeWeightConst': bacy.convert_long(obj.TimeWeightConst(), password),
+        'Difficulty': bacy.convert_int(obj.Difficulty(), password),
+        'RecommandLevel': bacy.convert_int(obj.RecommandLevel(), password),
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
+        'AllyPassiveSkillId': [bacy.convert_string(obj.AllyPassiveSkillId(j), password) for j in range(obj.AllyPassiveSkillIdLength())],
+        'AllyPassiveSkillLevel': [bacy.convert_int(obj.AllyPassiveSkillLevel(j), password) for j in range(obj.AllyPassiveSkillLevelLength())],
+        'EnemyPassiveSkillId': [bacy.convert_string(obj.EnemyPassiveSkillId(j), password) for j in range(obj.EnemyPassiveSkillIdLength())],
+        'EnemyPassiveSkillLevel': [bacy.convert_int(obj.EnemyPassiveSkillLevel(j), password) for j in range(obj.EnemyPassiveSkillLevelLength())],
+        'GeasIconPath': [bacy.convert_string(obj.GeasIconPath(j), password) for j in range(obj.GeasIconPathLength())],
+        'GeasLocalizeEtcKey': [bacy.convert_uint(obj.GeasLocalizeEtcKey(j), password) for j in range(obj.GeasLocalizeEtcKeyLength())],
     }
 
 
 def dump_TimeAttackDungeonRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'RewardMaxPoint': table_encryption.convert_long(obj.RewardMaxPoint(), password),
-        'RewardType': [TimeAttackDungeonRewardType(table_encryption.convert_int(obj.RewardType(j), password)).name for j in range(obj.RewardTypeLength())],
-        'RewardMinPoint': [table_encryption.convert_long(obj.RewardMinPoint(j), password) for j in range(obj.RewardMinPointLength())],
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardParcelDefaultAmount': [table_encryption.convert_long(obj.RewardParcelDefaultAmount(j), password) for j in range(obj.RewardParcelDefaultAmountLength())],
-        'RewardParcelMaxAmount': [table_encryption.convert_long(obj.RewardParcelMaxAmount(j), password) for j in range(obj.RewardParcelMaxAmountLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'RewardMaxPoint': bacy.convert_long(obj.RewardMaxPoint(), password),
+        'RewardType': [TimeAttackDungeonRewardType(bacy.convert_int(obj.RewardType(j), password)).name for j in range(obj.RewardTypeLength())],
+        'RewardMinPoint': [bacy.convert_long(obj.RewardMinPoint(j), password) for j in range(obj.RewardMinPointLength())],
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardParcelDefaultAmount': [bacy.convert_long(obj.RewardParcelDefaultAmount(j), password) for j in range(obj.RewardParcelDefaultAmountLength())],
+        'RewardParcelMaxAmount': [bacy.convert_long(obj.RewardParcelMaxAmount(j), password) for j in range(obj.RewardParcelMaxAmountLength())],
     }
 
 
 def dump_TimeAttackDungeonSeasonManageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'StartDate': table_encryption.convert_string(obj.StartDate(), password),
-        'EndDate': table_encryption.convert_string(obj.EndDate(), password),
-        'UISlot': table_encryption.convert_long(obj.UISlot(), password),
-        'DungeonId': table_encryption.convert_long(obj.DungeonId(), password),
-        'DifficultyGeas': [table_encryption.convert_long(obj.DifficultyGeas(j), password) for j in range(obj.DifficultyGeasLength())],
-        'TimeAttackDungeonRewardId': table_encryption.convert_long(obj.TimeAttackDungeonRewardId(), password),
-        'RoomLifeTimeInSeconds': table_encryption.convert_long(obj.RoomLifeTimeInSeconds(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'StartDate': bacy.convert_string(obj.StartDate(), password),
+        'EndDate': bacy.convert_string(obj.EndDate(), password),
+        'UISlot': bacy.convert_long(obj.UISlot(), password),
+        'DungeonId': bacy.convert_long(obj.DungeonId(), password),
+        'DifficultyGeas': [bacy.convert_long(obj.DifficultyGeas(j), password) for j in range(obj.DifficultyGeasLength())],
+        'TimeAttackDungeonRewardId': bacy.convert_long(obj.TimeAttackDungeonRewardId(), password),
+        'RoomLifeTimeInSeconds': bacy.convert_long(obj.RoomLifeTimeInSeconds(), password),
     }
 
 
 def dump_TranscendenceRecipeExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'DevName': table_encryption.convert_string(obj.DevName(), password),
-        'CostCurrencyType': CurrencyTypes(table_encryption.convert_int(obj.CostCurrencyType(), password)).name,
-        'CostCurrencyAmount': table_encryption.convert_long(obj.CostCurrencyAmount(), password),
-        'ParcelType': [ParcelType(table_encryption.convert_int(obj.ParcelType_(j), password)).name for j in range(obj.ParcelTypeLength())],
-        'ParcelId': [table_encryption.convert_long(obj.ParcelId(j), password) for j in range(obj.ParcelIdLength())],
-        'ParcelAmount': [table_encryption.convert_int(obj.ParcelAmount(j), password) for j in range(obj.ParcelAmountLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'DevName': bacy.convert_string(obj.DevName(), password),
+        'CostCurrencyType': CurrencyTypes(bacy.convert_int(obj.CostCurrencyType(), password)).name,
+        'CostCurrencyAmount': bacy.convert_long(obj.CostCurrencyAmount(), password),
+        'ParcelType': [ParcelType(bacy.convert_int(obj.ParcelType_(j), password)).name for j in range(obj.ParcelTypeLength())],
+        'ParcelId': [bacy.convert_long(obj.ParcelId(j), password) for j in range(obj.ParcelIdLength())],
+        'ParcelAmount': [bacy.convert_int(obj.ParcelAmount(j), password) for j in range(obj.ParcelAmountLength())],
     }
 
 
 def dump_TrophyCollectionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'LocalizeCodeId': table_encryption.convert_uint(obj.LocalizeCodeId(), password),
-        'FurnitureId': [table_encryption.convert_long(obj.FurnitureId(j), password) for j in range(obj.FurnitureIdLength())],
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'LocalizeCodeId': bacy.convert_uint(obj.LocalizeCodeId(), password),
+        'FurnitureId': [bacy.convert_long(obj.FurnitureId(j), password) for j in range(obj.FurnitureIdLength())],
     }
 
 
 def dump_WeekDungeonExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'StageId': table_encryption.convert_long(obj.StageId(), password),
-        'WeekDungeonType': WeekDungeonType(table_encryption.convert_int(obj.WeekDungeonType_(), password)).name,
-        'Difficulty': table_encryption.convert_int(obj.Difficulty(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'PrevStageId': table_encryption.convert_long(obj.PrevStageId(), password),
-        'StageEnterCostType': [ParcelType(table_encryption.convert_int(obj.StageEnterCostType(j), password)).name for j in range(obj.StageEnterCostTypeLength())],
-        'StageEnterCostId': [table_encryption.convert_long(obj.StageEnterCostId(j), password) for j in range(obj.StageEnterCostIdLength())],
-        'StageEnterCostAmount': [table_encryption.convert_int(obj.StageEnterCostAmount(j), password) for j in range(obj.StageEnterCostAmountLength())],
-        'GroundId': table_encryption.convert_int(obj.GroundId(), password),
-        'StarGoal': [StarGoalType(table_encryption.convert_int(obj.StarGoal(j), password)).name for j in range(obj.StarGoalLength())],
-        'StarGoalAmount': [table_encryption.convert_int(obj.StarGoalAmount(j), password) for j in range(obj.StarGoalAmountLength())],
-        'StageTopography': StageTopography(table_encryption.convert_int(obj.StageTopography_(), password)).name,
-        'RecommandLevel': table_encryption.convert_long(obj.RecommandLevel(), password),
-        'StageRewardId': table_encryption.convert_long(obj.StageRewardId(), password),
-        'PlayTimeLimitInSeconds': table_encryption.convert_long(obj.PlayTimeLimitInSeconds(), password),
-        'BattleRewardExp': table_encryption.convert_long(obj.BattleRewardExp(), password),
-        'BattleRewardPlayerExp': table_encryption.convert_long(obj.BattleRewardPlayerExp(), password),
-        'GroupBuffID': [table_encryption.convert_long(obj.GroupBuffID(j), password) for j in range(obj.GroupBuffIDLength())],
-        'EchelonExtensionType': EchelonExtensionType(table_encryption.convert_int(obj.EchelonExtensionType_(), password)).name,
+        'StageId': bacy.convert_long(obj.StageId(), password),
+        'WeekDungeonType': WeekDungeonType(bacy.convert_int(obj.WeekDungeonType_(), password)).name,
+        'Difficulty': bacy.convert_int(obj.Difficulty(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'PrevStageId': bacy.convert_long(obj.PrevStageId(), password),
+        'StageEnterCostType': [ParcelType(bacy.convert_int(obj.StageEnterCostType(j), password)).name for j in range(obj.StageEnterCostTypeLength())],
+        'StageEnterCostId': [bacy.convert_long(obj.StageEnterCostId(j), password) for j in range(obj.StageEnterCostIdLength())],
+        'StageEnterCostAmount': [bacy.convert_int(obj.StageEnterCostAmount(j), password) for j in range(obj.StageEnterCostAmountLength())],
+        'GroundId': bacy.convert_int(obj.GroundId(), password),
+        'StarGoal': [StarGoalType(bacy.convert_int(obj.StarGoal(j), password)).name for j in range(obj.StarGoalLength())],
+        'StarGoalAmount': [bacy.convert_int(obj.StarGoalAmount(j), password) for j in range(obj.StarGoalAmountLength())],
+        'StageTopography': StageTopography(bacy.convert_int(obj.StageTopography_(), password)).name,
+        'RecommandLevel': bacy.convert_long(obj.RecommandLevel(), password),
+        'StageRewardId': bacy.convert_long(obj.StageRewardId(), password),
+        'PlayTimeLimitInSeconds': bacy.convert_long(obj.PlayTimeLimitInSeconds(), password),
+        'BattleRewardExp': bacy.convert_long(obj.BattleRewardExp(), password),
+        'BattleRewardPlayerExp': bacy.convert_long(obj.BattleRewardPlayerExp(), password),
+        'GroupBuffID': [bacy.convert_long(obj.GroupBuffID(j), password) for j in range(obj.GroupBuffIDLength())],
+        'EchelonExtensionType': EchelonExtensionType(bacy.convert_int(obj.EchelonExtensionType_(), password)).name,
     }
 
 
 def dump_WeekDungeonFindGiftRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'StageRewardId': table_encryption.convert_long(obj.StageRewardId(), password),
-        'DevName': table_encryption.convert_string(obj.DevName(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardParcelAmount': [table_encryption.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
-        'RewardParcelProbability': [table_encryption.convert_long(obj.RewardParcelProbability(j), password) for j in range(obj.RewardParcelProbabilityLength())],
-        'DropItemModelPrefabPath': [table_encryption.convert_string(obj.DropItemModelPrefabPath(j), password) for j in range(obj.DropItemModelPrefabPathLength())],
+        'StageRewardId': bacy.convert_long(obj.StageRewardId(), password),
+        'DevName': bacy.convert_string(obj.DevName(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardParcelAmount': [bacy.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'RewardParcelProbability': [bacy.convert_long(obj.RewardParcelProbability(j), password) for j in range(obj.RewardParcelProbabilityLength())],
+        'DropItemModelPrefabPath': [bacy.convert_string(obj.DropItemModelPrefabPath(j), password) for j in range(obj.DropItemModelPrefabPathLength())],
     }
 
 
 def dump_WeekDungeonGroupBuffExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'WeekDungeonBuffId': table_encryption.convert_long(obj.WeekDungeonBuffId(), password),
-        'School': School(table_encryption.convert_int(obj.School_(), password)).name,
-        'RecommandLocalizeEtcId': table_encryption.convert_uint(obj.RecommandLocalizeEtcId(), password),
-        'FormationLocalizeEtcId': table_encryption.convert_uint(obj.FormationLocalizeEtcId(), password),
-        'SkillGroupId': table_encryption.convert_string(obj.SkillGroupId(), password),
+        'WeekDungeonBuffId': bacy.convert_long(obj.WeekDungeonBuffId(), password),
+        'School': School(bacy.convert_int(obj.School_(), password)).name,
+        'RecommandLocalizeEtcId': bacy.convert_uint(obj.RecommandLocalizeEtcId(), password),
+        'FormationLocalizeEtcId': bacy.convert_uint(obj.FormationLocalizeEtcId(), password),
+        'SkillGroupId': bacy.convert_string(obj.SkillGroupId(), password),
     }
 
 
 def dump_WeekDungeonOpenScheduleExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'WeekDay': WeekDay(table_encryption.convert_int(obj.WeekDay_(), password)).name,
-        'Open': [WeekDungeonType(table_encryption.convert_int(obj.Open(j), password)).name for j in range(obj.OpenLength())],
+        'WeekDay': WeekDay(bacy.convert_int(obj.WeekDay_(), password)).name,
+        'Open': [WeekDungeonType(bacy.convert_int(obj.Open(j), password)).name for j in range(obj.OpenLength())],
     }
 
 
 def dump_WeekDungeonRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'DungeonType': WeekDungeonType(table_encryption.convert_int(obj.DungeonType(), password)).name,
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardParcelId': table_encryption.convert_long(obj.RewardParcelId(), password),
-        'RewardParcelAmount': table_encryption.convert_long(obj.RewardParcelAmount(), password),
-        'RewardParcelProbability': table_encryption.convert_long(obj.RewardParcelProbability(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'DungeonType': WeekDungeonType(bacy.convert_int(obj.DungeonType(), password)).name,
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardParcelId': bacy.convert_long(obj.RewardParcelId(), password),
+        'RewardParcelAmount': bacy.convert_long(obj.RewardParcelAmount(), password),
+        'RewardParcelProbability': bacy.convert_long(obj.RewardParcelProbability(), password),
         'IsDisplayed': obj.IsDisplayed(),
-        'DropItemModelPrefabPath': table_encryption.convert_string(obj.DropItemModelPrefabPath(), password),
+        'DropItemModelPrefabPath': bacy.convert_string(obj.DropItemModelPrefabPath(), password),
     }
 
 
 def dump_WorldRaidBossGroupExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'WorldRaidBossGroupId': table_encryption.convert_long(obj.WorldRaidBossGroupId(), password),
-        'WorldBossName': table_encryption.convert_string(obj.WorldBossName(), password),
-        'WorldBossPopupPortrait': table_encryption.convert_string(obj.WorldBossPopupPortrait(), password),
-        'WorldBossPopupBG': table_encryption.convert_string(obj.WorldBossPopupBG(), password),
-        'WorldBossParcelPortrait': table_encryption.convert_string(obj.WorldBossParcelPortrait(), password),
-        'WorldBossListParcel': table_encryption.convert_string(obj.WorldBossListParcel(), password),
-        'WorldBossHP': table_encryption.convert_long(obj.WorldBossHP(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'WorldRaidBossGroupId': bacy.convert_long(obj.WorldRaidBossGroupId(), password),
+        'WorldBossName': bacy.convert_string(obj.WorldBossName(), password),
+        'WorldBossPopupPortrait': bacy.convert_string(obj.WorldBossPopupPortrait(), password),
+        'WorldBossPopupBG': bacy.convert_string(obj.WorldBossPopupBG(), password),
+        'WorldBossParcelPortrait': bacy.convert_string(obj.WorldBossParcelPortrait(), password),
+        'WorldBossListParcel': bacy.convert_string(obj.WorldBossListParcel(), password),
+        'WorldBossHP': bacy.convert_long(obj.WorldBossHP(), password),
         'UIHideBeforeSpawn': obj.UIHideBeforeSpawn(),
         'HideAnotherBossKilled': obj.HideAnotherBossKilled(),
-        'WorldBossClearRewardGroupId': table_encryption.convert_long(obj.WorldBossClearRewardGroupId(), password),
-        'AnotherBossKilled': [table_encryption.convert_long(obj.AnotherBossKilled(j), password) for j in range(obj.AnotherBossKilledLength())],
-        'EchelonConstraintGroupId': table_encryption.convert_long(obj.EchelonConstraintGroupId(), password),
-        'ExclusiveOperatorBossSpawn': table_encryption.convert_string(obj.ExclusiveOperatorBossSpawn(), password),
-        'ExclusiveOperatorBossKill': table_encryption.convert_string(obj.ExclusiveOperatorBossKill(), password),
-        'ExclusiveOperatorScenarioBattle': table_encryption.convert_string(obj.ExclusiveOperatorScenarioBattle(), password),
-        'ExclusiveOperatorBossDamaged': table_encryption.convert_string(obj.ExclusiveOperatorBossDamaged(), password),
-        'BossGroupOpenCondition': table_encryption.convert_long(obj.BossGroupOpenCondition(), password),
+        'WorldBossClearRewardGroupId': bacy.convert_long(obj.WorldBossClearRewardGroupId(), password),
+        'AnotherBossKilled': [bacy.convert_long(obj.AnotherBossKilled(j), password) for j in range(obj.AnotherBossKilledLength())],
+        'EchelonConstraintGroupId': bacy.convert_long(obj.EchelonConstraintGroupId(), password),
+        'ExclusiveOperatorBossSpawn': bacy.convert_string(obj.ExclusiveOperatorBossSpawn(), password),
+        'ExclusiveOperatorBossKill': bacy.convert_string(obj.ExclusiveOperatorBossKill(), password),
+        'ExclusiveOperatorScenarioBattle': bacy.convert_string(obj.ExclusiveOperatorScenarioBattle(), password),
+        'ExclusiveOperatorBossDamaged': bacy.convert_string(obj.ExclusiveOperatorBossDamaged(), password),
+        'BossGroupOpenCondition': bacy.convert_long(obj.BossGroupOpenCondition(), password),
     }
 
 
 def dump_WorldRaidConditionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'LockUI': [table_encryption.convert_string(obj.LockUI(j), password) for j in range(obj.LockUILength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'LockUI': [bacy.convert_string(obj.LockUI(j), password) for j in range(obj.LockUILength())],
         'HideWhenLocked': obj.HideWhenLocked(),
-        'AccountLevel': table_encryption.convert_long(obj.AccountLevel(), password),
-        'ScenarioModeId': [table_encryption.convert_long(obj.ScenarioModeId(j), password) for j in range(obj.ScenarioModeIdLength())],
-        'CampaignStageID': [table_encryption.convert_long(obj.CampaignStageID(j), password) for j in range(obj.CampaignStageIDLength())],
-        'MultipleConditionCheckType': MultipleConditionCheckType(table_encryption.convert_int(obj.MultipleConditionCheckType_(), password)).name,
-        'AfterWhenDate': table_encryption.convert_string(obj.AfterWhenDate(), password),
-        'WorldRaidBossKill': [table_encryption.convert_long(obj.WorldRaidBossKill(j), password) for j in range(obj.WorldRaidBossKillLength())],
+        'AccountLevel': bacy.convert_long(obj.AccountLevel(), password),
+        'ScenarioModeId': [bacy.convert_long(obj.ScenarioModeId(j), password) for j in range(obj.ScenarioModeIdLength())],
+        'CampaignStageID': [bacy.convert_long(obj.CampaignStageID(j), password) for j in range(obj.CampaignStageIDLength())],
+        'MultipleConditionCheckType': MultipleConditionCheckType(bacy.convert_int(obj.MultipleConditionCheckType_(), password)).name,
+        'AfterWhenDate': bacy.convert_string(obj.AfterWhenDate(), password),
+        'WorldRaidBossKill': [bacy.convert_long(obj.WorldRaidBossKill(j), password) for j in range(obj.WorldRaidBossKillLength())],
     }
 
 
 def dump_WorldRaidFavorBuffExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'WorldRaidFavorRank': table_encryption.convert_long(obj.WorldRaidFavorRank(), password),
-        'WorldRaidFavorRankBonus': table_encryption.convert_long(obj.WorldRaidFavorRankBonus(), password),
+        'WorldRaidFavorRank': bacy.convert_long(obj.WorldRaidFavorRank(), password),
+        'WorldRaidFavorRankBonus': bacy.convert_long(obj.WorldRaidFavorRankBonus(), password),
     }
 
 
 def dump_WorldRaidSeasonManageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'SeasonId': table_encryption.convert_long(obj.SeasonId(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'EnterTicket': CurrencyTypes(table_encryption.convert_int(obj.EnterTicket(), password)).name,
-        'WorldRaidLobbyScene': table_encryption.convert_string(obj.WorldRaidLobbyScene(), password),
-        'WorldRaidLobbyBanner': table_encryption.convert_string(obj.WorldRaidLobbyBanner(), password),
-        'WorldRaidLobbyBG': table_encryption.convert_string(obj.WorldRaidLobbyBG(), password),
+        'SeasonId': bacy.convert_long(obj.SeasonId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'EnterTicket': CurrencyTypes(bacy.convert_int(obj.EnterTicket(), password)).name,
+        'WorldRaidLobbyScene': bacy.convert_string(obj.WorldRaidLobbyScene(), password),
+        'WorldRaidLobbyBanner': bacy.convert_string(obj.WorldRaidLobbyBanner(), password),
+        'WorldRaidLobbyBG': bacy.convert_string(obj.WorldRaidLobbyBG(), password),
         'WorldRaidLobbyBannerShow': obj.WorldRaidLobbyBannerShow(),
-        'SeasonOpenCondition': table_encryption.convert_long(obj.SeasonOpenCondition(), password),
-        'WorldRaidLobbyEnterScenario': table_encryption.convert_long(obj.WorldRaidLobbyEnterScenario(), password),
+        'SeasonOpenCondition': bacy.convert_long(obj.SeasonOpenCondition(), password),
+        'WorldRaidLobbyEnterScenario': bacy.convert_long(obj.WorldRaidLobbyEnterScenario(), password),
         'CanPlayNotSeasonTime': obj.CanPlayNotSeasonTime(),
         'WorldRaidUniqueThemeLobbyUI': obj.WorldRaidUniqueThemeLobbyUI(),
-        'WorldRaidUniqueThemeName': table_encryption.convert_string(obj.WorldRaidUniqueThemeName(), password),
+        'WorldRaidUniqueThemeName': bacy.convert_string(obj.WorldRaidUniqueThemeName(), password),
         'CanWorldRaidGemEnter': obj.CanWorldRaidGemEnter(),
         'HideWorldRaidTicketUI': obj.HideWorldRaidTicketUI(),
         'UseWorldRaidCommonToast': obj.UseWorldRaidCommonToast(),
-        'OpenRaidBossGroupId': [table_encryption.convert_long(obj.OpenRaidBossGroupId(j), password) for j in range(obj.OpenRaidBossGroupIdLength())],
-        'BossSpawnTime': [table_encryption.convert_string(obj.BossSpawnTime(j), password) for j in range(obj.BossSpawnTimeLength())],
-        'EliminateTime': [table_encryption.convert_string(obj.EliminateTime(j), password) for j in range(obj.EliminateTimeLength())],
-        'ScenarioOutputConditionId': [table_encryption.convert_long(obj.ScenarioOutputConditionId(j), password) for j in range(obj.ScenarioOutputConditionIdLength())],
-        'ConditionScenarioGroupid': [table_encryption.convert_long(obj.ConditionScenarioGroupid(j), password) for j in range(obj.ConditionScenarioGroupidLength())],
-        'WorldRaidMapEnterOperator': table_encryption.convert_string(obj.WorldRaidMapEnterOperator(), password),
+        'OpenRaidBossGroupId': [bacy.convert_long(obj.OpenRaidBossGroupId(j), password) for j in range(obj.OpenRaidBossGroupIdLength())],
+        'BossSpawnTime': [bacy.convert_string(obj.BossSpawnTime(j), password) for j in range(obj.BossSpawnTimeLength())],
+        'EliminateTime': [bacy.convert_string(obj.EliminateTime(j), password) for j in range(obj.EliminateTimeLength())],
+        'ScenarioOutputConditionId': [bacy.convert_long(obj.ScenarioOutputConditionId(j), password) for j in range(obj.ScenarioOutputConditionIdLength())],
+        'ConditionScenarioGroupid': [bacy.convert_long(obj.ConditionScenarioGroupid(j), password) for j in range(obj.ConditionScenarioGroupidLength())],
+        'WorldRaidMapEnterOperator': bacy.convert_string(obj.WorldRaidMapEnterOperator(), password),
         'UseFavorRankBuff': obj.UseFavorRankBuff(),
     }
 
 
 def dump_WorldRaidStageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
         'UseBossIndex': obj.UseBossIndex(),
         'UseBossAIPhaseSync': obj.UseBossAIPhaseSync(),
-        'WorldRaidBossGroupId': table_encryption.convert_long(obj.WorldRaidBossGroupId(), password),
-        'PortraitPath': table_encryption.convert_string(obj.PortraitPath(), password),
-        'BGPath': table_encryption.convert_string(obj.BGPath(), password),
-        'RaidCharacterId': table_encryption.convert_long(obj.RaidCharacterId(), password),
-        'BossCharacterId': [table_encryption.convert_long(obj.BossCharacterId(j), password) for j in range(obj.BossCharacterIdLength())],
-        'AssistCharacterLimitCount': table_encryption.convert_long(obj.AssistCharacterLimitCount(), password),
-        'WorldRaidDifficulty': WorldRaidDifficulty(table_encryption.convert_int(obj.WorldRaidDifficulty_(), password)).name,
+        'WorldRaidBossGroupId': bacy.convert_long(obj.WorldRaidBossGroupId(), password),
+        'PortraitPath': bacy.convert_string(obj.PortraitPath(), password),
+        'BGPath': bacy.convert_string(obj.BGPath(), password),
+        'RaidCharacterId': bacy.convert_long(obj.RaidCharacterId(), password),
+        'BossCharacterId': [bacy.convert_long(obj.BossCharacterId(j), password) for j in range(obj.BossCharacterIdLength())],
+        'AssistCharacterLimitCount': bacy.convert_long(obj.AssistCharacterLimitCount(), password),
+        'WorldRaidDifficulty': WorldRaidDifficulty(bacy.convert_int(obj.WorldRaidDifficulty_(), password)).name,
         'DifficultyOpenCondition': obj.DifficultyOpenCondition(),
-        'RaidEnterAmount': table_encryption.convert_long(obj.RaidEnterAmount(), password),
-        'ReEnterAmount': table_encryption.convert_long(obj.ReEnterAmount(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
-        'RaidBattleEndRewardGroupId': table_encryption.convert_long(obj.RaidBattleEndRewardGroupId(), password),
-        'RaidRewardGroupId': table_encryption.convert_long(obj.RaidRewardGroupId(), password),
-        'BattleReadyTimelinePath': [table_encryption.convert_string(obj.BattleReadyTimelinePath(j), password) for j in range(obj.BattleReadyTimelinePathLength())],
-        'BattleReadyTimelinePhaseStart': [table_encryption.convert_int(obj.BattleReadyTimelinePhaseStart(j), password) for j in range(obj.BattleReadyTimelinePhaseStartLength())],
-        'BattleReadyTimelinePhaseEnd': [table_encryption.convert_int(obj.BattleReadyTimelinePhaseEnd(j), password) for j in range(obj.BattleReadyTimelinePhaseEndLength())],
-        'VictoryTimelinePath': table_encryption.convert_string(obj.VictoryTimelinePath(), password),
-        'PhaseChangeTimelinePath': table_encryption.convert_string(obj.PhaseChangeTimelinePath(), password),
-        'TimeLinePhase': table_encryption.convert_long(obj.TimeLinePhase(), password),
-        'EnterScenarioKey': table_encryption.convert_long(obj.EnterScenarioKey(), password),
-        'ClearScenarioKey': table_encryption.convert_long(obj.ClearScenarioKey(), password),
+        'RaidEnterAmount': bacy.convert_long(obj.RaidEnterAmount(), password),
+        'ReEnterAmount': bacy.convert_long(obj.ReEnterAmount(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
+        'RaidBattleEndRewardGroupId': bacy.convert_long(obj.RaidBattleEndRewardGroupId(), password),
+        'RaidRewardGroupId': bacy.convert_long(obj.RaidRewardGroupId(), password),
+        'BattleReadyTimelinePath': [bacy.convert_string(obj.BattleReadyTimelinePath(j), password) for j in range(obj.BattleReadyTimelinePathLength())],
+        'BattleReadyTimelinePhaseStart': [bacy.convert_int(obj.BattleReadyTimelinePhaseStart(j), password) for j in range(obj.BattleReadyTimelinePhaseStartLength())],
+        'BattleReadyTimelinePhaseEnd': [bacy.convert_int(obj.BattleReadyTimelinePhaseEnd(j), password) for j in range(obj.BattleReadyTimelinePhaseEndLength())],
+        'VictoryTimelinePath': bacy.convert_string(obj.VictoryTimelinePath(), password),
+        'PhaseChangeTimelinePath': bacy.convert_string(obj.PhaseChangeTimelinePath(), password),
+        'TimeLinePhase': bacy.convert_long(obj.TimeLinePhase(), password),
+        'EnterScenarioKey': bacy.convert_long(obj.EnterScenarioKey(), password),
+        'ClearScenarioKey': bacy.convert_long(obj.ClearScenarioKey(), password),
         'UseFixedEchelon': obj.UseFixedEchelon(),
-        'FixedEchelonId': table_encryption.convert_long(obj.FixedEchelonId(), password),
+        'FixedEchelonId': bacy.convert_long(obj.FixedEchelonId(), password),
         'IsRaidScenarioBattle': obj.IsRaidScenarioBattle(),
         'ShowSkillCard': obj.ShowSkillCard(),
-        'BossBGInfoKey': table_encryption.convert_uint(obj.BossBGInfoKey(), password),
-        'DamageToWorldBoss': table_encryption.convert_long(obj.DamageToWorldBoss(), password),
-        'AllyPassiveSkill': [table_encryption.convert_string(obj.AllyPassiveSkill(j), password) for j in range(obj.AllyPassiveSkillLength())],
-        'AllyPassiveSkillLevel': [table_encryption.convert_int(obj.AllyPassiveSkillLevel(j), password) for j in range(obj.AllyPassiveSkillLevelLength())],
+        'BossBGInfoKey': bacy.convert_uint(obj.BossBGInfoKey(), password),
+        'DamageToWorldBoss': bacy.convert_long(obj.DamageToWorldBoss(), password),
+        'AllyPassiveSkill': [bacy.convert_string(obj.AllyPassiveSkill(j), password) for j in range(obj.AllyPassiveSkillLength())],
+        'AllyPassiveSkillLevel': [bacy.convert_int(obj.AllyPassiveSkillLevel(j), password) for j in range(obj.AllyPassiveSkillLevelLength())],
         'SaveCurrentLocalBossHP': obj.SaveCurrentLocalBossHP(),
-        'EchelonExtensionType': EchelonExtensionType(table_encryption.convert_int(obj.EchelonExtensionType_(), password)).name,
+        'EchelonExtensionType': EchelonExtensionType(bacy.convert_int(obj.EchelonExtensionType_(), password)).name,
     }
 
 
 def dump_WorldRaidStageRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
         'IsClearStageRewardHideInfo': obj.IsClearStageRewardHideInfo(),
-        'ClearStageRewardProb': table_encryption.convert_long(obj.ClearStageRewardProb(), password),
-        'ClearStageRewardParcelType': ParcelType(table_encryption.convert_int(obj.ClearStageRewardParcelType(), password)).name,
-        'ClearStageRewardParcelUniqueID': table_encryption.convert_long(obj.ClearStageRewardParcelUniqueID(), password),
-        'ClearStageRewardParcelUniqueName': table_encryption.convert_string(obj.ClearStageRewardParcelUniqueName(), password),
-        'ClearStageRewardAmount': table_encryption.convert_long(obj.ClearStageRewardAmount(), password),
+        'ClearStageRewardProb': bacy.convert_long(obj.ClearStageRewardProb(), password),
+        'ClearStageRewardParcelType': ParcelType(bacy.convert_int(obj.ClearStageRewardParcelType(), password)).name,
+        'ClearStageRewardParcelUniqueID': bacy.convert_long(obj.ClearStageRewardParcelUniqueID(), password),
+        'ClearStageRewardParcelUniqueName': bacy.convert_string(obj.ClearStageRewardParcelUniqueName(), password),
+        'ClearStageRewardAmount': bacy.convert_long(obj.ClearStageRewardAmount(), password),
     }
 
 
 def dump_AudioAnimatorExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ControllerNameHash': table_encryption.convert_uint(obj.ControllerNameHash(), password),
-        'VoiceNamePrefix': table_encryption.convert_string(obj.VoiceNamePrefix(), password),
-        'StateNameHash': table_encryption.convert_uint(obj.StateNameHash(), password),
-        'StateName': table_encryption.convert_string(obj.StateName(), password),
+        'ControllerNameHash': bacy.convert_uint(obj.ControllerNameHash(), password),
+        'VoiceNamePrefix': bacy.convert_string(obj.VoiceNamePrefix(), password),
+        'StateNameHash': bacy.convert_uint(obj.StateNameHash(), password),
+        'StateName': bacy.convert_string(obj.StateName(), password),
         'IgnoreInterruptDelay': obj.IgnoreInterruptDelay(),
         'IgnoreInterruptPlay': obj.IgnoreInterruptPlay(),
-        'Volume': table_encryption.convert_float(obj.Volume(), password),
-        'Delay': table_encryption.convert_float(obj.Delay(), password),
-        'RandomPitchMin': table_encryption.convert_int(obj.RandomPitchMin(), password),
-        'RandomPitchMax': table_encryption.convert_int(obj.RandomPitchMax(), password),
-        'AudioPriority': table_encryption.convert_int(obj.AudioPriority(), password),
-        'AudioClipPath': [table_encryption.convert_string(obj.AudioClipPath(j), password) for j in range(obj.AudioClipPathLength())],
-        'VoiceHash': [table_encryption.convert_uint(obj.VoiceHash(j), password) for j in range(obj.VoiceHashLength())],
+        'Volume': bacy.convert_float(obj.Volume(), password),
+        'Delay': bacy.convert_float(obj.Delay(), password),
+        'RandomPitchMin': bacy.convert_int(obj.RandomPitchMin(), password),
+        'RandomPitchMax': bacy.convert_int(obj.RandomPitchMax(), password),
+        'AudioPriority': bacy.convert_int(obj.AudioPriority(), password),
+        'AudioClipPath': [bacy.convert_string(obj.AudioClipPath(j), password) for j in range(obj.AudioClipPathLength())],
+        'VoiceHash': [bacy.convert_uint(obj.VoiceHash(j), password) for j in range(obj.VoiceHashLength())],
     }
 
 
 def dump_BGMExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Nation': [Nation(table_encryption.convert_int(obj.Nation_(j), password)).name for j in range(obj.NationLength())],
-        'Path': [table_encryption.convert_string(obj.Path(j), password) for j in range(obj.PathLength())],
-        'Volume': [table_encryption.convert_float(obj.Volume(j), password) for j in range(obj.VolumeLength())],
-        'LoopStartTime': [table_encryption.convert_float(obj.LoopStartTime(j), password) for j in range(obj.LoopStartTimeLength())],
-        'LoopEndTime': [table_encryption.convert_float(obj.LoopEndTime(j), password) for j in range(obj.LoopEndTimeLength())],
-        'LoopTranstionTime': [table_encryption.convert_float(obj.LoopTranstionTime(j), password) for j in range(obj.LoopTranstionTimeLength())],
-        'LoopOffsetTime': [table_encryption.convert_float(obj.LoopOffsetTime(j), password) for j in range(obj.LoopOffsetTimeLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Nation': [Nation(bacy.convert_int(obj.Nation_(j), password)).name for j in range(obj.NationLength())],
+        'Path': [bacy.convert_string(obj.Path(j), password) for j in range(obj.PathLength())],
+        'Volume': [bacy.convert_float(obj.Volume(j), password) for j in range(obj.VolumeLength())],
+        'LoopStartTime': [bacy.convert_float(obj.LoopStartTime(j), password) for j in range(obj.LoopStartTimeLength())],
+        'LoopEndTime': [bacy.convert_float(obj.LoopEndTime(j), password) for j in range(obj.LoopEndTimeLength())],
+        'LoopTranstionTime': [bacy.convert_float(obj.LoopTranstionTime(j), password) for j in range(obj.LoopTranstionTimeLength())],
+        'LoopOffsetTime': [bacy.convert_float(obj.LoopOffsetTime(j), password) for j in range(obj.LoopOffsetTimeLength())],
     }
 
 
 def dump_BGMRaidExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'StageId': table_encryption.convert_long(obj.StageId(), password),
-        'PhaseIndex': table_encryption.convert_long(obj.PhaseIndex(), password),
-        'BGMId': table_encryption.convert_long(obj.BGMId(), password),
+        'StageId': bacy.convert_long(obj.StageId(), password),
+        'PhaseIndex': bacy.convert_long(obj.PhaseIndex(), password),
+        'BGMId': bacy.convert_long(obj.BGMId(), password),
     }
 
 
 def dump_BGMUIExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UIPrefab': table_encryption.convert_uint(obj.UIPrefab(), password),
-        'BGMId': table_encryption.convert_long(obj.BGMId(), password),
-        'BGMId2nd': table_encryption.convert_long(obj.BGMId2nd(), password),
-        'BGMId3rd': table_encryption.convert_long(obj.BGMId3rd(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
+        'UIPrefab': bacy.convert_uint(obj.UIPrefab(), password),
+        'BGMId': bacy.convert_long(obj.BGMId(), password),
+        'BGMId2nd': bacy.convert_long(obj.BGMId2nd(), password),
+        'BGMId3rd': bacy.convert_long(obj.BGMId3rd(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
     }
 
 
 def dump_CameraExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'MinDistance': table_encryption.convert_float(obj.MinDistance(), password),
-        'MaxDistance': table_encryption.convert_float(obj.MaxDistance(), password),
-        'RotationX': table_encryption.convert_float(obj.RotationX(), password),
-        'RotationY': table_encryption.convert_float(obj.RotationY(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'MinDistance': bacy.convert_float(obj.MinDistance(), password),
+        'MaxDistance': bacy.convert_float(obj.MaxDistance(), password),
+        'RotationX': bacy.convert_float(obj.RotationX(), password),
+        'RotationY': bacy.convert_float(obj.RotationY(), password),
         'MoveInstantly': obj.MoveInstantly(),
         'MoveInstantlyRotationSave': obj.MoveInstantlyRotationSave(),
-        'LeftMargin': table_encryption.convert_float(obj.LeftMargin(), password),
-        'BottomMargin': table_encryption.convert_float(obj.BottomMargin(), password),
+        'LeftMargin': bacy.convert_float(obj.LeftMargin(), password),
+        'BottomMargin': bacy.convert_float(obj.BottomMargin(), password),
         'IgnoreEnemies': obj.IgnoreEnemies(),
         'UseRailPointCompensation': obj.UseRailPointCompensation(),
     }
 
 
 def dump_CharacterDialogEventExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CostumeUniqueId': table_encryption.convert_long(obj.CostumeUniqueId(), password),
-        'OriginalCharacterId': table_encryption.convert_long(obj.OriginalCharacterId(), password),
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'EventID': table_encryption.convert_long(obj.EventID(), password),
-        'ProductionStep': ProductionStep(table_encryption.convert_int(obj.ProductionStep_(), password)).name,
-        'DialogCategory': DialogCategory(table_encryption.convert_int(obj.DialogCategory_(), password)).name,
-        'DialogCondition': DialogCondition(table_encryption.convert_int(obj.DialogCondition_(), password)).name,
-        'DialogConditionDetail': DialogConditionDetail(table_encryption.convert_int(obj.DialogConditionDetail_(), password)).name,
-        'DialogConditionDetailValue': table_encryption.convert_long(obj.DialogConditionDetailValue(), password),
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'DialogType': DialogType(table_encryption.convert_int(obj.DialogType_(), password)).name,
-        'ActionName': table_encryption.convert_string(obj.ActionName(), password),
-        'Duration': table_encryption.convert_long(obj.Duration(), password),
-        'AnimationName': table_encryption.convert_string(obj.AnimationName(), password),
-        'LocalizeKR': table_encryption.convert_string(obj.LocalizeKR(), password),
-        'LocalizeJP': table_encryption.convert_string(obj.LocalizeJP(), password),
-        'VoiceId': [table_encryption.convert_uint(obj.VoiceId(j), password) for j in range(obj.VoiceIdLength())],
+        'CostumeUniqueId': bacy.convert_long(obj.CostumeUniqueId(), password),
+        'OriginalCharacterId': bacy.convert_long(obj.OriginalCharacterId(), password),
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'EventID': bacy.convert_long(obj.EventID(), password),
+        'ProductionStep': ProductionStep(bacy.convert_int(obj.ProductionStep_(), password)).name,
+        'DialogCategory': DialogCategory(bacy.convert_int(obj.DialogCategory_(), password)).name,
+        'DialogCondition': DialogCondition(bacy.convert_int(obj.DialogCondition_(), password)).name,
+        'DialogConditionDetail': DialogConditionDetail(bacy.convert_int(obj.DialogConditionDetail_(), password)).name,
+        'DialogConditionDetailValue': bacy.convert_long(obj.DialogConditionDetailValue(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'DialogType': DialogType(bacy.convert_int(obj.DialogType_(), password)).name,
+        'ActionName': bacy.convert_string(obj.ActionName(), password),
+        'Duration': bacy.convert_long(obj.Duration(), password),
+        'AnimationName': bacy.convert_string(obj.AnimationName(), password),
+        'LocalizeKR': bacy.convert_string(obj.LocalizeKR(), password),
+        'LocalizeJP': bacy.convert_string(obj.LocalizeJP(), password),
+        'VoiceId': [bacy.convert_uint(obj.VoiceId(j), password) for j in range(obj.VoiceIdLength())],
         'CollectionVisible': obj.CollectionVisible(),
-        'CVCollectionType': CVCollectionType(table_encryption.convert_int(obj.CVCollectionType_(), password)).name,
-        'UnlockEventSeason': table_encryption.convert_long(obj.UnlockEventSeason(), password),
-        'ScenarioGroupId': table_encryption.convert_long(obj.ScenarioGroupId(), password),
-        'LocalizeCVGroup': table_encryption.convert_string(obj.LocalizeCVGroup(), password),
+        'CVCollectionType': CVCollectionType(bacy.convert_int(obj.CVCollectionType_(), password)).name,
+        'UnlockEventSeason': bacy.convert_long(obj.UnlockEventSeason(), password),
+        'ScenarioGroupId': bacy.convert_long(obj.ScenarioGroupId(), password),
+        'LocalizeCVGroup': bacy.convert_string(obj.LocalizeCVGroup(), password),
     }
 
 
 def dump_CharacterDialogExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'CostumeUniqueId': table_encryption.convert_long(obj.CostumeUniqueId(), password),
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'ProductionStep': ProductionStep(table_encryption.convert_int(obj.ProductionStep_(), password)).name,
-        'DialogCategory': DialogCategory(table_encryption.convert_int(obj.DialogCategory_(), password)).name,
-        'DialogCondition': DialogCondition(table_encryption.convert_int(obj.DialogCondition_(), password)).name,
-        'Anniversary': Anniversary(table_encryption.convert_int(obj.Anniversary_(), password)).name,
-        'StartDate': table_encryption.convert_string(obj.StartDate(), password),
-        'EndDate': table_encryption.convert_string(obj.EndDate(), password),
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'DialogType': DialogType(table_encryption.convert_int(obj.DialogType_(), password)).name,
-        'ActionName': table_encryption.convert_string(obj.ActionName(), password),
-        'Duration': table_encryption.convert_long(obj.Duration(), password),
-        'AnimationName': table_encryption.convert_string(obj.AnimationName(), password),
-        'LocalizeKR': table_encryption.convert_string(obj.LocalizeKR(), password),
-        'LocalizeJP': table_encryption.convert_string(obj.LocalizeJP(), password),
-        'VoiceId': [table_encryption.convert_uint(obj.VoiceId(j), password) for j in range(obj.VoiceIdLength())],
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'CostumeUniqueId': bacy.convert_long(obj.CostumeUniqueId(), password),
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'ProductionStep': ProductionStep(bacy.convert_int(obj.ProductionStep_(), password)).name,
+        'DialogCategory': DialogCategory(bacy.convert_int(obj.DialogCategory_(), password)).name,
+        'DialogCondition': DialogCondition(bacy.convert_int(obj.DialogCondition_(), password)).name,
+        'Anniversary': Anniversary(bacy.convert_int(obj.Anniversary_(), password)).name,
+        'StartDate': bacy.convert_string(obj.StartDate(), password),
+        'EndDate': bacy.convert_string(obj.EndDate(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'DialogType': DialogType(bacy.convert_int(obj.DialogType_(), password)).name,
+        'ActionName': bacy.convert_string(obj.ActionName(), password),
+        'Duration': bacy.convert_long(obj.Duration(), password),
+        'AnimationName': bacy.convert_string(obj.AnimationName(), password),
+        'LocalizeKR': bacy.convert_string(obj.LocalizeKR(), password),
+        'LocalizeJP': bacy.convert_string(obj.LocalizeJP(), password),
+        'VoiceId': [bacy.convert_uint(obj.VoiceId(j), password) for j in range(obj.VoiceIdLength())],
         'ApplyPosition': obj.ApplyPosition(),
-        'PosX': table_encryption.convert_float(obj.PosX(), password),
-        'PosY': table_encryption.convert_float(obj.PosY(), password),
+        'PosX': bacy.convert_float(obj.PosX(), password),
+        'PosY': bacy.convert_float(obj.PosY(), password),
         'CollectionVisible': obj.CollectionVisible(),
-        'CVCollectionType': CVCollectionType(table_encryption.convert_int(obj.CVCollectionType_(), password)).name,
-        'UnlockFavorRank': table_encryption.convert_long(obj.UnlockFavorRank(), password),
+        'CVCollectionType': CVCollectionType(bacy.convert_int(obj.CVCollectionType_(), password)).name,
+        'UnlockFavorRank': bacy.convert_long(obj.UnlockFavorRank(), password),
         'UnlockEquipWeapon': obj.UnlockEquipWeapon(),
-        'LocalizeCVGroup': table_encryption.convert_string(obj.LocalizeCVGroup(), password),
+        'LocalizeCVGroup': bacy.convert_string(obj.LocalizeCVGroup(), password),
     }
 
 
 def dump_CharacterDialogSubtitleExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'LocalizeCVGroup': table_encryption.convert_string(obj.LocalizeCVGroup(), password),
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'Duration': table_encryption.convert_long(obj.Duration(), password),
+        'LocalizeCVGroup': bacy.convert_string(obj.LocalizeCVGroup(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'Duration': bacy.convert_long(obj.Duration(), password),
         'Separate': obj.Separate(),
-        'LocalizeKR': table_encryption.convert_string(obj.LocalizeKR(), password),
-        'LocalizeJP': table_encryption.convert_string(obj.LocalizeJP(), password),
+        'LocalizeKR': bacy.convert_string(obj.LocalizeKR(), password),
+        'LocalizeJP': bacy.convert_string(obj.LocalizeJP(), password),
     }
 
 
 def dump_CharacterPotentialExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'PotentialStatGroupId': table_encryption.convert_long(obj.PotentialStatGroupId(), password),
-        'PotentialStatBonusRateType': PotentialStatBonusRateType(table_encryption.convert_int(obj.PotentialStatBonusRateType_(), password)).name,
+        'Id': bacy.convert_long(obj.Id(), password),
+        'PotentialStatGroupId': bacy.convert_long(obj.PotentialStatGroupId(), password),
+        'PotentialStatBonusRateType': PotentialStatBonusRateType(bacy.convert_int(obj.PotentialStatBonusRateType_(), password)).name,
         'IsUnnecessaryStat': obj.IsUnnecessaryStat(),
     }
 
 
 def dump_CharacterPotentialRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'RequirePotentialStatType': [PotentialStatBonusRateType(table_encryption.convert_int(obj.RequirePotentialStatType(j), password)).name for j in range(obj.RequirePotentialStatTypeLength())],
-        'RequirePotentialStatLevel': [table_encryption.convert_long(obj.RequirePotentialStatLevel(j), password) for j in range(obj.RequirePotentialStatLevelLength())],
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardId': table_encryption.convert_long(obj.RewardId(), password),
-        'RewardAmount': table_encryption.convert_int(obj.RewardAmount(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'RequirePotentialStatType': [PotentialStatBonusRateType(bacy.convert_int(obj.RequirePotentialStatType(j), password)).name for j in range(obj.RequirePotentialStatTypeLength())],
+        'RequirePotentialStatLevel': [bacy.convert_long(obj.RequirePotentialStatLevel(j), password) for j in range(obj.RequirePotentialStatLevelLength())],
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardId': bacy.convert_long(obj.RewardId(), password),
+        'RewardAmount': bacy.convert_int(obj.RewardAmount(), password),
     }
 
 
 def dump_CharacterPotentialStatExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'PotentialStatGroupId': table_encryption.convert_long(obj.PotentialStatGroupId(), password),
-        'PotentialLevel': table_encryption.convert_int(obj.PotentialLevel(), password),
-        'RecipeId': table_encryption.convert_long(obj.RecipeId(), password),
-        'StatBonusRate': table_encryption.convert_long(obj.StatBonusRate(), password),
+        'PotentialStatGroupId': bacy.convert_long(obj.PotentialStatGroupId(), password),
+        'PotentialLevel': bacy.convert_int(obj.PotentialLevel(), password),
+        'RecipeId': bacy.convert_long(obj.RecipeId(), password),
+        'StatBonusRate': bacy.convert_long(obj.StatBonusRate(), password),
     }
 
 
 def dump_CharacterVoiceExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CharacterVoiceUniqueId': table_encryption.convert_long(obj.CharacterVoiceUniqueId(), password),
-        'CharacterVoiceGroupId': table_encryption.convert_long(obj.CharacterVoiceGroupId(), password),
-        'VoiceHash': table_encryption.convert_uint(obj.VoiceHash(), password),
+        'CharacterVoiceUniqueId': bacy.convert_long(obj.CharacterVoiceUniqueId(), password),
+        'CharacterVoiceGroupId': bacy.convert_long(obj.CharacterVoiceGroupId(), password),
+        'VoiceHash': bacy.convert_uint(obj.VoiceHash(), password),
         'OnlyOne': obj.OnlyOne(),
-        'Priority': table_encryption.convert_int(obj.Priority(), password),
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
+        'Priority': bacy.convert_int(obj.Priority(), password),
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
         'CollectionVisible': obj.CollectionVisible(),
-        'CVCollectionType': CVCollectionType(table_encryption.convert_int(obj.CVCollectionType_(), password)).name,
-        'UnlockFavorRank': table_encryption.convert_long(obj.UnlockFavorRank(), password),
-        'LocalizeCVGroup': table_encryption.convert_string(obj.LocalizeCVGroup(), password),
-        'Nation': [Nation(table_encryption.convert_int(obj.Nation_(j), password)).name for j in range(obj.NationLength())],
-        'Volume': [table_encryption.convert_float(obj.Volume(j), password) for j in range(obj.VolumeLength())],
-        'Delay': [table_encryption.convert_float(obj.Delay(j), password) for j in range(obj.DelayLength())],
-        'Path': [table_encryption.convert_string(obj.Path(j), password) for j in range(obj.PathLength())],
+        'CVCollectionType': CVCollectionType(bacy.convert_int(obj.CVCollectionType_(), password)).name,
+        'UnlockFavorRank': bacy.convert_long(obj.UnlockFavorRank(), password),
+        'LocalizeCVGroup': bacy.convert_string(obj.LocalizeCVGroup(), password),
+        'Nation': [Nation(bacy.convert_int(obj.Nation_(j), password)).name for j in range(obj.NationLength())],
+        'Volume': [bacy.convert_float(obj.Volume(j), password) for j in range(obj.VolumeLength())],
+        'Delay': [bacy.convert_float(obj.Delay(j), password) for j in range(obj.DelayLength())],
+        'Path': [bacy.convert_string(obj.Path(j), password) for j in range(obj.PathLength())],
     }
 
 
 def dump_CharacterVoiceSubtitleExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'LocalizeCVGroup': table_encryption.convert_string(obj.LocalizeCVGroup(), password),
-        'CharacterVoiceGroupId': table_encryption.convert_long(obj.CharacterVoiceGroupId(), password),
-        'Duration': table_encryption.convert_long(obj.Duration(), password),
+        'LocalizeCVGroup': bacy.convert_string(obj.LocalizeCVGroup(), password),
+        'CharacterVoiceGroupId': bacy.convert_long(obj.CharacterVoiceGroupId(), password),
+        'Duration': bacy.convert_long(obj.Duration(), password),
         'Separate': obj.Separate(),
-        'LocalizeKR': table_encryption.convert_string(obj.LocalizeKR(), password),
-        'LocalizeJP': table_encryption.convert_string(obj.LocalizeJP(), password),
+        'LocalizeKR': bacy.convert_string(obj.LocalizeKR(), password),
+        'LocalizeJP': bacy.convert_string(obj.LocalizeJP(), password),
     }
 
 
 def dump_ClanChattingEmojiExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'TabGroupId': table_encryption.convert_int(obj.TabGroupId(), password),
-        'DisplayOrder': table_encryption.convert_int(obj.DisplayOrder(), password),
-        'ImagePathKr': table_encryption.convert_string(obj.ImagePathKr(), password),
-        'ImagePathJp': table_encryption.convert_string(obj.ImagePathJp(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'TabGroupId': bacy.convert_int(obj.TabGroupId(), password),
+        'DisplayOrder': bacy.convert_int(obj.DisplayOrder(), password),
+        'ImagePathKr': bacy.convert_string(obj.ImagePathKr(), password),
+        'ImagePathJp': bacy.convert_string(obj.ImagePathJp(), password),
     }
 
 
 def dump_CombatEmojiExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'EmojiEvent': EmojiEvent(table_encryption.convert_int(obj.EmojiEvent_(), password)).name,
-        'OrderOfPriority': table_encryption.convert_int(obj.OrderOfPriority(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'EmojiEvent': EmojiEvent(bacy.convert_int(obj.EmojiEvent_(), password)).name,
+        'OrderOfPriority': bacy.convert_int(obj.OrderOfPriority(), password),
         'EmojiDuration': obj.EmojiDuration(),
         'EmojiReversal': obj.EmojiReversal(),
         'EmojiTurnOn': obj.EmojiTurnOn(),
-        'ShowEmojiDelay': table_encryption.convert_int(obj.ShowEmojiDelay(), password),
+        'ShowEmojiDelay': bacy.convert_int(obj.ShowEmojiDelay(), password),
         'ShowDefaultBG': obj.ShowDefaultBG(),
     }
 
 
 def dump_ContentSpoilerPopupExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ContentType': ContentType(table_encryption.convert_int(obj.ContentType_(), password)).name,
-        'SpoilerPopupTitle': table_encryption.convert_string(obj.SpoilerPopupTitle(), password),
-        'SpoilerPopupDescription': table_encryption.convert_string(obj.SpoilerPopupDescription(), password),
+        'ContentType': ContentType(bacy.convert_int(obj.ContentType_(), password)).name,
+        'SpoilerPopupTitle': bacy.convert_string(obj.SpoilerPopupTitle(), password),
+        'SpoilerPopupDescription': bacy.convert_string(obj.SpoilerPopupDescription(), password),
         'IsWarningPopUp': obj.IsWarningPopUp(),
-        'ConditionScenarioModeId': table_encryption.convert_long(obj.ConditionScenarioModeId(), password),
+        'ConditionScenarioModeId': bacy.convert_long(obj.ConditionScenarioModeId(), password),
     }
 
 
 def dump_ContentsScenarioExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_uint(obj.Id(), password),
-        'LocalizeId': table_encryption.convert_uint(obj.LocalizeId(), password),
-        'DisplayOrder': table_encryption.convert_int(obj.DisplayOrder(), password),
-        'ScenarioContentType': ScenarioContentType(table_encryption.convert_int(obj.ScenarioContentType_(), password)).name,
-        'ScenarioGroupId': [table_encryption.convert_long(obj.ScenarioGroupId(j), password) for j in range(obj.ScenarioGroupIdLength())],
+        'Id': bacy.convert_uint(obj.Id(), password),
+        'LocalizeId': bacy.convert_uint(obj.LocalizeId(), password),
+        'DisplayOrder': bacy.convert_int(obj.DisplayOrder(), password),
+        'ScenarioContentType': ScenarioContentType(bacy.convert_int(obj.ScenarioContentType_(), password)).name,
+        'ScenarioGroupId': [bacy.convert_long(obj.ScenarioGroupId(j), password) for j in range(obj.ScenarioGroupIdLength())],
     }
 
 
 def dump_ContentsShortcutExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'ContentType': ContentType(table_encryption.convert_int(obj.ContentType_(), password)).name,
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'ScenarioModeVolume': table_encryption.convert_long(obj.ScenarioModeVolume(), password),
-        'ScenarioModeChapter': table_encryption.convert_long(obj.ScenarioModeChapter(), password),
-        'ShortcutOpenTime': table_encryption.convert_string(obj.ShortcutOpenTime(), password),
-        'ShortcutCloseTime': table_encryption.convert_string(obj.ShortcutCloseTime(), password),
-        'ConditionContentId': table_encryption.convert_long(obj.ConditionContentId(), password),
-        'ConquestMapDifficulty': StageDifficulty(table_encryption.convert_int(obj.ConquestMapDifficulty(), password)).name,
-        'ConquestStepIndex': table_encryption.convert_int(obj.ConquestStepIndex(), password),
-        'ShortcutContentId': table_encryption.convert_long(obj.ShortcutContentId(), password),
-        'ShortcutUIName': [table_encryption.convert_string(obj.ShortcutUIName(j), password) for j in range(obj.ShortcutUINameLength())],
-        'Localize': table_encryption.convert_string(obj.Localize(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'ContentType': ContentType(bacy.convert_int(obj.ContentType_(), password)).name,
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'ScenarioModeVolume': bacy.convert_long(obj.ScenarioModeVolume(), password),
+        'ScenarioModeChapter': bacy.convert_long(obj.ScenarioModeChapter(), password),
+        'ShortcutOpenTime': bacy.convert_string(obj.ShortcutOpenTime(), password),
+        'ShortcutCloseTime': bacy.convert_string(obj.ShortcutCloseTime(), password),
+        'ConditionContentId': bacy.convert_long(obj.ConditionContentId(), password),
+        'ConquestMapDifficulty': StageDifficulty(bacy.convert_int(obj.ConquestMapDifficulty(), password)).name,
+        'ConquestStepIndex': bacy.convert_int(obj.ConquestStepIndex(), password),
+        'ShortcutContentId': bacy.convert_long(obj.ShortcutContentId(), password),
+        'ShortcutUIName': [bacy.convert_string(obj.ShortcutUIName(j), password) for j in range(obj.ShortcutUINameLength())],
+        'Localize': bacy.convert_string(obj.Localize(), password),
     }
 
 
 def dump_EventContentNotifyExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_int(obj.Id(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'IconPath': table_encryption.convert_string(obj.IconPath(), password),
-        'EventNotifyType': EventNotifyType(table_encryption.convert_int(obj.EventNotifyType_(), password)).name,
-        'EventTargetType': EventTargetType(table_encryption.convert_int(obj.EventTargetType_(), password)).name,
-        'ShortcutEventTargetType': EventTargetType(table_encryption.convert_int(obj.ShortcutEventTargetType(), password)).name,
+        'Id': bacy.convert_int(obj.Id(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'IconPath': bacy.convert_string(obj.IconPath(), password),
+        'EventNotifyType': EventNotifyType(bacy.convert_int(obj.EventNotifyType_(), password)).name,
+        'EventTargetType': EventTargetType(bacy.convert_int(obj.EventTargetType_(), password)).name,
+        'ShortcutEventTargetType': EventTargetType(bacy.convert_int(obj.ShortcutEventTargetType(), password)).name,
         'IsShortcutEnable': obj.IsShortcutEnable(),
     }
 
 
 def dump_EventContentSpoilerPopupExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'SpoilerPopupTitle': table_encryption.convert_string(obj.SpoilerPopupTitle(), password),
-        'SpoilerPopupDescription': table_encryption.convert_string(obj.SpoilerPopupDescription(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'SpoilerPopupTitle': bacy.convert_string(obj.SpoilerPopupTitle(), password),
+        'SpoilerPopupDescription': bacy.convert_string(obj.SpoilerPopupDescription(), password),
         'IsWarningPopUp': obj.IsWarningPopUp(),
-        'ConditionScenarioModeId': table_encryption.convert_long(obj.ConditionScenarioModeId(), password),
+        'ConditionScenarioModeId': bacy.convert_long(obj.ConditionScenarioModeId(), password),
     }
 
 
 def dump_EventContentTreasureCellRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'LocalizeCodeID': table_encryption.convert_string(obj.LocalizeCodeID(), password),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardParcelAmount': [table_encryption.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'LocalizeCodeID': bacy.convert_string(obj.LocalizeCodeID(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardParcelAmount': [bacy.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
     }
 
 
 def dump_EventContentTreasureExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'TitleLocalize': table_encryption.convert_string(obj.TitleLocalize(), password),
-        'LoopRound': table_encryption.convert_int(obj.LoopRound(), password),
-        'UsePrefabName': table_encryption.convert_string(obj.UsePrefabName(), password),
-        'TreasureBGImagePath': table_encryption.convert_string(obj.TreasureBGImagePath(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'TitleLocalize': bacy.convert_string(obj.TitleLocalize(), password),
+        'LoopRound': bacy.convert_int(obj.LoopRound(), password),
+        'UsePrefabName': bacy.convert_string(obj.UsePrefabName(), password),
+        'TreasureBGImagePath': bacy.convert_string(obj.TreasureBGImagePath(), password),
     }
 
 
 def dump_EventContentTreasureRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'LocalizeCodeID': table_encryption.convert_string(obj.LocalizeCodeID(), password),
-        'CellUnderImageWidth': table_encryption.convert_int(obj.CellUnderImageWidth(), password),
-        'CellUnderImageHeight': table_encryption.convert_int(obj.CellUnderImageHeight(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'LocalizeCodeID': bacy.convert_string(obj.LocalizeCodeID(), password),
+        'CellUnderImageWidth': bacy.convert_int(obj.CellUnderImageWidth(), password),
+        'CellUnderImageHeight': bacy.convert_int(obj.CellUnderImageHeight(), password),
         'HiddenImage': obj.HiddenImage(),
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardParcelAmount': [table_encryption.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
-        'CellUnderImagePath': table_encryption.convert_string(obj.CellUnderImagePath(), password),
-        'TreasureSmallImagePath': table_encryption.convert_string(obj.TreasureSmallImagePath(), password),
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardParcelAmount': [bacy.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'CellUnderImagePath': bacy.convert_string(obj.CellUnderImagePath(), password),
+        'TreasureSmallImagePath': bacy.convert_string(obj.TreasureSmallImagePath(), password),
     }
 
 
 def dump_EventContentTreasureRoundExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'TreasureRound': table_encryption.convert_int(obj.TreasureRound(), password),
-        'TreasureRoundSize': [table_encryption.convert_int(obj.TreasureRoundSize(j), password) for j in range(obj.TreasureRoundSizeLength())],
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'TreasureRound': bacy.convert_int(obj.TreasureRound(), password),
+        'TreasureRoundSize': [bacy.convert_int(obj.TreasureRoundSize(j), password) for j in range(obj.TreasureRoundSizeLength())],
         'CellVisualSortUnstructed': obj.CellVisualSortUnstructed(),
-        'CellCheckGoodsId': table_encryption.convert_long(obj.CellCheckGoodsId(), password),
-        'CellRewardId': table_encryption.convert_long(obj.CellRewardId(), password),
-        'RewardID': [table_encryption.convert_long(obj.RewardID(j), password) for j in range(obj.RewardIDLength())],
-        'RewardAmount': [table_encryption.convert_int(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
-        'TreasureCellImagePath': table_encryption.convert_string(obj.TreasureCellImagePath(), password),
+        'CellCheckGoodsId': bacy.convert_long(obj.CellCheckGoodsId(), password),
+        'CellRewardId': bacy.convert_long(obj.CellRewardId(), password),
+        'RewardID': [bacy.convert_long(obj.RewardID(j), password) for j in range(obj.RewardIDLength())],
+        'RewardAmount': [bacy.convert_int(obj.RewardAmount(j), password) for j in range(obj.RewardAmountLength())],
+        'TreasureCellImagePath': bacy.convert_string(obj.TreasureCellImagePath(), password),
     }
 
 
 def dump_IdCardBackgroundExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Rarity': Rarity(table_encryption.convert_int(obj.Rarity_(), password)).name,
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Rarity': Rarity(bacy.convert_int(obj.Rarity_(), password)).name,
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
         'CollectionVisible': obj.CollectionVisible(),
         'IsDefault': obj.IsDefault(),
-        'BgPath': table_encryption.convert_string(obj.BgPath(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'Icon': table_encryption.convert_string(obj.Icon(), password),
+        'BgPath': bacy.convert_string(obj.BgPath(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'Icon': bacy.convert_string(obj.Icon(), password),
     }
 
 
 def dump_InformationExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupID': table_encryption.convert_long(obj.GroupID(), password),
-        'PageName': table_encryption.convert_string(obj.PageName(), password),
-        'LocalizeCodeId': table_encryption.convert_string(obj.LocalizeCodeId(), password),
-        'TutorialParentName': [table_encryption.convert_string(obj.TutorialParentName(j), password) for j in range(obj.TutorialParentNameLength())],
-        'UIName': [table_encryption.convert_string(obj.UIName(j), password) for j in range(obj.UINameLength())],
+        'GroupID': bacy.convert_long(obj.GroupID(), password),
+        'PageName': bacy.convert_string(obj.PageName(), password),
+        'LocalizeCodeId': bacy.convert_string(obj.LocalizeCodeId(), password),
+        'TutorialParentName': [bacy.convert_string(obj.TutorialParentName(j), password) for j in range(obj.TutorialParentNameLength())],
+        'UIName': [bacy.convert_string(obj.UIName(j), password) for j in range(obj.UINameLength())],
     }
 
 
 def dump_LoadingImageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ID': table_encryption.convert_long(obj.ID(), password),
-        'ImagePathKr': table_encryption.convert_string(obj.ImagePathKr(), password),
-        'ImagePathJp': table_encryption.convert_string(obj.ImagePathJp(), password),
-        'DisplayWeight': table_encryption.convert_int(obj.DisplayWeight(), password),
+        'ID': bacy.convert_long(obj.ID(), password),
+        'ImagePathKr': bacy.convert_string(obj.ImagePathKr(), password),
+        'ImagePathJp': bacy.convert_string(obj.ImagePathJp(), password),
+        'DisplayWeight': bacy.convert_int(obj.DisplayWeight(), password),
     }
 
 
 def dump_LocalizeCharProfileChangeExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'ScenarioModeId': table_encryption.convert_long(obj.ScenarioModeId(), password),
-        'ChangeCharacterID': table_encryption.convert_long(obj.ChangeCharacterID(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'ScenarioModeId': bacy.convert_long(obj.ScenarioModeId(), password),
+        'ChangeCharacterID': bacy.convert_long(obj.ChangeCharacterID(), password),
     }
 
 
 def dump_LocalizeCodeInBuildExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Key': table_encryption.convert_uint(obj.Key(), password),
-        'Kr': table_encryption.convert_string(obj.Kr(), password),
-        'Jp': table_encryption.convert_string(obj.Jp(), password),
+        'Key': bacy.convert_uint(obj.Key(), password),
+        'Kr': bacy.convert_string(obj.Kr(), password),
+        'Jp': bacy.convert_string(obj.Jp(), password),
     }
 
 
 def dump_LocalizeErrorExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Key': table_encryption.convert_uint(obj.Key(), password),
-        'ErrorLevel': WebAPIErrorLevel(table_encryption.convert_int(obj.ErrorLevel(), password)).name,
-        'Kr': table_encryption.convert_string(obj.Kr(), password),
-        'Jp': table_encryption.convert_string(obj.Jp(), password),
+        'Key': bacy.convert_uint(obj.Key(), password),
+        'ErrorLevel': WebAPIErrorLevel(bacy.convert_int(obj.ErrorLevel(), password)).name,
+        'Kr': bacy.convert_string(obj.Kr(), password),
+        'Jp': bacy.convert_string(obj.Jp(), password),
     }
 
 
 def dump_LocalizeEtcExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Key': table_encryption.convert_uint(obj.Key(), password),
-        'NameKr': table_encryption.convert_string(obj.NameKr(), password),
-        'DescriptionKr': table_encryption.convert_string(obj.DescriptionKr(), password),
-        'NameJp': table_encryption.convert_string(obj.NameJp(), password),
-        'DescriptionJp': table_encryption.convert_string(obj.DescriptionJp(), password),
+        'Key': bacy.convert_uint(obj.Key(), password),
+        'NameKr': bacy.convert_string(obj.NameKr(), password),
+        'DescriptionKr': bacy.convert_string(obj.DescriptionKr(), password),
+        'NameJp': bacy.convert_string(obj.NameJp(), password),
+        'DescriptionJp': bacy.convert_string(obj.DescriptionJp(), password),
     }
 
 
 def dump_LocalizeExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Key': table_encryption.convert_uint(obj.Key(), password),
-        'Kr': table_encryption.convert_string(obj.Kr(), password),
-        'Jp': table_encryption.convert_string(obj.Jp(), password),
+        'Key': bacy.convert_uint(obj.Key(), password),
+        'Kr': bacy.convert_string(obj.Kr(), password),
+        'Jp': bacy.convert_string(obj.Jp(), password),
     }
 
 
 def dump_LocalizeSkillExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Key': table_encryption.convert_uint(obj.Key(), password),
-        'NameKr': table_encryption.convert_string(obj.NameKr(), password),
-        'DescriptionKr': table_encryption.convert_string(obj.DescriptionKr(), password),
-        'SkillInvokeLocalizeKr': table_encryption.convert_string(obj.SkillInvokeLocalizeKr(), password),
-        'NameJp': table_encryption.convert_string(obj.NameJp(), password),
-        'DescriptionJp': table_encryption.convert_string(obj.DescriptionJp(), password),
-        'SkillInvokeLocalizeJp': table_encryption.convert_string(obj.SkillInvokeLocalizeJp(), password),
+        'Key': bacy.convert_uint(obj.Key(), password),
+        'NameKr': bacy.convert_string(obj.NameKr(), password),
+        'DescriptionKr': bacy.convert_string(obj.DescriptionKr(), password),
+        'SkillInvokeLocalizeKr': bacy.convert_string(obj.SkillInvokeLocalizeKr(), password),
+        'NameJp': bacy.convert_string(obj.NameJp(), password),
+        'DescriptionJp': bacy.convert_string(obj.DescriptionJp(), password),
+        'SkillInvokeLocalizeJp': bacy.convert_string(obj.SkillInvokeLocalizeJp(), password),
     }
 
 
 def dump_MemoryLobbyExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'ProductionStep': ProductionStep(table_encryption.convert_int(obj.ProductionStep_(), password)).name,
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
-        'PrefabName': table_encryption.convert_string(obj.PrefabName(), password),
-        'MemoryLobbyCategory': MemoryLobbyCategory(table_encryption.convert_int(obj.MemoryLobbyCategory_(), password)).name,
-        'SlotTextureName': table_encryption.convert_string(obj.SlotTextureName(), password),
-        'RewardTextureName': table_encryption.convert_string(obj.RewardTextureName(), password),
-        'BGMId': table_encryption.convert_long(obj.BGMId(), password),
-        'AudioClipJp': table_encryption.convert_string(obj.AudioClipJp(), password),
-        'AudioClipKr': table_encryption.convert_string(obj.AudioClipKr(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'ProductionStep': ProductionStep(bacy.convert_int(obj.ProductionStep_(), password)).name,
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
+        'PrefabName': bacy.convert_string(obj.PrefabName(), password),
+        'MemoryLobbyCategory': MemoryLobbyCategory(bacy.convert_int(obj.MemoryLobbyCategory_(), password)).name,
+        'SlotTextureName': bacy.convert_string(obj.SlotTextureName(), password),
+        'RewardTextureName': bacy.convert_string(obj.RewardTextureName(), password),
+        'BGMId': bacy.convert_long(obj.BGMId(), password),
+        'AudioClipJp': bacy.convert_string(obj.AudioClipJp(), password),
+        'AudioClipKr': bacy.convert_string(obj.AudioClipKr(), password),
     }
 
 
 def dump_MessagePopupExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'StringId': table_encryption.convert_uint(obj.StringId(), password),
-        'MessagePopupLayout': MessagePopupLayout(table_encryption.convert_int(obj.MessagePopupLayout_(), password)).name,
-        'OrderType': MessagePopupImagePositionType(table_encryption.convert_int(obj.OrderType(), password)).name,
-        'Image': table_encryption.convert_string(obj.Image(), password),
-        'TitleText': table_encryption.convert_uint(obj.TitleText(), password),
-        'SubTitleText': table_encryption.convert_uint(obj.SubTitleText(), password),
-        'MessageText': table_encryption.convert_uint(obj.MessageText(), password),
-        'ConditionText': [table_encryption.convert_uint(obj.ConditionText(j), password) for j in range(obj.ConditionTextLength())],
+        'StringId': bacy.convert_uint(obj.StringId(), password),
+        'MessagePopupLayout': MessagePopupLayout(bacy.convert_int(obj.MessagePopupLayout_(), password)).name,
+        'OrderType': MessagePopupImagePositionType(bacy.convert_int(obj.OrderType(), password)).name,
+        'Image': bacy.convert_string(obj.Image(), password),
+        'TitleText': bacy.convert_uint(obj.TitleText(), password),
+        'SubTitleText': bacy.convert_uint(obj.SubTitleText(), password),
+        'MessageText': bacy.convert_uint(obj.MessageText(), password),
+        'ConditionText': [bacy.convert_uint(obj.ConditionText(j), password) for j in range(obj.ConditionTextLength())],
         'DisplayXButton': obj.DisplayXButton(),
-        'Button': [MessagePopupButtonType(table_encryption.convert_int(obj.Button(j), password)).name for j in range(obj.ButtonLength())],
-        'ButtonText': [table_encryption.convert_uint(obj.ButtonText(j), password) for j in range(obj.ButtonTextLength())],
-        'ButtonCommand': [table_encryption.convert_string(obj.ButtonCommand(j), password) for j in range(obj.ButtonCommandLength())],
-        'ButtonParameter': [table_encryption.convert_string(obj.ButtonParameter(j), password) for j in range(obj.ButtonParameterLength())],
+        'Button': [MessagePopupButtonType(bacy.convert_int(obj.Button(j), password)).name for j in range(obj.ButtonLength())],
+        'ButtonText': [bacy.convert_uint(obj.ButtonText(j), password) for j in range(obj.ButtonTextLength())],
+        'ButtonCommand': [bacy.convert_string(obj.ButtonCommand(j), password) for j in range(obj.ButtonCommandLength())],
+        'ButtonParameter': [bacy.convert_string(obj.ButtonParameter(j), password) for j in range(obj.ButtonParameterLength())],
     }
 
 
 def dump_MiniGameDefenseCharacterBanExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'CharacterId': table_encryption.convert_long(obj.CharacterId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'CharacterId': bacy.convert_long(obj.CharacterId(), password),
     }
 
 
 def dump_MiniGameDefenseFixedStatExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'MinigameDefenseFixedStatId': table_encryption.convert_long(obj.MinigameDefenseFixedStatId(), password),
-        'Level': table_encryption.convert_int(obj.Level(), password),
-        'Grade': table_encryption.convert_int(obj.Grade(), password),
-        'ExSkillLevel': table_encryption.convert_int(obj.ExSkillLevel(), password),
-        'NoneExSkillLevel': table_encryption.convert_int(obj.NoneExSkillLevel(), password),
-        'Equipment1Tier': table_encryption.convert_int(obj.Equipment1Tier(), password),
-        'Equipment1Level': table_encryption.convert_int(obj.Equipment1Level(), password),
-        'Equipment2Tier': table_encryption.convert_int(obj.Equipment2Tier(), password),
-        'Equipment2Level': table_encryption.convert_int(obj.Equipment2Level(), password),
-        'Equipment3Tier': table_encryption.convert_int(obj.Equipment3Tier(), password),
-        'Equipment3Level': table_encryption.convert_int(obj.Equipment3Level(), password),
-        'CharacterWeaponGrade': table_encryption.convert_int(obj.CharacterWeaponGrade(), password),
-        'CharacterWeaponLevel': table_encryption.convert_int(obj.CharacterWeaponLevel(), password),
-        'CharacterGearTier': table_encryption.convert_int(obj.CharacterGearTier(), password),
-        'CharacterGearLevel': table_encryption.convert_int(obj.CharacterGearLevel(), password),
+        'MinigameDefenseFixedStatId': bacy.convert_long(obj.MinigameDefenseFixedStatId(), password),
+        'Level': bacy.convert_int(obj.Level(), password),
+        'Grade': bacy.convert_int(obj.Grade(), password),
+        'ExSkillLevel': bacy.convert_int(obj.ExSkillLevel(), password),
+        'NoneExSkillLevel': bacy.convert_int(obj.NoneExSkillLevel(), password),
+        'Equipment1Tier': bacy.convert_int(obj.Equipment1Tier(), password),
+        'Equipment1Level': bacy.convert_int(obj.Equipment1Level(), password),
+        'Equipment2Tier': bacy.convert_int(obj.Equipment2Tier(), password),
+        'Equipment2Level': bacy.convert_int(obj.Equipment2Level(), password),
+        'Equipment3Tier': bacy.convert_int(obj.Equipment3Tier(), password),
+        'Equipment3Level': bacy.convert_int(obj.Equipment3Level(), password),
+        'CharacterWeaponGrade': bacy.convert_int(obj.CharacterWeaponGrade(), password),
+        'CharacterWeaponLevel': bacy.convert_int(obj.CharacterWeaponLevel(), password),
+        'CharacterGearTier': bacy.convert_int(obj.CharacterGearTier(), password),
+        'CharacterGearLevel': bacy.convert_int(obj.CharacterGearLevel(), password),
     }
 
 
 def dump_MiniGameDefenseInfoExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'DefenseBattleParcelType': ParcelType(table_encryption.convert_int(obj.DefenseBattleParcelType(), password)).name,
-        'DefenseBattleParcelId': table_encryption.convert_long(obj.DefenseBattleParcelId(), password),
-        'DefenseBattleMultiplierMax': table_encryption.convert_long(obj.DefenseBattleMultiplierMax(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'DefenseBattleParcelType': ParcelType(bacy.convert_int(obj.DefenseBattleParcelType(), password)).name,
+        'DefenseBattleParcelId': bacy.convert_long(obj.DefenseBattleParcelId(), password),
+        'DefenseBattleMultiplierMax': bacy.convert_long(obj.DefenseBattleMultiplierMax(), password),
         'DisableRootMotion': obj.DisableRootMotion(),
     }
 
 
 def dump_MiniGameDefenseStageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'StageDifficulty': StageDifficulty(table_encryption.convert_int(obj.StageDifficulty_(), password)).name,
-        'StageDifficultyLocalize': table_encryption.convert_uint(obj.StageDifficultyLocalize(), password),
-        'StageNumber': table_encryption.convert_int(obj.StageNumber(), password),
-        'StageDisplay': table_encryption.convert_int(obj.StageDisplay(), password),
-        'PrevStageId': table_encryption.convert_long(obj.PrevStageId(), password),
-        'EchelonExtensionType': EchelonExtensionType(table_encryption.convert_int(obj.EchelonExtensionType_(), password)).name,
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'StageEnterCostType': ParcelType(table_encryption.convert_int(obj.StageEnterCostType(), password)).name,
-        'StageEnterCostId': table_encryption.convert_long(obj.StageEnterCostId(), password),
-        'StageEnterCostAmount': table_encryption.convert_int(obj.StageEnterCostAmount(), password),
-        'EventContentStageRewardId': table_encryption.convert_long(obj.EventContentStageRewardId(), password),
-        'EnterScenarioGroupId': [table_encryption.convert_long(obj.EnterScenarioGroupId(j), password) for j in range(obj.EnterScenarioGroupIdLength())],
-        'ClearScenarioGroupId': [table_encryption.convert_long(obj.ClearScenarioGroupId(j), password) for j in range(obj.ClearScenarioGroupIdLength())],
-        'StageTopography': StageTopography(table_encryption.convert_int(obj.StageTopography_(), password)).name,
-        'RecommandLevel': table_encryption.convert_int(obj.RecommandLevel(), password),
-        'GroundID': table_encryption.convert_long(obj.GroundID(), password),
-        'ContentType': ContentType(table_encryption.convert_int(obj.ContentType_(), password)).name,
-        'StarGoal': [StarGoalType(table_encryption.convert_int(obj.StarGoal(j), password)).name for j in range(obj.StarGoalLength())],
-        'StarGoalAmount': [table_encryption.convert_int(obj.StarGoalAmount(j), password) for j in range(obj.StarGoalAmountLength())],
-        'DefenseFormationBGPrefab': table_encryption.convert_string(obj.DefenseFormationBGPrefab(), password),
-        'DefenseFormationBGPrefabScale': table_encryption.convert_float(obj.DefenseFormationBGPrefabScale(), password),
-        'FixedEchelon': table_encryption.convert_long(obj.FixedEchelon(), password),
-        'MininageDefenseFixedStatId': table_encryption.convert_long(obj.MininageDefenseFixedStatId(), password),
-        'StageHint': table_encryption.convert_uint(obj.StageHint(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'StageDifficulty': StageDifficulty(bacy.convert_int(obj.StageDifficulty_(), password)).name,
+        'StageDifficultyLocalize': bacy.convert_uint(obj.StageDifficultyLocalize(), password),
+        'StageNumber': bacy.convert_int(obj.StageNumber(), password),
+        'StageDisplay': bacy.convert_int(obj.StageDisplay(), password),
+        'PrevStageId': bacy.convert_long(obj.PrevStageId(), password),
+        'EchelonExtensionType': EchelonExtensionType(bacy.convert_int(obj.EchelonExtensionType_(), password)).name,
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'StageEnterCostType': ParcelType(bacy.convert_int(obj.StageEnterCostType(), password)).name,
+        'StageEnterCostId': bacy.convert_long(obj.StageEnterCostId(), password),
+        'StageEnterCostAmount': bacy.convert_int(obj.StageEnterCostAmount(), password),
+        'EventContentStageRewardId': bacy.convert_long(obj.EventContentStageRewardId(), password),
+        'EnterScenarioGroupId': [bacy.convert_long(obj.EnterScenarioGroupId(j), password) for j in range(obj.EnterScenarioGroupIdLength())],
+        'ClearScenarioGroupId': [bacy.convert_long(obj.ClearScenarioGroupId(j), password) for j in range(obj.ClearScenarioGroupIdLength())],
+        'StageTopography': StageTopography(bacy.convert_int(obj.StageTopography_(), password)).name,
+        'RecommandLevel': bacy.convert_int(obj.RecommandLevel(), password),
+        'GroundID': bacy.convert_long(obj.GroundID(), password),
+        'ContentType': ContentType(bacy.convert_int(obj.ContentType_(), password)).name,
+        'StarGoal': [StarGoalType(bacy.convert_int(obj.StarGoal(j), password)).name for j in range(obj.StarGoalLength())],
+        'StarGoalAmount': [bacy.convert_int(obj.StarGoalAmount(j), password) for j in range(obj.StarGoalAmountLength())],
+        'DefenseFormationBGPrefab': bacy.convert_string(obj.DefenseFormationBGPrefab(), password),
+        'DefenseFormationBGPrefabScale': bacy.convert_float(obj.DefenseFormationBGPrefabScale(), password),
+        'FixedEchelon': bacy.convert_long(obj.FixedEchelon(), password),
+        'MininageDefenseFixedStatId': bacy.convert_long(obj.MininageDefenseFixedStatId(), password),
+        'StageHint': bacy.convert_uint(obj.StageHint(), password),
     }
 
 
 def dump_MiniGameDreamCollectionScenarioExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
         'IsSkip': obj.IsSkip(),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'Parameter': [DreamMakerParameterType(table_encryption.convert_int(obj.Parameter(j), password)).name for j in range(obj.ParameterLength())],
-        'ParameterAmount': [table_encryption.convert_long(obj.ParameterAmount(j), password) for j in range(obj.ParameterAmountLength())],
-        'ScenarioGroupId': table_encryption.convert_long(obj.ScenarioGroupId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'Parameter': [DreamMakerParameterType(bacy.convert_int(obj.Parameter(j), password)).name for j in range(obj.ParameterLength())],
+        'ParameterAmount': [bacy.convert_long(obj.ParameterAmount(j), password) for j in range(obj.ParameterAmountLength())],
+        'ScenarioGroupId': bacy.convert_long(obj.ScenarioGroupId(), password),
     }
 
 
 def dump_MiniGameDreamDailyPointExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'TotalParameterMin': table_encryption.convert_long(obj.TotalParameterMin(), password),
-        'TotalParameterMax': table_encryption.convert_long(obj.TotalParameterMax(), password),
-        'DailyPointCoefficient': table_encryption.convert_long(obj.DailyPointCoefficient(), password),
-        'DailyPointCorrectionValue': table_encryption.convert_long(obj.DailyPointCorrectionValue(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'TotalParameterMin': bacy.convert_long(obj.TotalParameterMin(), password),
+        'TotalParameterMax': bacy.convert_long(obj.TotalParameterMax(), password),
+        'DailyPointCoefficient': bacy.convert_long(obj.DailyPointCoefficient(), password),
+        'DailyPointCorrectionValue': bacy.convert_long(obj.DailyPointCorrectionValue(), password),
     }
 
 
 def dump_MiniGameDreamEndingExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'EndingId': table_encryption.convert_long(obj.EndingId(), password),
-        'DreamMakerEndingType': DreamMakerEndingType(table_encryption.convert_int(obj.DreamMakerEndingType_(), password)).name,
-        'Order': table_encryption.convert_int(obj.Order(), password),
-        'ScenarioGroupId': table_encryption.convert_long(obj.ScenarioGroupId(), password),
-        'EndingCondition': [DreamMakerEndingCondition(table_encryption.convert_int(obj.EndingCondition(j), password)).name for j in range(obj.EndingConditionLength())],
-        'EndingConditionValue': [table_encryption.convert_long(obj.EndingConditionValue(j), password) for j in range(obj.EndingConditionValueLength())],
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'EndingId': bacy.convert_long(obj.EndingId(), password),
+        'DreamMakerEndingType': DreamMakerEndingType(bacy.convert_int(obj.DreamMakerEndingType_(), password)).name,
+        'Order': bacy.convert_int(obj.Order(), password),
+        'ScenarioGroupId': bacy.convert_long(obj.ScenarioGroupId(), password),
+        'EndingCondition': [DreamMakerEndingCondition(bacy.convert_int(obj.EndingCondition(j), password)).name for j in range(obj.EndingConditionLength())],
+        'EndingConditionValue': [bacy.convert_long(obj.EndingConditionValue(j), password) for j in range(obj.EndingConditionValueLength())],
     }
 
 
 def dump_MiniGameDreamEndingRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'EndingId': table_encryption.convert_long(obj.EndingId(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'DreamMakerEndingRewardType': DreamMakerEndingRewardType(table_encryption.convert_int(obj.DreamMakerEndingRewardType_(), password)).name,
-        'DreamMakerEndingType': DreamMakerEndingType(table_encryption.convert_int(obj.DreamMakerEndingType_(), password)).name,
-        'RewardParcelType': [ParcelType(table_encryption.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
-        'RewardParcelId': [table_encryption.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
-        'RewardParcelAmount': [table_encryption.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'EndingId': bacy.convert_long(obj.EndingId(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'DreamMakerEndingRewardType': DreamMakerEndingRewardType(bacy.convert_int(obj.DreamMakerEndingRewardType_(), password)).name,
+        'DreamMakerEndingType': DreamMakerEndingType(bacy.convert_int(obj.DreamMakerEndingType_(), password)).name,
+        'RewardParcelType': [ParcelType(bacy.convert_int(obj.RewardParcelType(j), password)).name for j in range(obj.RewardParcelTypeLength())],
+        'RewardParcelId': [bacy.convert_long(obj.RewardParcelId(j), password) for j in range(obj.RewardParcelIdLength())],
+        'RewardParcelAmount': [bacy.convert_long(obj.RewardParcelAmount(j), password) for j in range(obj.RewardParcelAmountLength())],
     }
 
 
 def dump_MiniGameDreamInfoExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'DreamMakerMultiplierCondition': DreamMakerMultiplierCondition(table_encryption.convert_int(obj.DreamMakerMultiplierCondition_(), password)).name,
-        'DreamMakerMultiplierConditionValue': table_encryption.convert_long(obj.DreamMakerMultiplierConditionValue(), password),
-        'DreamMakerMultiplierMax': table_encryption.convert_long(obj.DreamMakerMultiplierMax(), password),
-        'DreamMakerDays': table_encryption.convert_long(obj.DreamMakerDays(), password),
-        'DreamMakerActionPoint': table_encryption.convert_long(obj.DreamMakerActionPoint(), password),
-        'DreamMakerParcelType': ParcelType(table_encryption.convert_int(obj.DreamMakerParcelType(), password)).name,
-        'DreamMakerParcelId': table_encryption.convert_long(obj.DreamMakerParcelId(), password),
-        'DreamMakerDailyPointParcelType': ParcelType(table_encryption.convert_int(obj.DreamMakerDailyPointParcelType(), password)).name,
-        'DreamMakerDailyPointId': table_encryption.convert_long(obj.DreamMakerDailyPointId(), password),
-        'DreamMakerParameterTransfer': table_encryption.convert_long(obj.DreamMakerParameterTransfer(), password),
-        'ScheduleCostGoodsId': table_encryption.convert_long(obj.ScheduleCostGoodsId(), password),
-        'LobbyBGMChangeScenarioId': table_encryption.convert_long(obj.LobbyBGMChangeScenarioId(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'DreamMakerMultiplierCondition': DreamMakerMultiplierCondition(bacy.convert_int(obj.DreamMakerMultiplierCondition_(), password)).name,
+        'DreamMakerMultiplierConditionValue': bacy.convert_long(obj.DreamMakerMultiplierConditionValue(), password),
+        'DreamMakerMultiplierMax': bacy.convert_long(obj.DreamMakerMultiplierMax(), password),
+        'DreamMakerDays': bacy.convert_long(obj.DreamMakerDays(), password),
+        'DreamMakerActionPoint': bacy.convert_long(obj.DreamMakerActionPoint(), password),
+        'DreamMakerParcelType': ParcelType(bacy.convert_int(obj.DreamMakerParcelType(), password)).name,
+        'DreamMakerParcelId': bacy.convert_long(obj.DreamMakerParcelId(), password),
+        'DreamMakerDailyPointParcelType': ParcelType(bacy.convert_int(obj.DreamMakerDailyPointParcelType(), password)).name,
+        'DreamMakerDailyPointId': bacy.convert_long(obj.DreamMakerDailyPointId(), password),
+        'DreamMakerParameterTransfer': bacy.convert_long(obj.DreamMakerParameterTransfer(), password),
+        'ScheduleCostGoodsId': bacy.convert_long(obj.ScheduleCostGoodsId(), password),
+        'LobbyBGMChangeScenarioId': bacy.convert_long(obj.LobbyBGMChangeScenarioId(), password),
     }
 
 
 def dump_MiniGameDreamParameterExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'ParameterType': DreamMakerParameterType(table_encryption.convert_int(obj.ParameterType(), password)).name,
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'IconPath': table_encryption.convert_string(obj.IconPath(), password),
-        'ParameterBase': table_encryption.convert_long(obj.ParameterBase(), password),
-        'ParameterBaseMax': table_encryption.convert_long(obj.ParameterBaseMax(), password),
-        'ParameterMin': table_encryption.convert_long(obj.ParameterMin(), password),
-        'ParameterMax': table_encryption.convert_long(obj.ParameterMax(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'ParameterType': DreamMakerParameterType(bacy.convert_int(obj.ParameterType(), password)).name,
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'IconPath': bacy.convert_string(obj.IconPath(), password),
+        'ParameterBase': bacy.convert_long(obj.ParameterBase(), password),
+        'ParameterBaseMax': bacy.convert_long(obj.ParameterBaseMax(), password),
+        'ParameterMin': bacy.convert_long(obj.ParameterMin(), password),
+        'ParameterMax': bacy.convert_long(obj.ParameterMax(), password),
     }
 
 
 def dump_MiniGameDreamReplayScenarioExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'ScenarioGroupId': table_encryption.convert_long(obj.ScenarioGroupId(), password),
-        'Order': table_encryption.convert_long(obj.Order(), password),
-        'ReplaySummaryTitleLocalize': table_encryption.convert_uint(obj.ReplaySummaryTitleLocalize(), password),
-        'ReplaySummaryLocalizeScenarioId': table_encryption.convert_uint(obj.ReplaySummaryLocalizeScenarioId(), password),
-        'ReplayScenarioResource': table_encryption.convert_string(obj.ReplayScenarioResource(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'ScenarioGroupId': bacy.convert_long(obj.ScenarioGroupId(), password),
+        'Order': bacy.convert_long(obj.Order(), password),
+        'ReplaySummaryTitleLocalize': bacy.convert_uint(obj.ReplaySummaryTitleLocalize(), password),
+        'ReplaySummaryLocalizeScenarioId': bacy.convert_uint(obj.ReplaySummaryLocalizeScenarioId(), password),
+        'ReplayScenarioResource': bacy.convert_string(obj.ReplayScenarioResource(), password),
         'IsReplayScenarioHorizon': obj.IsReplayScenarioHorizon(),
     }
 
 
 def dump_MiniGameDreamScheduleExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'DreamMakerScheduleGroupId': table_encryption.convert_long(obj.DreamMakerScheduleGroupId(), password),
-        'DisplayOrder': table_encryption.convert_long(obj.DisplayOrder(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'IconPath': table_encryption.convert_string(obj.IconPath(), password),
-        'LoadingResource01': table_encryption.convert_string(obj.LoadingResource01(), password),
-        'LoadingResource02': table_encryption.convert_string(obj.LoadingResource02(), password),
-        'AnimationName': table_encryption.convert_string(obj.AnimationName(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'DreamMakerScheduleGroupId': bacy.convert_long(obj.DreamMakerScheduleGroupId(), password),
+        'DisplayOrder': bacy.convert_long(obj.DisplayOrder(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'IconPath': bacy.convert_string(obj.IconPath(), password),
+        'LoadingResource01': bacy.convert_string(obj.LoadingResource01(), password),
+        'LoadingResource02': bacy.convert_string(obj.LoadingResource02(), password),
+        'AnimationName': bacy.convert_string(obj.AnimationName(), password),
     }
 
 
 def dump_MiniGameDreamScheduleResultExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'DreamMakerResult': DreamMakerResult(table_encryption.convert_int(obj.DreamMakerResult_(), password)).name,
-        'DreamMakerScheduleGroup': table_encryption.convert_long(obj.DreamMakerScheduleGroup(), password),
-        'Prob': table_encryption.convert_int(obj.Prob(), password),
-        'RewardParameter': [DreamMakerParameterType(table_encryption.convert_int(obj.RewardParameter(j), password)).name for j in range(obj.RewardParameterLength())],
-        'RewardParameterOperationType': [DreamMakerParamOperationType(table_encryption.convert_int(obj.RewardParameterOperationType(j), password)).name for j in range(obj.RewardParameterOperationTypeLength())],
-        'RewardParameterAmount': [table_encryption.convert_long(obj.RewardParameterAmount(j), password) for j in range(obj.RewardParameterAmountLength())],
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardParcelId': table_encryption.convert_long(obj.RewardParcelId(), password),
-        'RewardParcelAmount': table_encryption.convert_long(obj.RewardParcelAmount(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'DreamMakerResult': DreamMakerResult(bacy.convert_int(obj.DreamMakerResult_(), password)).name,
+        'DreamMakerScheduleGroup': bacy.convert_long(obj.DreamMakerScheduleGroup(), password),
+        'Prob': bacy.convert_int(obj.Prob(), password),
+        'RewardParameter': [DreamMakerParameterType(bacy.convert_int(obj.RewardParameter(j), password)).name for j in range(obj.RewardParameterLength())],
+        'RewardParameterOperationType': [DreamMakerParamOperationType(bacy.convert_int(obj.RewardParameterOperationType(j), password)).name for j in range(obj.RewardParameterOperationTypeLength())],
+        'RewardParameterAmount': [bacy.convert_long(obj.RewardParameterAmount(j), password) for j in range(obj.RewardParameterAmountLength())],
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardParcelId': bacy.convert_long(obj.RewardParcelId(), password),
+        'RewardParcelAmount': bacy.convert_long(obj.RewardParcelAmount(), password),
     }
 
 
 def dump_MiniGameDreamTimelineExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'DreamMakerDays': table_encryption.convert_long(obj.DreamMakerDays(), password),
-        'DreamMakerActionPoint': table_encryption.convert_long(obj.DreamMakerActionPoint(), password),
-        'EnterScenarioGroupId': table_encryption.convert_long(obj.EnterScenarioGroupId(), password),
-        'Bgm': table_encryption.convert_long(obj.Bgm(), password),
-        'ArtLevelPath': table_encryption.convert_string(obj.ArtLevelPath(), password),
-        'DesignLevelPath': table_encryption.convert_string(obj.DesignLevelPath(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'DreamMakerDays': bacy.convert_long(obj.DreamMakerDays(), password),
+        'DreamMakerActionPoint': bacy.convert_long(obj.DreamMakerActionPoint(), password),
+        'EnterScenarioGroupId': bacy.convert_long(obj.EnterScenarioGroupId(), password),
+        'Bgm': bacy.convert_long(obj.Bgm(), password),
+        'ArtLevelPath': bacy.convert_string(obj.ArtLevelPath(), password),
+        'DesignLevelPath': bacy.convert_string(obj.DesignLevelPath(), password),
     }
 
 
 def dump_MinigameDreamVoiceExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'VoiceCondition': DreamMakerVoiceCondition(table_encryption.convert_int(obj.VoiceCondition(), password)).name,
-        'VoiceClip': table_encryption.convert_uint(obj.VoiceClip(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'VoiceCondition': DreamMakerVoiceCondition(bacy.convert_int(obj.VoiceCondition(), password)).name,
+        'VoiceClip': bacy.convert_uint(obj.VoiceClip(), password),
     }
 
 
 def dump_MissionEmergencyCompleteExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'MissionId': table_encryption.convert_long(obj.MissionId(), password),
+        'MissionId': bacy.convert_long(obj.MissionId(), password),
         'EmergencyComplete': obj.EmergencyComplete(),
     }
 
 
 def dump_MultiFloorRaidRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'RewardGroupId': table_encryption.convert_long(obj.RewardGroupId(), password),
-        'ClearStageRewardProb': table_encryption.convert_long(obj.ClearStageRewardProb(), password),
-        'ClearStageRewardParcelType': ParcelType(table_encryption.convert_int(obj.ClearStageRewardParcelType(), password)).name,
-        'ClearStageRewardParcelUniqueID': table_encryption.convert_long(obj.ClearStageRewardParcelUniqueID(), password),
-        'ClearStageRewardAmount': table_encryption.convert_long(obj.ClearStageRewardAmount(), password),
+        'RewardGroupId': bacy.convert_long(obj.RewardGroupId(), password),
+        'ClearStageRewardProb': bacy.convert_long(obj.ClearStageRewardProb(), password),
+        'ClearStageRewardParcelType': ParcelType(bacy.convert_int(obj.ClearStageRewardParcelType(), password)).name,
+        'ClearStageRewardParcelUniqueID': bacy.convert_long(obj.ClearStageRewardParcelUniqueID(), password),
+        'ClearStageRewardAmount': bacy.convert_long(obj.ClearStageRewardAmount(), password),
     }
 
 
 def dump_MultiFloorRaidSeasonManageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'SeasonId': table_encryption.convert_long(obj.SeasonId(), password),
-        'LobbyEnterScenario': table_encryption.convert_uint(obj.LobbyEnterScenario(), password),
+        'SeasonId': bacy.convert_long(obj.SeasonId(), password),
+        'LobbyEnterScenario': bacy.convert_uint(obj.LobbyEnterScenario(), password),
         'ShowLobbyBanner': obj.ShowLobbyBanner(),
-        'SeasonStartDate': table_encryption.convert_string(obj.SeasonStartDate(), password),
-        'SeasonEndDate': table_encryption.convert_string(obj.SeasonEndDate(), password),
-        'SettlementEndDate': table_encryption.convert_string(obj.SettlementEndDate(), password),
-        'OpenRaidBossGroupId': table_encryption.convert_string(obj.OpenRaidBossGroupId(), password),
-        'EnterScenarioKey': table_encryption.convert_uint(obj.EnterScenarioKey(), password),
-        'LobbyImgPath': table_encryption.convert_string(obj.LobbyImgPath(), password),
-        'LevelImgPath': table_encryption.convert_string(obj.LevelImgPath(), password),
-        'PlayTip': table_encryption.convert_string(obj.PlayTip(), password),
+        'SeasonStartDate': bacy.convert_string(obj.SeasonStartDate(), password),
+        'SeasonEndDate': bacy.convert_string(obj.SeasonEndDate(), password),
+        'SettlementEndDate': bacy.convert_string(obj.SettlementEndDate(), password),
+        'OpenRaidBossGroupId': bacy.convert_string(obj.OpenRaidBossGroupId(), password),
+        'EnterScenarioKey': bacy.convert_uint(obj.EnterScenarioKey(), password),
+        'LobbyImgPath': bacy.convert_string(obj.LobbyImgPath(), password),
+        'LevelImgPath': bacy.convert_string(obj.LevelImgPath(), password),
+        'PlayTip': bacy.convert_string(obj.PlayTip(), password),
     }
 
 
 def dump_MultiFloorRaidStageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'EchelonExtensionType': EchelonExtensionType(table_encryption.convert_int(obj.EchelonExtensionType_(), password)).name,
-        'BossGroupId': table_encryption.convert_string(obj.BossGroupId(), password),
-        'AssistSlot': table_encryption.convert_int(obj.AssistSlot(), password),
-        'StageOpenCondition': table_encryption.convert_long(obj.StageOpenCondition(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'EchelonExtensionType': EchelonExtensionType(bacy.convert_int(obj.EchelonExtensionType_(), password)).name,
+        'BossGroupId': bacy.convert_string(obj.BossGroupId(), password),
+        'AssistSlot': bacy.convert_int(obj.AssistSlot(), password),
+        'StageOpenCondition': bacy.convert_long(obj.StageOpenCondition(), password),
         'FloorListSection': obj.FloorListSection(),
-        'FloorListSectionOpenCondition': table_encryption.convert_long(obj.FloorListSectionOpenCondition(), password),
-        'FloorListSectionLabel': table_encryption.convert_uint(obj.FloorListSectionLabel(), password),
-        'Difficulty': table_encryption.convert_int(obj.Difficulty(), password),
+        'FloorListSectionOpenCondition': bacy.convert_long(obj.FloorListSectionOpenCondition(), password),
+        'FloorListSectionLabel': bacy.convert_uint(obj.FloorListSectionLabel(), password),
+        'Difficulty': bacy.convert_int(obj.Difficulty(), password),
         'UseBossIndex': obj.UseBossIndex(),
         'UseBossAIPhaseSync': obj.UseBossAIPhaseSync(),
-        'FloorListImgPath': table_encryption.convert_string(obj.FloorListImgPath(), password),
-        'FloorImgPath': table_encryption.convert_string(obj.FloorImgPath(), password),
-        'RaidCharacterId': table_encryption.convert_long(obj.RaidCharacterId(), password),
-        'BossCharacterId': [table_encryption.convert_long(obj.BossCharacterId(j), password) for j in range(obj.BossCharacterIdLength())],
-        'StatChangeId': [table_encryption.convert_long(obj.StatChangeId(j), password) for j in range(obj.StatChangeIdLength())],
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
-        'RecommendLevel': table_encryption.convert_long(obj.RecommendLevel(), password),
-        'RewardGroupId': table_encryption.convert_long(obj.RewardGroupId(), password),
-        'BattleReadyTimelinePath': [table_encryption.convert_string(obj.BattleReadyTimelinePath(j), password) for j in range(obj.BattleReadyTimelinePathLength())],
-        'BattleReadyTimelinePhaseStart': [table_encryption.convert_int(obj.BattleReadyTimelinePhaseStart(j), password) for j in range(obj.BattleReadyTimelinePhaseStartLength())],
-        'BattleReadyTimelinePhaseEnd': [table_encryption.convert_int(obj.BattleReadyTimelinePhaseEnd(j), password) for j in range(obj.BattleReadyTimelinePhaseEndLength())],
-        'VictoryTimelinePath': table_encryption.convert_string(obj.VictoryTimelinePath(), password),
+        'FloorListImgPath': bacy.convert_string(obj.FloorListImgPath(), password),
+        'FloorImgPath': bacy.convert_string(obj.FloorImgPath(), password),
+        'RaidCharacterId': bacy.convert_long(obj.RaidCharacterId(), password),
+        'BossCharacterId': [bacy.convert_long(obj.BossCharacterId(j), password) for j in range(obj.BossCharacterIdLength())],
+        'StatChangeId': [bacy.convert_long(obj.StatChangeId(j), password) for j in range(obj.StatChangeIdLength())],
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
+        'RecommendLevel': bacy.convert_long(obj.RecommendLevel(), password),
+        'RewardGroupId': bacy.convert_long(obj.RewardGroupId(), password),
+        'BattleReadyTimelinePath': [bacy.convert_string(obj.BattleReadyTimelinePath(j), password) for j in range(obj.BattleReadyTimelinePathLength())],
+        'BattleReadyTimelinePhaseStart': [bacy.convert_int(obj.BattleReadyTimelinePhaseStart(j), password) for j in range(obj.BattleReadyTimelinePhaseStartLength())],
+        'BattleReadyTimelinePhaseEnd': [bacy.convert_int(obj.BattleReadyTimelinePhaseEnd(j), password) for j in range(obj.BattleReadyTimelinePhaseEndLength())],
+        'VictoryTimelinePath': bacy.convert_string(obj.VictoryTimelinePath(), password),
         'ShowSkillCard': obj.ShowSkillCard(),
     }
 
 
 def dump_MultiFloorRaidStatChangeExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'StatChangeId': table_encryption.convert_long(obj.StatChangeId(), password),
-        'StatType': [StatType(table_encryption.convert_int(obj.StatType_(j), password)).name for j in range(obj.StatTypeLength())],
-        'StatAdd': [table_encryption.convert_long(obj.StatAdd(j), password) for j in range(obj.StatAddLength())],
-        'StatMultiply': [table_encryption.convert_long(obj.StatMultiply(j), password) for j in range(obj.StatMultiplyLength())],
-        'ApplyCharacterId': [table_encryption.convert_long(obj.ApplyCharacterId(j), password) for j in range(obj.ApplyCharacterIdLength())],
+        'StatChangeId': bacy.convert_long(obj.StatChangeId(), password),
+        'StatType': [StatType(bacy.convert_int(obj.StatType_(j), password)).name for j in range(obj.StatTypeLength())],
+        'StatAdd': [bacy.convert_long(obj.StatAdd(j), password) for j in range(obj.StatAddLength())],
+        'StatMultiply': [bacy.convert_long(obj.StatMultiply(j), password) for j in range(obj.StatMultiplyLength())],
+        'ApplyCharacterId': [bacy.convert_long(obj.ApplyCharacterId(j), password) for j in range(obj.ApplyCharacterIdLength())],
     }
 
 
 def dump_OperatorExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'GroupId': table_encryption.convert_string(obj.GroupId(), password),
-        'OperatorCondition': OperatorCondition(table_encryption.convert_int(obj.OperatorCondition_(), password)).name,
-        'OutputSequence': table_encryption.convert_int(obj.OutputSequence(), password),
-        'RandomWeight': table_encryption.convert_int(obj.RandomWeight(), password),
-        'OutputDelay': table_encryption.convert_int(obj.OutputDelay(), password),
-        'Duration': table_encryption.convert_int(obj.Duration(), password),
-        'OperatorOutputPriority': table_encryption.convert_int(obj.OperatorOutputPriority(), password),
-        'PortraitPath': table_encryption.convert_string(obj.PortraitPath(), password),
-        'TextLocalizeKey': table_encryption.convert_string(obj.TextLocalizeKey(), password),
-        'VoiceId': [table_encryption.convert_uint(obj.VoiceId(j), password) for j in range(obj.VoiceIdLength())],
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'GroupId': bacy.convert_string(obj.GroupId(), password),
+        'OperatorCondition': OperatorCondition(bacy.convert_int(obj.OperatorCondition_(), password)).name,
+        'OutputSequence': bacy.convert_int(obj.OutputSequence(), password),
+        'RandomWeight': bacy.convert_int(obj.RandomWeight(), password),
+        'OutputDelay': bacy.convert_int(obj.OutputDelay(), password),
+        'Duration': bacy.convert_int(obj.Duration(), password),
+        'OperatorOutputPriority': bacy.convert_int(obj.OperatorOutputPriority(), password),
+        'PortraitPath': bacy.convert_string(obj.PortraitPath(), password),
+        'TextLocalizeKey': bacy.convert_string(obj.TextLocalizeKey(), password),
+        'VoiceId': [bacy.convert_uint(obj.VoiceId(j), password) for j in range(obj.VoiceIdLength())],
         'OperatorWaitQueue': obj.OperatorWaitQueue(),
     }
 
 
 def dump_ScenarioBGEffectExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Name': table_encryption.convert_uint(obj.Name(), password),
-        'Effect': table_encryption.convert_string(obj.Effect(), password),
-        'Effect2': table_encryption.convert_string(obj.Effect2(), password),
-        'Scroll': ScenarioBGScroll(table_encryption.convert_int(obj.Scroll(), password)).name,
-        'ScrollTime': table_encryption.convert_long(obj.ScrollTime(), password),
-        'ScrollFrom': table_encryption.convert_long(obj.ScrollFrom(), password),
-        'ScrollTo': table_encryption.convert_long(obj.ScrollTo(), password),
+        'Name': bacy.convert_uint(obj.Name(), password),
+        'Effect': bacy.convert_string(obj.Effect(), password),
+        'Effect2': bacy.convert_string(obj.Effect2(), password),
+        'Scroll': ScenarioBGScroll(bacy.convert_int(obj.Scroll(), password)).name,
+        'ScrollTime': bacy.convert_long(obj.ScrollTime(), password),
+        'ScrollFrom': bacy.convert_long(obj.ScrollFrom(), password),
+        'ScrollTo': bacy.convert_long(obj.ScrollTo(), password),
     }
 
 
 def dump_ScenarioBGNameExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Name': table_encryption.convert_uint(obj.Name(), password),
-        'ProductionStep': ProductionStep(table_encryption.convert_int(obj.ProductionStep_(), password)).name,
-        'BGFileName': table_encryption.convert_string(obj.BGFileName(), password),
-        'BGType': ScenarioBGType(table_encryption.convert_int(obj.BGType(), password)).name,
-        'AnimationRoot': table_encryption.convert_string(obj.AnimationRoot(), password),
-        'AnimationName': table_encryption.convert_string(obj.AnimationName(), password),
-        'SpineScale': table_encryption.convert_float(obj.SpineScale(), password),
-        'SpineLocalPosX': table_encryption.convert_int(obj.SpineLocalPosX(), password),
-        'SpineLocalPosY': table_encryption.convert_int(obj.SpineLocalPosY(), password),
+        'Name': bacy.convert_uint(obj.Name(), password),
+        'ProductionStep': ProductionStep(bacy.convert_int(obj.ProductionStep_(), password)).name,
+        'BGFileName': bacy.convert_string(obj.BGFileName(), password),
+        'BGType': ScenarioBGType(bacy.convert_int(obj.BGType(), password)).name,
+        'AnimationRoot': bacy.convert_string(obj.AnimationRoot(), password),
+        'AnimationName': bacy.convert_string(obj.AnimationName(), password),
+        'SpineScale': bacy.convert_float(obj.SpineScale(), password),
+        'SpineLocalPosX': bacy.convert_int(obj.SpineLocalPosX(), password),
+        'SpineLocalPosY': bacy.convert_int(obj.SpineLocalPosY(), password),
     }
 
 
 def dump_ScenarioCharacterEmotionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EmoticonName': table_encryption.convert_string(obj.EmoticonName(), password),
-        'Name': table_encryption.convert_uint(obj.Name(), password),
+        'EmoticonName': bacy.convert_string(obj.EmoticonName(), password),
+        'Name': bacy.convert_uint(obj.Name(), password),
     }
 
 
 def dump_ScenarioCharacterNameExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CharacterName': table_encryption.convert_uint(obj.CharacterName(), password),
-        'ProductionStep': ProductionStep(table_encryption.convert_int(obj.ProductionStep_(), password)).name,
-        'NameKR': table_encryption.convert_string(obj.NameKR(), password),
-        'NicknameKR': table_encryption.convert_string(obj.NicknameKR(), password),
-        'NameJP': table_encryption.convert_string(obj.NameJP(), password),
-        'NicknameJP': table_encryption.convert_string(obj.NicknameJP(), password),
-        'Shape': ScenarioCharacterShapes(table_encryption.convert_int(obj.Shape(), password)).name,
-        'SpinePrefabName': table_encryption.convert_string(obj.SpinePrefabName(), password),
-        'SmallPortrait': table_encryption.convert_string(obj.SmallPortrait(), password),
+        'CharacterName': bacy.convert_uint(obj.CharacterName(), password),
+        'ProductionStep': ProductionStep(bacy.convert_int(obj.ProductionStep_(), password)).name,
+        'NameKR': bacy.convert_string(obj.NameKR(), password),
+        'NicknameKR': bacy.convert_string(obj.NicknameKR(), password),
+        'NameJP': bacy.convert_string(obj.NameJP(), password),
+        'NicknameJP': bacy.convert_string(obj.NicknameJP(), password),
+        'Shape': ScenarioCharacterShapes(bacy.convert_int(obj.Shape(), password)).name,
+        'SpinePrefabName': bacy.convert_string(obj.SpinePrefabName(), password),
+        'SmallPortrait': bacy.convert_string(obj.SmallPortrait(), password),
     }
 
 
 def dump_ScenarioCharacterSituationSetExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Name': table_encryption.convert_uint(obj.Name(), password),
-        'Face': table_encryption.convert_string(obj.Face(), password),
-        'Behavior': table_encryption.convert_string(obj.Behavior(), password),
-        'Action': table_encryption.convert_string(obj.Action(), password),
-        'Shape': table_encryption.convert_string(obj.Shape(), password),
-        'Effect': table_encryption.convert_uint(obj.Effect(), password),
-        'Emotion': table_encryption.convert_uint(obj.Emotion(), password),
+        'Name': bacy.convert_uint(obj.Name(), password),
+        'Face': bacy.convert_string(obj.Face(), password),
+        'Behavior': bacy.convert_string(obj.Behavior(), password),
+        'Action': bacy.convert_string(obj.Action(), password),
+        'Shape': bacy.convert_string(obj.Shape(), password),
+        'Effect': bacy.convert_uint(obj.Effect(), password),
+        'Emotion': bacy.convert_uint(obj.Emotion(), password),
     }
 
 
 def dump_ScenarioContentCollectionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'UnlockConditionType': CollectionUnlockType(table_encryption.convert_int(obj.UnlockConditionType(), password)).name,
-        'UnlockConditionParameter': [table_encryption.convert_long(obj.UnlockConditionParameter(j), password) for j in range(obj.UnlockConditionParameterLength())],
-        'MultipleConditionCheckType': MultipleConditionCheckType(table_encryption.convert_int(obj.MultipleConditionCheckType_(), password)).name,
-        'UnlockConditionCount': table_encryption.convert_long(obj.UnlockConditionCount(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'UnlockConditionType': CollectionUnlockType(bacy.convert_int(obj.UnlockConditionType(), password)).name,
+        'UnlockConditionParameter': [bacy.convert_long(obj.UnlockConditionParameter(j), password) for j in range(obj.UnlockConditionParameterLength())],
+        'MultipleConditionCheckType': MultipleConditionCheckType(bacy.convert_int(obj.MultipleConditionCheckType_(), password)).name,
+        'UnlockConditionCount': bacy.convert_long(obj.UnlockConditionCount(), password),
         'IsObject': obj.IsObject(),
         'IsHorizon': obj.IsHorizon(),
-        'EmblemResource': table_encryption.convert_string(obj.EmblemResource(), password),
-        'ThumbResource': table_encryption.convert_string(obj.ThumbResource(), password),
-        'FullResource': table_encryption.convert_string(obj.FullResource(), password),
-        'LocalizeEtcId': table_encryption.convert_uint(obj.LocalizeEtcId(), password),
-        'SubNameLocalizeCodeId': table_encryption.convert_string(obj.SubNameLocalizeCodeId(), password),
+        'EmblemResource': bacy.convert_string(obj.EmblemResource(), password),
+        'ThumbResource': bacy.convert_string(obj.ThumbResource(), password),
+        'FullResource': bacy.convert_string(obj.FullResource(), password),
+        'LocalizeEtcId': bacy.convert_uint(obj.LocalizeEtcId(), password),
+        'SubNameLocalizeCodeId': bacy.convert_string(obj.SubNameLocalizeCodeId(), password),
     }
 
 
 def dump_ScenarioEffectExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'EffectName': table_encryption.convert_string(obj.EffectName(), password),
-        'Name': table_encryption.convert_uint(obj.Name(), password),
+        'EffectName': bacy.convert_string(obj.EffectName(), password),
+        'Name': bacy.convert_uint(obj.Name(), password),
     }
 
 
 def dump_ScenarioModeExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ModeId': table_encryption.convert_long(obj.ModeId(), password),
-        'ModeType': ScenarioModeTypes(table_encryption.convert_int(obj.ModeType(), password)).name,
-        'SubType': ScenarioModeSubTypes(table_encryption.convert_int(obj.SubType(), password)).name,
-        'VolumeId': table_encryption.convert_long(obj.VolumeId(), password),
-        'ChapterId': table_encryption.convert_long(obj.ChapterId(), password),
-        'EpisodeId': table_encryption.convert_long(obj.EpisodeId(), password),
+        'ModeId': bacy.convert_long(obj.ModeId(), password),
+        'ModeType': ScenarioModeTypes(bacy.convert_int(obj.ModeType(), password)).name,
+        'SubType': ScenarioModeSubTypes(bacy.convert_int(obj.SubType(), password)).name,
+        'VolumeId': bacy.convert_long(obj.VolumeId(), password),
+        'ChapterId': bacy.convert_long(obj.ChapterId(), password),
+        'EpisodeId': bacy.convert_long(obj.EpisodeId(), password),
         'Hide': obj.Hide(),
         'Open': obj.Open(),
         'IsContinue': obj.IsContinue(),
-        'EpisodeContinueModeId': table_encryption.convert_long(obj.EpisodeContinueModeId(), password),
-        'FrontScenarioGroupId': [table_encryption.convert_long(obj.FrontScenarioGroupId(j), password) for j in range(obj.FrontScenarioGroupIdLength())],
-        'StrategyId': table_encryption.convert_long(obj.StrategyId(), password),
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
+        'EpisodeContinueModeId': bacy.convert_long(obj.EpisodeContinueModeId(), password),
+        'FrontScenarioGroupId': [bacy.convert_long(obj.FrontScenarioGroupId(j), password) for j in range(obj.FrontScenarioGroupIdLength())],
+        'StrategyId': bacy.convert_long(obj.StrategyId(), password),
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
         'IsDefeatBattle': obj.IsDefeatBattle(),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'BackScenarioGroupId': [table_encryption.convert_long(obj.BackScenarioGroupId(j), password) for j in range(obj.BackScenarioGroupIdLength())],
-        'ClearedModeId': [table_encryption.convert_long(obj.ClearedModeId(j), password) for j in range(obj.ClearedModeIdLength())],
-        'ScenarioModeRewardId': table_encryption.convert_long(obj.ScenarioModeRewardId(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'BackScenarioGroupId': [bacy.convert_long(obj.BackScenarioGroupId(j), password) for j in range(obj.BackScenarioGroupIdLength())],
+        'ClearedModeId': [bacy.convert_long(obj.ClearedModeId(j), password) for j in range(obj.ClearedModeIdLength())],
+        'ScenarioModeRewardId': bacy.convert_long(obj.ScenarioModeRewardId(), password),
         'IsScenarioSpecialReward': obj.IsScenarioSpecialReward(),
-        'AccountLevelLimit': table_encryption.convert_long(obj.AccountLevelLimit(), password),
-        'ClearedStageId': table_encryption.convert_long(obj.ClearedStageId(), password),
-        'NeedClub': Club(table_encryption.convert_int(obj.NeedClub(), password)).name,
-        'NeedClubStudentCount': table_encryption.convert_int(obj.NeedClubStudentCount(), password),
-        'EventContentId': table_encryption.convert_long(obj.EventContentId(), password),
-        'EventContentType': EventContentType(table_encryption.convert_int(obj.EventContentType_(), password)).name,
-        'EventContentCondition': table_encryption.convert_long(obj.EventContentCondition(), password),
-        'EventContentConditionGroup': table_encryption.convert_long(obj.EventContentConditionGroup(), password),
-        'MapDifficulty': StageDifficulty(table_encryption.convert_int(obj.MapDifficulty(), password)).name,
-        'StepIndex': table_encryption.convert_int(obj.StepIndex(), password),
-        'RecommendLevel': table_encryption.convert_int(obj.RecommendLevel(), password),
-        'EventIconParcelPath': table_encryption.convert_string(obj.EventIconParcelPath(), password),
-        'EventBannerTitle': table_encryption.convert_uint(obj.EventBannerTitle(), password),
+        'AccountLevelLimit': bacy.convert_long(obj.AccountLevelLimit(), password),
+        'ClearedStageId': bacy.convert_long(obj.ClearedStageId(), password),
+        'NeedClub': Club(bacy.convert_int(obj.NeedClub(), password)).name,
+        'NeedClubStudentCount': bacy.convert_int(obj.NeedClubStudentCount(), password),
+        'EventContentId': bacy.convert_long(obj.EventContentId(), password),
+        'EventContentType': EventContentType(bacy.convert_int(obj.EventContentType_(), password)).name,
+        'EventContentCondition': bacy.convert_long(obj.EventContentCondition(), password),
+        'EventContentConditionGroup': bacy.convert_long(obj.EventContentConditionGroup(), password),
+        'MapDifficulty': StageDifficulty(bacy.convert_int(obj.MapDifficulty(), password)).name,
+        'StepIndex': bacy.convert_int(obj.StepIndex(), password),
+        'RecommendLevel': bacy.convert_int(obj.RecommendLevel(), password),
+        'EventIconParcelPath': bacy.convert_string(obj.EventIconParcelPath(), password),
+        'EventBannerTitle': bacy.convert_uint(obj.EventBannerTitle(), password),
         'Lof': obj.Lof(),
-        'StageTopography': StageTopography(table_encryption.convert_int(obj.StageTopography_(), password)).name,
-        'FixedEchelonId': table_encryption.convert_long(obj.FixedEchelonId(), password),
-        'CompleteReportEventName': table_encryption.convert_string(obj.CompleteReportEventName(), password),
-        'EchelonExtensionType': EchelonExtensionType(table_encryption.convert_int(obj.EchelonExtensionType_(), password)).name,
-        'CollectionGroupId': table_encryption.convert_long(obj.CollectionGroupId(), password),
+        'StageTopography': StageTopography(bacy.convert_int(obj.StageTopography_(), password)).name,
+        'FixedEchelonId': bacy.convert_long(obj.FixedEchelonId(), password),
+        'CompleteReportEventName': bacy.convert_string(obj.CompleteReportEventName(), password),
+        'EchelonExtensionType': EchelonExtensionType(bacy.convert_int(obj.EchelonExtensionType_(), password)).name,
+        'CollectionGroupId': bacy.convert_long(obj.CollectionGroupId(), password),
     }
 
 
 def dump_ScenarioModeRewardExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ScenarioModeRewardId': table_encryption.convert_long(obj.ScenarioModeRewardId(), password),
-        'RewardTag': RewardTag(table_encryption.convert_int(obj.RewardTag_(), password)).name,
-        'RewardProb': table_encryption.convert_int(obj.RewardProb(), password),
-        'RewardParcelType': ParcelType(table_encryption.convert_int(obj.RewardParcelType(), password)).name,
-        'RewardParcelId': table_encryption.convert_long(obj.RewardParcelId(), password),
-        'RewardParcelAmount': table_encryption.convert_int(obj.RewardParcelAmount(), password),
+        'ScenarioModeRewardId': bacy.convert_long(obj.ScenarioModeRewardId(), password),
+        'RewardTag': RewardTag(bacy.convert_int(obj.RewardTag_(), password)).name,
+        'RewardProb': bacy.convert_int(obj.RewardProb(), password),
+        'RewardParcelType': ParcelType(bacy.convert_int(obj.RewardParcelType(), password)).name,
+        'RewardParcelId': bacy.convert_long(obj.RewardParcelId(), password),
+        'RewardParcelAmount': bacy.convert_int(obj.RewardParcelAmount(), password),
         'IsDisplayed': obj.IsDisplayed(),
     }
 
 
 def dump_ScenarioResourceInfoExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'ScenarioModeId': table_encryption.convert_long(obj.ScenarioModeId(), password),
-        'VideoId': table_encryption.convert_long(obj.VideoId(), password),
-        'BgmId': table_encryption.convert_long(obj.BgmId(), password),
-        'AudioName': table_encryption.convert_string(obj.AudioName(), password),
-        'SpinePath': table_encryption.convert_string(obj.SpinePath(), password),
-        'Ratio': table_encryption.convert_int(obj.Ratio(), password),
-        'LobbyAniPath': table_encryption.convert_string(obj.LobbyAniPath(), password),
-        'MovieCGPath': table_encryption.convert_string(obj.MovieCGPath(), password),
-        'LocalizeId': table_encryption.convert_uint(obj.LocalizeId(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'ScenarioModeId': bacy.convert_long(obj.ScenarioModeId(), password),
+        'VideoId': bacy.convert_long(obj.VideoId(), password),
+        'BgmId': bacy.convert_long(obj.BgmId(), password),
+        'AudioName': bacy.convert_string(obj.AudioName(), password),
+        'SpinePath': bacy.convert_string(obj.SpinePath(), password),
+        'Ratio': bacy.convert_int(obj.Ratio(), password),
+        'LobbyAniPath': bacy.convert_string(obj.LobbyAniPath(), password),
+        'MovieCGPath': bacy.convert_string(obj.MovieCGPath(), password),
+        'LocalizeId': bacy.convert_uint(obj.LocalizeId(), password),
     }
 
 
 def dump_ScenarioScriptExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'SelectionGroup': table_encryption.convert_long(obj.SelectionGroup(), password),
-        'BGMId': table_encryption.convert_long(obj.BGMId(), password),
-        'Sound': table_encryption.convert_string(obj.Sound(), password),
-        'Transition': table_encryption.convert_uint(obj.Transition(), password),
-        'BGName': table_encryption.convert_uint(obj.BGName(), password),
-        'BGEffect': table_encryption.convert_uint(obj.BGEffect(), password),
-        'PopupFileName': table_encryption.convert_string(obj.PopupFileName(), password),
-        'ScriptKr': table_encryption.convert_string(obj.ScriptKr(), password),
-        'TextJp': table_encryption.convert_string(obj.TextJp(), password),
-        'VoiceId': table_encryption.convert_uint(obj.VoiceId(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'SelectionGroup': bacy.convert_long(obj.SelectionGroup(), password),
+        'BGMId': bacy.convert_long(obj.BGMId(), password),
+        'Sound': bacy.convert_string(obj.Sound(), password),
+        'Transition': bacy.convert_uint(obj.Transition(), password),
+        'BGName': bacy.convert_uint(obj.BGName(), password),
+        'BGEffect': bacy.convert_uint(obj.BGEffect(), password),
+        'PopupFileName': bacy.convert_string(obj.PopupFileName(), password),
+        'ScriptKr': bacy.convert_string(obj.ScriptKr(), password),
+        'TextJp': bacy.convert_string(obj.TextJp(), password),
+        'VoiceId': bacy.convert_uint(obj.VoiceId(), password),
     }
 
 
 def dump_ScenarioTransitionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Name': table_encryption.convert_uint(obj.Name(), password),
-        'TransitionOut': table_encryption.convert_string(obj.TransitionOut(), password),
-        'TransitionOutDuration': table_encryption.convert_long(obj.TransitionOutDuration(), password),
-        'TransitionOutResource': table_encryption.convert_string(obj.TransitionOutResource(), password),
-        'TransitionIn': table_encryption.convert_string(obj.TransitionIn(), password),
-        'TransitionInDuration': table_encryption.convert_long(obj.TransitionInDuration(), password),
-        'TransitionInResource': table_encryption.convert_string(obj.TransitionInResource(), password),
+        'Name': bacy.convert_uint(obj.Name(), password),
+        'TransitionOut': bacy.convert_string(obj.TransitionOut(), password),
+        'TransitionOutDuration': bacy.convert_long(obj.TransitionOutDuration(), password),
+        'TransitionOutResource': bacy.convert_string(obj.TransitionOutResource(), password),
+        'TransitionIn': bacy.convert_string(obj.TransitionIn(), password),
+        'TransitionInDuration': bacy.convert_long(obj.TransitionInDuration(), password),
+        'TransitionInResource': bacy.convert_string(obj.TransitionInResource(), password),
     }
 
 
 def dump_ServiceActionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ServiceActionType': ServiceActionType(table_encryption.convert_int(obj.ServiceActionType_(), password)).name,
+        'ServiceActionType': ServiceActionType(bacy.convert_int(obj.ServiceActionType_(), password)).name,
         'IsLegacy': obj.IsLegacy(),
-        'GoodsId': table_encryption.convert_long(obj.GoodsId(), password),
+        'GoodsId': bacy.convert_long(obj.GoodsId(), password),
     }
 
 
 def dump_ShortcutTypeExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
         'IsAscending': obj.IsAscending(),
-        'ContentType': [ShortcutContentType(table_encryption.convert_int(obj.ContentType(j), password)).name for j in range(obj.ContentTypeLength())],
+        'ContentType': [ShortcutContentType(bacy.convert_int(obj.ContentType(j), password)).name for j in range(obj.ContentTypeLength())],
     }
 
 
 def dump_SkillAdditionalTooltipExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroupId': table_encryption.convert_long(obj.GroupId(), password),
-        'AdditionalSkillGroupId': table_encryption.convert_string(obj.AdditionalSkillGroupId(), password),
-        'ShowSkillSlot': table_encryption.convert_string(obj.ShowSkillSlot(), password),
+        'GroupId': bacy.convert_long(obj.GroupId(), password),
+        'AdditionalSkillGroupId': bacy.convert_string(obj.AdditionalSkillGroupId(), password),
+        'ShowSkillSlot': bacy.convert_string(obj.ShowSkillSlot(), password),
     }
 
 
 def dump_SoundUIExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ID': table_encryption.convert_long(obj.ID(), password),
-        'SoundUniqueId': table_encryption.convert_string(obj.SoundUniqueId(), password),
-        'Path': table_encryption.convert_string(obj.Path(), password),
+        'ID': bacy.convert_long(obj.ID(), password),
+        'SoundUniqueId': bacy.convert_string(obj.SoundUniqueId(), password),
+        'Path': bacy.convert_string(obj.Path(), password),
     }
 
 
 def dump_SpineLipsyncExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'VoiceId': table_encryption.convert_uint(obj.VoiceId(), password),
-        'AnimJson': table_encryption.convert_string(obj.AnimJson(), password),
+        'VoiceId': bacy.convert_uint(obj.VoiceId(), password),
+        'AnimJson': bacy.convert_string(obj.AnimJson(), password),
     }
 
 
 def dump_StageFileRefreshSettingExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'GroundId': table_encryption.convert_long(obj.GroundId(), password),
+        'GroundId': bacy.convert_long(obj.GroundId(), password),
         'ForceSave': obj.ForceSave(),
     }
 
 
 def dump_StoryStrategyExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Name': table_encryption.convert_string(obj.Name(), password),
-        'Localize': table_encryption.convert_string(obj.Localize(), password),
-        'StageEnterEchelonCount': table_encryption.convert_int(obj.StageEnterEchelonCount(), password),
-        'BattleDuration': table_encryption.convert_long(obj.BattleDuration(), password),
-        'WhiteListId': table_encryption.convert_long(obj.WhiteListId(), password),
-        'StrategyMap': table_encryption.convert_string(obj.StrategyMap(), password),
-        'StrategyMapBG': table_encryption.convert_string(obj.StrategyMapBG(), password),
-        'MaxTurn': table_encryption.convert_int(obj.MaxTurn(), password),
-        'StageTopography': StageTopography(table_encryption.convert_int(obj.StageTopography_(), password)).name,
-        'StrategyEnvironment': StrategyEnvironment(table_encryption.convert_int(obj.StrategyEnvironment_(), password)).name,
-        'ContentType': ContentType(table_encryption.convert_int(obj.ContentType_(), password)).name,
-        'BGMId': table_encryption.convert_long(obj.BGMId(), password),
-        'FirstClearReportEventName': table_encryption.convert_string(obj.FirstClearReportEventName(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Name': bacy.convert_string(obj.Name(), password),
+        'Localize': bacy.convert_string(obj.Localize(), password),
+        'StageEnterEchelonCount': bacy.convert_int(obj.StageEnterEchelonCount(), password),
+        'BattleDuration': bacy.convert_long(obj.BattleDuration(), password),
+        'WhiteListId': bacy.convert_long(obj.WhiteListId(), password),
+        'StrategyMap': bacy.convert_string(obj.StrategyMap(), password),
+        'StrategyMapBG': bacy.convert_string(obj.StrategyMapBG(), password),
+        'MaxTurn': bacy.convert_int(obj.MaxTurn(), password),
+        'StageTopography': StageTopography(bacy.convert_int(obj.StageTopography_(), password)).name,
+        'StrategyEnvironment': StrategyEnvironment(bacy.convert_int(obj.StrategyEnvironment_(), password)).name,
+        'ContentType': ContentType(bacy.convert_int(obj.ContentType_(), password)).name,
+        'BGMId': bacy.convert_long(obj.BGMId(), password),
+        'FirstClearReportEventName': bacy.convert_string(obj.FirstClearReportEventName(), password),
     }
 
 
 def dump_ToastExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_uint(obj.Id(), password),
-        'ToastType': ToastType(table_encryption.convert_int(obj.ToastType_(), password)).name,
-        'MissionId': table_encryption.convert_uint(obj.MissionId(), password),
-        'TextId': table_encryption.convert_uint(obj.TextId(), password),
-        'LifeTime': table_encryption.convert_long(obj.LifeTime(), password),
+        'Id': bacy.convert_uint(obj.Id(), password),
+        'ToastType': ToastType(bacy.convert_int(obj.ToastType_(), password)).name,
+        'MissionId': bacy.convert_uint(obj.MissionId(), password),
+        'TextId': bacy.convert_uint(obj.TextId(), password),
+        'LifeTime': bacy.convert_long(obj.LifeTime(), password),
     }
 
 
 def dump_TutorialCharacterDialogExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'TalkId': table_encryption.convert_long(obj.TalkId(), password),
-        'AnimationName': table_encryption.convert_string(obj.AnimationName(), password),
-        'LocalizeKR': table_encryption.convert_string(obj.LocalizeKR(), password),
-        'LocalizeJP': table_encryption.convert_string(obj.LocalizeJP(), password),
-        'VoiceId': table_encryption.convert_uint(obj.VoiceId(), password),
+        'TalkId': bacy.convert_long(obj.TalkId(), password),
+        'AnimationName': bacy.convert_string(obj.AnimationName(), password),
+        'LocalizeKR': bacy.convert_string(obj.LocalizeKR(), password),
+        'LocalizeJP': bacy.convert_string(obj.LocalizeJP(), password),
+        'VoiceId': bacy.convert_uint(obj.VoiceId(), password),
     }
 
 
 def dump_TutorialExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'ID': table_encryption.convert_long(obj.ID(), password),
-        'CompletionReportEventName': table_encryption.convert_string(obj.CompletionReportEventName(), password),
+        'ID': bacy.convert_long(obj.ID(), password),
+        'CompletionReportEventName': bacy.convert_string(obj.CompletionReportEventName(), password),
         'CompulsoryTutorial': obj.CompulsoryTutorial(),
         'DescriptionTutorial': obj.DescriptionTutorial(),
-        'TutorialStageId': table_encryption.convert_long(obj.TutorialStageId(), password),
-        'UIName': [table_encryption.convert_string(obj.UIName(j), password) for j in range(obj.UINameLength())],
-        'TutorialParentName': [table_encryption.convert_string(obj.TutorialParentName(j), password) for j in range(obj.TutorialParentNameLength())],
+        'TutorialStageId': bacy.convert_long(obj.TutorialStageId(), password),
+        'UIName': [bacy.convert_string(obj.UIName(j), password) for j in range(obj.UINameLength())],
+        'TutorialParentName': [bacy.convert_string(obj.TutorialParentName(j), password) for j in range(obj.TutorialParentNameLength())],
     }
 
 
 def dump_TutorialFailureImageExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Contents': TutorialFailureContentType(table_encryption.convert_int(obj.Contents(), password)).name,
-        'Type': table_encryption.convert_string(obj.Type(), password),
-        'ImagePathKr': table_encryption.convert_string(obj.ImagePathKr(), password),
-        'ImagePathJp': table_encryption.convert_string(obj.ImagePathJp(), password),
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Contents': TutorialFailureContentType(bacy.convert_int(obj.Contents(), password)).name,
+        'Type': bacy.convert_string(obj.Type(), password),
+        'ImagePathKr': bacy.convert_string(obj.ImagePathKr(), password),
+        'ImagePathJp': bacy.convert_string(obj.ImagePathJp(), password),
     }
 
 
 def dump_VideoExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'Id': table_encryption.convert_long(obj.Id(), password),
-        'Nation': [Nation(table_encryption.convert_int(obj.Nation_(j), password)).name for j in range(obj.NationLength())],
-        'VideoPath': [table_encryption.convert_string(obj.VideoPath(j), password) for j in range(obj.VideoPathLength())],
-        'SoundPath': [table_encryption.convert_string(obj.SoundPath(j), password) for j in range(obj.SoundPathLength())],
-        'SoundVolume': [table_encryption.convert_float(obj.SoundVolume(j), password) for j in range(obj.SoundVolumeLength())],
+        'Id': bacy.convert_long(obj.Id(), password),
+        'Nation': [Nation(bacy.convert_int(obj.Nation_(j), password)).name for j in range(obj.NationLength())],
+        'VideoPath': [bacy.convert_string(obj.VideoPath(j), password) for j in range(obj.VideoPathLength())],
+        'SoundPath': [bacy.convert_string(obj.SoundPath(j), password) for j in range(obj.SoundPathLength())],
+        'SoundVolume': [bacy.convert_float(obj.SoundVolume(j), password) for j in range(obj.SoundVolumeLength())],
     }
 
 
 def dump_VoiceCommonExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'VoiceEvent': VoiceEvent(table_encryption.convert_int(obj.VoiceEvent_(), password)).name,
-        'Rate': table_encryption.convert_long(obj.Rate(), password),
-        'VoiceHash': [table_encryption.convert_uint(obj.VoiceHash(j), password) for j in range(obj.VoiceHashLength())],
+        'VoiceEvent': VoiceEvent(bacy.convert_int(obj.VoiceEvent_(), password)).name,
+        'Rate': bacy.convert_long(obj.Rate(), password),
+        'VoiceHash': [bacy.convert_uint(obj.VoiceHash(j), password) for j in range(obj.VoiceHashLength())],
     }
 
 
 def dump_VoiceExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'Id': table_encryption.convert_uint(obj.Id(), password),
-        'Nation': [Nation(table_encryption.convert_int(obj.Nation_(j), password)).name for j in range(obj.NationLength())],
-        'Path': [table_encryption.convert_string(obj.Path(j), password) for j in range(obj.PathLength())],
-        'Volume': [table_encryption.convert_float(obj.Volume(j), password) for j in range(obj.VolumeLength())],
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'Id': bacy.convert_uint(obj.Id(), password),
+        'Nation': [Nation(bacy.convert_int(obj.Nation_(j), password)).name for j in range(obj.NationLength())],
+        'Path': [bacy.convert_string(obj.Path(j), password) for j in range(obj.PathLength())],
+        'Volume': [bacy.convert_float(obj.Volume(j), password) for j in range(obj.VolumeLength())],
     }
 
 
 def dump_VoiceLogicEffectExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'LogicEffectNameHash': table_encryption.convert_uint(obj.LogicEffectNameHash(), password),
+        'LogicEffectNameHash': bacy.convert_uint(obj.LogicEffectNameHash(), password),
         'Self': obj.Self(),
-        'Priority': table_encryption.convert_int(obj.Priority(), password),
-        'VoiceHash': [table_encryption.convert_uint(obj.VoiceHash(j), password) for j in range(obj.VoiceHashLength())],
-        'VoiceId': table_encryption.convert_uint(obj.VoiceId(), password),
+        'Priority': bacy.convert_int(obj.Priority(), password),
+        'VoiceHash': [bacy.convert_uint(obj.VoiceHash(j), password) for j in range(obj.VoiceHashLength())],
+        'VoiceId': bacy.convert_uint(obj.VoiceId(), password),
     }
 
 
 def dump_VoiceRoomExceptionExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'CostumeUniqueId': table_encryption.convert_long(obj.CostumeUniqueId(), password),
-        'LinkedCharacterVoicePrintType': CVPrintType(table_encryption.convert_int(obj.LinkedCharacterVoicePrintType(), password)).name,
-        'LinkedCostumeUniqueId': table_encryption.convert_long(obj.LinkedCostumeUniqueId(), password),
+        'CostumeUniqueId': bacy.convert_long(obj.CostumeUniqueId(), password),
+        'LinkedCharacterVoicePrintType': CVPrintType(bacy.convert_int(obj.LinkedCharacterVoicePrintType(), password)).name,
+        'LinkedCostumeUniqueId': bacy.convert_long(obj.LinkedCostumeUniqueId(), password),
     }
 
 
 def dump_VoiceSpineExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'Id': table_encryption.convert_uint(obj.Id(), password),
-        'Nation': [Nation(table_encryption.convert_int(obj.Nation_(j), password)).name for j in range(obj.NationLength())],
-        'Path': [table_encryption.convert_string(obj.Path(j), password) for j in range(obj.PathLength())],
-        'SoundVolume': [table_encryption.convert_float(obj.SoundVolume(j), password) for j in range(obj.SoundVolumeLength())],
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'Id': bacy.convert_uint(obj.Id(), password),
+        'Nation': [Nation(bacy.convert_int(obj.Nation_(j), password)).name for j in range(obj.NationLength())],
+        'Path': [bacy.convert_string(obj.Path(j), password) for j in range(obj.PathLength())],
+        'SoundVolume': [bacy.convert_float(obj.SoundVolume(j), password) for j in range(obj.SoundVolumeLength())],
     }
 
 
 def dump_VoiceTimelineExcel(obj, password) -> dict:
-    table_encryption = TableEncryptionService()
-
     return {
-        'UniqueId': table_encryption.convert_long(obj.UniqueId(), password),
-        'Id': table_encryption.convert_uint(obj.Id(), password),
-        'Nation': [Nation(table_encryption.convert_int(obj.Nation_(j), password)).name for j in range(obj.NationLength())],
-        'Path': [table_encryption.convert_string(obj.Path(j), password) for j in range(obj.PathLength())],
-        'SoundVolume': [table_encryption.convert_float(obj.SoundVolume(j), password) for j in range(obj.SoundVolumeLength())],
+        'UniqueId': bacy.convert_long(obj.UniqueId(), password),
+        'Id': bacy.convert_uint(obj.Id(), password),
+        'Nation': [Nation(bacy.convert_int(obj.Nation_(j), password)).name for j in range(obj.NationLength())],
+        'Path': [bacy.convert_string(obj.Path(j), password) for j in range(obj.PathLength())],
+        'SoundVolume': [bacy.convert_float(obj.SoundVolume(j), password) for j in range(obj.SoundVolumeLength())],
     }
 
 

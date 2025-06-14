@@ -15,10 +15,18 @@ def delete_directory(directory: Path) -> bool:
     return False
 
 
-def extract_files_from_zip(zip_file: Path, extract_path: Path, file_infos: list = None) -> None:
+def check_extracted_files(data_dir: Path) -> bool:
+    required_path = data_dir / 'data' / 'assets' / 'bin' / 'Data'
+    return required_path.exists() and any(required_path.iterdir())
+
+
+def extract_files_from_zip(zip_file: Path, extract_path: Path, file_infos: list = None, filter_path: str = None) -> None:
     with ZipFile(zip_file, 'r') as zip:
         if file_infos is None:
-            file_infos = [file for file in zip.infolist() if not file.is_dir()]
+            if filter_path:
+                file_infos = [file for file in zip.infolist() if not file.is_dir() and file.filename.startswith(filter_path)]
+            else:
+                file_infos = [file for file in zip.infolist() if not file.is_dir()]
         
         for file_info in file_infos:
             target_path = extract_path / Path(file_info.filename)
@@ -39,13 +47,13 @@ def get_data_dir(app_name: str, app_author: str, version: str = "jp") -> Path:
 
 
 def get_cache_dir(app_name: str, app_author: str, version: str = "jp") -> Path:
-    cache_dir = Path(user_cache_dir(app_name, app_author)) / version
+    cache_dir = Path(user_cache_dir(app_name, app_author)) / "cache" / version
     ensure_directory_exists(cache_dir)
     return cache_dir
 
 
 def get_output_dir(base_path: Path = None) -> Path:
-    output_dir = base_path or Path.cwd() / 'output'
+    output_dir = Path(base_path) if base_path else Path.cwd() / 'output'
     ensure_directory_exists(output_dir)
     return output_dir
 

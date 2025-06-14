@@ -26,7 +26,7 @@ class CatalogParser:
         return self._fetch_bytes(catalog, '/TableBundles/TableCatalog.bytes', 'tablebytes')
 
     def _fetch_media_bytes(self, catalog: str) -> bytes:
-        return self._fetch_bytes(catalog, '/MediaResources/MediaCatalog.bytes', 'mediabytes')
+        return self._fetch_bytes(catalog, '/MediaResources/Catalog/MediaCatalog.bytes', 'mediabytes')
 
     def _fetch_data(self, url: str, cache_name: str) -> dict:
         with CachedSession(cache_name=cache_name, use_temp=True) as session:
@@ -68,28 +68,28 @@ class CatalogParser:
         return {
             'AssetBundles': [
                 {
-                    'url': f'{server_url}/Android/{asset["Name"]}',
-                    'crc': asset.get('Crc', 0),
-                    'size': asset.get('Size', 0)
+                    'Url': f'{server_url}/Android/{asset["Name"]}',
+                    'Crc': asset.get('Crc', 0),
+                    'Size': asset.get('Size', 0)
                 }
                 for asset in bundle_data['BundleFiles']
             ],
             'TableBundles': [
                 {
-                    'url': f'{server_url}/TableBundles/{key}',
-                    'crc': asset.get('crc', 0),
-                    'size': asset.get('size', 0)
+                    'Url': f'{server_url}/TableBundles/{asset["Name"]}',
+                    'Crc': asset.get('Crc', 0),
+                    'Size': asset.get('Size', 0)
                 }
-                for key, asset in table_data['TableBundles'].items()
+                for key, asset in table_data['Table'].items()
             ],
             'MediaResources': [
                 {
-                    'url': f'{server_url}/MediaResources/{value["path"]}',
-                    'path': value['path'],
-                    'crc': value.get('crc', 0),
-                    'size': value.get('bytes', 0)
+                    'Url': f'{server_url}/MediaResources/{value["Path"]}'.replace("\\", "/"),
+                    'Path': value['Path'].replace("\\", "/"),
+                    'Crc': value.get('Crc', 0),
+                    'Size': value.get('Bytes', 0)
                 }
-                for key, value in media_data['MediaResources'].items()
+                for key, value in media_data['Table'].items()
             ],
         }
 

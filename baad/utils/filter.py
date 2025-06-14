@@ -12,86 +12,63 @@ class Filter:
     def _load_game_files(self) -> dict:
         return load_json(self.game_files_path)
 
-    def _get_name_from_url(self, url: str) -> str:
-        return Path(url).name
-
-    def _get_name_from_path(self, path: str) -> str:
-        return Path(path).name
-
-    def _find_matches(self, pattern: str, choices: dict) -> list:
+    def _find_matches(self, pattern: str, choices: list, name_key: str = 'Name') -> list:
         pattern = pattern.lower()
         matches = [
-            (name, data) 
-            for name, data in choices.items() 
-            if pattern in name.lower()
+            item for item in choices 
+            if pattern in item[name_key].lower()
         ]
 
-        return matches if matches else [
-            (name, data)
-
-            for name, data in choices.items()
-
-            if (
-                match := process.extractOne(
-                    query=pattern,
-                    choices=[name], 
-                    scorer=fuzz.token_sort_ratio,
-                    score_cutoff=self.score_cutoff
+        if not matches:
+            matches = [
+                item for item in choices
+                if (
+                    process.extractOne(
+                        query=pattern,
+                        choices=[item[name_key]], 
+                        scorer=fuzz.token_sort_ratio,
+                        score_cutoff=self.score_cutoff
+                    )
                 )
-            )
-        ]
+            ]
+
+        return matches
 
     def filter_files(self, pattern: str) -> dict:
         game_files = self._load_game_files()
         
-        asset_choices = {
-            self._get_name_from_url(asset['url']): asset 
-            for asset in game_files.get('AssetBundles', [])
-        }
-        
-        asset_matches = self._find_matches(pattern, asset_choices)
+        asset_matches = self._find_matches(pattern, game_files.get('AssetBundles', []))
         asset_results = [
             {
-                'url': data['url'],
-                'crc': data['crc'],
-                'size': data.get('size', 0),
-                'name': name
+                'url': asset['Url'],
+                'crc': asset['Crc'],
+                'size': asset.get('Size', 0),
+                'name': asset['Name']
             }
-
-            for name, data in asset_matches
+            for asset in asset_matches
         ]
 
-        table_choices = {
-            self._get_name_from_url(table['url']): table
-            for table in game_files.get('TableBundles', [])
-        }
-        
-        table_matches = self._find_matches(pattern, table_choices)
+        table_matches = self._find_matches(pattern, game_files.get('TableBundles', []))
         table_results = [
             {
-                'url': data['url'],
-                'crc': data['crc'],
-                'size': data.get('size', 0),
-                'name': name
+                'url': table['Url'],
+                'crc': table['Crc'],
+                'size': table.get('Size', 0),
+                'name': table['Name']
             }
-            for name, data in table_matches
+            for table in table_matches
         ]
 
-        media_choices = {
-            self._get_name_from_path(media['path']): media
-            for media in game_files.get('MediaResources', [])
-        }
-        
-        media_matches = self._find_matches(pattern, media_choices)
+        media_matches = self._find_matches(pattern, game_files.get('MediaResources', []), name_key='Path')
         media_results = [
             {
-                'url': data['url'],
-                'path': data['path'],
-                'crc': data['crc'],
-                'size': data.get('bytes', 0),
-                'name': name
+                'url': media['Url'],
+                'path': media['Path'],
+                'crc': media['Crc'],
+                'size': media.get('Size', 0),
+                'name': Path(media['Path']).name
             }
-            for name, data in media_matches
+            for media in media_matches
         ]
 
         return {

@@ -30,8 +30,10 @@ class TableExtractor:
     def _process_json_file(name: str, data: bytes) -> bytes:
         if name == 'logiceffectdata.json':
             return decrypt(data, 'LogicEffectData').encode('utf-8')
+        
         elif name == 'newskilldata.json':
             return decrypt(data, 'NewSkillData').encode('utf-8')
+        
         return data
 
     def _process_excel_file(self, name: str, data: bytes) -> tuple:
@@ -46,21 +48,26 @@ class TableExtractor:
 
     async def extract_table(self, table_file: Path | str, task: int) -> None:
         try:
-            zip_file = TableZipFile(str(table_file), None)
+            with open(table_file, 'rb') as f:
+                zip_bytes = f.read()
+            
+            zip_file = TableZipFile(zip_bytes, table_file.name.lower())
             table_dir_fp = self.extracted_path / table_file.stem
             ensure_directory_exists(table_dir_fp)
 
-            try:
-                data = zip_file.open(table_file.stem)
-                if table_file.name == 'Excel.zip':
-                    data, new_name = self._process_excel_file(table_file.stem, data)
-                    fp = table_dir_fp / new_name
-                else:
-                    data = self._process_json_file(table_file.stem, data)
-                    fp = table_dir_fp / table_file.stem
+            self.print_progress.add_task(f"[cyan]Extracting {table_file.name}...[/cyan]")
 
-                ensure_directory_exists(fp.parent)
-                fp.write_bytes(data)
+            try:
+                for name, data in zip_file.extract_all():
+                    if table_file.name == 'Excel.zip':
+                        data, new_name = self._process_excel_file(name, data)
+                        fp = table_dir_fp / new_name
+                    else:
+                        data = self._process_json_file(name, data)
+                        fp = table_dir_fp / name
+
+                    ensure_directory_exists(fp.parent)
+                    fp.write_bytes(data)
 
                 self.extract_progress.update(task, advance=1)
                 self.live.update(self.progress_group)
@@ -69,17 +76,26 @@ class TableExtractor:
                 self.print_progress.add_task(f'[yellow]Warning processing {table_file.name}: {e}[/yellow]')
 
         except BadZipFile:
-            self.console.log(f'[red]Error: {table_file} is not a valid zip file.[/red]')
+            self.print_progress.add_task(f'[red]Error: {table_file} is not a valid zip file.[/red]')
+
+        except Exception as e:
+            self.print_progress.add_task(f'[red]Error reading {table_file}: {str(e)}[/red]')
 
     async def extract_all_tables(self) -> None:
         table_files = list(Path(self.table_path).glob('*.zip'))
-        extract_task = self.extract_progress.add_task('[green]Extracting...', total=len(table_files))
+        if not table_files:
+            self.print_progress.add_task("[yellow]No table files found to extract[/yellow]")
+            return
 
-        task = [self.extract_table(table_file, extract_task) for table_file in table_files]
-        await asyncio.gather(*task)
+        self.print_progress.add_task(f"[cyan]Found {len(table_files)} table archives to extract[/cyan]")
         
-        self.extract_progress.update(extract_task, description='[green]Extracted...')
-        self.print_progress.add_task('[green]Extraction completed![/green]')
+        extract_task = self.extract_progress.add_task('[green]Extracting Tables...', total=len(table_files))
+        
+        tasks = [self.extract_table(table_file, extract_task) for table_file in table_files]
+        await asyncio.gather(*tasks)
+        
+        self.extract_progress.update(extract_task, description='[green]Tables Extracted...')
+        self.print_progress.add_task("[green]All tables have been extracted successfully![/green]")
 
     def run_extraction(self) -> None:
         try:

@@ -49,41 +49,27 @@ pip install git+https://github.com/Deathemonic/BA-AD
 	<summary>Tutorial with Screenshots (Click to expand)</summary>
 <br>
 
-Before doing anything, make sure you have [`uv`](https://github.com/astral-sh/uv?tab=readme-ov-file#installation) installed.
+1. Open your Terminal
 
-1. Download the repository files
+*For Windows press `Ctrl + X` or `Right Click` on the Start Menu then select Terminal*
 
 ![stepone](.github/resources/tutorial/step1.png)
 
-2. Extract the downloaded zip and open the folder from the extracted zip
+2. Install `uv` 
+
+*For Windows type `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`*
+
+*For **Mac** or **GNU/Linux** type `curl -LsSf https://astral.sh/uv/install.sh | sh`*
 
 ![steptwo](.github/resources/tutorial/step2.png)
 
-3. `Shift` + `Right Click` then click `Open PowerShell window here`
+3. Install `BA-AD`
 
-_alternatively you can open cmd then change directory to the folder_
+*Type `uv tool install git+https://github.com/Deathemonic/BA-AD`*
 
 ![stepthree](.github/resources/tutorial/step3.png)
 
-<br>
-
-
-4. Install the tool using `uv tool install .`
-
-![steptwentytwo](.github/resources/tutorial/step22.png)
-
-5. You can now run it using the `uvx --from ba-ad baad` to see the usage. Check out [Usage](#usage) on how to use the tool.
-
-![steptwentythree](.github/resources/tutorial/step23.png)
-
-<br>
-
-4. Or you can install tool by typing `pip install .`
-
-![stepfour](.github/resources/tutorial/step4.png)
-
-
-5. Your done just type `baad --help` to see the usage. Check out [Usage](#usage) on how to use the tool.
+4. Your done just type `baad --help` to see the usage. Check out [Usage](#usage) on how to use the tool.
 
 <br>
 

@@ -19,17 +19,20 @@ class MediaExtractor:
 
     async def extract_media(self, media_file: Path | str, extract_task: int) -> None:
         try:
-            zip_file = TableZipFile(str(media_file), None)
+            with open(media_file, 'rb') as f:
+                zip_bytes = f.read()
+            
+            zip_file = TableZipFile(zip_bytes, media_file.name.lower())
             media_dir_fp = self.extracted_path / media_file.stem
             ensure_directory_exists(media_dir_fp)
 
             self.print_progress.add_task(f"[cyan]Extracting {media_file.name}...[/cyan]")
 
             try:
-                data = zip_file.open(media_file.stem)
-                fp = media_dir_fp / media_file.stem
-                ensure_directory_exists(fp.parent)
-                fp.write_bytes(data)
+                for name, data in zip_file.extract_all():
+                    fp = media_dir_fp / name
+                    ensure_directory_exists(fp.parent)
+                    fp.write_bytes(data)
                 
                 self.extract_progress.update(extract_task, advance=1)
                 self.live.update(self.progress_group)
@@ -39,6 +42,8 @@ class MediaExtractor:
 
         except BadZipFile:
             self.print_progress.add_task(f'[red]Error: {media_file} is not a valid zip file.[/red]')
+        except Exception as e:
+            self.print_progress.add_task(f'[red]Error reading {media_file}: {str(e)}[/red]')
 
     async def extract_all_media(self) -> None:
         media_files = list(Path(self.media_path).glob('*.zip'))

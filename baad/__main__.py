@@ -172,6 +172,7 @@ def handle_apk(args, console) -> str:
             apk.download_apk()
         else:
             console.print("[green]APK is up to date.[/green]")
+            apk.extract_apk()
     
     parser = CatalogParser()
     return parser.fetch_catalog_url()

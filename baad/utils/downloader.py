@@ -31,11 +31,11 @@ class ResourceDownloader:
 
     @staticmethod
     def _get_file_path(file: dict) -> str | Path:
-        if 'path' in file:
-            return file['path']
-        elif isinstance(file['url'], str):
-            return Path(file['url']).name
-        return Path(file['url'])
+        if 'Path' in file:
+            return file['Path']
+        elif isinstance(file['Url'], str):
+            return Path(file['Url']).name
+        return Path(file['Url'])
 
     async def _check_existing_file(self, file_path: Path, crc: int) -> bool:
         if not file_path.exists():
@@ -107,9 +107,9 @@ class ResourceDownloader:
             tasks = [
                 self._download_file(
                     session,
-                    file['url'],
+                    file['Url'],
                     base_path / self._get_file_path(file),
-                    file['crc'],
+                    file['Crc'],
                 )
                 for file in files
             ]

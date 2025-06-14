@@ -9,7 +9,8 @@ from ..helpers.filemanager import (
     delete_directory,
     get_zip_file_infos,
     extract_files_from_zip,
-    get_data_dir
+    get_data_dir,
+    check_extracted_files
 )
 from .. import __app_name__, __app_author__
 
@@ -91,20 +92,16 @@ class Apk:
             if delete_directory(folder):
                 self.console.print(f"[yellow]Deleted outdated folder: {folder}[/yellow]")
 
-    def _parse_zipfile(self, apk_path: Path, extract_path: Path) -> None:
+    def _parse_zipfile(self, apk_path: Path, extract_path: Path, filter_path: str = None) -> None:
         file_infos = get_zip_file_infos(apk_path)
-        self._extract_files(apk_path, file_infos, extract_path)
+        self._extract_files(apk_path, file_infos, extract_path, filter_path)
 
-    def _extract_files(self, zip_path: Path, file_infos: list, extract_path: Path) -> None:
+    def _extract_files(self, zip_path: Path, file_infos: list, extract_path: Path, filter_path: str = None) -> None:
         extract_task = self.extract_progress.add_task('[green]Extracting...', total=len(file_infos))
 
         with self.live:
-            for file_info in file_infos:
-                extract_files_from_zip(zip_path, extract_path, [file_info])
-                
-                self.extract_progress.update(extract_task, advance=1)
-                self.live.update(self.progress_group)
-
+            extract_files_from_zip(zip_path, extract_path, file_infos, filter_path)
+            self.extract_progress.update(extract_task, advance=len(file_infos))
             self.extract_progress.update(extract_task, description='[green]APK Extracted...')
             self.live.update(self.progress_group)
 
@@ -118,16 +115,19 @@ class Apk:
             self._force_download()
             return
 
-        self.extract_apk()
+        if not check_extracted_files(self.cache_dir):
+            self.extract_apk()
 
     def extract_apk(self) -> None:
+        if check_extracted_files(self.cache_dir):
+            return
+
         xapk_path = Path(self.apk_path)
         apk_path = self.cache_dir / 'apk'
         data_path = self.cache_dir / 'data'
         unity_apk = apk_path / 'UnityDataAssetPack.apk'
-        main_apk = apk_path / 'com.YostarJP.BlueArchive.apk'
 
         self._parse_zipfile(xapk_path, apk_path)
-        self._parse_zipfile(unity_apk, data_path)
-        self._parse_zipfile(main_apk, data_path)
+        
+        self._parse_zipfile(unity_apk, data_path, 'assets/bin/Data')
 
