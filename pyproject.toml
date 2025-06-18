@@ -17,7 +17,7 @@ dependencies = [
     "rich>=13.9.4",
     "unitypy>=1.20.12",
     "xxhash>=3.5.0",
-    "bacy",
+    "bacy>=1.3.0",
 ]
 
 [build-system]
@@ -26,9 +26,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["baad"]
-
-[tool.uv.sources]
-bacy = { git = "https://github.com/Deathemonic/BA-CY", tag = "v1.3.0-pyo3" }
 
 [project.scripts]
 baad = "baad.__main__:main"
