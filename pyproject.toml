@@ -28,7 +28,7 @@ build-backend = "hatchling.build"
 packages = ["baad"]
 
 [tool.uv.sources]
-bacy = { git = "https://github.com/Deathemonic/BA-CY", rev = "pyo3" }
+bacy = { git = "https://github.com/Deathemonic/BA-CY", tag = "v1.3.0-pyo3" }
 
 [project.scripts]
 baad = "baad.__main__:main"
