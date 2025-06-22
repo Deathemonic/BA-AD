@@ -12,23 +12,22 @@ class Filter:
     def _load_game_files(self) -> dict:
         return load_json(self.game_files_path)
 
-    def _find_matches(self, pattern: str, choices: list, name_key: str = 'Name') -> list:
+    def _find_matches(self, pattern: str, choices: list) -> list:
         pattern = pattern.lower()
+        
         matches = [
             item for item in choices 
-            if pattern in item[name_key].lower()
+            if pattern in str(item['Url']).lower()
         ]
 
         if not matches:
             matches = [
                 item for item in choices
-                if (
-                    process.extractOne(
-                        query=pattern,
-                        choices=[item[name_key]], 
-                        scorer=fuzz.token_sort_ratio,
-                        score_cutoff=self.score_cutoff
-                    )
+                if process.extractOne(
+                    query=pattern,
+                    choices=[str(item['Url'])], 
+                    scorer=fuzz.token_sort_ratio,
+                    score_cutoff=self.score_cutoff
                 )
             ]
 
@@ -40,10 +39,10 @@ class Filter:
         asset_matches = self._find_matches(pattern, game_files.get('AssetBundles', []))
         asset_results = [
             {
-                'url': asset['Url'],
-                'crc': asset['Crc'],
-                'size': asset.get('Size', 0),
-                'name': asset['Name']
+                'Url': asset['Url'],
+                'Crc': asset['Crc'],
+                'Size': asset.get('Size', 0),
+                'Name': Path(asset['Url']).name
             }
             for asset in asset_matches
         ]
@@ -51,22 +50,22 @@ class Filter:
         table_matches = self._find_matches(pattern, game_files.get('TableBundles', []))
         table_results = [
             {
-                'url': table['Url'],
-                'crc': table['Crc'],
-                'size': table.get('Size', 0),
-                'name': table['Name']
+                'Url': table['Url'],
+                'Crc': table['Crc'],
+                'Size': table.get('Size', 0),
+                'Name': Path(table['Url']).name
             }
             for table in table_matches
         ]
 
-        media_matches = self._find_matches(pattern, game_files.get('MediaResources', []), name_key='Path')
+        media_matches = self._find_matches(pattern, game_files.get('MediaResources', []))
         media_results = [
             {
-                'url': media['Url'],
-                'path': media['Path'],
-                'crc': media['Crc'],
-                'size': media.get('Size', 0),
-                'name': Path(media['Path']).name
+                'Url': media['Url'],
+                'Path': media['Path'],
+                'Crc': media['Crc'],
+                'Size': media.get('Size', 0),
+                'Name': Path(media['Path']).name
             }
             for media in media_matches
         ]
@@ -76,4 +75,3 @@ class Filter:
             'TableBundles': table_results, 
             'MediaResources': media_results
         }
-        

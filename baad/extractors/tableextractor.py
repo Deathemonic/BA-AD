@@ -51,7 +51,7 @@ class TableExtractor:
             with open(table_file, 'rb') as f:
                 zip_bytes = f.read()
             
-            zip_file = TableZipFile(zip_bytes, table_file.name.lower())
+            zip_file = TableZipFile(zip_bytes, table_file.name)
             table_dir_fp = self.extracted_path / table_file.stem
             ensure_directory_exists(table_dir_fp)
 
