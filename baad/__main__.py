@@ -108,12 +108,12 @@ def arguments() -> tuple:
     extract.add_argument(
         '--assets',
         action='store_true',
-        help='extract the assetbundles',
+        help='extract the assetbundles (deprecated)',
     )
     extract.add_argument(
         '--tables',
         action='store_true',
-        help='extract the tablebundles',
+        help='extract the tablebundles (deprecated)',
     )
     extract.add_argument(
         '--media',
@@ -159,7 +159,7 @@ def arguments() -> tuple:
 
 def handle_apk(args, console) -> str:
     apk = Apk()
-    
+
     if args.update:
         console.print("[yellow]Force updating APK...[/yellow]")
         apk.download_apk(update=True)
@@ -173,7 +173,7 @@ def handle_apk(args, console) -> str:
         else:
             console.print("[green]APK is up to date.[/green]")
             apk.extract_apk()
-    
+
     parser = CatalogParser()
     return parser.fetch_catalog_url()
 
@@ -223,7 +223,7 @@ def handle_extract(args) -> None:
 def handle_search(args) -> None:
     root_path = Path(__file__).parent
     output_path = args.output if hasattr(args, 'output') and args.output else None
-    
+
     catalog_list = List(root_path, update=args.update, output=output_path)
     catalog_list.show()
 
