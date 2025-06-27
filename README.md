@@ -7,6 +7,10 @@ A tool that downloads and extracts the **Blue Archive JP** `AssetBundles`, `Tabl
 
 It downloads them directly from the **Yostar Servers**.
 
+> [!WARNING]  
+> This version of BA-AD is now archived please use the latest one [here](https://github.com/Deathemonic/BA-AD).
+
+
 ## Requirements
 - Python 3.10+
 - .Net Runtime 6.0 (If you are using GNU/Linux or MacOS)
