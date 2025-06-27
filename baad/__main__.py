@@ -32,12 +32,12 @@ def arguments() -> tuple:
         action='store_true',
         help='force update the apk',
     )
-    parser.add_argument(
-        '-g',
-        '--generate',
-        action='store_true',
-        help='generate the flatbuf schemas (this will be removed in the future and will be replaced by BA-FB)',
-    )
+    # parser.add_argument(
+    #    '-g',
+    #    '--generate',
+    #    action='store_true',
+    #    help='generate the flatbuf schemas (this will be removed in the future and will be replaced by BA-FB)',
+    # )
 
     search = sub_parser.add_parser(
         'search',
@@ -100,21 +100,21 @@ def arguments() -> tuple:
         type=str,
         help='path of the files that will be extracted',
     )
-    extract.add_argument(
-        '--studio',
-        action='store_true',
-        help='uses the assetstudiomod as a backend for extracting the assetbundles',
-    )
-    extract.add_argument(
-        '--assets',
-        action='store_true',
-        help='extract the assetbundles (deprecated)',
-    )
-    extract.add_argument(
-        '--tables',
-        action='store_true',
-        help='extract the tablebundles (deprecated)',
-    )
+    # extract.add_argument(
+    #    '--studio',
+    #    action='store_true',
+    #    help='uses the assetstudiomod as a backend for extracting the assetbundles',
+    # )
+    # extract.add_argument(
+    #    '--assets',
+    #    action='store_true',
+    #    help='extract the assetbundles (deprecated)',
+    # )
+    # extract.add_argument(
+    #    '--tables',
+    #    action='store_true',
+    #    help='extract the tablebundles (deprecated)',
+    # )
     extract.add_argument(
         '--media',
         action='store_true',
