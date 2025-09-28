@@ -159,8 +159,8 @@ dependencies = [
 
 [[package]]
 name = "baad-core"
-version = "2.5.0"
-source = "git+https://github.com/RZinth/BA-AD-Core#6fe01fda0ebccc6d502c9c6432493234f3eee631"
+version = "2.5.1"
+source = "git+https://github.com/RZinth/BA-AD-Core#02bfeb9a7f7d4425f4493cbd89ac84c338e2d497"
 dependencies = [
  "anyhow",
  "chrono",
