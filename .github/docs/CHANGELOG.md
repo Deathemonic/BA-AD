@@ -1,10 +1,12 @@
 # Changelogs
 
-## 2.8.1
+## 2.8.2
 
 ### Fixes
 
 - Fixed `needs_catalog_update` logic on cli
+- Fixed color detection logic on config
+- Fixed error messages duplications
 
 ## 2.8.0
 

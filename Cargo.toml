@@ -29,5 +29,4 @@ clap = { version = "4.5.48", features = ["derive"] }
 
 bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "2.4.1" }
 trauma = { git = "https://github.com/RZinth/trauma", version = "3.3.1", features = ["rustls"] }  # Using a custom trauma
-baad-core = { git = "https://github.com/RZinth/BA-AD-Core", version = "2.5.0" }
-
+baad-core = { git = "https://github.com/RZinth/BA-AD-Core", version = "2.5.1" }
