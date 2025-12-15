@@ -1,4 +1,4 @@
-use crate::cli::args::{
+use crate::args::{
     Args, BaseDownloadArgs, Commands, GlobalDownloadArgs, JapanDownloadArgs, RegionCommands,
 };
 
@@ -7,7 +7,7 @@ use baad::catalog::{CatalogFetcher, CatalogParser};
 use baad::download::{FilterMethod, ResourceCategory, ResourceDownloadBuilder, ResourceFilter};
 use baad::helpers::{ApkError, BuildType, Platform, ServerConfig, ServerRegion};
 
-use baad_core::{file, info};
+use baad_utils::{file, info};
 use clap::CommandFactory;
 use eyre::{eyre, Result};
 use std::rc::Rc;

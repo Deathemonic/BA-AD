@@ -62,13 +62,13 @@
 ### Fixes
 
 - Fix colors on certain terminals
-  - Added a color detecting logic on `baad_core` to prevent weird characters on `ansi` terminals (e.g command prompt)
+  - Added a color detecting logic on `baad_utils` to prevent weird characters on `ansi` terminals (e.g command prompt)
 
 ## 2.7.5
 
 ### API Changes
 
-- Fix `baad_core::utils::file` exports redirecting to `baad::utils::json`
+- Fix `baad_utils::utils::file` exports redirecting to `baad::utils::json`
 - Export `debug, error, file, info, warn, trace`
 
 
@@ -110,7 +110,7 @@
 
 ### Fixes
 
-- Changed the cache path from `baad_core` to `baad`
+- Changed the cache path from `baad_utils` to `baad`
 
 ## v2.4.0
 

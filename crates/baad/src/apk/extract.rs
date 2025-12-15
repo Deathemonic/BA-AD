@@ -3,7 +3,7 @@ use crate::helpers::{
     LIBIL2CPP_PATH, LIBIL2CPP_PATTERN, METADATA_PATH, METADATA_PATTERN, ServerConfig, ServerRegion,
 };
 
-use baad_core::{file, info};
+use baad_utils::{file, info};
 use glob::Pattern;
 use std::fs::{self, File};
 use std::io::{self, BufWriter, Cursor, Read};

@@ -9,7 +9,7 @@ use crate::utils::{
     json,
 };
 
-use baad_core::{file, info};
+use baad_utils::{file, info};
 use bacy::catalog::{MediaCatalog, Packing, TableCatalog, deserialize_table_catalog, deserialize_media_catalog};
 use hashbrown::HashSet;
 use reqwest::Client;
