@@ -71,8 +71,8 @@ pub struct BaseDownloadArgs {
     #[arg(long)]
     pub filter: Option<String>,
 
-    /// Filter method to use
-    #[arg(long, value_enum, default_value = "contains")]
+    /// Filter method to use (exact, contains, regex, fuzzy, glob, contains-ignore-case, starts-with, ends-with)
+    #[arg(long, default_value = "contains")]
     pub filter_method: FilterMethod,
 
     /// Proxy URL for downloads

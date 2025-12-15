@@ -1,23 +1,40 @@
 use crate::helpers::error::FilterError;
 
-use clap::ValueEnum;
 use glob::Pattern as GlobPattern;
 use lazy_regex::Regex;
 use nucleo::{Config, Matcher, Utf32Str};
+use std::str::FromStr;
 
-#[derive(Debug, Clone, ValueEnum)]
+#[derive(Debug, Clone)]
 pub enum FilterMethod {
     Exact,
     Contains,
     Regex,
     Fuzzy,
     Glob,
-    #[value(name = "contains-ignore-case")]
     ContainsIgnoreCase,
-    #[value(name = "starts-with")]
     StartsWith,
-    #[value(name = "ends-with")]
     EndsWith,
+}
+
+impl FromStr for FilterMethod {
+    type Err = FilterError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "exact" => Ok(Self::Exact),
+            "contains" => Ok(Self::Contains),
+            "regex" => Ok(Self::Regex),
+            "fuzzy" => Ok(Self::Fuzzy),
+            "glob" => Ok(Self::Glob),
+            "contains-ignore-case" => Ok(Self::ContainsIgnoreCase),
+            "starts-with" => Ok(Self::StartsWith),
+            "ends-with" => Ok(Self::EndsWith),
+            _ => Err(FilterError::InvalidFilterMethod {
+                method: s.into(),
+            }),
+        }
+    }
 }
 
 pub struct ResourceFilter {
