@@ -1,8 +1,9 @@
-mod cli;
+mod args;
+mod parse;
 
-use cli::{parse, Args};
+use args::Args;
 
-use baad_core::config::{init_logging, LoggingConfig};
+use baad_utils::config::{init_logging, LoggingConfig};
 use clap::Parser;
 use eyre::Result;
 

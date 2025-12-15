@@ -6,4 +6,4 @@ pub use api::*;
 pub use config::*;
 pub use error::*;
 
-pub use baad_core::config::*;
+pub use baad_utils::config::*;

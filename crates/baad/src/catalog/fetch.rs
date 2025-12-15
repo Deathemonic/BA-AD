@@ -5,7 +5,7 @@ use crate::helpers::{
 };
 use crate::utils::json;
 
-use baad_core::{debug, file, info};
+use baad_utils::{debug, file, info};
 use bacy::table_encryption::{convert_string, create_key, encrypt_string};
 use base64::{Engine, engine::general_purpose};
 use memchr::memmem::Finder;

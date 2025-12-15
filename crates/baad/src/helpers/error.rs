@@ -27,7 +27,7 @@ pub enum JsonError {
     Io(#[from] std::io::Error),
 
     #[error(transparent)]
-    File(#[from] baad_core::error::FileError),
+    File(#[from] baad_utils::error::FileError),
 
     #[error("Failed to convert file content to UTF-8")]
     InvalidUtf8,
@@ -51,7 +51,7 @@ pub enum DownloadError {
     Json(#[from] JsonError),
 
     #[error(transparent)]
-    File(#[from] baad_core::error::FileError),
+    File(#[from] baad_utils::error::FileError),
 
     #[error(transparent)]
     Network(#[from] NetworkError),
@@ -75,7 +75,7 @@ pub enum CatalogError {
     Json(#[from] JsonError),
 
     #[error(transparent)]
-    File(#[from] baad_core::error::FileError),
+    File(#[from] baad_utils::error::FileError),
 
     #[error(transparent)]
     Catalog(#[from] bacy::error::CatalogError),
@@ -111,7 +111,7 @@ pub enum ApkError {
     Json(#[from] JsonError),
 
     #[error(transparent)]
-    File(#[from] baad_core::error::FileError),
+    File(#[from] baad_utils::error::FileError),
 
     #[error(transparent)]
     Network(#[from] NetworkError),

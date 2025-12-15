@@ -5,7 +5,7 @@ use crate::helpers::{
 };
 use crate::utils::{catalog::load_resources, network};
 
-use baad_core::{debug, error, file, info, warn};
+use baad_utils::{debug, error, file, info, warn};
 use reqwest::Url;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;

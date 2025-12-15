@@ -133,13 +133,11 @@ checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
 name = "baad"
-version = "2.9.0"
+version = "3.0.0"
 dependencies = [
- "baad-core",
+ "baad-utils",
  "bacy 2.6.1 (git+https://github.com/Deathemonic/BA-CY?tag=v2.6.1)",
  "base64",
- "clap",
- "eyre",
  "glob",
  "hashbrown",
  "lazy-regex",
@@ -158,9 +156,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "baad-core"
-version = "2.7.1"
-source = "git+https://github.com/RZinth/BA-AD-Core#cf5866592e52cfa26eddeefd47bb399f76df8dd9"
+name = "baad-cli"
+version = "3.0.0"
+dependencies = [
+ "baad",
+ "baad-utils",
+ "clap",
+ "eyre",
+ "tokio",
+]
+
+[[package]]
+name = "baad-utils"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "chrono",

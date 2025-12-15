@@ -4,7 +4,7 @@ use crate::helpers::{
 };
 use crate::utils::{json, network};
 
-use baad_core::{debug, file, info, warn};
+use baad_utils::{debug, file, info, warn};
 use reqwest::{Client, Url};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;

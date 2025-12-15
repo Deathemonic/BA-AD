@@ -1,6 +1,6 @@
 use crate::helpers::{API_FILENAME, ApiData, GlobalData, JapanData, JsonError};
 
-use baad_core::file;
+use baad_utils::file;
 use serde::{Serialize, de::DeserializeOwned};
 use std::path::Path;
 

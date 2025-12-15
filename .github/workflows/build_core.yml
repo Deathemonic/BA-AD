@@ -13,32 +13,32 @@ jobs:
             arch: x86_64
             runner: windows-latest
             target: x86_64-pc-windows-msvc
-            lib_name: baad_core.dll
+            lib_name: baad_utils.dll
           - os: windows
             arch: aarch64
             runner: windows-latest
             target: aarch64-pc-windows-msvc
-            lib_name: baad_core.dll
+            lib_name: baad_utils.dll
           - os: macos
             arch: x86_64
             runner: macos-15
             target: x86_64-apple-darwin
-            lib_name: libbaad_core.dylib
+            lib_name: libbaad_utils.dylib
           - os: macos
             arch: aarch64
             runner: macos-15
             target: aarch64-apple-darwin
-            lib_name: libbaad_core.dylib
+            lib_name: libbaad_utils.dylib
           - os: linux
             arch: x86_64
             runner: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            lib_name: libbaad_core.so
+            lib_name: libbaad_utils.so
           - os: linux
             arch: aarch64
             runner: ubuntu-24.04-arm
             target: aarch64-unknown-linux-gnu
-            lib_name: libbaad_core.so
+            lib_name: libbaad_utils.so
     steps:
       - name: Clone source repository
         run: |
