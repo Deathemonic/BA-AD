@@ -1,0 +1,27 @@
+[package]
+name = "baad"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+baad-utils = { workspace = true }
+
+tokio = { workspace = true }
+thiserror = { workspace = true }
+
+reqwest = { version = "0.12.23", features = ["json"] }
+serde_json = { version = "1.0.145", features = ["preserve_order"] }
+serde = { version = "1.0.226", features = ["derive"] }
+walkdir = "2.5.0"
+zip = "5.1.1"
+base64 = "0.22.1"
+lazy-regex = "3.4.1"
+glob = "0.3.3"
+nucleo = "0.5.0"
+url = "2.5.7"
+hashbrown = "0.16.0"
+rayon = "1.11.0"
+memchr = "2.7.6"
+
+bacy = { git = "https://github.com/Deathemonic/BA-CY", tag = "v2.6.1" }
+trauma = { git = "https://github.com/RZinth/trauma", version = "3.3.1", features = ["rustls"] }

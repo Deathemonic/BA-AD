@@ -1,0 +1,28 @@
+[package]
+name = "baad-utils"
+version.workspace = true
+edition.workspace = true
+
+[features]
+default = []
+no_logs = []
+no_debug = []
+no_error = []
+
+[dependencies]
+tokio = { workspace = true }
+eyre = { workspace = true }
+thiserror = { workspace = true }
+
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter", "json"] }
+tracing-appender = { version = "0.2.4", features = ["parking_lot"] }
+owo-colors = { version = "4.2.2", features = ["supports-colors"] }
+chrono = { version = "0.4", features = ["serde"] }
+lazy-regex = "3.3"
+once_cell = "1.19"
+smallvec = "1.13"
+itoa = "1.0"
+crossbeam-channel = "0.5"
+platform-dirs = "0.3.0"
+anyhow = "1.0.99"

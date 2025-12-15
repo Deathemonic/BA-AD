@@ -1,35 +1,20 @@
-[package]
-name = "baad"
-version = "2.9.1"
+[workspace]
+members = [
+    "crates/baad",
+    "crates/baad-cli",
+    "crates/baad-utils",
+]
+resolver = "2"
+
+[workspace.package]
+version = "3.0.0"
 edition = "2024"
+authors = ["Zinth"]
 
-[lib]
-name = "baad"
-path = "src/lib.rs"
-
-[[bin]]
-name = "baad"
-path = "src/main.rs"
-
-[dependencies]
-reqwest = { version = "0.12.23", features = ["json"] }
-serde_json = { version = "1.0.145", features = ["preserve_order"] }
-serde = { version = "1.0.226", features = ["derive"] }
+[workspace.dependencies]
 tokio = { version = "1.47.1", features = ["full"] }
-thiserror = "2.0.16"
-walkdir = "2.5.0"
 eyre = "0.6.12"
-zip = "5.1.1"
-base64 = "0.22.1"
-lazy-regex = "3.4.1"
-glob = "0.3.3"
-nucleo = "0.5.0"
-url = "2.5.7"
-clap = { version = "4.5.48", features = ["derive"] }
-hashbrown = "0.16.0"
-rayon = "1.11.0"
-memchr = "2.7.6"
+thiserror = "2.0.16"
 
-bacy = { git = "https://github.com/Deathemonic/BA-CY", tag = "v2.6.1" }
-trauma = { git = "https://github.com/RZinth/trauma", version = "3.3.1", features = ["rustls"] }  # Using a custom trauma
-baad-core = { git = "https://github.com/RZinth/BA-AD-Core", version = "2.6.0" }
+baad = { path = "crates/baad" }
+baad-utils = { path = "crates/baad-utils" }

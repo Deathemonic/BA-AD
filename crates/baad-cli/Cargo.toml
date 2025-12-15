@@ -1,0 +1,17 @@
+[package]
+name = "baad-cli"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "baad"
+path = "src/main.rs"
+
+[dependencies]
+baad = { workspace = true }
+baad-utils = { workspace = true }
+
+tokio = { workspace = true }
+eyre = { workspace = true }
+
+clap = { version = "4.5.48", features = ["derive"] }
