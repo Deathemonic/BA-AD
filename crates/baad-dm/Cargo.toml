@@ -1,0 +1,37 @@
+[package]
+name = "baad-dm"
+license = "MIT"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+tokio = { version = "1.49", features = ["macros", "rt-multi-thread", "fs", "io-util"] }
+futures = "0.3"
+reqwest-middleware = "0.4"
+reqwest-retry = "0.7"
+indicatif = "0.18"
+thiserror = "2"
+derive_more = { version = "2", features = ["display", "from", "debug"] }
+bon = "3"
+flate2 = "1.1"
+form_urlencoded = "1.1"
+tracing = "0.1"
+bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "3.0.1" }
+
+[dependencies.reqwest]
+version = "0.12"
+default-features = false
+features = [
+    "http2",
+    "stream",
+    "socks",
+    "gzip",
+    "deflate",
+    "brotli",
+    "zstd",
+    "rustls-tls",
+]
+
+[features]
+default = []
+native-tls = ["reqwest/native-tls"]

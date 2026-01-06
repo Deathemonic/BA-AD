@@ -4,6 +4,7 @@ mod parse;
 use args::Args;
 
 use baad_utils::config::{init_logging, LoggingConfig};
+
 use clap::Parser;
 use eyre::Result;
 

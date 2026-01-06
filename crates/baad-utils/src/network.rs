@@ -1,4 +1,4 @@
-use crate::helpers::NetworkError;
+use crate::error::NetworkError;
 
 use reqwest::{Proxy, Response};
 

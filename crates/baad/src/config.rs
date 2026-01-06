@@ -1,9 +1,12 @@
 use crate::helpers::error::ServerConfigError;
 
-use lazy_regex::{lazy_regex, Lazy, Regex};
-use reqwest::header::{HeaderMap, HeaderValue};
-use std::borrow::Cow;
 use std::rc::Rc;
+use std::borrow::Cow;
+
+
+use reqwest::header::{HeaderMap, HeaderValue};
+use lazy_regex::{lazy_regex, Lazy, Regex};
+
 
 pub static JAPAN_REGEX_URL: Lazy<Regex> = lazy_regex!(
     r"(X?APKJ)..(https?://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))"
@@ -46,6 +49,9 @@ pub const DATA_PATTERN: &str = "*";
 pub const METADATA_PATTERN: &str = "global-metadata.dat";
 
 pub const EXECUTABLE_NAME: &str = "baad";
+
+pub const PATCH_PACK_ANDROID: &str = "Android_PatchPack";
+pub const PATCH_PACK_IOS: &str = "iOS_PatchPack";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ServerRegion {
