@@ -5,6 +5,9 @@
 # Blue Archive - Asset Downloader
 A tool and library that downloads the latest **Blue Archive** assets.
 
+> [!WARNING]  
+> This is a unfinished version of `BA-AD` don't use unless your a developer/contributor.
+
 ## Install
 
 ### Release
