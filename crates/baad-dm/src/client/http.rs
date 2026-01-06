@@ -43,3 +43,13 @@ pub fn get_content_length(response: &reqwest_middleware::reqwest::Response) -> O
         response.content_length()
     }
 }
+
+pub async fn resolve_url(client: &ClientWithMiddleware, url: &str) -> Result<String, String> {
+    let res = client
+        .head(url)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    
+    Ok(res.url().to_string())
+}

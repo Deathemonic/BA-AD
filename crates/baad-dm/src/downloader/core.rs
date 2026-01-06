@@ -5,6 +5,7 @@ use crate::progress::ProgressDisplay;
 use crate::zip::ZipExtractor;
 
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use futures::stream::{self, StreamExt};
 use indicatif::ProgressBar;
@@ -24,6 +25,12 @@ struct FetchCtx<'a> {
     client: &'a ClientWithMiddleware,
     download: &'a Download,
     progress: &'a ProgressDisplay,
+    file_path: PathBuf,
+}
+
+struct ChunkCtx {
+    client: Arc<ClientWithMiddleware>,
+    resolved_url: String,
     file_path: PathBuf,
 }
 
@@ -122,7 +129,7 @@ impl Downloader {
             return self.extract_zip(ctx).await;
         }
 
-        let (resumable, content_length) = self.check_server(ctx.client, ctx.download).await.map_err(|e| {
+        let (resumable, content_length, resolved_url) = self.check_server(ctx.client, ctx.download).await.map_err(|e| {
             self.make_summary(ctx.download, StatusCode::BAD_REQUEST, 0, false)
                 .failed(e)
         })?;
@@ -152,7 +159,7 @@ impl Downloader {
         };
 
         if chunk_count > 1 {
-            self.download_chunked(ctx, opts.total_size, chunk_count).await
+            self.download_chunked(ctx, opts.total_size, chunk_count, &resolved_url).await
         } else {
             self.download_stream(ctx, opts).await
         }
@@ -162,8 +169,10 @@ impl Downloader {
         &self,
         client: &ClientWithMiddleware,
         download: &Download,
-    ) -> Result<(bool, Option<u64>), String> {
+    ) -> Result<(bool, Option<u64>, String), String> {
         let res = client.head(download.url.clone()).send().await.map_err(|e| e.to_string())?;
+        
+        let resolved_url = res.url().to_string();
         let headers = res.headers();
 
         let resumable = headers
@@ -176,7 +185,7 @@ impl Downloader {
             .and_then(|v| v.to_str().ok())
             .and_then(|v| v.parse().ok());
 
-        Ok((resumable, content_length))
+        Ok((resumable, content_length, resolved_url))
     }
 
     async fn download_stream(&self, ctx: &FetchCtx<'_>, opts: StreamOpts) -> FetchResult {
@@ -249,7 +258,7 @@ impl Downloader {
         Ok(downloaded)
     }
 
-    async fn download_chunked(&self, ctx: &FetchCtx<'_>, total_size: u64, chunk_count: usize) -> FetchResult {
+    async fn download_chunked(&self, ctx: &FetchCtx<'_>, total_size: u64, chunk_count: usize, resolved_url: &str) -> FetchResult {
         let chunk_size = total_size / chunk_count as u64;
 
         self.ensure_parent_dir(&ctx.file_path).await.map_err(|e| {
@@ -280,9 +289,20 @@ impl Downloader {
             .collect();
 
         let concurrent_chunks = chunk_count.min(self.config.max_concurrent_chunks);
+        
+        let chunk_ctx = ChunkCtx {
+            client: Arc::new(ctx.client.clone()),
+            resolved_url: resolved_url.to_string(),
+            file_path: ctx.file_path.clone(),
+        };
+        let chunk_ctx = Arc::new(chunk_ctx);
 
         let results: Vec<_> = stream::iter(ranges)
-            .map(|range| self.download_chunk(ctx, range, &pb))
+            .map(|range| {
+                let chunk_ctx = Arc::clone(&chunk_ctx);
+                let pb = pb.clone();
+                async move { Self::download_chunk(&chunk_ctx, range, &pb).await }
+            })
             .buffer_unordered(concurrent_chunks)
             .collect()
             .await;
@@ -298,10 +318,10 @@ impl Downloader {
         Ok(self.make_summary(ctx.download, StatusCode::OK, total_size, true).success())
     }
 
-    async fn download_chunk(&self, ctx: &FetchCtx<'_>, range: ChunkRange, pb: &ProgressBar) -> Result<(), String> {
-        let res = ctx
+    async fn download_chunk(chunk_ctx: &ChunkCtx, range: ChunkRange, pb: &ProgressBar) -> Result<(), String> {
+        let res = chunk_ctx
             .client
-            .get(ctx.download.url.as_str())
+            .get(&chunk_ctx.resolved_url)
             .header(RANGE, format!("bytes={}-{}", range.start, range.end))
             .send()
             .await
@@ -311,7 +331,7 @@ impl Downloader {
 
         let mut file = OpenOptions::new()
             .write(true)
-            .open(&ctx.file_path)
+            .open(&chunk_ctx.file_path)
             .await
             .map_err(|e| e.to_string())?;
 
