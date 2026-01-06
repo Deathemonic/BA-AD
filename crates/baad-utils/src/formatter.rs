@@ -1,11 +1,12 @@
 use crate::utils::{contains_url, format_urls, get_level_visual_length, level_to_index};
 
-use chrono::{DateTime, Local};
-use owo_colors::{OwoColorize, Stream, Style};
-use smallvec::SmallVec;
 use std::borrow::Cow;
 use std::fmt;
 use std::sync::Arc;
+
+use chrono::{DateTime, Local};
+use owo_colors::{OwoColorize, Stream, Style};
+use smallvec::SmallVec;
 use tracing::{
     Event, Level, Subscriber,
     field::{Field, Visit},

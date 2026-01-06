@@ -1,5 +1,8 @@
-use eyre::{EyreHandler, Report};
 use std::sync::Once;
+use std::iter::successors;
+use std::{error, fmt, panic, io};
+
+use eyre::{EyreHandler, Report};
 use thiserror::Error;
 use tracing::{error, warn};
 
@@ -11,7 +14,7 @@ impl IntoEyreReport for anyhow::Error {
     fn into_eyre_report(self) -> Report {
         let mut report = Report::msg(self.to_string());
 
-        for source in std::iter::successors(self.source(), |e| e.source()) {
+        for source in successors(self.source(), |e| e.source()) {
             report = report.wrap_err(source.to_string());
         }
 
@@ -31,17 +34,17 @@ impl TracingHandler {
 impl EyreHandler for TracingHandler {
     fn debug(
         &self,
-        error: &(dyn std::error::Error + 'static),
-        f: &mut std::fmt::Formatter<'_>,
-    ) -> std::fmt::Result {
+        error: &(dyn error::Error + 'static),
+        f: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
         if f.alternate() {
-            return std::fmt::Debug::fmt(error, f);
+            return fmt::Debug::fmt(error, f);
         }
 
         let mut prev_msg = error.to_string();
         error!("{}", error);
 
-        for cause in std::iter::successors(error.source(), |e| (*e).source()) {
+        for cause in successors(error.source(), |e| (*e).source()) {
             let cause_msg = cause.to_string();
             if cause_msg != prev_msg {
                 error!("{}", cause);
@@ -81,7 +84,7 @@ pub fn install() -> Result<(), ConfigError> {
 
     static ONCE: Once = Once::new();
     ONCE.call_once(|| {
-        std::panic::set_hook(Box::new(|panic_info| {
+        panic::set_hook(Box::new(|panic_info| {
             let msg = match panic_info.payload().downcast_ref::<&str>() {
                 Some(s) => s.to_string(),
                 None => match panic_info.payload().downcast_ref::<String>() {
@@ -105,10 +108,10 @@ pub fn install() -> Result<(), ConfigError> {
 #[derive(Error, Debug)]
 pub enum FileError {
     #[error(transparent)]
-    Io(#[from] std::io::Error),
+    Io(#[from] io::Error),
 
     #[error(transparent)]
-    External(Box<dyn std::error::Error + Send + Sync>),
+    External(Box<dyn error::Error + Send + Sync>),
 
     #[error("Failed to create app directories")]
     AppDirectoryCreationFailed,
@@ -123,8 +126,29 @@ pub enum FileError {
 #[derive(Error, Debug)]
 pub enum ConfigError {
     #[error(transparent)]
-    External(Box<dyn std::error::Error + Send + Sync>),
+    External(Box<dyn error::Error + Send + Sync>),
 
     #[error("Failed to initialize logging")]
     LoggingInitFailed,
+}
+
+#[derive(Error, Debug)]
+pub enum NetworkError {
+    #[error(transparent)]
+    Reqwest(#[from] reqwest::Error),
+
+    #[error("Unable to set proxy")]
+    Proxy,
+}
+
+#[derive(Error, Debug)]
+pub enum JsonError {
+    #[error(transparent)]
+    Io(#[from] FileError),
+
+    #[error(transparent)]
+    Serde(#[from] serde_json::Error),
+
+    #[error("Invalid UTF-8 in JSON file")]
+    InvalidUtf8,
 }

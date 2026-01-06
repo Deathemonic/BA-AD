@@ -1,8 +1,7 @@
-use crate::async_writer::AsyncMakeWriter;
+use crate::async_writer::{store_guard, AsyncMakeWriter};
 use crate::error::ConfigError;
 use crate::formatter::ConsoleFormatter;
 
-use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::{
     fmt::{self, format::FmtSpan},
     layer::SubscriberExt,
@@ -52,7 +51,7 @@ impl FeatureConfig {
     }
 }
 
-pub fn init_logging(config: LoggingConfig) -> Result<Option<WorkerGuard>, ConfigError> {
+pub fn init_logging(config: LoggingConfig) -> Result<(), ConfigError> {
     let feature_config = FeatureConfig::from_features();
 
     if feature_config.logs_enabled
@@ -64,7 +63,7 @@ pub fn init_logging(config: LoggingConfig) -> Result<Option<WorkerGuard>, Config
 
     if !feature_config.logs_enabled {
         tracing_subscriber::registry().init();
-        return Ok(None);
+        return Ok(());
     }
 
     let env_filter = match (
@@ -76,7 +75,7 @@ pub fn init_logging(config: LoggingConfig) -> Result<Option<WorkerGuard>, Config
         (false, false) => EnvFilter::new("info"),
     };
 
-    let guard = if config.enable_async_writer {
+    if config.enable_async_writer {
         let (async_writer, guard) = AsyncMakeWriter::new();
 
         macro_rules! console_layer {
@@ -111,7 +110,7 @@ pub fn init_logging(config: LoggingConfig) -> Result<Option<WorkerGuard>, Config
         };
 
         result.map_err(|_| ConfigError::LoggingInitFailed)?;
-        Some(guard)
+        store_guard(guard);
     } else {
         macro_rules! console_layer {
             () => {
@@ -144,12 +143,11 @@ pub fn init_logging(config: LoggingConfig) -> Result<Option<WorkerGuard>, Config
         };
 
         result.map_err(|_| ConfigError::LoggingInitFailed)?;
-        None
-    };
+    }
 
-    Ok(guard)
+    Ok(())
 }
 
-pub fn init_logging_default() -> Result<Option<WorkerGuard>, ConfigError> {
+pub fn init_logging_default() -> Result<(), ConfigError> {
     init_logging(LoggingConfig::default())
 }

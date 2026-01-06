@@ -1,6 +1,7 @@
+use std::future::Future;
+
 use eyre::Result;
 use lazy_regex::regex;
-use std::future::Future;
 use tracing::{error, Level};
 
 #[inline]

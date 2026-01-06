@@ -1,9 +1,5 @@
 [workspace]
-members = [
-    "crates/baad",
-    "crates/baad-cli",
-    "crates/baad-utils",
-]
+members = ["crates/baad-dm"]
 resolver = "2"
 
 [workspace.package]
@@ -16,5 +12,5 @@ tokio = { version = "1.47.1", features = ["full"] }
 eyre = "0.6.12"
 thiserror = "2.0.16"
 
-baad = { path = "crates/baad" }
-baad-utils = { path = "crates/baad-utils" }
+# baad = { path = "crates/baad" }
+# baad-utils = { path = "crates/baad-utils" }

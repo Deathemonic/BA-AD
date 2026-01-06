@@ -81,9 +81,6 @@ pub enum CatalogError {
     File(#[from] baad_utils::error::FileError),
 
     #[error(transparent)]
-    Catalog(#[from] bacy::error::CatalogError),
-
-    #[error(transparent)]
     Apk(#[from] ApkError),
 
     #[error(transparent)]
@@ -100,6 +97,9 @@ pub enum CatalogError {
 
     #[error(transparent)]
     Io(#[from] std::io::Error),
+
+    #[error(transparent)]
+    MemoryPack(#[from] memorypack::Error),
 
     #[error("Catalog URL is empty for {region} region")]
     EmptyCatalogUrl { region: Box<str> },
