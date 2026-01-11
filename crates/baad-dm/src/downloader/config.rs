@@ -1,6 +1,3 @@
-use crate::download::Summary;
-use crate::progress::StyleOptions;
-
 use std::env::current_dir;
 use std::fmt::{Debug, Formatter, Result};
 use std::path::PathBuf;
@@ -8,6 +5,9 @@ use std::sync::Arc;
 
 use bon::Builder;
 use reqwest_middleware::reqwest::header::HeaderMap;
+
+use crate::download::Summary;
+use crate::progress::StyleOptions;
 
 pub type DownloadCallback = Arc<dyn Fn(&Summary) + Send + Sync>;
 
@@ -44,7 +44,7 @@ pub struct DownloaderConfig {
 
     pub proxy: Option<reqwest_middleware::reqwest::Proxy>,
 
-    pub on_complete: Option<DownloadCallback>,
+    pub on_complete: Option<DownloadCallback>
 }
 
 impl Debug for DownloaderConfig {

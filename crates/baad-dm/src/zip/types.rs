@@ -14,5 +14,5 @@ pub struct ZipFileInfo {
     pub compression_method: u16,
     pub compressed_size: u64,
     pub uncompressed_size: u64,
-    pub local_header_offset: u64,
+    pub local_header_offset: u64
 }
