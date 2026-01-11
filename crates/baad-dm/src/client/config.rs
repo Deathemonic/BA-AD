@@ -1,4 +1,5 @@
-use reqwest_middleware::reqwest::{header::HeaderMap, Proxy};
+use reqwest_middleware::reqwest::Proxy;
+use reqwest_middleware::reqwest::header::HeaderMap;
 
 #[derive(Debug, Clone, Default)]
 pub struct HttpClientConfig {
@@ -6,7 +7,7 @@ pub struct HttpClientConfig {
     pub proxy: Option<Proxy>,
     pub headers: Option<HeaderMap>,
     pub pool_max_idle: usize,
-    pub tcp_nodelay: bool,
+    pub tcp_nodelay: bool
 }
 
 impl HttpClientConfig {
@@ -16,7 +17,7 @@ impl HttpClientConfig {
             proxy: None,
             headers: None,
             pool_max_idle: 10,
-            tcp_nodelay: true,
+            tcp_nodelay: true
         }
     }
 

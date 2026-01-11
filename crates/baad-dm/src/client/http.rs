@@ -1,11 +1,14 @@
-use super::config::HttpClientConfig;
-
 use std::time::Duration;
 
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
+use reqwest_retry::RetryTransientMiddleware;
+use reqwest_retry::policies::ExponentialBackoff;
 
-pub fn create_http_client(config: HttpClientConfig) -> Result<ClientWithMiddleware, reqwest_middleware::reqwest::Error> {
+use super::config::HttpClientConfig;
+
+pub fn create_http_client(
+    config: HttpClientConfig
+) -> Result<ClientWithMiddleware, reqwest_middleware::reqwest::Error> {
     let retry_policy = ExponentialBackoff::builder().build_with_max_retries(config.retries);
 
     let mut builder = reqwest_middleware::reqwest::Client::builder()
@@ -45,11 +48,7 @@ pub fn get_content_length(response: &reqwest_middleware::reqwest::Response) -> O
 }
 
 pub async fn resolve_url(client: &ClientWithMiddleware, url: &str) -> Result<String, String> {
-    let res = client
-        .head(url)
-        .send()
-        .await
-        .map_err(|e| e.to_string())?;
-    
+    let res = client.head(url).send().await.map_err(|e| e.to_string())?;
+
     Ok(res.url().to_string())
 }

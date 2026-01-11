@@ -1,21 +1,21 @@
-use super::StyleOptions;
-
 use std::sync::Arc;
 
 use indicatif::{MultiProgress, ProgressBar, ProgressDrawTarget};
+
+use super::StyleOptions;
 
 pub struct ProgressDisplay {
     multi: Arc<MultiProgress>,
     main: Arc<ProgressBar>,
     style: StyleOptions,
-    show_main: bool,
+    show_main: bool
 }
 
 impl ProgressDisplay {
     pub fn new(style: StyleOptions, total: usize, single_file_mode: bool) -> Self {
         let multi = Arc::new(match style.is_enabled() {
             true => MultiProgress::new(),
-            false => MultiProgress::with_draw_target(ProgressDrawTarget::hidden()),
+            false => MultiProgress::with_draw_target(ProgressDrawTarget::hidden())
         });
 
         let show_main = !single_file_mode || total > 1;
@@ -26,10 +26,15 @@ impl ProgressDisplay {
                 pb.tick();
                 pb
             }
-            false => ProgressBar::hidden(),
+            false => ProgressBar::hidden()
         });
 
-        Self { multi, main, style, show_main }
+        Self {
+            multi,
+            main,
+            style,
+            show_main
+        }
     }
 
     #[inline]
@@ -38,15 +43,13 @@ impl ProgressDisplay {
     }
 
     #[inline]
-    pub fn increment_main(&self) {
-        self.main.inc(1);
-    }
+    pub fn increment_main(&self) { self.main.inc(1); }
 
     #[inline]
     pub fn finish_child(&self, pb: ProgressBar) {
         match self.style.child.clear {
             true => pb.finish_and_clear(),
-            false => pb.finish(),
+            false => pb.finish()
         }
     }
 
@@ -54,7 +57,7 @@ impl ProgressDisplay {
         if self.show_main {
             match self.style.main.clear {
                 true => self.main.finish_and_clear(),
-                false => self.main.finish(),
+                false => self.main.finish()
             }
         }
     }

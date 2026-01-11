@@ -1,5 +1,4 @@
-use std::io;
-use std::result;
+use std::{io, result};
 
 use thiserror::Error;
 
@@ -23,7 +22,7 @@ pub enum Error {
     Archive {
         message: Box<str>,
         #[source]
-        source: Option<Box<dyn std::error::Error + Send + Sync>>,
+        source: Option<Box<dyn std::error::Error + Send + Sync>>
     },
 
     #[error("Unsupported compression method: {0}")]
@@ -36,5 +35,5 @@ pub enum Error {
     RangeNotSupported,
 
     #[error("Download failed: {0}")]
-    DownloadFailed(Box<str>),
+    DownloadFailed(Box<str>)
 }

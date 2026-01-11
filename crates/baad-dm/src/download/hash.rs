@@ -7,14 +7,14 @@ use bacy::hash::crc;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HashType {
     Md5,
-    Crc32,
+    Crc32
 }
 
 pub fn detect_hash_type(hash: &str) -> Option<HashType> {
     match hash.len() {
         32 if hash.chars().all(|c| c.is_ascii_hexdigit()) => Some(HashType::Md5),
         _ if hash.parse::<u32>().is_ok() => Some(HashType::Crc32),
-        _ => None,
+        _ => None
     }
 }
 
@@ -42,9 +42,9 @@ pub fn verify_hash(file_path: &Path, expected: Option<&String>) -> Result<bool, 
                 Ok(()) => Ok(true),
                 Err(HashError::Mismatch { .. }) => Ok(false),
                 Err(HashError::InvalidPath) => Ok(false),
-                Err(e) => Err(e),
+                Err(e) => Err(e)
             }
         }
-        None => Ok(false),
+        None => Ok(false)
     }
 }

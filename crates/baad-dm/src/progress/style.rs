@@ -3,33 +3,29 @@ use indicatif::{ProgressBar, ProgressStyle};
 #[derive(Debug, Clone)]
 pub struct StyleOptions {
     pub main: ProgressBarOpts,
-    pub child: ProgressBarOpts,
+    pub child: ProgressBarOpts
 }
 
 impl Default for StyleOptions {
     fn default() -> Self {
         Self {
             main: ProgressBarOpts::main_default(),
-            child: ProgressBarOpts::child_default(),
+            child: ProgressBarOpts::child_default()
         }
     }
 }
 
 impl StyleOptions {
-    pub fn new(main: ProgressBarOpts, child: ProgressBarOpts) -> Self {
-        Self { main, child }
-    }
+    pub fn new(main: ProgressBarOpts, child: ProgressBarOpts) -> Self { Self { main, child } }
 
     pub fn hidden() -> Self {
         Self {
             main: ProgressBarOpts::hidden(),
-            child: ProgressBarOpts::hidden(),
+            child: ProgressBarOpts::hidden()
         }
     }
 
-    pub fn is_enabled(&self) -> bool {
-        self.main.enabled || self.child.enabled
-    }
+    pub fn is_enabled(&self) -> bool { self.main.enabled || self.child.enabled }
 }
 
 #[derive(Debug, Clone)]
@@ -37,7 +33,7 @@ pub struct ProgressBarOpts {
     pub template: Option<String>,
     pub progress_chars: Option<String>,
     pub enabled: bool,
-    pub clear: bool,
+    pub clear: bool
 }
 
 impl Default for ProgressBarOpts {
@@ -46,25 +42,24 @@ impl Default for ProgressBarOpts {
             template: None,
             progress_chars: None,
             enabled: true,
-            clear: true,
+            clear: true
         }
     }
 }
 
 impl ProgressBarOpts {
-    pub const TEMPLATE_MAIN: &'static str =
-        "{bar:40.blue} {pos:>}/{len} ({percent}%) eta {eta_precise:.blue}";
-    pub const TEMPLATE_CHILD: &'static str =
-        "{bar:40.green/black} {bytes:>11.green}/{total_bytes:<11.green} {bytes_per_sec:>13.red} eta {eta:.blue}";
     pub const CHARS_FINE: &'static str = "█▉▊▋▌▍▎▏  ";
     pub const CHARS_LINE: &'static str = "━╾╴─";
+    pub const TEMPLATE_CHILD: &'static str = "{bar:40.green/black} {bytes:>11.green}/{total_bytes:<11.green} {bytes_per_sec:>13.red} eta {eta:.blue}";
+    pub const TEMPLATE_MAIN: &'static str =
+        "{bar:40.blue} {pos:>}/{len} ({percent}%) eta {eta_precise:.blue}";
 
     pub fn main_default() -> Self {
         Self {
             template: Some(Self::TEMPLATE_MAIN.into()),
             progress_chars: Some(Self::CHARS_FINE.into()),
             enabled: true,
-            clear: false,
+            clear: false
         }
     }
 
@@ -73,7 +68,7 @@ impl ProgressBarOpts {
             template: Some(Self::TEMPLATE_CHILD.into()),
             progress_chars: Some(Self::CHARS_LINE.into()),
             enabled: true,
-            clear: true,
+            clear: true
         }
     }
 
@@ -89,12 +84,12 @@ impl ProgressBarOpts {
             Some(template) => ProgressStyle::default_bar()
                 .template(template)
                 .unwrap_or_else(|_| ProgressStyle::default_bar()),
-            None => ProgressStyle::default_bar(),
+            None => ProgressStyle::default_bar()
         };
 
         match &self.progress_chars {
             Some(chars) => style.progress_chars(chars),
-            None => style,
+            None => style
         }
     }
 

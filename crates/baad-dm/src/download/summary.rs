@@ -1,7 +1,7 @@
-use super::Download;
-
 use bon::Builder;
 use reqwest_middleware::reqwest::StatusCode;
+
+use super::Download;
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub enum Status {
@@ -10,7 +10,7 @@ pub enum Status {
     Success,
     Skipped(String),
     Failed(String),
-    HashMismatch(String),
+    HashMismatch(String)
 }
 
 #[derive(Debug, Clone, Builder)]
@@ -23,7 +23,7 @@ pub struct Summary {
     #[builder(default)]
     pub status: Status,
     #[builder(default)]
-    pub resumable: bool,
+    pub resumable: bool
 }
 
 impl Summary {
@@ -47,7 +47,5 @@ impl Summary {
         self
     }
 
-    pub fn is_success(&self) -> bool {
-        matches!(self.status, Status::Success)
-    }
+    pub fn is_success(&self) -> bool { matches!(self.status, Status::Success) }
 }
