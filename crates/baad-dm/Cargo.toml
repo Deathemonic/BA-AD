@@ -32,6 +32,4 @@ features = [
     "rustls-tls",
 ]
 
-[features]
-default = []
-native-tls = ["reqwest/native-tls"]
+
