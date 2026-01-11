@@ -139,6 +139,7 @@ For more info check out [Library](.github/docs/LIBRARY.md)
 - [BA-MU](https://github.com/Deathemonic/BA-MU): A tool that re-dump AssetBundle for **Blue Archive**.
 - [BA-FB](https://github.com/Deathemonic/BA-FB): A tool for dumping and generating **Blue Archive** flatbuffers.
 - [BA-CY](https://github.com/Deathemonic/BA-CY): Library for handling **Blue Archive** catalogs, tables, serialization/deserialization, encryption, and hashing.
+- [BA-BR](https://github.com/Deathemonic/BA-BR): A tool that repacks AssetBundle for **Blue Archive**. 
 
 
 ### Contributing
@@ -153,7 +154,9 @@ Don't like my [shitty code](https://www.reddit.com/r/programminghorror) and what
 - [lwd-temp/blue-archive-spine-production](https://github.com/lwd-temp/blue-archive-spine-production)
 - [aelurum/AssetStudio](https://github.com/aelurum/AssetStudio)
 
-### Copyright
-Blue Archive is a registered trademark of NAT GAMES Co., Ltd., NEXON Korea Corp., and Yostar, Inc.
-This project is not affiliated with, endorsed by, or connected to NAT GAMES Co., Ltd., NEXON Korea Corp., NEXON GAMES Co., Ltd., IODivision, Yostar, Inc., or any of their subsidiaries or affiliates.
-All game assets, content, and materials are copyrighted by their respective owners and are used for informational and educational purposes only.
+---
+
+<sub>**Copyright** - Blue Archive is a registered trademark of NAT GAMES Co., Ltd., NEXON Korea Corp., and Yostar, Inc.
+This project is not affiliated with, endorsed by, or connected to NAT GAMES Co., Ltd., NEXON Korea Corp., NEXON GAMES
+Co., Ltd., IODivision, Yostar, Inc., or any of their subsidiaries or affiliates. All game assets, content, and materials
+are copyrighted by their respective owners and are used for informational and educational purposes only.</sub>
