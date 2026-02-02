@@ -1,49 +1,18 @@
-use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use futures::stream::{self, StreamExt};
-use indicatif::ProgressBar;
-use reqwest_middleware::ClientWithMiddleware;
 use reqwest_middleware::reqwest::StatusCode;
-use reqwest_middleware::reqwest::header::RANGE;
-use tokio::fs::{self, File, OpenOptions};
-use tokio::io::{AsyncSeekExt, AsyncWriteExt, BufWriter, SeekFrom};
-use tracing::debug;
+use tokio::fs;
+use tracing::{debug, info};
 
-use super::config::DownloaderConfig;
-use crate::client::{HttpClientConfig, create_http_client, get_content_length};
+use crate::client::{HttpClientConfig, create_http_client};
+use crate::download::summary::FetchOutcome;
 use crate::download::{Download, Status, Summary};
-use crate::progress::ProgressDisplay;
+use crate::downloader::chunk::download_chunked;
+use crate::downloader::config::DownloaderConfig;
+use crate::downloader::helpers::{FetchCtx, StreamOpts, check_server, ensure_parent_dir};
+use crate::downloader::stream::download_stream;
 use crate::zip::ZipExtractor;
-
-const WRITE_BUFFER_SIZE: usize = 256 * 1024;
-const CHUNK_SIZE: u64 = 8 * 1024 * 1024;
-
-type FetchResult = Result<Summary, Summary>;
-
-struct FetchCtx<'a> {
-    client: &'a ClientWithMiddleware,
-    download: &'a Download,
-    progress: &'a ProgressDisplay,
-    file_path: PathBuf
-}
-
-struct ChunkCtx {
-    client: Arc<ClientWithMiddleware>,
-    resolved_url: String,
-    file_path: PathBuf
-}
-
-struct StreamOpts {
-    size_on_disk: u64,
-    total_size: u64,
-    resumable: bool
-}
-
-struct ChunkRange {
-    start: u64,
-    end: u64
-}
 
 #[derive(Clone, Debug)]
 pub struct Downloader {
@@ -68,58 +37,52 @@ impl Downloader {
             return downloads
                 .iter()
                 .map(|d| {
-                    self.make_summary(d, StatusCode::INTERNAL_SERVER_ERROR, 0, false)
-                        .failed("Failed to create HTTP client")
+                    self.create_summary(
+                        d.clone(),
+                        FetchOutcome::failed(
+                            "Failed to create HTTP client",
+                            StatusCode::INTERNAL_SERVER_ERROR
+                        )
+                    )
                 })
                 .collect();
         };
 
-        let progress = ProgressDisplay::new(
-            self.config.style_options.clone(),
-            downloads.len(),
-            downloads.len() == 1
-        );
-
-        let summaries = stream::iter(downloads)
+        stream::iter(downloads)
             .map(|d| {
                 let ctx = FetchCtx {
                     client: &client,
                     download: d,
-                    progress: &progress,
                     file_path: self.config.directory.join(&d.filename)
                 };
-                self.fetch(ctx)
+                async move { self.fetch(ctx).await }
             })
             .buffer_unordered(self.config.concurrent_downloads)
             .collect::<Vec<_>>()
-            .await;
-
-        progress.finish();
-        summaries
+            .await
     }
 
     async fn fetch(&self, ctx: FetchCtx<'_>) -> Summary {
-        let result = self.fetch_inner(&ctx).await;
-        ctx.progress.increment_main();
-        self.complete(result.unwrap_or_else(|e| e))
+        info!(file = %ctx.download.filename, "Downloading");
+        let download = ctx.download.clone();
+        let outcome = self.fetch_inner(&ctx).await;
+        let summary = self.create_summary(download, outcome);
+        self.finalize(summary)
     }
 
-    async fn fetch_inner(&self, ctx: &FetchCtx<'_>) -> FetchResult {
+    async fn fetch_inner(&self, ctx: &FetchCtx<'_>) -> FetchOutcome {
         if !self.config.overwrite
             && ctx.file_path.exists()
             && let Ok(true) = ctx.download.verify_hash(&ctx.file_path)
         {
             let size = fs::metadata(&ctx.file_path).await.map(|m| m.len()).unwrap_or(0);
-            return Ok(self
-                .make_summary(ctx.download, StatusCode::OK, size, false)
-                .skipped("File exists with matching hash"));
+            return FetchOutcome::skipped("File exists with matching hash", size);
         }
 
         if !self.config.overwrite
             && ctx.file_path.exists()
             && let Ok(false) = ctx.download.verify_hash(&ctx.file_path)
         {
-            debug!("Hash mismatch, will redownload");
             let _ = fs::remove_file(&ctx.file_path).await;
         }
 
@@ -128,9 +91,10 @@ impl Downloader {
         }
 
         let (resumable, content_length, resolved_url) =
-            self.check_server(ctx.client, ctx.download).await.map_err(|e| {
-                self.make_summary(ctx.download, StatusCode::BAD_REQUEST, 0, false).failed(e)
-            })?;
+            match check_server(ctx.client, ctx.download).await {
+                Ok(v) => v,
+                Err(e) => return FetchOutcome::failed(e, StatusCode::BAD_REQUEST)
+            };
 
         let size_on_disk = match resumable && ctx.file_path.exists() {
             true => fs::metadata(&ctx.file_path).await.map(|m| m.len()).unwrap_or(0),
@@ -141,290 +105,116 @@ impl Downloader {
             && len == size_on_disk
             && size_on_disk > 0
         {
-            return Ok(self
-                .make_summary(ctx.download, StatusCode::OK, len, resumable)
-                .skipped("Already fully downloaded"));
+            return FetchOutcome::skipped("Already fully downloaded", len);
         }
 
         let total_size = content_length.unwrap_or(0);
-        let opts = StreamOpts {
-            size_on_disk,
-            total_size,
-            resumable
-        };
+        let opts = StreamOpts { size_on_disk, resumable };
 
+        let chunk_size = 8 * 1024 * 1024;
         let chunk_count = if resumable && total_size >= self.config.chunk_threshold {
-            let calculated = (total_size / CHUNK_SIZE).max(1) as usize;
+            let calculated = (total_size / chunk_size).max(1) as usize;
             calculated.clamp(1, self.config.max_chunks_per_file)
         } else {
             1
         };
 
-        if chunk_count > 1 {
-            self.download_chunked(ctx, opts.total_size, chunk_count, &resolved_url).await
-        } else {
-            self.download_stream(ctx, opts).await
-        }
-    }
-
-    async fn check_server(
-        &self,
-        client: &ClientWithMiddleware,
-        download: &Download
-    ) -> Result<(bool, Option<u64>, String), String> {
-        let res = client.head(download.url.clone()).send().await.map_err(|e| e.to_string())?;
-
-        let resolved_url = res.url().to_string();
-        let headers = res.headers();
-
-        let resumable =
-            headers.get("accept-ranges").and_then(|v| v.to_str().ok()).is_some_and(|v| v != "none");
-
-        let content_length = headers
-            .get("content-length")
-            .and_then(|v| v.to_str().ok())
-            .and_then(|v| v.parse().ok());
-
-        Ok((resumable, content_length, resolved_url))
-    }
-
-    async fn download_stream(&self, ctx: &FetchCtx<'_>, opts: StreamOpts) -> FetchResult {
-        let mut req = ctx.client.get(ctx.download.url.as_str());
-
-        if opts.resumable && opts.size_on_disk > 0 {
-            req = req.header(RANGE, format!("bytes={}-", opts.size_on_disk));
-        }
-
-        let res = req.send().await.map_err(|e| {
-            self.make_summary(ctx.download, StatusCode::BAD_REQUEST, 0, opts.resumable).failed(e)
-        })?;
-
-        res.error_for_status_ref().map_err(|e| {
-            self.make_summary(ctx.download, res.status(), 0, opts.resumable).failed(e)
-        })?;
-
-        let actual_size = get_content_length(&res).unwrap_or(opts.total_size);
-        let pb = ctx.progress.create_child(actual_size, opts.size_on_disk);
-
-        self.ensure_parent_dir(&ctx.file_path).await.map_err(|e| {
-            self.make_summary(ctx.download, StatusCode::INTERNAL_SERVER_ERROR, 0, opts.resumable)
-                .failed(e)
-        })?;
-
-        let file = OpenOptions::new()
-            .create(true)
-            .write(true)
-            .append(opts.resumable && opts.size_on_disk > 0)
-            .truncate(!(opts.resumable && opts.size_on_disk > 0))
-            .open(&ctx.file_path)
+        let result = if chunk_count > 1 {
+            match download_chunked(
+                ctx,
+                total_size,
+                chunk_count,
+                &resolved_url,
+                self.config.max_concurrent_chunks
+            )
             .await
-            .map_err(|e| {
-                self.make_summary(
-                    ctx.download,
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    0,
-                    opts.resumable
-                )
-                .failed(e)
-            })?;
-
-        let downloaded = self.stream_to_file(file, res, opts.size_on_disk, &pb).await;
-        ctx.progress.finish_child(pb);
-
-        match downloaded {
-            Ok(size) => {
-                Ok(self.make_summary(ctx.download, StatusCode::OK, size, opts.resumable).success())
+            {
+                Ok(()) => Ok(total_size),
+                Err(e) => Err(e)
             }
-            Err((size, e)) => Err(self
-                .make_summary(ctx.download, StatusCode::PARTIAL_CONTENT, size, opts.resumable)
-                .failed(e))
-        }
-    }
-
-    async fn stream_to_file(
-        &self,
-        file: File,
-        res: reqwest_middleware::reqwest::Response,
-        initial_size: u64,
-        pb: &ProgressBar
-    ) -> Result<u64, (u64, String)> {
-        let mut writer = BufWriter::with_capacity(WRITE_BUFFER_SIZE, file);
-        let mut downloaded = initial_size;
-        let mut stream = res.bytes_stream();
-
-        while let Some(chunk) = stream.next().await {
-            let chunk = chunk.map_err(|e| (downloaded, e.to_string()))?;
-            writer.write_all(&chunk).await.map_err(|e| (downloaded, e.to_string()))?;
-            downloaded += chunk.len() as u64;
-            pb.inc(chunk.len() as u64);
-        }
-
-        writer.flush().await.map_err(|e| (downloaded, e.to_string()))?;
-        Ok(downloaded)
-    }
-
-    async fn download_chunked(
-        &self,
-        ctx: &FetchCtx<'_>,
-        total_size: u64,
-        chunk_count: usize,
-        resolved_url: &str
-    ) -> FetchResult {
-        let chunk_size = total_size / chunk_count as u64;
-
-        self.ensure_parent_dir(&ctx.file_path).await.map_err(|e| {
-            self.make_summary(ctx.download, StatusCode::INTERNAL_SERVER_ERROR, 0, true).failed(e)
-        })?;
-
-        let file = File::create(&ctx.file_path).await.map_err(|e| {
-            self.make_summary(ctx.download, StatusCode::INTERNAL_SERVER_ERROR, 0, true).failed(e)
-        })?;
-
-        file.set_len(total_size).await.map_err(|e| {
-            self.make_summary(ctx.download, StatusCode::INTERNAL_SERVER_ERROR, 0, true).failed(e)
-        })?;
-
-        drop(file);
-
-        let pb = ctx.progress.create_child(total_size, 0);
-
-        let ranges: Vec<_> = (0..chunk_count)
-            .map(|i| {
-                let start = i as u64 * chunk_size;
-                let end = if i == chunk_count - 1 {
-                    total_size - 1
-                } else {
-                    (i as u64 + 1) * chunk_size - 1
-                };
-                ChunkRange { start, end }
-            })
-            .collect();
-
-        let concurrent_chunks = chunk_count.min(self.config.max_concurrent_chunks);
-
-        let chunk_ctx = ChunkCtx {
-            client: Arc::new(ctx.client.clone()),
-            resolved_url: resolved_url.to_string(),
-            file_path: ctx.file_path.clone()
+        } else {
+            download_stream(ctx, opts).await
         };
-        let chunk_ctx = Arc::new(chunk_ctx);
 
-        let results: Vec<_> = stream::iter(ranges)
-            .map(|range| {
-                let chunk_ctx = Arc::clone(&chunk_ctx);
-                let pb = pb.clone();
-                async move { Self::download_chunk(&chunk_ctx, range, &pb).await }
-            })
-            .buffer_unordered(concurrent_chunks)
-            .collect()
-            .await;
-
-        ctx.progress.finish_child(pb);
-
-        if let Some(Err(e)) = results.into_iter().find(|r| r.is_err()) {
-            return Err(self
-                .make_summary(ctx.download, StatusCode::PARTIAL_CONTENT, 0, true)
-                .failed(e));
-        }
-
-        Ok(self.make_summary(ctx.download, StatusCode::OK, total_size, true).success())
+        FetchOutcome::from_result(result, resumable)
     }
 
-    async fn download_chunk(
-        chunk_ctx: &ChunkCtx,
-        range: ChunkRange,
-        pb: &ProgressBar
-    ) -> Result<(), String> {
-        let res = chunk_ctx
-            .client
-            .get(&chunk_ctx.resolved_url)
-            .header(RANGE, format!("bytes={}-{}", range.start, range.end))
-            .send()
-            .await
-            .map_err(|e| e.to_string())?;
-
-        res.error_for_status_ref().map_err(|e| e.to_string())?;
-
-        let mut file = OpenOptions::new()
-            .write(true)
-            .open(&chunk_ctx.file_path)
-            .await
-            .map_err(|e| e.to_string())?;
-
-        file.seek(SeekFrom::Start(range.start)).await.map_err(|e| e.to_string())?;
-
-        let mut writer = BufWriter::with_capacity(WRITE_BUFFER_SIZE, file);
-        let mut stream = res.bytes_stream();
-
-        while let Some(chunk) = stream.next().await {
-            let chunk = chunk.map_err(|e| e.to_string())?;
-            writer.write_all(&chunk).await.map_err(|e| e.to_string())?;
-            pb.inc(chunk.len() as u64);
-        }
-
-        writer.flush().await.map_err(|e| e.to_string())
-    }
-
-    async fn extract_zip(&self, ctx: &FetchCtx<'_>) -> FetchResult {
+    async fn extract_zip(&self, ctx: &FetchCtx<'_>) -> FetchOutcome {
         let Some(ref target) = ctx.download.target_file else {
-            return Err(self
-                .make_summary(ctx.download, StatusCode::BAD_REQUEST, 0, false)
-                .failed("No target file for ZIP extraction"));
+            return FetchOutcome::failed(
+                "No target file for ZIP extraction",
+                StatusCode::BAD_REQUEST
+            );
         };
 
-        let pb = ctx.progress.create_child(0, 0);
+        let extractor = match ZipExtractor::new(ctx.client, &ctx.download.url).await {
+            Ok(e) => e,
+            Err(e) => return FetchOutcome::failed(e, StatusCode::BAD_REQUEST)
+        };
 
-        let extractor = ZipExtractor::new(ctx.client, &ctx.download.url).await.map_err(|e| {
-            ctx.progress.finish_child(pb.clone());
-            self.make_summary(ctx.download, StatusCode::BAD_REQUEST, 0, false).failed(e)
-        })?;
-
-        let data = extractor.extract_file(target).await.map_err(|e| {
-            ctx.progress.finish_child(pb.clone());
-            self.make_summary(ctx.download, StatusCode::NOT_FOUND, 0, false).failed(e)
-        })?;
+        let data = match extractor.extract_file(target).await {
+            Ok(d) => d,
+            Err(e) => return FetchOutcome::failed(e, StatusCode::NOT_FOUND)
+        };
 
         let size = data.len() as u64;
 
-        self.ensure_parent_dir(&ctx.file_path).await.map_err(|e| {
-            ctx.progress.finish_child(pb.clone());
-            self.make_summary(ctx.download, StatusCode::INTERNAL_SERVER_ERROR, 0, false).failed(e)
-        })?;
-
-        fs::write(&ctx.file_path, &data).await.map_err(|e| {
-            ctx.progress.finish_child(pb.clone());
-            self.make_summary(ctx.download, StatusCode::INTERNAL_SERVER_ERROR, 0, false).failed(e)
-        })?;
-
-        ctx.progress.finish_child(pb);
-        Ok(self.make_summary(ctx.download, StatusCode::OK, size, false).success())
-    }
-
-    async fn ensure_parent_dir(&self, path: &Path) -> Result<(), String> {
-        if let Some(parent) = path.parent() {
-            fs::create_dir_all(parent).await.map_err(|e| e.to_string())?;
+        if let Err(e) = ensure_parent_dir(&ctx.file_path).await {
+            return FetchOutcome::failed(e, StatusCode::INTERNAL_SERVER_ERROR);
         }
-        Ok(())
+
+        if let Err(e) = fs::write(&ctx.file_path, &data).await {
+            return FetchOutcome::failed(e, StatusCode::INTERNAL_SERVER_ERROR);
+        }
+
+        FetchOutcome::success(size, false)
     }
 
-    #[inline]
-    fn make_summary(
-        &self,
-        download: &Download,
-        status_code: StatusCode,
-        size: u64,
-        resumable: bool
-    ) -> Summary {
-        Summary {
-            download: download.clone(),
-            status_code,
-            size,
-            status: Status::NotStarted,
-            resumable
+    fn create_summary(&self, download: Download, outcome: FetchOutcome) -> Summary {
+        let download = Arc::new(download);
+
+        match outcome {
+            FetchOutcome::Success { size, resumable } => Summary {
+                download,
+                status_code: StatusCode::OK,
+                size,
+                status: Status::Success,
+                resumable
+            },
+            FetchOutcome::Skipped { reason, size } => Summary {
+                download,
+                status_code: StatusCode::OK,
+                size,
+                status: Status::Skipped(reason.to_string()),
+                resumable: false
+            },
+            FetchOutcome::Failed { error, status_code } => Summary {
+                download,
+                status_code,
+                size: 0,
+                status: Status::Failed(error),
+                resumable: false
+            }
         }
     }
 
-    fn complete(&self, summary: Summary) -> Summary {
+    fn finalize(&self, summary: Summary) -> Summary {
+        match &summary.status {
+            Status::Success => {
+                info!(file = %summary.download.filename, success = true, "Downloaded");
+            }
+            Status::Failed(error) => {
+                info!(file = %summary.download.filename, error = %error, "Failed");
+            }
+            Status::Skipped(reason) => {
+                debug!(file = %summary.download.filename, reason = %reason, "Skipped");
+            }
+            Status::HashMismatch(reason) => {
+                info!(file = %summary.download.filename, reason = %reason, "Hash mismatch");
+            }
+            Status::NotStarted => {}
+        }
+
         if let Some(ref callback) = self.config.on_complete {
             callback(&summary);
         }

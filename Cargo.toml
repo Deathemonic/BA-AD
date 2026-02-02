@@ -1,5 +1,11 @@
 [workspace]
-members = ["crates/baad-dm"]
+members = [
+    "crates/baad-core",
+    "crates/baad",
+    "crates/baad-utils",
+    "crates/baad-dm",
+    "crates/baad-cli"
+]
 resolver = "2"
 
 [workspace.package]
@@ -11,6 +17,12 @@ authors = ["Zinth"]
 tokio = { version = "1.47.1", features = ["full"] }
 eyre = "0.6.12"
 thiserror = "2.0.16"
+serde = { version = "1.0.226", features = ["derive"] }
+serde_json = { version = "1.0.145", features = ["preserve_order"] }
+reqwest = "0.12.23"
+lazy-regex = "3.4.1"
+bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "3.1.0" }
 
-# baad = { path = "crates/baad" }
-# baad-utils = { path = "crates/baad-utils" }
+baad = { path = "crates/baad" }
+baad-core = { path = "crates/baad-core" }
+baad-utils = { path = "crates/baad-utils" }
