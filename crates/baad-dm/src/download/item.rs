@@ -2,6 +2,7 @@ use std::path::Path;
 
 use reqwest_middleware::reqwest::Url;
 
+use crate::download::hash::verify_hash;
 use crate::error::Error;
 
 #[derive(Debug, Clone)]
@@ -35,7 +36,7 @@ impl Download {
     pub fn is_extraction(&self) -> bool { self.target_file.is_some() }
 
     pub fn verify_hash(&self, file_path: &Path) -> Result<bool, Box<dyn std::error::Error>> {
-        Ok(super::hash::verify_hash(file_path, self.hash.as_ref())?)
+        Ok(verify_hash(file_path, self.hash.as_ref())?)
     }
 }
 
@@ -50,7 +51,7 @@ impl TryFrom<&str> for Download {
 
         let filename = url
             .path_segments()
-            .and_then(|segments| segments.last())
+            .and_then(|mut segments| segments.next_back())
             .filter(|s| !s.is_empty())
             .ok_or_else(|| Error::InvalidUrl {
                 url: value.into(),
@@ -76,7 +77,7 @@ impl TryFrom<&Url> for Download {
     fn try_from(url: &Url) -> Result<Self, Self::Error> {
         let filename = url
             .path_segments()
-            .and_then(|segments| segments.last())
+            .and_then(|mut segments| segments.next_back())
             .filter(|s| !s.is_empty())
             .ok_or_else(|| Error::InvalidUrl {
                 url: url.as_str().into(),

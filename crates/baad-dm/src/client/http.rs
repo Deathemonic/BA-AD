@@ -1,17 +1,17 @@
 use std::time::Duration;
 
+use reqwest_middleware::reqwest::{Client, Error as ReqwestError, Response};
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use reqwest_retry::RetryTransientMiddleware;
 use reqwest_retry::policies::ExponentialBackoff;
 
-use super::config::HttpClientConfig;
+use crate::client::config::HttpClientConfig;
+use crate::error::Error;
 
-pub fn create_http_client(
-    config: HttpClientConfig
-) -> Result<ClientWithMiddleware, reqwest_middleware::reqwest::Error> {
+pub fn create_http_client(config: HttpClientConfig) -> Result<ClientWithMiddleware, ReqwestError> {
     let retry_policy = ExponentialBackoff::builder().build_with_max_retries(config.retries);
 
-    let mut builder = reqwest_middleware::reqwest::Client::builder()
+    let mut builder = Client::builder()
         .pool_max_idle_per_host(config.pool_max_idle)
         .pool_idle_timeout(Duration::from_secs(90))
         .tcp_nodelay(config.tcp_nodelay)
@@ -35,7 +35,7 @@ pub fn create_http_client(
     Ok(client)
 }
 
-pub fn get_content_length(response: &reqwest_middleware::reqwest::Response) -> Option<u64> {
+pub fn get_content_length(response: &Response) -> Option<u64> {
     if let Some(content_range) = response.headers().get("content-range") {
         content_range
             .to_str()
@@ -47,8 +47,8 @@ pub fn get_content_length(response: &reqwest_middleware::reqwest::Response) -> O
     }
 }
 
-pub async fn resolve_url(client: &ClientWithMiddleware, url: &str) -> Result<String, String> {
-    let res = client.head(url).send().await.map_err(|e| e.to_string())?;
+pub async fn resolve_url(client: &ClientWithMiddleware, url: &str) -> Result<String, Error> {
+    let res = client.head(url).send().await?;
 
     Ok(res.url().to_string())
 }

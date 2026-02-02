@@ -4,12 +4,12 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use bon::Builder;
+use reqwest_middleware::reqwest::Proxy;
 use reqwest_middleware::reqwest::header::HeaderMap;
 
 use crate::download::Summary;
-use crate::progress::StyleOptions;
 
-pub type DownloadCallback = Arc<dyn Fn(&Summary) + Send + Sync>;
+type DownloadCallback = Arc<dyn Fn(&Summary) + Send + Sync>;
 
 #[derive(Builder, Clone)]
 pub struct DownloaderConfig {
@@ -37,12 +37,9 @@ pub struct DownloaderConfig {
     #[builder(default = false)]
     pub overwrite: bool,
 
-    #[builder(default)]
-    pub style_options: StyleOptions,
-
     pub headers: Option<HeaderMap>,
 
-    pub proxy: Option<reqwest_middleware::reqwest::Proxy>,
+    pub proxy: Option<Proxy>,
 
     pub on_complete: Option<DownloadCallback>
 }

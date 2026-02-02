@@ -4,25 +4,26 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+baad-core = { workspace = true }
 baad-utils = { workspace = true }
+baad-dm = { path = "../baad-dm" }
 
 tokio = { workspace = true }
 thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { workspace = true, features = ["json"] }
+lazy-regex = { workspace = true }
+bacy = { workspace = true }
 
-reqwest = { version = "0.12.23", features = ["json"] }
-serde_json = { version = "1.0.145", features = ["preserve_order"] }
-serde = { version = "1.0.226", features = ["derive"] }
 walkdir = "2.5.0"
 zip = "5.1.1"
 base64 = "0.22.1"
-lazy-regex = "3.4.1"
 glob = "0.3.3"
 nucleo = "0.5.0"
 url = "2.5.7"
 hashbrown = "0.16.0"
 rayon = "1.11.0"
 memchr = "2.7.6"
-
-bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "3.0.1" }
-trauma = { git = "https://github.com/RZinth/trauma", version = "3.3.1", features = ["rustls"] }
+urlencoding = "2.1.3"
 memorypack = "1.1.1"

@@ -1,12 +1,10 @@
-use std::{io, result};
+use std::io;
 
 use thiserror::Error;
 
-pub type Result<T> = result::Result<T, Error>;
-
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("invalid URL '{url}': {reason}")]
+    #[error("Invalid URL '{url}': {reason}")]
     InvalidUrl { url: Box<str>, reason: Box<str> },
 
     #[error(transparent)]
@@ -15,15 +13,17 @@ pub enum Error {
     #[error(transparent)]
     HttpMiddleware(#[from] reqwest_middleware::Error),
 
+    #[error("HTTP error: {0}")]
+    HttpStatus(reqwest_middleware::reqwest::StatusCode),
+
+    #[error(transparent)]
+    InvalidProgressStyle(#[from] indicatif::style::TemplateError),
+
     #[error(transparent)]
     Io(#[from] io::Error),
 
-    #[error("archive error: {message}")]
-    Archive {
-        message: Box<str>,
-        #[source]
-        source: Option<Box<dyn std::error::Error + Send + Sync>>
-    },
+    #[error("Archive error: {0}")]
+    Archive(Box<str>),
 
     #[error("Unsupported compression method: {0}")]
     UnsupportedCompression(u16),
@@ -35,5 +35,12 @@ pub enum Error {
     RangeNotSupported,
 
     #[error("Download failed: {0}")]
-    DownloadFailed(Box<str>)
+    DownloadFailed(Box<str>),
+
+    #[error("Stream error at {downloaded} bytes")]
+    Stream {
+        downloaded: u64,
+        #[source]
+        source: Box<Error>
+    }
 }
