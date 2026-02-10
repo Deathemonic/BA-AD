@@ -17,9 +17,6 @@ pub enum Error {
     HttpStatus(reqwest_middleware::reqwest::StatusCode),
 
     #[error(transparent)]
-    InvalidProgressStyle(#[from] indicatif::style::TemplateError),
-
-    #[error(transparent)]
     Io(#[from] io::Error),
 
     #[error("Archive error: {0}")]

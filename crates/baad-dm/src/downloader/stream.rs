@@ -1,14 +1,22 @@
+use std::sync::Arc;
+
 use futures::StreamExt;
 use reqwest_middleware::reqwest::header::RANGE;
+use reqwest_middleware::reqwest::Response;
 use tokio::fs::{File, OpenOptions};
 use tokio::io::{AsyncWriteExt, BufWriter};
 
 use crate::downloader::helpers::{FetchCtx, StreamOpts, ensure_parent_dir};
+use crate::downloader::progress::ProgressTracker;
 use crate::error::Error;
 
 const WRITE_BUFFER_SIZE: usize = 256 * 1024;
 
-pub async fn download_stream(ctx: &FetchCtx<'_>, opts: StreamOpts) -> Result<u64, Error> {
+pub async fn download_stream(
+    ctx: &FetchCtx<'_>,
+    opts: StreamOpts,
+    progress: Option<Arc<ProgressTracker>>
+) -> Result<u64, Error> {
     let mut req = ctx.client.get(ctx.download.url.as_str());
 
     if opts.resumable && opts.size_on_disk > 0 {
@@ -33,13 +41,14 @@ pub async fn download_stream(ctx: &FetchCtx<'_>, opts: StreamOpts) -> Result<u64
         .await
         .map_err(Error::Io)?;
 
-    stream_to_file(file, res, opts.size_on_disk).await
+    stream_to_file(file, res, opts.size_on_disk, progress).await
 }
 
 pub async fn stream_to_file(
     file: File,
-    res: reqwest_middleware::reqwest::Response,
-    initial_size: u64
+    res: Response,
+    initial_size: u64,
+    progress: Option<Arc<ProgressTracker>>
 ) -> Result<u64, Error> {
     let mut writer = BufWriter::with_capacity(WRITE_BUFFER_SIZE, file);
     let mut downloaded = initial_size;
@@ -49,6 +58,10 @@ pub async fn stream_to_file(
         let chunk = chunk.map_err(Error::Http)?;
         writer.write_all(&chunk).await.map_err(Error::Io)?;
         downloaded += chunk.len() as u64;
+
+        if let Some(ref p) = progress {
+            p.add_bytes(chunk.len() as u64);
+        }
     }
 
     writer.flush().await.map_err(Error::Io)?;

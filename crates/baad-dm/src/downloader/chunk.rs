@@ -8,6 +8,7 @@ use tokio::fs::{File, OpenOptions};
 use tokio::io::{AsyncSeekExt, AsyncWriteExt, BufWriter, SeekFrom};
 
 use crate::downloader::helpers::{FetchCtx, ensure_parent_dir};
+use crate::downloader::progress::ProgressTracker;
 use crate::error::Error;
 
 const WRITE_BUFFER_SIZE: usize = 256 * 1024;
@@ -28,7 +29,8 @@ pub async fn download_chunked(
     total_size: u64,
     chunk_count: usize,
     resolved_url: &str,
-    max_concurrent_chunks: usize
+    max_concurrent_chunks: usize,
+    progress: Option<Arc<ProgressTracker>>
 ) -> Result<(), Error> {
     let chunk_size = total_size / chunk_count as u64;
 
@@ -61,7 +63,8 @@ pub async fn download_chunked(
     let results: Vec<_> = stream::iter(ranges)
         .map(|range| {
             let chunk_ctx = Arc::clone(&chunk_ctx);
-            async move { download_chunk(&chunk_ctx, range).await }
+            let progress = progress.clone();
+            async move { download_chunk(&chunk_ctx, range, progress).await }
         })
         .buffer_unordered(concurrent_chunks)
         .collect()
@@ -74,7 +77,11 @@ pub async fn download_chunked(
     Ok(())
 }
 
-async fn download_chunk(chunk_ctx: &ChunkCtx, range: ChunkRange) -> Result<(), Error> {
+async fn download_chunk(
+    chunk_ctx: &ChunkCtx,
+    range: ChunkRange,
+    progress: Option<Arc<ProgressTracker>>
+) -> Result<(), Error> {
     let res = chunk_ctx
         .client
         .get(&chunk_ctx.resolved_url)
@@ -94,6 +101,10 @@ async fn download_chunk(chunk_ctx: &ChunkCtx, range: ChunkRange) -> Result<(), E
     while let Some(chunk) = stream.next().await {
         let chunk = chunk?;
         writer.write_all(&chunk).await?;
+
+        if let Some(ref p) = progress {
+            p.add_bytes(chunk.len() as u64);
+        }
     }
 
     writer.flush().await.map_err(Error::from)

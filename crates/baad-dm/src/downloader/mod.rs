@@ -2,6 +2,7 @@ mod chunk;
 mod config;
 mod core;
 mod helpers;
+mod progress;
 mod stream;
 
 pub use core::Downloader;

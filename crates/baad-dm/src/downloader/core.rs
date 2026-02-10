@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use baad_core::{DownloadEvent, DownloadStatus};
 use futures::stream::{self, StreamExt};
 use reqwest_middleware::reqwest::StatusCode;
 use tokio::fs;
@@ -11,6 +12,7 @@ use crate::download::{Download, Status, Summary};
 use crate::downloader::chunk::download_chunked;
 use crate::downloader::config::DownloaderConfig;
 use crate::downloader::helpers::{FetchCtx, StreamOpts, check_server, ensure_parent_dir};
+use crate::downloader::progress::ProgressTracker;
 use crate::downloader::stream::download_stream;
 use crate::zip::ZipExtractor;
 
@@ -55,22 +57,28 @@ impl Downloader {
                     download: d,
                     file_path: self.config.directory.join(&d.filename)
                 };
-                async move { self.fetch(ctx).await }
+                async move { self.fetch_with_progress(ctx).await }
             })
             .buffer_unordered(self.config.concurrent_downloads)
             .collect::<Vec<_>>()
             .await
     }
 
-    async fn fetch(&self, ctx: FetchCtx<'_>) -> Summary {
-        info!(file = %ctx.download.filename, "Downloading");
+    async fn fetch_with_progress(&self, ctx: FetchCtx<'_>) -> Summary {
         let download = ctx.download.clone();
-        let outcome = self.fetch_inner(&ctx).await;
+        let filename: Arc<str> = ctx.download.filename.as_str().into();
+
+        self.config.observer.on_event(DownloadEvent::Started {
+            filename: Arc::clone(&filename),
+            total_bytes: 0
+        });
+
+        let outcome = self.fetch_inner(&ctx, &filename).await;
         let summary = self.create_summary(download, outcome);
         self.finalize(summary)
     }
 
-    async fn fetch_inner(&self, ctx: &FetchCtx<'_>) -> FetchOutcome {
+    async fn fetch_inner(&self, ctx: &FetchCtx<'_>, filename: &Arc<str>) -> FetchOutcome {
         if !self.config.overwrite
             && ctx.file_path.exists()
             && let Ok(true) = ctx.download.verify_hash(&ctx.file_path)
@@ -119,13 +127,24 @@ impl Downloader {
             1
         };
 
+        let progress_tracker = if total_size > 0 {
+            Some(Arc::new(ProgressTracker::new(
+                Arc::clone(filename),
+                total_size,
+                Arc::clone(&self.config.observer)
+            )))
+        } else {
+            None
+        };
+
         let result = if chunk_count > 1 {
             match download_chunked(
                 ctx,
                 total_size,
                 chunk_count,
                 &resolved_url,
-                self.config.max_concurrent_chunks
+                self.config.max_concurrent_chunks,
+                progress_tracker.clone()
             )
             .await
             {
@@ -133,7 +152,7 @@ impl Downloader {
                 Err(e) => Err(e)
             }
         } else {
-            download_stream(ctx, opts).await
+            download_stream(ctx, opts, progress_tracker.clone()).await
         };
 
         FetchOutcome::from_result(result, resumable)
@@ -185,7 +204,7 @@ impl Downloader {
                 download,
                 status_code: StatusCode::OK,
                 size,
-                status: Status::Skipped(reason.to_string()),
+                status: Status::Skipped(reason.into()),
                 resumable: false
             },
             FetchOutcome::Failed { error, status_code } => Summary {
@@ -199,6 +218,8 @@ impl Downloader {
     }
 
     fn finalize(&self, summary: Summary) -> Summary {
+        let filename: Arc<str> = summary.download.filename.as_str().into();
+
         match &summary.status {
             Status::Success => {
                 info!(file = %summary.download.filename, success = true, "Downloaded");
@@ -215,9 +236,20 @@ impl Downloader {
             Status::NotStarted => {}
         }
 
-        if let Some(ref callback) = self.config.on_complete {
-            callback(&summary);
-        }
+        let status = match &summary.status {
+            Status::Success => DownloadStatus::Success,
+            Status::Failed(error) => DownloadStatus::Failed(error.as_str().into()),
+            Status::Skipped(_) => DownloadStatus::Skipped,
+            Status::HashMismatch(_) => DownloadStatus::HashMismatch,
+            Status::NotStarted => DownloadStatus::Skipped
+        };
+
+        self.config.observer.on_event(DownloadEvent::Completed {
+            filename,
+            size: summary.size,
+            status
+        });
+
         summary
     }
 }

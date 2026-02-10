@@ -1,0 +1,98 @@
+use std::path::Path;
+
+use baad_core::HashValue;
+use baad_dm::Download;
+use reqwest::Url;
+
+use crate::download::ResourceFilter;
+use crate::strategy::{AssetDownload, MediaDownload, TableDownload};
+
+pub fn convert_assets(assets: &[AssetDownload], filter: Option<&ResourceFilter>) -> Vec<Download> {
+    let mut downloads = Vec::new();
+
+    for asset in assets {
+        if let Some(f) = filter
+            && let Some(filename) = Path::new(&asset.path).file_name().and_then(|n| n.to_str())
+            && f.matches(filename)
+        {
+            if let Some(dl) = create_download(&asset.url, &asset.path, &asset.hash, None) {
+                downloads.push(dl);
+            }
+            continue;
+        }
+
+        if let Some(f) = filter {
+            for bundle_name in &asset.bundle_files {
+                if f.matches(bundle_name)
+                    && let Some(dl) = create_download(
+                        &asset.url,
+                        &convert_path_to_bundle(&asset.path, bundle_name),
+                        &asset.hash,
+                        Some(bundle_name)
+                    )
+                {
+                    downloads.push(dl);
+                }
+            }
+        } else if let Some(dl) = create_download(&asset.url, &asset.path, &asset.hash, None) {
+            downloads.push(dl);
+        }
+    }
+
+    downloads
+}
+
+pub fn convert_tables(tables: &[TableDownload], filter: Option<&ResourceFilter>) -> Vec<Download> {
+    tables
+        .iter()
+        .filter(|t| {
+            filter.is_none_or(|f| {
+                Path::new(&t.path)
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .is_some_and(|filename| f.matches(filename))
+            })
+        })
+        .filter_map(|t| create_download(&t.url, &t.path, &t.hash, None))
+        .collect()
+}
+
+pub fn convert_media(media: &[MediaDownload], filter: Option<&ResourceFilter>) -> Vec<Download> {
+    media
+        .iter()
+        .filter(|m| {
+            filter.is_none_or(|f| {
+                Path::new(&m.path)
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .is_some_and(|filename| f.matches(filename))
+            })
+        })
+        .filter_map(|m| create_download(&m.url, &m.path, &m.hash, None))
+        .collect()
+}
+
+fn convert_path_to_bundle(zip_path: &str, bundle_filename: &str) -> String {
+    if let Some(last_slash) = zip_path.rfind('/') {
+        format!("{}/{}", &zip_path[..last_slash], bundle_filename)
+    } else {
+        bundle_filename.to_string()
+    }
+}
+
+fn create_download(
+    url: &str,
+    path: &str,
+    hash: &HashValue,
+    target: Option<&str>
+) -> Option<Download> {
+    let parsed_url = Url::parse(url).ok()?;
+
+    let mut download = Download::new(parsed_url, path).with_hash(hash.as_string());
+
+    if let Some(target_file) = target {
+        download = download.with_target_file(target_file);
+    }
+
+    Some(download)
+}
