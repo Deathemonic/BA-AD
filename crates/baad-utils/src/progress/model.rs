@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use better_default::Default;
 use baad_core::{DownloadEvent, DownloadObserver, DownloadStatus};
+use better_default::Default;
 use tracing::Level;
 
 use crate::formatter::LineFormatter;
@@ -54,25 +54,17 @@ impl DownloadProgressModel {
 impl ProgressModel for DownloadProgressModel {
     fn render(&mut self, _width: usize, output: &mut String) {
         for filename in self.active.keys() {
-            let _ = self.formatter.write_line(
-                output,
-                &Level::INFO,
-                false,
-                "Downloading",
-                &[("file", filename)]
-            );
+            let _ = self
+                .formatter
+                .write_line(output, &Level::INFO, false, "Downloading", &[("file", filename)]);
         }
     }
 
     fn final_message(&mut self, output: &mut String) {
         for filename in &self.completed {
-            let _ = self.formatter.write_line(
-                output,
-                &Level::INFO,
-                true,
-                "Downloaded",
-                &[("file", filename)]
-            );
+            let _ = self
+                .formatter
+                .write_line(output, &Level::INFO, true, "Downloaded", &[("file", filename)]);
         }
     }
 }
