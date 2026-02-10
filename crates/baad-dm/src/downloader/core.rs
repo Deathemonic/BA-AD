@@ -8,7 +8,7 @@ use tracing::{debug, info};
 
 use crate::client::{HttpClientConfig, create_http_client};
 use crate::download::summary::FetchOutcome;
-use crate::download::{Download, Status, Summary};
+use crate::download::{Download, Summary};
 use crate::downloader::chunk::download_chunked;
 use crate::downloader::config::DownloaderConfig;
 use crate::downloader::helpers::{FetchCtx, StreamOpts, check_server, ensure_parent_dir};
@@ -197,21 +197,21 @@ impl Downloader {
                 download,
                 status_code: StatusCode::OK,
                 size,
-                status: Status::Success,
+                status: DownloadStatus::Success,
                 resumable
             },
             FetchOutcome::Skipped { reason, size } => Summary {
                 download,
                 status_code: StatusCode::OK,
                 size,
-                status: Status::Skipped(reason.into()),
+                status: DownloadStatus::Skipped(reason.into()),
                 resumable: false
             },
             FetchOutcome::Failed { error, status_code } => Summary {
                 download,
                 status_code,
                 size: 0,
-                status: Status::Failed(error),
+                status: DownloadStatus::Failed(error.into()),
                 resumable: false
             }
         }
@@ -221,33 +221,25 @@ impl Downloader {
         let filename: Arc<str> = summary.download.filename.as_str().into();
 
         match &summary.status {
-            Status::Success => {
+            DownloadStatus::Success => {
                 info!(file = %summary.download.filename, success = true, "Downloaded");
             }
-            Status::Failed(error) => {
+            DownloadStatus::Failed(error) => {
                 info!(file = %summary.download.filename, error = %error, "Failed");
             }
-            Status::Skipped(reason) => {
+            DownloadStatus::Skipped(reason) => {
                 debug!(file = %summary.download.filename, reason = %reason, "Skipped");
             }
-            Status::HashMismatch(reason) => {
+            DownloadStatus::HashMismatch(reason) => {
                 info!(file = %summary.download.filename, reason = %reason, "Hash mismatch");
             }
-            Status::NotStarted => {}
+            DownloadStatus::NotStarted => {}
         }
-
-        let status = match &summary.status {
-            Status::Success => DownloadStatus::Success,
-            Status::Failed(error) => DownloadStatus::Failed(error.as_str().into()),
-            Status::Skipped(_) => DownloadStatus::Skipped,
-            Status::HashMismatch(_) => DownloadStatus::HashMismatch,
-            Status::NotStarted => DownloadStatus::Skipped
-        };
 
         self.config.observer.on_event(DownloadEvent::Completed {
             filename,
             size: summary.size,
-            status
+            status: summary.status.clone()
         });
 
         summary
