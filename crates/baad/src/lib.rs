@@ -4,5 +4,6 @@ pub mod cdn;
 pub mod download;
 pub mod strategy;
 
-pub use baad_core::{BuildType, Platform};
+pub use baad_core::{BuildType, DownloadObserver, Platform, set_observer};
+pub use baad_utils::config::{LoggingConfig, init_logging};
 pub use baad_utils::{debug, error, file, info, trace, warn};

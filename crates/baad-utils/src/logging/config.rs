@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 pub use baad_core::ConfigError;
-use baad_core::{DownloadObserver, NoopObserver};
+use baad_core::set_observer;
 use better_default::Default;
 use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::fmt::{self};
@@ -38,10 +38,6 @@ pub struct LoggingConfig {
     pub verbose_mode: bool,
     pub include_timestamps: bool,
     pub enable_async_writer: bool
-}
-
-pub struct LoggingOutput {
-    pub observer: Arc<dyn DownloadObserver>
 }
 
 #[derive(Debug, Clone)]
@@ -126,11 +122,13 @@ fn should_use_progress(config: &LoggingConfig) -> bool {
 fn init_with_progress(
     config: &LoggingConfig,
     feature_config: &FeatureConfig
-) -> Result<LoggingOutput, ConfigError> {
+) -> Result<(), ConfigError> {
     let model = DownloadProgressModel::new();
     let view = Arc::new(ProgressView::new(model, PROGRESS_UPDATE_INTERVAL));
     let observer = DownloadProgressObserver::new(Arc::clone(&view));
     let writer = ProgressMakeWriter::new(Arc::clone(&view));
+
+    set_observer(Arc::new(observer));
 
     let filter =
         env_filter(config.verbose_mode, config.enable_debug && feature_config.debug_enabled);
@@ -144,17 +142,13 @@ fn init_with_progress(
                 .event_format(ConsoleFormatter::new().with_timestamps(config.include_timestamps))
         )
         .try_init()
-        .map_err(|_| ConfigError::LoggingInitFailed)?;
-
-    Ok(LoggingOutput {
-        observer: Arc::new(observer)
-    })
+        .map_err(|_| ConfigError::LoggingInitFailed)
 }
 
 fn init_without_progress(
     config: &LoggingConfig,
     feature_config: &FeatureConfig
-) -> Result<LoggingOutput, ConfigError> {
+) -> Result<(), ConfigError> {
     let filter =
         env_filter(config.verbose_mode, config.enable_debug && feature_config.debug_enabled);
     let subscriber = registry().with(filter);
@@ -180,22 +174,16 @@ fn init_without_progress(
         )
     };
 
-    result.map_err(|_| ConfigError::LoggingInitFailed)?;
-
-    Ok(LoggingOutput {
-        observer: Arc::new(NoopObserver)
-    })
+    result.map_err(|_| ConfigError::LoggingInitFailed)
 }
 
-pub fn init_logging(config: LoggingConfig) -> Result<LoggingOutput, ConfigError> {
+pub fn init_logging(config: LoggingConfig) -> Result<(), ConfigError> {
     let feature_config = FeatureConfig::from_features();
     install_error_handler(&feature_config)?;
 
     if !feature_config.logs_enabled {
         registry().init();
-        return Ok(LoggingOutput {
-            observer: Arc::new(NoopObserver)
-        });
+        return Ok(());
     }
 
     if should_use_progress(&config) {

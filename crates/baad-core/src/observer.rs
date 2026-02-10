@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 
 pub enum DownloadStatus {
     Success,
@@ -21,4 +21,12 @@ pub struct NoopObserver;
 
 impl DownloadObserver for NoopObserver {
     fn on_event(&self, _event: DownloadEvent) {}
+}
+
+static GLOBAL_OBSERVER: OnceLock<Arc<dyn DownloadObserver>> = OnceLock::new();
+
+pub fn set_observer(observer: Arc<dyn DownloadObserver>) { let _ = GLOBAL_OBSERVER.set(observer); }
+
+pub fn observer() -> Arc<dyn DownloadObserver> {
+    GLOBAL_OBSERVER.get().cloned().unwrap_or_else(|| Arc::new(NoopObserver))
 }

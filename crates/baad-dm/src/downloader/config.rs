@@ -3,7 +3,7 @@ use std::fmt::{Debug, Formatter, Result};
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use baad_core::{DownloadObserver, NoopObserver};
+use baad_core::DownloadObserver;
 use bon::Builder;
 use reqwest_middleware::reqwest::Proxy;
 use reqwest_middleware::reqwest::header::HeaderMap;
@@ -38,7 +38,7 @@ pub struct DownloaderConfig {
 
     pub proxy: Option<Proxy>,
 
-    #[builder(default = Arc::new(NoopObserver))]
+    #[builder(default = baad_core::observer())]
     pub observer: Arc<dyn DownloadObserver>
 }
 

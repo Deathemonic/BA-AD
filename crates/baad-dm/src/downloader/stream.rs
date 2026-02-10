@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use futures::StreamExt;
-use reqwest_middleware::reqwest::header::RANGE;
 use reqwest_middleware::reqwest::Response;
+use reqwest_middleware::reqwest::header::RANGE;
 use tokio::fs::{File, OpenOptions};
 use tokio::io::{AsyncWriteExt, BufWriter};
 
