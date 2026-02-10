@@ -1,10 +1,13 @@
 use std::sync::{Arc, OnceLock};
 
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub enum DownloadStatus {
+    #[default]
+    NotStarted,
     Success,
-    Skipped,
+    Skipped(Arc<str>),
     Failed(Arc<str>),
-    HashMismatch
+    HashMismatch(Arc<str>)
 }
 
 pub enum DownloadEvent {

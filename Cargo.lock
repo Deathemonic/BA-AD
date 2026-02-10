@@ -220,13 +220,11 @@ name = "baad-dm"
 version = "3.0.0"
 dependencies = [
  "baad-core",
- "baad-utils",
  "bacy",
  "bon",
  "flate2",
  "form_urlencoded",
  "futures",
- "rand",
  "reqwest",
  "reqwest-middleware",
  "reqwest-retry",

@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
-use baad_core::CatalogError;
-use baad_dm::{Download, Downloader, DownloaderConfig, Status};
+use baad_core::{CatalogError, DownloadStatus};
+use baad_dm::{Download, Downloader, DownloaderConfig};
 use baad_utils::{error, info, warn};
 use reqwest::Url;
 
@@ -86,7 +86,7 @@ impl ResourceDownloader {
         let summaries = downloader.download(&downloads).await;
 
         let failed_count =
-            summaries.iter().filter(|s| matches!(s.status, Status::Failed(_))).count();
+            summaries.iter().filter(|s| matches!(s.status, DownloadStatus::Failed(_))).count();
 
         if failed_count > 0 {
             error!(category = category, failed = failed_count, "Some downloads failed");
@@ -128,7 +128,7 @@ pub async fn download_file(
     let summaries = downloader.download(&[download]).await;
 
     if let Some(summary) = summaries.first()
-        && matches!(summary.status, Status::Failed(_))
+        && matches!(summary.status, DownloadStatus::Failed(_))
     {
         return Err(CatalogError::DeserializationFailed);
     }

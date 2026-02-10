@@ -1,20 +1,11 @@
 use std::sync::Arc;
 
+use baad_core::DownloadStatus;
 use bon::Builder;
 use reqwest_middleware::reqwest::StatusCode;
 
 use crate::download::Download;
 use crate::error::Error;
-
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub enum Status {
-    #[default]
-    NotStarted,
-    Success,
-    Skipped(String),
-    Failed(String),
-    HashMismatch(String)
-}
 
 #[derive(Debug)]
 pub(crate) enum FetchOutcome {
@@ -53,33 +44,13 @@ pub struct Summary {
     #[builder(default)]
     pub size: u64,
     #[builder(default)]
-    pub status: Status,
+    pub status: DownloadStatus,
     #[builder(default)]
     pub resumable: bool
 }
 
 impl Summary {
-    pub fn success(mut self) -> Self {
-        self.status = Status::Success;
-        self
-    }
-
-    pub fn failed(mut self, reason: impl ToString) -> Self {
-        self.status = Status::Failed(reason.to_string());
-        self
-    }
-
-    pub fn skipped(mut self, reason: impl ToString) -> Self {
-        self.status = Status::Skipped(reason.to_string());
-        self
-    }
-
-    pub fn hash_mismatch(mut self, reason: impl ToString) -> Self {
-        self.status = Status::HashMismatch(reason.to_string());
-        self
-    }
-
-    pub fn is_success(&self) -> bool { matches!(self.status, Status::Success) }
+    pub fn is_success(&self) -> bool { matches!(self.status, DownloadStatus::Success) }
 
     pub fn for_download(download: Download) -> Self {
         Self::builder().download(Arc::new(download)).build()
