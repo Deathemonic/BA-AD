@@ -4,8 +4,13 @@ use flate2::read::DeflateDecoder;
 use reqwest_middleware::ClientWithMiddleware;
 use reqwest_middleware::reqwest::Url;
 
-use super::types::*;
 use crate::error::Error;
+use crate::zip::types::*;
+
+struct EocdInfo {
+    cd_size: u64,
+    cd_offset: u64
+}
 
 pub struct ZipExtractor<'a> {
     client: &'a ClientWithMiddleware,
@@ -22,10 +27,7 @@ impl<'a> ZipExtractor<'a> {
             .get("content-length")
             .and_then(|h| h.to_str().ok())
             .and_then(|s| s.parse().ok())
-            .ok_or_else(|| Error::Archive {
-                message: "Could not determine ZIP file size".into(),
-                source: None
-            })?;
+            .ok_or_else(|| Error::Archive("Could not determine ZIP file size".into()))?;
 
         let accepts_ranges = headers
             .get("accept-ranges")
@@ -52,18 +54,14 @@ impl<'a> ZipExtractor<'a> {
 
         let data = self.fetch_range(start, self.zip_size - 1).await?;
 
-        let offset =
-            data.windows(4).rposition(|w| w == EOCD_SIGNATURE).ok_or_else(|| Error::Archive {
-                message: "Could not find End of Central Directory".into(),
-                source: None
-            })?;
+        let offset = data
+            .windows(4)
+            .rposition(|w| w == EOCD_SIGNATURE)
+            .ok_or_else(|| Error::Archive("Could not find End of Central Directory".into()))?;
 
         let eocd = &data[offset..];
         if eocd.len() < EOCD_MIN_SIZE {
-            return Err(Error::Archive {
-                message: "Invalid EOCD record".into(),
-                source: None
-            });
+            return Err(Error::Archive("Invalid EOCD record".into()));
         }
 
         Ok(EocdInfo {
@@ -75,10 +73,8 @@ impl<'a> ZipExtractor<'a> {
     async fn find_file(&self, eocd: &EocdInfo, target: &str) -> Result<ZipFileInfo, Error> {
         let cd_data = self.fetch_range(eocd.cd_offset, eocd.cd_offset + eocd.cd_size - 1).await?;
 
-        self.parse_central_directory(&cd_data, target)?.ok_or_else(|| Error::Archive {
-            message: format!("File '{}' not found in ZIP", target).into(),
-            source: None
-        })
+        self.parse_central_directory(&cd_data, target)?
+            .ok_or_else(|| Error::Archive(format!("File '{}' not found in ZIP", target).into()))
     }
 
     async fn read_file_data(&self, info: &ZipFileInfo) -> Result<Vec<u8>, Error> {
@@ -90,10 +86,7 @@ impl<'a> ZipExtractor<'a> {
             .await?;
 
         if header.len() < LOCAL_HEADER_MIN_SIZE {
-            return Err(Error::Archive {
-                message: "Invalid local file header".into(),
-                source: None
-            });
+            return Err(Error::Archive("Invalid local file header".into()));
         }
 
         let filename_len = read_u16_le(&header, 26) as u64;
@@ -159,20 +152,14 @@ impl<'a> ZipExtractor<'a> {
             COMPRESSION_STORED => Ok(data.to_vec()),
             COMPRESSION_DEFLATE => {
                 let mut output = Vec::with_capacity(data.len() * 2);
-                DeflateDecoder::new(data).read_to_end(&mut output).map_err(|e| Error::Archive {
-                    message: "Deflate decompression failed".into(),
-                    source: Some(Box::new(e))
+                DeflateDecoder::new(data).read_to_end(&mut output).map_err(|e| {
+                    Error::Archive(format!("Deflate decompression failed: {}", e).into())
                 })?;
                 Ok(output)
             }
             _ => Err(Error::UnsupportedCompression(method))
         }
     }
-}
-
-struct EocdInfo {
-    cd_size: u64,
-    cd_offset: u64
 }
 
 #[inline]

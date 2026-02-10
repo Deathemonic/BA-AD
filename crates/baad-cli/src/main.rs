@@ -2,9 +2,7 @@ mod args;
 mod parse;
 
 use args::Args;
-
-use baad_utils::config::{init_logging, LoggingConfig};
-
+use baad_utils::config::{LoggingConfig, init_logging};
 use clap::Parser;
 use eyre::Result;
 
@@ -17,7 +15,7 @@ async fn main() -> Result<()> {
         enable_debug: args.verbose,
         ..LoggingConfig::default()
     };
-    init_logging(config)?;
+    let output = init_logging(config)?;
 
-    parse::run(args).await
+    parse::run(args, output.observer).await
 }

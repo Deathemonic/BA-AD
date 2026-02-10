@@ -1,0 +1,14 @@
+[package]
+name = "baad-core"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { workspace = true }
+lazy-regex = { workspace = true }
+bacy = { workspace = true }
+
+memorypack = "1.2.1"

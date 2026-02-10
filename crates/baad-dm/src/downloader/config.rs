@@ -3,13 +3,10 @@ use std::fmt::{Debug, Formatter, Result};
 use std::path::PathBuf;
 use std::sync::Arc;
 
+use baad_core::{DownloadObserver, NoopObserver};
 use bon::Builder;
 use reqwest_middleware::reqwest::Proxy;
 use reqwest_middleware::reqwest::header::HeaderMap;
-
-use crate::download::Summary;
-
-type DownloadCallback = Arc<dyn Fn(&Summary) + Send + Sync>;
 
 #[derive(Builder, Clone)]
 pub struct DownloaderConfig {
@@ -41,7 +38,8 @@ pub struct DownloaderConfig {
 
     pub proxy: Option<Proxy>,
 
-    pub on_complete: Option<DownloadCallback>
+    #[builder(default = Arc::new(NoopObserver))]
+    pub observer: Arc<dyn DownloadObserver>
 }
 
 impl Debug for DownloaderConfig {
@@ -55,7 +53,6 @@ impl Debug for DownloaderConfig {
             .field("retries", &self.retries)
             .field("resumable", &self.resumable)
             .field("overwrite", &self.overwrite)
-            .field("on_complete", &self.on_complete.is_some())
             .finish()
     }
 }

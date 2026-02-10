@@ -1,9 +1,9 @@
-use crate::helpers::error::FilterError;
+use std::str::FromStr;
 
+use baad_core::error::FilterError;
 use glob::Pattern as GlobPattern;
 use lazy_regex::Regex;
 use nucleo::{Config, Matcher, Utf32Str};
-use std::str::FromStr;
 
 #[derive(Debug, Clone)]
 pub enum FilterMethod {
@@ -14,7 +14,7 @@ pub enum FilterMethod {
     Glob,
     ContainsIgnoreCase,
     StartsWith,
-    EndsWith,
+    EndsWith
 }
 
 impl FromStr for FilterMethod {
@@ -30,9 +30,7 @@ impl FromStr for FilterMethod {
             "contains-ignore-case" => Ok(Self::ContainsIgnoreCase),
             "starts-with" => Ok(Self::StartsWith),
             "ends-with" => Ok(Self::EndsWith),
-            _ => Err(FilterError::InvalidFilterMethod {
-                method: s.into(),
-            }),
+            _ => Err(FilterError::InvalidFilterMethod { method: s.into() })
         }
     }
 }
@@ -42,7 +40,7 @@ pub struct ResourceFilter {
     method: FilterMethod,
     compiled_regex: Option<Regex>,
     fuzzy_matcher: Option<Matcher>,
-    lowercase_pattern: Option<String>,
+    lowercase_pattern: Option<String>
 }
 
 impl ResourceFilter {
@@ -53,18 +51,17 @@ impl ResourceFilter {
 
         match method {
             FilterMethod::Regex => {
-                compiled_regex =
-                    Some(Regex::new(pattern).map_err(|_| FilterError::InvalidRegex {
-                        pattern: pattern.into(),
-                    })?);
+                compiled_regex = Some(
+                    Regex::new(pattern)
+                        .map_err(|_| FilterError::InvalidRegex { pattern: pattern.into() })?
+                );
             }
             FilterMethod::Fuzzy => {
                 fuzzy_matcher = Some(Matcher::new(Config::DEFAULT));
             }
             FilterMethod::Glob => {
-                GlobPattern::new(pattern).map_err(|_| FilterError::InvalidGlob {
-                    pattern: pattern.into(),
-                })?;
+                GlobPattern::new(pattern)
+                    .map_err(|_| FilterError::InvalidGlob { pattern: pattern.into() })?;
             }
             FilterMethod::ContainsIgnoreCase => {
                 lowercase_pattern = Some(pattern.to_lowercase());
@@ -81,13 +78,9 @@ impl ResourceFilter {
         })
     }
 
-    fn match_exact(&self, path: &str) -> bool {
-        path == self.pattern
-    }
+    fn match_exact(&self, path: &str) -> bool { path == self.pattern }
 
-    fn match_contains(&self, path: &str) -> bool {
-        path.contains(&self.pattern)
-    }
+    fn match_contains(&self, path: &str) -> bool { path.contains(&self.pattern) }
 
     fn match_contains_ignore_case(&self, path: &str) -> bool {
         if let Some(ref lower_pattern) = self.lowercase_pattern {
@@ -97,19 +90,12 @@ impl ResourceFilter {
         }
     }
 
-    fn match_starts_with(&self, path: &str) -> bool {
-        path.starts_with(&self.pattern)
-    }
+    fn match_starts_with(&self, path: &str) -> bool { path.starts_with(&self.pattern) }
 
-    fn match_ends_with(&self, path: &str) -> bool {
-        path.ends_with(&self.pattern)
-    }
+    fn match_ends_with(&self, path: &str) -> bool { path.ends_with(&self.pattern) }
 
     fn match_regex(&self, path: &str) -> bool {
-        self.compiled_regex
-            .as_ref()
-            .map(|r| r.is_match(path))
-            .unwrap_or(false)
+        self.compiled_regex.as_ref().map(|r| r.is_match(path)).unwrap_or(false)
     }
 
     fn match_fuzzy(&self, path: &str) -> bool {
@@ -128,9 +114,7 @@ impl ResourceFilter {
     }
 
     fn match_glob(&self, path: &str) -> bool {
-        GlobPattern::new(&self.pattern)
-            .map(|pattern| pattern.matches(path))
-            .unwrap_or(false)
+        GlobPattern::new(&self.pattern).map(|pattern| pattern.matches(path)).unwrap_or(false)
     }
 
     pub fn matches(&self, path: &str) -> bool {
@@ -142,7 +126,7 @@ impl ResourceFilter {
             FilterMethod::EndsWith => self.match_ends_with(path),
             FilterMethod::Regex => self.match_regex(path),
             FilterMethod::Fuzzy => self.match_fuzzy(path),
-            FilterMethod::Glob => self.match_glob(path),
+            FilterMethod::Glob => self.match_glob(path)
         }
     }
 }

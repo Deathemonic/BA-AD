@@ -1,6 +1,6 @@
-use crate::error::NetworkError;
-
 use reqwest::{Proxy, Response};
+
+use crate::error::NetworkError;
 
 pub fn get_content_length(response: &Response) -> u64 {
     response.headers().get("Content-Range").map_or_else(
@@ -12,7 +12,7 @@ pub fn get_content_length(response: &Response) -> u64 {
                 .and_then(|range| range.split('/').next_back())
                 .and_then(|size| size.parse::<u64>().ok())
                 .unwrap_or(0)
-        },
+        }
     )
 }
 
@@ -22,6 +22,6 @@ pub fn create_proxy(proxy_url: Option<&str>) -> Result<Option<Proxy>, NetworkErr
             let proxy = Proxy::all(url)?;
             Ok(Some(proxy))
         }
-        None => Ok(None),
+        None => Ok(None)
     }
 }

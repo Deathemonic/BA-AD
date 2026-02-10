@@ -6,6 +6,7 @@ use tokio::fs;
 use crate::download::Download;
 use crate::error::Error;
 
+#[derive(Debug)]
 pub struct FetchCtx<'a> {
     pub client: &'a ClientWithMiddleware,
     pub download: &'a Download,

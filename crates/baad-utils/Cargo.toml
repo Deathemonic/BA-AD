@@ -10,20 +10,26 @@ no_debug = []
 no_error = []
 
 [dependencies]
+baad-core = { workspace = true }
+
 tokio = { workspace = true }
 eyre = { workspace = true }
 thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { workspace = true }
+lazy-regex = { workspace = true }
 
-tracing = "0.1.41"
-tracing-subscriber = { version = "0.3.19", features = ["env-filter", "json"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 tracing-appender = { version = "0.2.4", features = ["parking_lot"] }
-owo-colors = { version = "4.2.2", features = ["supports-colors"] }
+terminal_size = "0.4"
+better_default = "1.0"
+owo-colors = { version = "4.2", features = ["supports-colors"] }
 chrono = { version = "0.4", features = ["serde"] }
-lazy-regex = "3.3"
-smallvec = "1.13"
+smallvec = "1.15"
 itoa = "1.0"
 crossbeam-channel = "0.5"
-platform-dirs = "0.3.0"
-anyhow = "1.0.99"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = { version = "1.0", features = ["preserve_order"] }
+platform-dirs = "0.3"
+anyhow = "1"
+simdutf8 = "0.1"
