@@ -1,11 +1,8 @@
 use std::process::exit;
-use std::sync::Arc;
 
-use baad::Platform;
 use baad::catalog::JapanCatalog;
 use baad::download::{FilterMethod, ResourceCategory, ResourceDownloader, ResourceFilter};
-use baad_core::DownloadObserver;
-use baad_utils::{file, info};
+use baad::{Platform, file, info};
 use clap::CommandFactory;
 use eyre::{Result, eyre};
 
@@ -19,14 +16,11 @@ use crate::args::{
 };
 
 pub struct CommandHandler {
-    args: Args,
-    observer: Arc<dyn DownloadObserver>
+    args: Args
 }
 
 impl CommandHandler {
-    fn new(args: Args, observer: Arc<dyn DownloadObserver>) -> Result<Self> {
-        Ok(Self { args, observer })
-    }
+    fn new(args: Args) -> Self { Self { args } }
 
     async fn handle(&self) -> Result<()> {
         if self.args.clean {
@@ -65,8 +59,7 @@ impl CommandHandler {
         let output_dir = file::get_output_dir(Some(args.base.output.clone().into())).await?;
         let downloader =
             ResourceDownloader::new(output_dir, args.base.limit as usize, args.base.retries)
-                .with_proxy(args.base.proxy.clone())
-                .with_observer(Arc::clone(&self.observer));
+                .with_proxy(args.base.proxy.clone());
 
         let categories = self.resource_categories(&args.base);
         let filter = self.resource_filter(&args.base)?;
@@ -116,12 +109,12 @@ impl CommandHandler {
     }
 }
 
-pub async fn run(args: Args, observer: Arc<dyn DownloadObserver>) -> Result<()> {
+pub async fn run(args: Args) -> Result<()> {
     if args.command.is_none() && !args.update && !args.clean {
         Args::command().print_help()?;
         exit(0);
     }
 
-    let handler = CommandHandler::new(args, observer)?;
+    let handler = CommandHandler::new(args);
     handler.handle().await
 }

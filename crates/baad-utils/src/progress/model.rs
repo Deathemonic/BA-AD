@@ -1,10 +1,8 @@
 use std::collections::HashMap;
-use std::fmt::Write;
 use std::sync::Arc;
 
-use baad_core::{DownloadEvent, DownloadObserver, DownloadStatus};
 use better_default::Default;
-use itoa::Buffer;
+use baad_core::{DownloadEvent, DownloadObserver, DownloadStatus};
 use tracing::Level;
 
 use crate::formatter::LineFormatter;
@@ -16,13 +14,9 @@ struct FileState {
 }
 
 #[derive(Default)]
-#[default(formatter: LineFormatter::new().with_timestamps(false))]
 pub struct DownloadProgressModel {
     active: HashMap<Arc<str>, FileState>,
-    completed_count: usize,
-    skipped_count: usize,
-    failed_count: usize,
-    total_bytes_downloaded: u64,
+    completed: Vec<Arc<str>>,
     formatter: LineFormatter
 }
 
@@ -47,65 +41,39 @@ impl DownloadProgressModel {
                     state.total_bytes = total_bytes;
                 }
             }
-            DownloadEvent::Completed { filename, size, status } => {
+            DownloadEvent::Completed { filename, size: _, status } => {
                 self.active.remove(&filename);
-                self.total_bytes_downloaded += size;
-                match status {
-                    DownloadStatus::Success => self.completed_count += 1,
-                    DownloadStatus::Skipped => self.skipped_count += 1,
-                    DownloadStatus::Failed(_) | DownloadStatus::HashMismatch => {
-                        self.failed_count += 1;
-                    }
+                if matches!(status, DownloadStatus::Success) {
+                    self.completed.push(filename);
                 }
             }
         }
-    }
-
-    fn format_summary(&self, buffer: &mut Buffer) -> String {
-        let active_count = self.active.len();
-        let mut message = String::new();
-
-        let _ = write!(message, "downloading {} files", buffer.format(active_count));
-
-        let _ = write!(message, " ({} done", buffer.format(self.completed_count));
-
-        if self.skipped_count > 0 {
-            let _ = write!(message, ", {} skipped", buffer.format(self.skipped_count));
-        }
-
-        let _ = write!(message, ", {} failed)", buffer.format(self.failed_count));
-
-        message
     }
 }
 
 impl ProgressModel for DownloadProgressModel {
     fn render(&mut self, _width: usize, output: &mut String) {
-        if self.active.is_empty() {
-            return;
+        for filename in self.active.keys() {
+            let _ = self.formatter.write_line(
+                output,
+                &Level::INFO,
+                false,
+                "Downloading",
+                &[("file", filename)]
+            );
         }
-
-        let mut buffer = Buffer::new();
-        let message = self.format_summary(&mut buffer);
-        let _ = self.formatter.write_simple_message(output, &Level::INFO, false, &message);
     }
 
     fn final_message(&mut self, output: &mut String) {
-        let mut buffer = Buffer::new();
-        let total = self.completed_count + self.skipped_count + self.failed_count;
-
-        let mut message = String::new();
-        let _ = write!(message, "{} files processed", buffer.format(total));
-        let _ = write!(message, " ({} done", buffer.format(self.completed_count));
-
-        if self.skipped_count > 0 {
-            let _ = write!(message, ", {} skipped", buffer.format(self.skipped_count));
+        for filename in &self.completed {
+            let _ = self.formatter.write_line(
+                output,
+                &Level::INFO,
+                true,
+                "Downloaded",
+                &[("file", filename)]
+            );
         }
-
-        let _ = write!(message, ", {} failed)", buffer.format(self.failed_count));
-
-        let is_success = self.failed_count == 0;
-        let _ = self.formatter.write_line(output, &Level::INFO, is_success, &message, &[]);
     }
 }
 

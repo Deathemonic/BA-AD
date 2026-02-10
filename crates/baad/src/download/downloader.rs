@@ -1,7 +1,6 @@
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 
-use baad_core::{CatalogError, DownloadObserver, NoopObserver};
+use baad_core::CatalogError;
 use baad_dm::{Download, Downloader, DownloaderConfig, Status};
 use baad_utils::{error, info, warn};
 use reqwest::Url;
@@ -20,8 +19,7 @@ pub struct ResourceDownloader {
     output_dir: PathBuf,
     limit: usize,
     retries: u32,
-    proxy: Option<String>,
-    observer: Arc<dyn DownloadObserver>
+    proxy: Option<String>
 }
 
 impl ResourceDownloader {
@@ -30,18 +28,12 @@ impl ResourceDownloader {
             output_dir,
             limit,
             retries,
-            proxy: None,
-            observer: Arc::new(NoopObserver)
+            proxy: None
         }
     }
 
     pub fn with_proxy(mut self, proxy: Option<String>) -> Self {
         self.proxy = proxy;
-        self
-    }
-
-    pub fn with_observer(mut self, observer: Arc<dyn DownloadObserver>) -> Self {
-        self.observer = observer;
         self
     }
 
@@ -82,7 +74,6 @@ impl ResourceDownloader {
             .directory(self.output_dir.clone())
             .concurrent_downloads(self.limit)
             .retries(self.retries)
-            .observer(Arc::clone(&self.observer))
             .build();
 
         if let Some(ref proxy_url) = self.proxy

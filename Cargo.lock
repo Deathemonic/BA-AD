@@ -197,8 +197,6 @@ name = "baad-cli"
 version = "3.0.0"
 dependencies = [
  "baad",
- "baad-core",
- "baad-utils",
  "clap",
  "eyre",
  "tokio",
