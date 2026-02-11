@@ -6,11 +6,14 @@ use baad_core::{
     Platform,
     TableCatalog
 };
+use baad_utils::file::get_data_path;
 use memorypack::MemoryPackSerializer;
 use reqwest::Client;
+use tokio::fs;
+
+use crate::download::download_file;
 
 pub struct JapanCdn {
-    client: Client,
     catalog_url: String,
     platform: Platform
 }
@@ -23,19 +26,15 @@ pub struct JapanResources {
 
 impl JapanCdn {
     pub fn new(catalog_url: String, platform: Platform) -> Result<Self, CatalogError> {
-        Self::with_client(Client::new(), catalog_url, platform)
+        Ok(Self { catalog_url, platform })
     }
 
     pub fn with_client(
-        client: Client,
+        _client: Client,
         catalog_url: String,
         platform: Platform
     ) -> Result<Self, CatalogError> {
-        Ok(Self {
-            client,
-            catalog_url,
-            platform
-        })
+        Self::new(catalog_url, platform)
     }
 
     pub async fn fetch_addressable(
@@ -66,22 +65,29 @@ impl JapanCdn {
     pub async fn fetch_packing(&self) -> Result<BundlePatchPackInfo, CatalogError> {
         let url =
             format!("{}/{}/BundlePackingInfo.bytes", self.catalog_url, self.platform.patch_pack());
-        let bytes = self.client.get(&url).send().await?.bytes().await?;
+        let bytes = self.fetch_bytes(&url, "BundlePackingInfo.bytes").await?;
         let packing = MemoryPackSerializer::deserialize::<BundlePatchPackInfo>(&bytes)?;
         Ok(packing)
     }
 
     pub async fn fetch_table(&self) -> Result<TableCatalog, CatalogError> {
         let url = format!("{}/TableBundles/TableCatalog.bytes", self.catalog_url);
-        let bytes = self.client.get(&url).send().await?.bytes().await?;
+        let bytes = self.fetch_bytes(&url, "TableCatalog.bytes").await?;
         let catalog = MemoryPackSerializer::deserialize::<TableCatalog>(&bytes)?;
         Ok(catalog)
     }
 
     pub async fn fetch_media(&self) -> Result<MediaCatalog, CatalogError> {
         let url = format!("{}/MediaResources/Catalog/MediaCatalog.bytes", self.catalog_url);
-        let bytes = self.client.get(&url).send().await?.bytes().await?;
+        let bytes = self.fetch_bytes(&url, "MediaCatalog.bytes").await?;
         let catalog = MemoryPackSerializer::deserialize::<MediaCatalog>(&bytes)?;
         Ok(catalog)
+    }
+
+    async fn fetch_bytes(&self, url: &str, filename: &str) -> Result<Vec<u8>, CatalogError> {
+        let path = get_data_path(&format!("catalog/japan/{filename}"))?;
+        download_file(url, &path, None, 3).await?;
+        let bytes = fs::read(&path).await?;
+        Ok(bytes)
     }
 }
