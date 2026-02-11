@@ -220,6 +220,12 @@ impl Downloader {
     fn finalize(&self, summary: Summary) -> Summary {
         let filename: Arc<str> = summary.download.filename.as_str().into();
 
+        self.config.observer.on_event(DownloadEvent::Completed {
+            filename,
+            size: summary.size,
+            status: summary.status.clone()
+        });
+
         match &summary.status {
             DownloadStatus::Success => {
                 info!(file = %summary.download.filename, success = true, "Downloaded");
@@ -235,12 +241,6 @@ impl Downloader {
             }
             DownloadStatus::NotStarted => {}
         }
-
-        self.config.observer.on_event(DownloadEvent::Completed {
-            filename,
-            size: summary.size,
-            status: summary.status.clone()
-        });
 
         summary
     }
