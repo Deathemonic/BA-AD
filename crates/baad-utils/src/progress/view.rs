@@ -219,7 +219,16 @@ impl<M: ProgressModel> InnerView<M> {
 
         self.write_buffer.clear();
         ansi::cursor_up_and_home(self.lines_drawn, &mut self.write_buffer);
-        self.write_buffer.extend_from_slice(message.as_bytes());
+
+        for byte in message.bytes() {
+            if byte == b'\n' {
+                self.write_buffer.extend_from_slice(ansi::CLEAR_TO_END_OF_LINE);
+            }
+            self.write_buffer.push(byte);
+        }
+        if !message.ends_with('\n') {
+            self.write_buffer.extend_from_slice(ansi::CLEAR_TO_END_OF_LINE);
+        }
 
         self.write_rendered_lines();
     }
