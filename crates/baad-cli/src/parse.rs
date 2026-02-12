@@ -65,8 +65,6 @@ impl CommandHandler {
         let filter = self.resource_filter(&args.base)?;
 
         downloader.download(downloads, &categories, filter.as_ref()).await?;
-
-        info!("Download complete");
         Ok(())
     }
 
