@@ -68,7 +68,7 @@ impl ResourceDownloader {
             return Ok(());
         }
 
-        info!(category = category, count = downloads.len(), "Starting download");
+        info!(category = category, "Starting download");
 
         let mut config = DownloaderConfig::builder()
             .directory(self.output_dir.clone())
