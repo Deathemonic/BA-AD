@@ -36,7 +36,6 @@ struct YoStarSignature {
 #[derive(Deserialize)]
 struct YoStarResponse<T> {
     code: i32,
-    msg: String,
     data: T
 }
 

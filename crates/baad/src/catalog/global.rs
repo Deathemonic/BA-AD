@@ -11,7 +11,7 @@ use baad_core::{
     ServerRegion
 };
 use baad_utils::file::get_data_path;
-use baad_utils::info;
+use baad_utils::{info, warn};
 use baad_utils::json::{load, update};
 use reqwest::Client;
 
@@ -79,22 +79,20 @@ impl GlobalCatalog {
     }
 
     pub async fn get_catalog_url(&self, version: &str) -> Result<String, CatalogError> {
-        let api_data = load::<ApiData>(&self.paths.api).await.ok();
+        let api_data = load::<ApiData>(&self.paths.api)
+            .await
+            .ok()
+            .filter(|d| d.global.version == version)
+            .map(|d| d.global.catalog_url)
+            .filter(|url| !url.is_empty());
 
-        if api_data.as_ref().map(|d| d.global.version.as_str()) != Some(version) {
-            info!("Version changed, performing full update");
-            return self.full_update(version.to_string()).await;
+        if let Some(catalog_url) = api_data {
+            info!("Using existing catalog URL");
+            return Ok(catalog_url);
         }
 
-        let api_data = api_data.ok_or(CatalogError::DeserializationFailed)?;
-
-        if api_data.global.catalog_url.is_empty() {
-            info!("Catalog URL empty, performing full update");
-            return self.full_update(version.to_string()).await;
-        }
-
-        info!("Using cached catalog URL");
-        Ok(api_data.global.catalog_url)
+        warn!("Catalog URL doesn't exist");
+        self.full_update(version.to_string()).await
     }
 
     pub async fn fetch_catalogs(
