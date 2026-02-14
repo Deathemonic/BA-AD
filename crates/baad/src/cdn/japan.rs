@@ -4,11 +4,11 @@ use baad_core::{
     JapanAddressable,
     MediaCatalog,
     Platform,
-    TableCatalog
+    TableCatalog,
+    client
 };
 use baad_utils::file::get_data_path;
 use memorypack::MemoryPackSerializer;
-use reqwest::Client;
 use tokio::fs;
 
 use crate::download::download_file;
@@ -25,23 +25,12 @@ pub struct JapanResources {
 }
 
 impl JapanCdn {
-    pub fn new(catalog_url: String, platform: Platform) -> Result<Self, CatalogError> {
-        Ok(Self { catalog_url, platform })
+    pub fn new(catalog_url: String, platform: Platform) -> Self {
+        Self { catalog_url, platform }
     }
 
-    pub fn with_client(
-        _client: Client,
-        catalog_url: String,
-        platform: Platform
-    ) -> Result<Self, CatalogError> {
-        Self::new(catalog_url, platform)
-    }
-
-    pub async fn fetch_addressable(
-        client: &Client,
-        url: &str
-    ) -> Result<JapanAddressable, CatalogError> {
-        let response = client.get(url).send().await?.json::<JapanAddressable>().await?;
+    pub async fn fetch_addressable(url: &str) -> Result<JapanAddressable, CatalogError> {
+        let response = client().get(url).send().await?.json::<JapanAddressable>().await?;
         Ok(response)
     }
 

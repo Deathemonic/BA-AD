@@ -13,10 +13,10 @@ use baad_core::{
     YOSTAR_GAME_JSON_CONFIG_PATH,
     YOSTAR_GAME_TAG,
     YOSTAR_SIGNATURE_DATA,
-    YOSTAR_VERSION
+    YOSTAR_VERSION,
+    client
 };
 use bacy::crypto::md5::compute_hash_str;
-use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -39,14 +39,10 @@ struct YoStarResponse<T> {
 }
 
 #[derive(Default)]
-pub struct YoStarClient {
-    client: Client
-}
+pub struct YoStarClient;
 
 impl YoStarClient {
-    pub fn new() -> Self { Self { client: Client::new() } }
-
-    pub fn with_client(client: Client) -> Self { Self { client } }
+    pub fn new() -> Self { Self }
 
     fn get_timestamp() -> Result<u64, CatalogError> {
         let duration = SystemTime::now()
@@ -77,7 +73,7 @@ impl YoStarClient {
         let url = format!("{}{}", YOSTAR_BASE_URL, endpoint);
         let signature = Self::create_signature()?;
 
-        let response = self.client.get(&url).header("Authorization", signature).send().await?;
+        let response = client().get(&url).header("Authorization", signature).send().await?;
 
         let yostar_response: YoStarResponse<T> = response.json().await?;
 
@@ -110,7 +106,7 @@ impl YoStarClient {
     }
 
     pub async fn get_json_data(&self, url: &str) -> Result<GameJsonData, CatalogError> {
-        let response = self.client.get(url).send().await?;
+        let response = client().get(url).send().await?;
         let data = response.json().await?;
         Ok(data)
     }

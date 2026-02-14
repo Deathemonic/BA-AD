@@ -12,7 +12,6 @@ use baad_core::{
 use baad_utils::file::get_data_path;
 use baad_utils::json::{load, update};
 use baad_utils::{info, warn};
-use reqwest::Client;
 
 use crate::api::NexonClient;
 use crate::catalog::Downloads;
@@ -32,18 +31,10 @@ pub struct GlobalCatalog {
 
 impl GlobalCatalog {
     pub fn new(platform: Platform, build_type: BuildType) -> Result<Self, CatalogError> {
-        Self::with_client(Client::new(), platform, build_type)
-    }
-
-    pub fn with_client(
-        client: Client,
-        platform: Platform,
-        build_type: BuildType
-    ) -> Result<Self, CatalogError> {
         MarketConfig::for_global(platform, build_type)?;
 
         Ok(Self {
-            nexon_client: NexonClient::with_client(client),
+            nexon_client: NexonClient::new(),
             platform,
             build_type,
             paths: GlobalPaths {
@@ -99,8 +90,8 @@ impl GlobalCatalog {
         &self,
         catalog_url: &str
     ) -> Result<GlobalCatalogData, CatalogError> {
-        let cdn_client = GlobalCdn::new(catalog_url.to_string());
-        let catalog = cdn_client.fetch().await?;
+        let cdn = GlobalCdn::new(catalog_url.to_string());
+        let catalog = cdn.fetch().await?;
         Ok(catalog)
     }
 

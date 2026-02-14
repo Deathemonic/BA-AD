@@ -11,6 +11,8 @@ pub use baad_core::{
     DownloadStatus,
     NoopObserver,
     Platform,
+    client,
+    set_client,
     set_observer
 };
 pub use baad_utils::config::{LoggingConfig, init_logging};

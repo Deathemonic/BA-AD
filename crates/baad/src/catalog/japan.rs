@@ -15,7 +15,6 @@ use bacy::crypto::table::{create_key, decrypt_string, encrypt_string};
 use base64::Engine;
 use base64::engine::general_purpose;
 use memchr::memmem::Finder;
-use reqwest::Client;
 use serde_json::Value;
 use tokio::fs;
 
@@ -38,12 +37,8 @@ pub struct JapanCatalog {
 
 impl JapanCatalog {
     pub fn new(platform: Platform) -> Result<Self, CatalogError> {
-        Self::with_client(Client::new(), platform)
-    }
-
-    pub fn with_client(client: Client, platform: Platform) -> Result<Self, CatalogError> {
         Ok(Self {
-            yostar_client: YoStarClient::with_client(client),
+            yostar_client: YoStarClient::new(),
             platform,
             paths: JapanPaths {
                 api: get_data_path(API_FILENAME)?,
@@ -106,7 +101,7 @@ impl JapanCatalog {
 
     pub async fn fetch_resources(&self) -> Result<(String, JapanResources), CatalogError> {
         let url = self.get_catalog_url().await?;
-        let cdn = JapanCdn::new(url.clone(), self.platform)?;
+        let cdn = JapanCdn::new(url.clone(), self.platform);
         let resources = cdn.fetch().await?;
         Ok((url, resources))
     }
@@ -182,10 +177,6 @@ impl JapanCatalog {
 
     async fn fetch_addressable(&self, url: &str) -> Result<JapanAddressable, CatalogError> {
         debug!(url = %url, "Fetching addressable");
-
-        let response = reqwest::get(url).await?;
-        let addressable = response.json().await?;
-
-        Ok(addressable)
+        JapanCdn::fetch_addressable(url).await
     }
 }

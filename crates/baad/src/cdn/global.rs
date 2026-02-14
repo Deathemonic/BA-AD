@@ -1,23 +1,14 @@
-use baad_core::{CatalogError, GlobalCatalog as GlobalCatalogData};
-use reqwest::Client;
+use baad_core::{CatalogError, GlobalCatalog as GlobalCatalogData, client};
 
 pub struct GlobalCdn {
-    client: Client,
     catalog_url: String
 }
 
 impl GlobalCdn {
-    pub fn new(catalog_url: String) -> Self {
-        Self {
-            client: Client::new(),
-            catalog_url
-        }
-    }
-
-    pub fn with_client(client: Client, catalog_url: String) -> Self { Self { client, catalog_url } }
+    pub fn new(catalog_url: String) -> Self { Self { catalog_url } }
 
     pub async fn fetch(&self) -> Result<GlobalCatalogData, CatalogError> {
-        let response = self.client.get(&self.catalog_url).send().await?;
+        let response = client().get(&self.catalog_url).send().await?;
         let catalog = response.json().await?;
         Ok(catalog)
     }

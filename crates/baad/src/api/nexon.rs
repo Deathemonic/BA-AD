@@ -5,22 +5,18 @@ use baad_core::{
     GlobalCatalog,
     MarketConfig,
     PLAYSTORE_REGEX_VERSION,
-    PLAYSTORE_VERSION_URL
+    PLAYSTORE_VERSION_URL,
+    client
 };
-use reqwest::Client;
 
 #[derive(Default)]
-pub struct NexonClient {
-    client: Client
-}
+pub struct NexonClient;
 
 impl NexonClient {
-    pub fn new() -> Self { Self::default() }
-
-    pub fn with_client(client: Client) -> Self { Self { client } }
+    pub fn new() -> Self { Self }
 
     pub async fn get_version(&self) -> Result<String, CatalogError> {
-        let response = self.client.get(PLAYSTORE_VERSION_URL).send().await?;
+        let response = client().get(PLAYSTORE_VERSION_URL).send().await?;
         let body = response.text().await?;
         PLAYSTORE_REGEX_VERSION
             .find(&body)
@@ -34,8 +30,7 @@ impl NexonClient {
         version: &str,
         build_number: &str
     ) -> Result<GlobalAddressable, CatalogError> {
-        let response = self
-            .client
+        let response = client()
             .post(GLOBAL_API_URL)
             .json(&serde_json::json!({
                 "market_game_id": market_config.market_game_id,
@@ -51,7 +46,7 @@ impl NexonClient {
     }
 
     pub async fn get_catalog(&self, resource_path: &str) -> Result<GlobalCatalog, CatalogError> {
-        let response = self.client.get(resource_path).send().await?;
+        let response = client().get(resource_path).send().await?;
         let catalog = response.json().await?;
         Ok(catalog)
     }
