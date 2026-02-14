@@ -1,8 +1,8 @@
 use std::process::exit;
 
-use baad::catalog::JapanCatalog;
+use baad::catalog::{GlobalCatalog, JapanCatalog};
 use baad::download::{FilterMethod, ResourceCategory, ResourceDownloader, ResourceFilter};
-use baad::{Platform, file, info};
+use baad::{BuildType, Platform, file, info};
 use clap::CommandFactory;
 use eyre::{Result, eyre};
 
@@ -68,8 +68,28 @@ impl CommandHandler {
         Ok(())
     }
 
-    async fn execute_global_download(&self, _args: &GlobalDownloadArgs) -> Result<()> {
-        Err(eyre!("Global region not yet implemented with new architecture"))
+    async fn execute_global_download(&self, args: &GlobalDownloadArgs) -> Result<()> {
+        let platform = if args.base.ios { Platform::Ios } else { Platform::Android };
+        let build_type = if args.teen { BuildType::Teen } else { BuildType::Standard };
+
+        info!(platform = %platform.as_str(), "Starting Global download");
+
+        let catalog = GlobalCatalog::new(platform, build_type)?;
+        let (base_url, resources) = catalog.fetch_resources().await?;
+        let downloads = GlobalCatalog::build_downloads(&resources, &base_url);
+
+        info!("Catalog fetched successfully");
+
+        let output_dir = file::get_output_dir(Some(args.base.output.clone().into())).await?;
+        let downloader =
+            ResourceDownloader::new(output_dir, args.base.limit as usize, args.base.retries)
+                .with_proxy(args.base.proxy.clone());
+
+        let categories = self.resource_categories(&args.base);
+        let filter = self.resource_filter(&args.base)?;
+
+        downloader.download(downloads, &categories, filter.as_ref()).await?;
+        Ok(())
     }
 
     fn resource_categories(&self, args: &BaseDownloadArgs) -> Vec<ResourceCategory> {

@@ -1,6 +1,3 @@
-use std::borrow::Cow;
-use std::rc::Rc;
-
 use lazy_regex::{Lazy, Regex, lazy_regex};
 
 use crate::error::ServerConfigError;
@@ -15,6 +12,9 @@ pub static REGEX_VERSION: Lazy<Regex> =
 
 pub const GLOBAL_VERSION_URL: &str =
     "https://api.pureapk.com/m/v3/cms/app_version?hl=en-US&package_name=com.nexon.bluearchive";
+pub const PLAYSTORE_VERSION_URL: &str =
+    "https://play.google.com/store/apps/details?id=com.nexon.bluearchive";
+pub static PLAYSTORE_REGEX_VERSION: Lazy<Regex> = lazy_regex!(r"\d\.\d{2}\.\d{6}");
 pub const JAPAN_VERSION_URL: &str =
     "https://api.pureapk.com/m/v3/cms/app_version?hl=en-US&package_name=com.YostarJP.BlueArchive";
 
@@ -60,12 +60,6 @@ pub const PATCH_PACK_IOS: &str = "iOS_PatchPack";
 pub const PATCH_PACK_WINDOWS: &str = "Windows_PatchPack";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ServerRegion {
-    Global,
-    Japan
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Platform {
     Android,
     Ios,
@@ -80,28 +74,7 @@ impl Platform {
             Self::Windows => PATCH_PACK_WINDOWS
         }
     }
-}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum BuildType {
-    Standard,
-    Teen
-}
-
-pub struct ServerConfig {
-    pub region: ServerRegion,
-    pub platform: Platform,
-    pub build_type: BuildType,
-    pub version_url: Cow<'static, str>,
-    pub apk_path: Cow<'static, str>
-}
-
-pub struct MarketConfig {
-    pub market_game_id: Cow<'static, str>,
-    pub market_code: Cow<'static, str>
-}
-
-impl Platform {
     pub const fn as_str(&self) -> &'static str {
         match self {
             Platform::Android => "Android",
@@ -109,6 +82,12 @@ impl Platform {
             Platform::Windows => "Windows"
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BuildType {
+    Standard,
+    Teen
 }
 
 impl BuildType {
@@ -120,60 +99,29 @@ impl BuildType {
     }
 }
 
-impl ServerConfig {
-    pub fn new(
-        server: ServerRegion,
-        platform: Option<Platform>,
-        build_type: Option<BuildType>
-    ) -> Result<Rc<Self>, ServerConfigError> {
-        let platform = platform.unwrap_or(Platform::Android);
-        let build_type = build_type.unwrap_or(BuildType::Standard);
+pub struct MarketConfig {
+    pub market_game_id: &'static str,
+    pub market_code: &'static str
+}
 
-        if build_type == BuildType::Teen && server != ServerRegion::Global {
-            return Err(ServerConfigError::TeenNotAvailable);
-        }
-
-        let config = match server {
-            ServerRegion::Global => Self {
-                region: server,
-                platform,
-                build_type,
-                version_url: GLOBAL_VERSION_URL.into(),
-                apk_path: GLOBAL_APK_PATH.into()
-            },
-            ServerRegion::Japan => Self {
-                region: server,
-                platform,
-                build_type,
-                version_url: JAPAN_VERSION_URL.into(),
-                apk_path: JAPAN_APK_PATH.into()
+impl MarketConfig {
+    pub fn for_global(
+        platform: Platform,
+        build_type: BuildType
+    ) -> Result<Self, ServerConfigError> {
+        let (market_game_id, market_code) = match (platform, build_type) {
+            (Platform::Android, BuildType::Standard) => {
+                (GLOBAL_ANDROID_STANDARD_ID, PLAYSTORE_CODE)
             }
+            (Platform::Android, BuildType::Teen) => (GLOBAL_ANDROID_TEEN_ID, PLAYSTORE_CODE),
+            (Platform::Ios, BuildType::Standard) => (GLOBAL_IOS_STANDARD_ID, APPSTORE_CODE),
+            (Platform::Ios, BuildType::Teen) => (GLOBAL_IOS_TEEN_ID, APPSTORE_CODE),
+            (Platform::Windows, _) => return Err(ServerConfigError::UnsupportedCombination)
         };
 
-        Ok(Rc::new(config))
-    }
-
-    pub fn get_market_config(&self) -> Option<MarketConfig> {
-        match self.region {
-            ServerRegion::Global => {
-                let (market_game_id, market_code) = match (self.platform, self.build_type) {
-                    (Platform::Android, BuildType::Standard) => {
-                        (GLOBAL_ANDROID_STANDARD_ID, PLAYSTORE_CODE)
-                    }
-                    (Platform::Android, BuildType::Teen) => {
-                        (GLOBAL_ANDROID_TEEN_ID, PLAYSTORE_CODE)
-                    }
-                    (Platform::Ios, BuildType::Standard) => (GLOBAL_IOS_STANDARD_ID, APPSTORE_CODE),
-                    (Platform::Ios, BuildType::Teen) => (GLOBAL_IOS_TEEN_ID, APPSTORE_CODE),
-                    (Platform::Windows, _) => return None
-                };
-
-                Some(MarketConfig {
-                    market_game_id: market_game_id.into(),
-                    market_code: market_code.into()
-                })
-            }
-            ServerRegion::Japan => None
-        }
+        Ok(Self {
+            market_game_id,
+            market_code
+        })
     }
 }

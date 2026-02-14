@@ -20,16 +20,10 @@ use serde_json::Value;
 use tokio::fs;
 
 use crate::api::YoStarClient;
+use crate::catalog::Downloads;
 use crate::cdn::{JapanCdn, JapanResources};
 use crate::download::download_file;
-use crate::strategy::{
-    AssetDownload,
-    AssetStrategy,
-    MediaDownload,
-    MediaStrategy,
-    TableDownload,
-    TableStrategy
-};
+use crate::strategy::{AssetStrategy, MediaStrategy, TableStrategy};
 
 struct JapanPaths {
     api: PathBuf,
@@ -40,12 +34,6 @@ pub struct JapanCatalog {
     yostar_client: YoStarClient,
     platform: Platform,
     paths: JapanPaths
-}
-
-pub struct Downloads {
-    pub assets: Vec<AssetDownload>,
-    pub tables: Vec<TableDownload>,
-    pub media: Vec<MediaDownload>
 }
 
 impl JapanCatalog {

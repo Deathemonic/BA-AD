@@ -6,17 +6,18 @@ use baad_core::{
     BuildType,
     CatalogError,
     GlobalCatalog as GlobalCatalogData,
-    Platform,
-    ServerConfig,
-    ServerRegion
+    MarketConfig,
+    Platform
 };
 use baad_utils::file::get_data_path;
-use baad_utils::{info, warn};
 use baad_utils::json::{load, update};
+use baad_utils::{info, warn};
 use reqwest::Client;
 
 use crate::api::NexonClient;
+use crate::catalog::Downloads;
 use crate::cdn::GlobalCdn;
+use crate::strategy::GlobalStrategy;
 
 struct GlobalPaths {
     api: PathBuf
@@ -39,6 +40,8 @@ impl GlobalCatalog {
         platform: Platform,
         build_type: BuildType
     ) -> Result<Self, CatalogError> {
+        MarketConfig::for_global(platform, build_type)?;
+
         Ok(Self {
             nexon_client: NexonClient::with_client(client),
             platform,
@@ -52,10 +55,7 @@ impl GlobalCatalog {
     async fn full_update(&self, version: String) -> Result<String, CatalogError> {
         info!(version = %version, "Performing full update");
 
-        let market_config =
-            ServerConfig::new(ServerRegion::Global, Some(self.platform), Some(self.build_type))?
-                .get_market_config()
-                .ok_or(CatalogError::DeserializationFailed)?;
+        let market_config = MarketConfig::for_global(self.platform, self.build_type)?;
 
         let build_number =
             version.split('.').next_back().ok_or(CatalogError::DeserializationFailed)?;
@@ -99,9 +99,25 @@ impl GlobalCatalog {
         &self,
         catalog_url: &str
     ) -> Result<GlobalCatalogData, CatalogError> {
-        let cdn_client = GlobalCdn::new(catalog_url.to_string(), self.platform);
+        let cdn_client = GlobalCdn::new(catalog_url.to_string());
         let catalog = cdn_client.fetch().await?;
-
         Ok(catalog)
+    }
+
+    pub async fn fetch_resources(&self) -> Result<(String, GlobalCatalogData), CatalogError> {
+        let version = self.nexon_client.get_version().await?;
+        info!(version = %version, "Fetched version from Play Store");
+
+        let catalog_url = self.get_catalog_url(&version).await?;
+        let base_url = GlobalCdn::derive_base_url(&catalog_url)
+            .ok_or(CatalogError::DeserializationFailed)?
+            .to_string();
+
+        let catalog = self.fetch_catalogs(&catalog_url).await?;
+        Ok((base_url, catalog))
+    }
+
+    pub fn build_downloads(catalog: &GlobalCatalogData, base_url: &str) -> Downloads {
+        GlobalStrategy::build_downloads(&catalog.resources, base_url)
     }
 }

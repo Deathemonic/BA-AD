@@ -1,4 +1,12 @@
-use baad_core::{CatalogError, GLOBAL_API_URL, GlobalAddressable, GlobalCatalog, MarketConfig};
+use baad_core::{
+    CatalogError,
+    GLOBAL_API_URL,
+    GlobalAddressable,
+    GlobalCatalog,
+    MarketConfig,
+    PLAYSTORE_REGEX_VERSION,
+    PLAYSTORE_VERSION_URL
+};
 use reqwest::Client;
 
 #[derive(Default)]
@@ -10,6 +18,15 @@ impl NexonClient {
     pub fn new() -> Self { Self::default() }
 
     pub fn with_client(client: Client) -> Self { Self { client } }
+
+    pub async fn get_version(&self) -> Result<String, CatalogError> {
+        let response = self.client.get(PLAYSTORE_VERSION_URL).send().await?;
+        let body = response.text().await?;
+        PLAYSTORE_REGEX_VERSION
+            .find(&body)
+            .map(|m| m.as_str().to_string())
+            .ok_or(CatalogError::DeserializationFailed)
+    }
 
     pub async fn get_addressable(
         &self,
