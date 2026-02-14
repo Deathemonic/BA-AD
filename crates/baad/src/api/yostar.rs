@@ -7,7 +7,6 @@ use baad_core::{
     GameFile,
     GameJsonConfig,
     GameJsonData,
-    Platform,
     YOSTAR_BASE_URL,
     YOSTAR_DOMAIN_PATH,
     YOSTAR_GAME_BASE_CONFIG_PATH,
@@ -39,20 +38,15 @@ struct YoStarResponse<T> {
     data: T
 }
 
+#[derive(Default)]
 pub struct YoStarClient {
-    client: Client,
-    platform: Platform
+    client: Client
 }
 
 impl YoStarClient {
-    pub fn new(platform: Platform) -> Self {
-        Self {
-            client: Client::new(),
-            platform
-        }
-    }
+    pub fn new() -> Self { Self { client: Client::new() } }
 
-    pub fn with_client(client: Client, platform: Platform) -> Self { Self { client, platform } }
+    pub fn with_client(client: Client) -> Self { Self { client } }
 
     fn get_timestamp() -> Result<u64, CatalogError> {
         let duration = SystemTime::now()
@@ -140,6 +134,4 @@ impl YoStarClient {
 
         Ok((download_url, resources_file))
     }
-
-    pub fn platform(&self) -> Platform { self.platform }
 }

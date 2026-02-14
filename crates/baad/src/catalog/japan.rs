@@ -43,7 +43,7 @@ impl JapanCatalog {
 
     pub fn with_client(client: Client, platform: Platform) -> Result<Self, CatalogError> {
         Ok(Self {
-            yostar_client: YoStarClient::with_client(client, platform),
+            yostar_client: YoStarClient::with_client(client),
             platform,
             paths: JapanPaths {
                 api: get_data_path(API_FILENAME)?,
