@@ -45,13 +45,12 @@ pub fn install() -> Result<(), ConfigError> {
     static ONCE: Once = Once::new();
     ONCE.call_once(|| {
         panic::set_hook(Box::new(|panic_info| {
-            let msg = match panic_info.payload().downcast_ref::<&str>() {
-                Some(s) => s.to_string(),
-                None => match panic_info.payload().downcast_ref::<String>() {
-                    Some(s) => s.clone(),
-                    None => "Unknown panic".to_string()
-                }
-            };
+            let msg = panic_info
+                .payload()
+                .downcast_ref::<&str>()
+                .map(|s| (*s).to_string())
+                .or_else(|| panic_info.payload().downcast_ref::<String>().cloned())
+                .unwrap_or_else(|| "Unknown panic".to_string());
 
             let location = panic_info
                 .location()

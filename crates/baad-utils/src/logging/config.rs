@@ -28,6 +28,7 @@ const PROGRESS_UPDATE_INTERVAL: Duration = Duration::from_millis(100);
 #[default(
     enable_console: FeatureConfig::from_features().logs_enabled,
     enable_debug: FeatureConfig::from_features().debug_enabled,
+    enable_trace: true,
     include_timestamps: true,
     enable_async_writer: true
 )]
@@ -35,7 +36,7 @@ pub struct LoggingConfig {
     pub enable_console: bool,
     pub enable_json: bool,
     pub enable_debug: bool,
-    pub verbose_mode: bool,
+    pub enable_trace: bool,
     pub include_timestamps: bool,
     pub enable_async_writer: bool
 }
@@ -67,11 +68,11 @@ fn install_error_handler(feature_config: &FeatureConfig) -> Result<(), ConfigErr
     Ok(())
 }
 
-fn env_filter(verbose: bool, debug: bool) -> EnvFilter {
-    match (verbose, debug) {
-        (true, _) => EnvFilter::new("trace"),
-        (false, true) => EnvFilter::new("debug"),
-        (false, false) => EnvFilter::new("info")
+fn env_filter(debug: bool, trace: bool) -> EnvFilter {
+    match (debug, trace) {
+        (true, true) => EnvFilter::new("trace"),
+        (true, false) => EnvFilter::new("debug"),
+        (false, _) => EnvFilter::new("info")
     }
 }
 
@@ -130,8 +131,10 @@ fn init_with_progress(
 
     set_observer(Arc::new(observer));
 
-    let filter =
-        env_filter(config.verbose_mode, config.enable_debug && feature_config.debug_enabled);
+    let filter = env_filter(
+        config.enable_debug && feature_config.debug_enabled,
+        config.enable_trace
+    );
 
     registry()
         .with(filter)
@@ -149,8 +152,10 @@ fn init_without_progress(
     config: &LoggingConfig,
     feature_config: &FeatureConfig
 ) -> Result<(), ConfigError> {
-    let filter =
-        env_filter(config.verbose_mode, config.enable_debug && feature_config.debug_enabled);
+    let filter = env_filter(
+        config.enable_debug && feature_config.debug_enabled,
+        config.enable_trace
+    );
     let subscriber = registry().with(filter);
 
     let result = if config.enable_async_writer {

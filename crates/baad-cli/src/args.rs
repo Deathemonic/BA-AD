@@ -1,6 +1,6 @@
 use baad::Platform;
 use baad::download::FilterMethod;
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Parser)]
 #[command(name = "baad")]
@@ -18,9 +18,18 @@ pub struct Args {
     #[arg(short, long)]
     pub clean: bool,
 
-    /// Enable verbose output
-    #[arg(short, long)]
-    pub verbose: bool
+    /// Enable verbose output (minimal, full)
+    #[arg(short, long, value_name = "LEVEL")]
+    pub verbose: Option<VerboseLevel>
+}
+
+#[derive(Debug, Clone, Copy, ValueEnum)]
+pub enum VerboseLevel {
+    /// Enable debug logs
+    Minimal,
+
+    /// Enable trace logs
+    Full
 }
 
 #[derive(Subcommand)]
