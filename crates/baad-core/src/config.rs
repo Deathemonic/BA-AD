@@ -1,4 +1,5 @@
 use lazy_regex::{Lazy, Regex, lazy_regex};
+use strum::{AsRefStr, EnumString, IntoStaticStr};
 
 use crate::error::ServerConfigError;
 
@@ -52,7 +53,8 @@ pub const PATCH_PACK_ANDROID: &str = "Android_PatchPack";
 pub const PATCH_PACK_IOS: &str = "iOS_PatchPack";
 pub const PATCH_PACK_WINDOWS: &str = "Windows_PatchPack";
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, AsRefStr, IntoStaticStr)]
+#[strum(serialize_all = "lowercase")]
 pub enum Platform {
     Android,
     Ios,
@@ -67,29 +69,12 @@ impl Platform {
             Self::Windows => PATCH_PACK_WINDOWS
         }
     }
-
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Platform::Android => "Android",
-            Platform::Ios => "Ios",
-            Platform::Windows => "Windows"
-        }
-    }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, AsRefStr, IntoStaticStr)]
 pub enum BuildType {
     Standard,
     Teen
-}
-
-impl BuildType {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            BuildType::Standard => "Standard",
-            BuildType::Teen => "Teen"
-        }
-    }
 }
 
 pub struct MarketConfig {

@@ -62,12 +62,7 @@ pub enum FilterError {
     InvalidRegex { pattern: Box<str> },
 
     #[error("Invalid glob pattern: {pattern}")]
-    InvalidGlob { pattern: Box<str> },
-
-    #[error(
-        "Invalid filter method: '{method}'. Valid options: exact, contains, regex, fuzzy, glob, contains-ignore-case, starts-with, ends-with"
-    )]
-    InvalidFilterMethod { method: Box<str> }
+    InvalidGlob { pattern: Box<str> }
 }
 
 #[derive(Error, Debug)]

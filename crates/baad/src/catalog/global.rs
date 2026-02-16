@@ -61,8 +61,8 @@ impl GlobalCatalog {
         update(&self.paths.api, |data: &mut ApiData| {
             data.global.version = version;
             data.global.catalog_url = catalog_url.clone();
-            data.global.platform = platform.as_str().into();
-            data.global.build_type = build_type.as_str().into();
+            data.global.platform = <&str>::from(platform).into();
+            data.global.build_type = <&str>::from(build_type).into();
         })
         .await?;
 

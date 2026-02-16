@@ -9,6 +9,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 reqwest = { workspace = true }
 lazy-regex = { workspace = true }
+strum = { workspace = true }
 bacy = { workspace = true }
 
 memorypack = "1.2.1"

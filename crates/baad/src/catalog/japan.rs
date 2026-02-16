@@ -63,7 +63,7 @@ impl JapanCatalog {
             data.japan.version = version;
             data.japan.server_info_url = server_info_url.clone();
             data.japan.catalog_url = catalog_url.to_string();
-            data.japan.platform = platform.as_str().into();
+            data.japan.platform = <&str>::from(platform).into();
         })
         .await?;
 

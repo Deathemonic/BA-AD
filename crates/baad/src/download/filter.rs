@@ -1,11 +1,11 @@
-use std::str::FromStr;
-
 use baad_core::error::FilterError;
 use glob::Pattern as GlobPattern;
 use lazy_regex::Regex;
 use nucleo::{Config, Matcher, Utf32Str};
+use strum::{AsRefStr, EnumString};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, EnumString, AsRefStr)]
+#[strum(serialize_all = "kebab-case")]
 pub enum FilterMethod {
     Exact,
     Contains,
@@ -15,24 +15,6 @@ pub enum FilterMethod {
     ContainsIgnoreCase,
     StartsWith,
     EndsWith
-}
-
-impl FromStr for FilterMethod {
-    type Err = FilterError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_lowercase().as_str() {
-            "exact" => Ok(Self::Exact),
-            "contains" => Ok(Self::Contains),
-            "regex" => Ok(Self::Regex),
-            "fuzzy" => Ok(Self::Fuzzy),
-            "glob" => Ok(Self::Glob),
-            "contains-ignore-case" => Ok(Self::ContainsIgnoreCase),
-            "starts-with" => Ok(Self::StartsWith),
-            "ends-with" => Ok(Self::EndsWith),
-            _ => Err(FilterError::InvalidFilterMethod { method: s.into() })
-        }
-    }
 }
 
 pub struct ResourceFilter {

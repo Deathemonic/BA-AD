@@ -1,4 +1,5 @@
 use baad::download::FilterMethod;
+use baad::Platform;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -79,9 +80,9 @@ pub struct BaseDownloadArgs {
     #[arg(long)]
     pub proxy: Option<String>,
 
-    /// Use iOS build instead of Android
-    #[arg(long)]
-    pub ios: bool
+    /// Platform to download (android, ios, windows)
+    #[arg(long, default_value = "android")]
+    pub platform: Platform
 }
 
 #[derive(Parser)]

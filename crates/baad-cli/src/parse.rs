@@ -46,9 +46,9 @@ impl CommandHandler {
     }
 
     async fn execute_japan_download(&self, args: &JapanDownloadArgs) -> Result<()> {
-        let platform = if args.base.ios { Platform::Ios } else { Platform::Android };
+        let platform = args.base.platform;
 
-        info!(platform = %platform.as_str(), "Starting Japan download");
+        info!(platform = %platform.as_ref(), "Starting Japan download");
 
         let catalog = JapanCatalog::new(platform)?;
         let (url, resources) = catalog.fetch_resources().await?;
@@ -69,10 +69,15 @@ impl CommandHandler {
     }
 
     async fn execute_global_download(&self, args: &GlobalDownloadArgs) -> Result<()> {
-        let platform = if args.base.ios { Platform::Ios } else { Platform::Android };
+        let platform = args.base.platform;
+
+        if matches!(platform, Platform::Windows) {
+            return Err(eyre!("Global server does not support Windows platform. Use --platform android or --platform ios"));
+        }
+
         let build_type = if args.teen { BuildType::Teen } else { BuildType::Standard };
 
-        info!(platform = %platform.as_str(), "Starting Global download");
+        info!(platform = %platform.as_ref(), "Starting Global download");
 
         let catalog = GlobalCatalog::new(platform, build_type)?;
         let (base_url, resources) = catalog.fetch_resources().await?;
