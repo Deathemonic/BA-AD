@@ -4,8 +4,8 @@ use baad_core::{
     GlobalAddressable,
     GlobalCatalog,
     MarketConfig,
-    PLAYSTORE_REGEX_VERSION,
-    PLAYSTORE_VERSION_URL,
+    REGEX_VERSION,
+    GLOBAL_PLAYSTORE_URL,
     client
 };
 
@@ -16,9 +16,9 @@ impl NexonClient {
     pub fn new() -> Self { Self }
 
     pub async fn get_version(&self) -> Result<String, CatalogError> {
-        let response = client().get(PLAYSTORE_VERSION_URL).send().await?;
+        let response = client().get(GLOBAL_PLAYSTORE_URL).send().await?;
         let body = response.text().await?;
-        PLAYSTORE_REGEX_VERSION
+        REGEX_VERSION
             .find(&body)
             .map(|m| m.as_str().to_string())
             .ok_or(CatalogError::DeserializationFailed)

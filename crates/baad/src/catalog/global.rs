@@ -97,7 +97,7 @@ impl GlobalCatalog {
 
     pub async fn fetch_resources(&self) -> Result<(String, GlobalCatalogData), CatalogError> {
         let version = self.nexon_client.get_version().await?;
-        info!(version = %version, "Fetched version from Play Store");
+        info!(version = %version, "Version");
 
         let catalog_url = self.get_catalog_url(&version).await?;
         let base_url = GlobalCdn::derive_base_url(&catalog_url)
@@ -105,6 +105,7 @@ impl GlobalCatalog {
             .to_string();
 
         let catalog = self.fetch_catalogs(&catalog_url).await?;
+
         Ok((base_url, catalog))
     }
 
