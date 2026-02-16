@@ -60,10 +60,10 @@ baad download japan --assets --filter "CH0230" --filter-method contains-ignore-c
 baad download japan --filter "ch0069" --filter-method fuzzy
 
 # Downloads all teen AssetBundles from the Global server using iOS platform
-baad download global --assets --ios --teen
+baad download global --assets --platform ios --teen
 
-# Downloads all AssetBundles from the JP server using iOS platform 
-baad download japan --assets --ios
+# Downloads all AssetBundles from the JP server using Windows platform 
+baad download japan --assets --platform windows
 ```
 
 <details>
@@ -71,15 +71,15 @@ baad download japan --assets --ios
 
 ### `baad --help`
 
-| Command/Option | Short | Description                                               |
-|----------------|-------|-----------------------------------------------------------|
-| `download`     |       | Download game files                                       |
-| `help`         |       | Print this message or the help of the given subcommand(s) |
-| `--update`     | `-u`  | Force update                                              |
-| `--clean`      | `-c`  | Cleans the cache                                          |
-| `--verbose`    | `-v`  | Enable verbose output                                     |
-| `--help`       | `-h`  | Print help                                                |
-| `--version`    | `-V`  | Print version                                             |
+| Command/Option        | Short | Description                                               |
+|-----------------------|-------|-----------------------------------------------------------|
+| `download`            |       | Download game files                                       |
+| `help`                |       | Print this message or the help of the given subcommand(s) |
+| `--update`            | `-u`  | Force update                                              |
+| `--clean`             | `-c`  | Cleans the cache                                          |
+| `--verbose=<LEVEL>`   | `-v`  | Enable verbose output (`minimal`, `full`)                 |
+| `--help`              | `-h`  | Print help                                                |
+| `--version`           | `-V`  | Print version                                             |
 
 ---
 
@@ -106,7 +106,7 @@ baad download japan --assets --ios
 | `--filter <FILTER>`               | Filter by name                                |            |                                                                                                   |
 | `--filter-method <FILTER_METHOD>` | Filter method to use                          | `contains` | `exact`, `contains`, `regex`, `fuzzy`, `glob`, `contains-ignore-case`, `starts-with`, `ends-with` |
 | `--proxy <PROXY>`                 | Proxy URL for downloads                       |            |                                                                                                   |
-| `--ios`                           | Use iOS build instead of Android              |            |                                                                                                   | 
+| `--platform <PLATFORM>`           | Platform to download                          | `android`  | `android`, `ios`, `windows`                                                                       |
 | `--teen`                          | Download Teen assets (Global only)            |            |                                                                                                   | 
 | `--help`                          | Print help                                    |            |                                                                                                   |
 
