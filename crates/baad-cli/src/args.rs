@@ -18,8 +18,8 @@ pub struct Args {
     #[arg(short, long)]
     pub clean: bool,
 
-    /// Enable verbose output (minimal, full)
-    #[arg(short, long, value_name = "LEVEL")]
+    /// Enable verbose output
+    #[arg(short, long, value_name = "LEVEL", num_args = 0..=1, default_missing_value = "minimal", require_equals = true)]
     pub verbose: Option<VerboseLevel>
 }
 

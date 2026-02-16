@@ -27,8 +27,8 @@ const PROGRESS_UPDATE_INTERVAL: Duration = Duration::from_millis(100);
 #[derive(Debug, Clone, Default)]
 #[default(
     enable_console: FeatureConfig::from_features().logs_enabled,
-    enable_debug: FeatureConfig::from_features().debug_enabled,
-    enable_trace: true,
+    enable_debug: false,
+    enable_trace: false,
     include_timestamps: true,
     enable_async_writer: true
 )]
