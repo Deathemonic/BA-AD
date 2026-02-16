@@ -24,10 +24,7 @@ impl CommandHandler {
 
     async fn handle(&self) -> Result<()> {
         if self.args.clean {
-            info!("Cleaning data...");
-            let data_dir = file::data_dir()?;
-            file::clear_all(data_dir).await?;
-            info!(success = true, "Data cleared");
+            return self.clean().await;
         }
 
         match &self.args.command {
@@ -36,16 +33,24 @@ impl CommandHandler {
         }
     }
 
+    async fn clean(&self) -> Result<()> {
+        info!("Cleaning data...");
+
+        let data_dir = file::data_dir()?;
+        file::clear_all(data_dir).await?;
+        
+        info!(success = true, "Data cleared");
+        Ok(())
+    }
+
     async fn handle_download(&self, region: &RegionCommands) -> Result<()> {
         match region {
-            RegionCommands::Global(download_args) => {
-                self.execute_global_download(download_args).await
-            }
-            RegionCommands::Japan(download_args) => self.execute_japan_download(download_args).await
+            RegionCommands::Global(download_args) => self.global_download(download_args).await,
+            RegionCommands::Japan(download_args) => self.japan_download(download_args).await
         }
     }
 
-    async fn execute_japan_download(&self, args: &JapanDownloadArgs) -> Result<()> {
+    async fn japan_download(&self, args: &JapanDownloadArgs) -> Result<()> {
         let platform = args.base.platform;
 
         info!(platform = %platform.as_ref(), "Starting Japan download");
@@ -68,11 +73,13 @@ impl CommandHandler {
         Ok(())
     }
 
-    async fn execute_global_download(&self, args: &GlobalDownloadArgs) -> Result<()> {
+    async fn global_download(&self, args: &GlobalDownloadArgs) -> Result<()> {
         let platform = args.base.platform;
 
         if matches!(platform, Platform::Windows) {
-            return Err(eyre!("Global server does not support Windows platform. Use --platform android or --platform ios"));
+            return Err(eyre!(
+                "Global server does not support Windows platform. Use --platform android or --platform ios"
+            ));
         }
 
         let build_type = if args.teen { BuildType::Teen } else { BuildType::Standard };

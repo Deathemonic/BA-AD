@@ -1,5 +1,5 @@
-use baad::download::FilterMethod;
 use baad::Platform;
+use baad::download::FilterMethod;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]

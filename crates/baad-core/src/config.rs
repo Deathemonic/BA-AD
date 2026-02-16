@@ -88,9 +88,7 @@ impl MarketConfig {
         build_type: BuildType
     ) -> Result<Self, ServerConfigError> {
         let (market_game_id, market_code) = match (platform, build_type) {
-            (Platform::Android, BuildType::Standard) => {
-                (GLOBAL_ANDROID_STANDARD_ID, PLAYSTORE_CODE)
-            }
+            (Platform::Android, BuildType::Standard) => (GLOBAL_ANDROID_STANDARD_ID, PLAYSTORE_CODE),
             (Platform::Android, BuildType::Teen) => (GLOBAL_ANDROID_TEEN_ID, PLAYSTORE_CODE),
             (Platform::Ios, BuildType::Standard) => (GLOBAL_IOS_STANDARD_ID, APPSTORE_CODE),
             (Platform::Ios, BuildType::Teen) => (GLOBAL_IOS_TEEN_ID, APPSTORE_CODE),
