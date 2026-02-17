@@ -1,11 +1,11 @@
 use baad_core::{
     CatalogError,
     GLOBAL_API_URL,
+    GLOBAL_PLAYSTORE_URL,
     GlobalAddressable,
     GlobalCatalog,
     MarketConfig,
     REGEX_VERSION,
-    GLOBAL_PLAYSTORE_URL,
     client
 };
 

@@ -38,7 +38,7 @@ impl CommandHandler {
 
         let data_dir = file::data_dir()?;
         file::clear_all(data_dir).await?;
-        
+
         info!(success = true, "Data cleared");
         Ok(())
     }

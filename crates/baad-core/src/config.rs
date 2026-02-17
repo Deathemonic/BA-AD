@@ -7,7 +7,8 @@ pub static REGEX_VERSION: Lazy<Regex> = lazy_regex!(r"\d\.\d{2}\.\d{6}");
 
 pub const GLOBAL_API_URL: &str = "https://api-pub.nexon.com/patch/v1.1/version-check";
 
-pub const GLOBAL_PLAYSTORE_URL: &str = "https://play.google.com/store/apps/details?id=com.nexon.bluearchive";
+pub const GLOBAL_PLAYSTORE_URL: &str =
+    "https://play.google.com/store/apps/details?id=com.nexon.bluearchive";
 pub const GLOBAL_APPSTORE_URL: &str = "https://apps.apple.com/us/app/blue-archive/id1571873795e";
 
 pub const GLOBAL_ANDROID_STANDARD_ID: &str = "com.nexon.bluearchive";
@@ -25,7 +26,6 @@ pub const YOSTAR_DOMAIN_PATH: &str = "/api/launcher/advanced/game/download/cdn";
 pub const YOSTAR_GAME_TAG: &str = "BlueArchive_JP";
 pub const YOSTAR_SIGNATURE_DATA: &str = "DE7108E9B2842FD460F4777702727869";
 pub const YOSTAR_VERSION: &str = "1.7.2";
-
 
 pub const API_FILENAME: &str = "api_data.json";
 pub const GAME_CONFIG_PATTERN: &[u8] = &[
@@ -88,7 +88,9 @@ impl MarketConfig {
         build_type: BuildType
     ) -> Result<Self, ServerConfigError> {
         let (market_game_id, market_code) = match (platform, build_type) {
-            (Platform::Android, BuildType::Standard) => (GLOBAL_ANDROID_STANDARD_ID, PLAYSTORE_CODE),
+            (Platform::Android, BuildType::Standard) => {
+                (GLOBAL_ANDROID_STANDARD_ID, PLAYSTORE_CODE)
+            }
             (Platform::Android, BuildType::Teen) => (GLOBAL_ANDROID_TEEN_ID, PLAYSTORE_CODE),
             (Platform::Ios, BuildType::Standard) => (GLOBAL_IOS_STANDARD_ID, APPSTORE_CODE),
             (Platform::Ios, BuildType::Teen) => (GLOBAL_IOS_TEEN_ID, APPSTORE_CODE),

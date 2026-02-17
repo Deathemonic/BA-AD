@@ -131,10 +131,8 @@ fn init_with_progress(
 
     set_observer(Arc::new(observer));
 
-    let filter = env_filter(
-        config.enable_debug && feature_config.debug_enabled,
-        config.enable_trace
-    );
+    let filter =
+        env_filter(config.enable_debug && feature_config.debug_enabled, config.enable_trace);
 
     registry()
         .with(filter)
@@ -152,10 +150,8 @@ fn init_without_progress(
     config: &LoggingConfig,
     feature_config: &FeatureConfig
 ) -> Result<(), ConfigError> {
-    let filter = env_filter(
-        config.enable_debug && feature_config.debug_enabled,
-        config.enable_trace
-    );
+    let filter =
+        env_filter(config.enable_debug && feature_config.debug_enabled, config.enable_trace);
     let subscriber = registry().with(filter);
 
     let result = if config.enable_async_writer {
