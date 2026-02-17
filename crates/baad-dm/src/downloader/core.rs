@@ -73,18 +73,22 @@ impl Downloader {
             total_bytes: 0
         });
 
-        let outcome = self.fetch_inner(&ctx, &filename).await;
+        let outcome = self.fetch_inner(&ctx, &filename).await.unwrap_or_else(|e| e);
         let summary = self.create_summary(download, outcome);
         self.finalize(summary)
     }
 
-    async fn fetch_inner(&self, ctx: &FetchCtx<'_>, filename: &Arc<str>) -> FetchOutcome {
+    async fn fetch_inner(
+        &self,
+        ctx: &FetchCtx<'_>,
+        filename: &Arc<str>
+    ) -> Result<FetchOutcome, FetchOutcome> {
         if !self.config.overwrite
             && ctx.file_path.exists()
             && let Ok(true) = ctx.download.verify_hash(&ctx.file_path)
         {
             let size = fs::metadata(&ctx.file_path).await.map(|m| m.len()).unwrap_or(0);
-            return FetchOutcome::skipped("File exists with matching hash", size);
+            return Ok(FetchOutcome::skipped("File exists with matching hash", size));
         }
 
         if !self.config.overwrite
@@ -98,11 +102,9 @@ impl Downloader {
             return self.extract_zip(ctx).await;
         }
 
-        let (resumable, content_length, resolved_url) =
-            match check_server(ctx.client, ctx.download).await {
-                Ok(v) => v,
-                Err(e) => return FetchOutcome::failed(e, StatusCode::BAD_REQUEST)
-            };
+        let (resumable, content_length, resolved_url) = check_server(ctx.client, ctx.download)
+            .await
+            .map_err(|e| FetchOutcome::failed(e, StatusCode::BAD_REQUEST))?;
 
         let size_on_disk = match resumable && ctx.file_path.exists() {
             true => fs::metadata(&ctx.file_path).await.map(|m| m.len()).unwrap_or(0),
@@ -113,7 +115,7 @@ impl Downloader {
             && len == size_on_disk
             && size_on_disk > 0
         {
-            return FetchOutcome::skipped("Already fully downloaded", len);
+            return Ok(FetchOutcome::skipped("Already fully downloaded", len));
         }
 
         let total_size = content_length.unwrap_or(0);
@@ -138,7 +140,7 @@ impl Downloader {
         };
 
         let result = if chunk_count > 1 {
-            match download_chunked(
+            download_chunked(
                 ctx,
                 total_size,
                 chunk_count,
@@ -147,46 +149,39 @@ impl Downloader {
                 progress_tracker.clone()
             )
             .await
-            {
-                Ok(()) => Ok(total_size),
-                Err(e) => Err(e)
-            }
+            .map(|()| total_size)
         } else {
             download_stream(ctx, opts, progress_tracker.clone()).await
         };
 
-        FetchOutcome::from_result(result, resumable)
+        Ok(FetchOutcome::from_result(result, resumable))
     }
 
-    async fn extract_zip(&self, ctx: &FetchCtx<'_>) -> FetchOutcome {
-        let Some(ref target) = ctx.download.target_file else {
-            return FetchOutcome::failed(
-                "No target file for ZIP extraction",
-                StatusCode::BAD_REQUEST
-            );
-        };
+    async fn extract_zip(&self, ctx: &FetchCtx<'_>) -> Result<FetchOutcome, FetchOutcome> {
+        let target = ctx.download.target_file.as_ref().ok_or_else(|| {
+            FetchOutcome::failed("No target file for ZIP extraction", StatusCode::BAD_REQUEST)
+        })?;
 
-        let extractor = match ZipExtractor::new(ctx.client, &ctx.download.url).await {
-            Ok(e) => e,
-            Err(e) => return FetchOutcome::failed(e, StatusCode::BAD_REQUEST)
-        };
+        let extractor = ZipExtractor::new(ctx.client, &ctx.download.url)
+            .await
+            .map_err(|e| FetchOutcome::failed(e, StatusCode::BAD_REQUEST))?;
 
-        let data = match extractor.extract_file(target).await {
-            Ok(d) => d,
-            Err(e) => return FetchOutcome::failed(e, StatusCode::NOT_FOUND)
-        };
+        let data = extractor
+            .extract_file(target)
+            .await
+            .map_err(|e| FetchOutcome::failed(e, StatusCode::NOT_FOUND))?;
 
         let size = data.len() as u64;
 
-        if let Err(e) = ensure_parent_dir(&ctx.file_path).await {
-            return FetchOutcome::failed(e, StatusCode::INTERNAL_SERVER_ERROR);
-        }
+        ensure_parent_dir(&ctx.file_path)
+            .await
+            .map_err(|e| FetchOutcome::failed(e, StatusCode::INTERNAL_SERVER_ERROR))?;
 
-        if let Err(e) = fs::write(&ctx.file_path, &data).await {
-            return FetchOutcome::failed(e, StatusCode::INTERNAL_SERVER_ERROR);
-        }
+        fs::write(&ctx.file_path, &data)
+            .await
+            .map_err(|e| FetchOutcome::failed(e, StatusCode::INTERNAL_SERVER_ERROR))?;
 
-        FetchOutcome::success(size, false)
+        Ok(FetchOutcome::success(size, false))
     }
 
     fn create_summary(&self, download: Download, outcome: FetchOutcome) -> Summary {
