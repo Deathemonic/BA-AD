@@ -1,13 +1,12 @@
 use std::path::Path;
 
-use baad_core::HashValue;
+use baad_core::{DownloadAsset, DownloadMedia, DownloadTable, HashValue};
 use baad_dm::Download;
 use reqwest::Url;
 
 use crate::download::ResourceFilter;
-use crate::strategy::{Asset, Media, Table};
 
-pub fn convert_assets(assets: &[Asset], filter: Option<&ResourceFilter>) -> Vec<Download> {
+pub fn convert_assets(assets: &[DownloadAsset], filter: Option<&ResourceFilter>) -> Vec<Download> {
     let mut downloads = Vec::new();
 
     for asset in assets {
@@ -42,7 +41,7 @@ pub fn convert_assets(assets: &[Asset], filter: Option<&ResourceFilter>) -> Vec<
     downloads
 }
 
-pub fn convert_tables(tables: &[Table], filter: Option<&ResourceFilter>) -> Vec<Download> {
+pub fn convert_tables(tables: &[DownloadTable], filter: Option<&ResourceFilter>) -> Vec<Download> {
     tables
         .iter()
         .filter(|t| {
@@ -57,7 +56,7 @@ pub fn convert_tables(tables: &[Table], filter: Option<&ResourceFilter>) -> Vec<
         .collect()
 }
 
-pub fn convert_media(media: &[Media], filter: Option<&ResourceFilter>) -> Vec<Download> {
+pub fn convert_media(media: &[DownloadMedia], filter: Option<&ResourceFilter>) -> Vec<Download> {
     media
         .iter()
         .filter(|m| {

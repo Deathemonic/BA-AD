@@ -4,6 +4,7 @@ use baad_core::{
     API_FILENAME,
     ApiData,
     CatalogError,
+    Downloads,
     GAME_CONFIG_PATTERN,
     JapanAddressable,
     Platform
@@ -19,10 +20,9 @@ use serde_json::Value;
 use tokio::fs;
 
 use crate::api::YoStarClient;
-use crate::catalog::Downloads;
 use crate::cdn::{JapanCdn, JapanResources};
 use crate::download::download_file;
-use crate::strategy::{AssetStrategy, MediaStrategy, TableStrategy};
+use crate::strategy::JapanStrategy;
 
 struct JapanPaths {
     api: PathBuf,
@@ -108,9 +108,9 @@ impl JapanCatalog {
 
     pub fn build_downloads(&self, resources: &JapanResources, url: &str) -> Downloads {
         Downloads {
-            assets: AssetStrategy::build_downloads(&resources.packing, url, self.platform),
-            tables: TableStrategy::build_downloads(&resources.table, url),
-            media: MediaStrategy::build_downloads(&resources.media, url)
+            assets: JapanStrategy::build_asset_downloads(&resources.packing, url, self.platform),
+            tables: JapanStrategy::build_table_downloads(&resources.table, url),
+            media: JapanStrategy::build_media_downloads(&resources.media, url)
         }
     }
 

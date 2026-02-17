@@ -272,3 +272,35 @@ pub struct BundleFile {
     pub file_hash: u64,
     pub signature: String
 }
+
+#[derive(Debug, Clone)]
+pub struct DownloadAsset {
+    pub url: String,
+    pub path: String,
+    pub hash: HashValue,
+    pub size: i64,
+    pub bundle_files: Vec<String>
+}
+
+#[derive(Debug, Clone)]
+pub struct DownloadMedia {
+    pub url: String,
+    pub path: String,
+    pub hash: HashValue,
+    pub size: i64
+}
+
+#[derive(Debug, Clone)]
+pub struct DownloadTable {
+    pub url: String,
+    pub path: String,
+    pub hash: HashValue,
+    pub size: i64
+}
+
+#[derive(Debug, Clone)]
+pub struct Downloads {
+    pub assets: Vec<DownloadAsset>,
+    pub tables: Vec<DownloadTable>,
+    pub media: Vec<DownloadMedia>
+}

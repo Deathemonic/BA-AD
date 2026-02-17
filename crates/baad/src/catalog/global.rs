@@ -5,6 +5,7 @@ use baad_core::{
     ApiData,
     BuildType,
     CatalogError,
+    Downloads,
     GlobalCatalog as GlobalCatalogData,
     MarketConfig,
     Platform
@@ -14,7 +15,6 @@ use baad_utils::json::{load, update};
 use baad_utils::{info, warn};
 
 use crate::api::NexonClient;
-use crate::catalog::Downloads;
 use crate::cdn::GlobalCdn;
 use crate::strategy::GlobalStrategy;
 

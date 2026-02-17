@@ -1,11 +1,10 @@
 use std::path::{Path, PathBuf};
 
-use baad_core::{CatalogError, DownloadStatus};
+use baad_core::{CatalogError, DownloadStatus, Downloads};
 use baad_dm::{Download, Downloader, DownloaderConfig};
 use baad_utils::{error, info, warn};
 use reqwest::Url;
 
-use crate::catalog::Downloads;
 use crate::download::{ResourceFilter, converter};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
