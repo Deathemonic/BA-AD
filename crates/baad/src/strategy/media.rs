@@ -1,6 +1,6 @@
 use baad_core::{HashValue, MediaCatalog};
 
-pub struct MediaDownload {
+pub struct Media {
     pub url: String,
     pub path: String,
     pub hash: HashValue,
@@ -10,13 +10,13 @@ pub struct MediaDownload {
 pub struct MediaStrategy;
 
 impl MediaStrategy {
-    pub fn build_downloads(catalog: &MediaCatalog, catalog_url: &str) -> Vec<MediaDownload> {
+    pub fn build_downloads(catalog: &MediaCatalog, catalog_url: &str) -> Vec<Media> {
         catalog
             .table
             .values()
             .map(|entry| {
                 let path = entry.path.replace('\\', "/");
-                MediaDownload {
+                Media {
                     url: format!("{}/MediaResources/{}", catalog_url, path),
                     path: format!("MediaResources/{}", path),
                     hash: HashValue::Crc(entry.crc),

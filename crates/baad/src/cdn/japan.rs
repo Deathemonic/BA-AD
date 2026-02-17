@@ -42,14 +42,14 @@ impl JapanCdn {
     }
 
     pub async fn fetch(&self) -> Result<JapanResources, CatalogError> {
-        let packing = self.fetch_packing().await?;
+        let packing = self.fetch_assets().await?;
         let table = self.fetch_table().await?;
         let media = self.fetch_media().await?;
 
         Ok(JapanResources { packing, table, media })
     }
 
-    pub async fn fetch_packing(&self) -> Result<BundlePatchPackInfo, CatalogError> {
+    pub async fn fetch_assets(&self) -> Result<BundlePatchPackInfo, CatalogError> {
         let url =
             format!("{}/{}/BundlePackingInfo.bytes", self.catalog_url, self.platform.patch_pack());
         let bytes = self.fetch_bytes(&url, "BundlePackingInfo.bytes").await?;

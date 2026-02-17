@@ -5,9 +5,9 @@ use baad_dm::Download;
 use reqwest::Url;
 
 use crate::download::ResourceFilter;
-use crate::strategy::{AssetDownload, MediaDownload, TableDownload};
+use crate::strategy::{Asset, Media, Table};
 
-pub fn convert_assets(assets: &[AssetDownload], filter: Option<&ResourceFilter>) -> Vec<Download> {
+pub fn convert_assets(assets: &[Asset], filter: Option<&ResourceFilter>) -> Vec<Download> {
     let mut downloads = Vec::new();
 
     for asset in assets {
@@ -42,7 +42,7 @@ pub fn convert_assets(assets: &[AssetDownload], filter: Option<&ResourceFilter>)
     downloads
 }
 
-pub fn convert_tables(tables: &[TableDownload], filter: Option<&ResourceFilter>) -> Vec<Download> {
+pub fn convert_tables(tables: &[Table], filter: Option<&ResourceFilter>) -> Vec<Download> {
     tables
         .iter()
         .filter(|t| {
@@ -57,7 +57,7 @@ pub fn convert_tables(tables: &[TableDownload], filter: Option<&ResourceFilter>)
         .collect()
 }
 
-pub fn convert_media(media: &[MediaDownload], filter: Option<&ResourceFilter>) -> Vec<Download> {
+pub fn convert_media(media: &[Media], filter: Option<&ResourceFilter>) -> Vec<Download> {
     media
         .iter()
         .filter(|m| {

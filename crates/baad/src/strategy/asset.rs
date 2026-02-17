@@ -1,6 +1,6 @@
 use baad_core::{BundlePatchPackInfo, HashValue, Platform};
 
-pub struct AssetDownload {
+pub struct Asset {
     pub url: String,
     pub path: String,
     pub hash: HashValue,
@@ -15,12 +15,12 @@ impl AssetStrategy {
         packing: &BundlePatchPackInfo,
         catalog_url: &str,
         platform: Platform
-    ) -> Vec<AssetDownload> {
+    ) -> Vec<Asset> {
         packing
             .full_patch_packs
             .iter()
             .chain(packing.update_packs.iter())
-            .map(|pack| AssetDownload {
+            .map(|pack| Asset {
                 url: format!("{}/{}/{}", catalog_url, platform.patch_pack(), pack.pack_name),
                 path: format!("AssetBundles/{}", pack.pack_name),
                 hash: HashValue::Crc(pack.crc),

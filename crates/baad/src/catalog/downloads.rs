@@ -1,7 +1,7 @@
-use crate::strategy::{AssetDownload, MediaDownload, TableDownload};
+use crate::strategy::{Asset, Media, Table};
 
 pub struct Downloads {
-    pub assets: Vec<AssetDownload>,
-    pub tables: Vec<TableDownload>,
-    pub media: Vec<MediaDownload>
+    pub assets: Vec<Asset>,
+    pub tables: Vec<Table>,
+    pub media: Vec<Media>
 }

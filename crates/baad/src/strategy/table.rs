@@ -1,6 +1,6 @@
 use baad_core::{HashValue, TableCatalog};
 
-pub struct TableDownload {
+pub struct Table {
     pub url: String,
     pub path: String,
     pub hash: HashValue,
@@ -10,11 +10,11 @@ pub struct TableDownload {
 pub struct TableStrategy;
 
 impl TableStrategy {
-    pub fn build_downloads(catalog: &TableCatalog, catalog_url: &str) -> Vec<TableDownload> {
+    pub fn build_downloads(catalog: &TableCatalog, catalog_url: &str) -> Vec<Table> {
         catalog
             .table
             .values()
-            .map(|entry| TableDownload {
+            .map(|entry| Table {
                 url: format!("{}/TableBundles/{}", catalog_url, entry.name),
                 path: format!("TableBundles/{}", entry.name),
                 hash: HashValue::Crc(entry.crc),

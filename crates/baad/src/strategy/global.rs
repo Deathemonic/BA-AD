@@ -1,7 +1,7 @@
 use baad_core::{HashValue, Resource};
 
 use crate::catalog::Downloads;
-use crate::strategy::{AssetDownload, MediaDownload, TableDownload};
+use crate::strategy::{Asset, Media, Table};
 
 const TABLE_BUNDLES_PREFIX: &str = "TableBundles/";
 const MEDIA_RESOURCES_PREFIX: &str = "MediaResources/";
@@ -25,21 +25,21 @@ impl GlobalStrategy {
             let size = resource.resource_size;
 
             if resource.resource_path.contains(TABLE_BUNDLES_PREFIX) {
-                tables.push(TableDownload {
+                tables.push(Table {
                     url,
                     path: resource.resource_path.clone(),
                     hash,
                     size
                 });
             } else if resource.resource_path.contains(MEDIA_RESOURCES_PREFIX) {
-                media.push(MediaDownload {
+                media.push(Media {
                     url,
                     path: resource.resource_path.clone(),
                     hash,
                     size
                 });
             } else {
-                assets.push(AssetDownload {
+                assets.push(Asset {
                     url,
                     path: resource.resource_path.clone(),
                     hash,
