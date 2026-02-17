@@ -1,14 +1,14 @@
 use std::env::current_dir;
-use std::fmt::{Debug, Formatter, Result};
 use std::path::PathBuf;
 use std::sync::Arc;
 
 use baad_core::DownloadObserver;
 use bon::Builder;
+use derive_more::Debug;
 use reqwest_middleware::reqwest::Proxy;
 use reqwest_middleware::reqwest::header::HeaderMap;
 
-#[derive(Builder, Clone)]
+#[derive(Builder, Clone, Debug)]
 pub struct DownloaderConfig {
     #[builder(default = current_dir().unwrap_or_default())]
     pub directory: PathBuf,
@@ -34,25 +34,13 @@ pub struct DownloaderConfig {
     #[builder(default = false)]
     pub overwrite: bool,
 
+    #[debug(skip)]
     pub headers: Option<HeaderMap>,
 
+    #[debug(skip)]
     pub proxy: Option<Proxy>,
 
+    #[debug(skip)]
     #[builder(default = baad_core::observer())]
     pub observer: Arc<dyn DownloadObserver>
-}
-
-impl Debug for DownloaderConfig {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        f.debug_struct("DownloaderConfig")
-            .field("directory", &self.directory)
-            .field("concurrent_downloads", &self.concurrent_downloads)
-            .field("max_chunks_per_file", &self.max_chunks_per_file)
-            .field("max_concurrent_chunks", &self.max_concurrent_chunks)
-            .field("chunk_threshold", &self.chunk_threshold)
-            .field("retries", &self.retries)
-            .field("resumable", &self.resumable)
-            .field("overwrite", &self.overwrite)
-            .finish()
-    }
 }

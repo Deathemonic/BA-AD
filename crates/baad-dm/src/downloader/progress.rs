@@ -1,25 +1,16 @@
-use std::fmt;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use baad_core::{DownloadEvent, DownloadObserver};
+use derive_more::Debug;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ProgressTracker {
     filename: Arc<str>,
     total_bytes: u64,
     downloaded_bytes: Arc<AtomicU64>,
+    #[debug(skip)]
     observer: Arc<dyn DownloadObserver>
-}
-
-impl fmt::Debug for ProgressTracker {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("ProgressTracker")
-            .field("filename", &self.filename)
-            .field("total_bytes", &self.total_bytes)
-            .field("downloaded_bytes", &self.downloaded_bytes)
-            .finish()
-    }
 }
 
 impl ProgressTracker {
