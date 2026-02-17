@@ -7,6 +7,7 @@ use reqwest_middleware::reqwest::header::RANGE;
 use tokio::fs::{File, OpenOptions};
 use tokio::io::{AsyncSeekExt, AsyncWriteExt, BufWriter, SeekFrom};
 
+use crate::client::create_range_header;
 use crate::downloader::helpers::{FetchCtx, ensure_parent_dir};
 use crate::downloader::progress::ProgressTracker;
 use crate::error::Error;
@@ -85,7 +86,7 @@ async fn download_chunk(
     let res = chunk_ctx
         .client
         .get(&chunk_ctx.resolved_url)
-        .header(RANGE, format!("bytes={}-{}", range.start, range.end))
+        .header(RANGE, create_range_header(range.start, Some(range.end)))
         .send()
         .await?;
 

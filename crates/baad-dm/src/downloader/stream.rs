@@ -6,6 +6,7 @@ use reqwest_middleware::reqwest::header::RANGE;
 use tokio::fs::{File, OpenOptions};
 use tokio::io::{AsyncWriteExt, BufWriter};
 
+use crate::client::create_range_header;
 use crate::downloader::helpers::{FetchCtx, StreamOpts, ensure_parent_dir};
 use crate::downloader::progress::ProgressTracker;
 use crate::error::Error;
@@ -20,7 +21,7 @@ pub async fn download_stream(
     let mut req = ctx.client.get(ctx.download.url.as_str());
 
     if opts.resumable && opts.size_on_disk > 0 {
-        req = req.header(RANGE, format!("bytes={}-", opts.size_on_disk));
+        req = req.header(RANGE, create_range_header(opts.size_on_disk, None));
     }
 
     let res = req.send().await.map_err(Error::HttpMiddleware)?;

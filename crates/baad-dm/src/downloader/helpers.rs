@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use reqwest_middleware::ClientWithMiddleware;
 use tokio::fs;
 
+use crate::client::{parse_accept_ranges, parse_content_length};
 use crate::download::Download;
 use crate::error::Error;
 
@@ -27,11 +28,8 @@ pub async fn check_server(
     let resolved_url = res.url().to_string();
     let headers = res.headers();
 
-    let resumable =
-        headers.get("accept-ranges").and_then(|v| v.to_str().ok()).is_some_and(|v| v != "none");
-
-    let content_length =
-        headers.get("content-length").and_then(|v| v.to_str().ok()).and_then(|v| v.parse().ok());
+    let resumable = parse_accept_ranges(headers);
+    let content_length = parse_content_length(headers);
 
     Ok((resumable, content_length, resolved_url))
 }

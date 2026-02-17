@@ -3,7 +3,9 @@ use std::io::Read;
 use flate2::read::DeflateDecoder;
 use reqwest_middleware::ClientWithMiddleware;
 use reqwest_middleware::reqwest::Url;
+use reqwest_middleware::reqwest::header::RANGE;
 
+use crate::client::create_range_header;
 use crate::error::Error;
 use crate::zip::types::*;
 
@@ -140,7 +142,7 @@ impl<'a> ZipExtractor<'a> {
         let res = self
             .client
             .get(self.url.as_str())
-            .header("Range", format!("bytes={}-{}", start, end))
+            .header(RANGE, create_range_header(start, Some(end)))
             .send()
             .await?;
 
