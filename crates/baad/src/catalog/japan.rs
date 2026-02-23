@@ -19,6 +19,7 @@ use memchr::memmem::Finder;
 use serde_json::Value;
 use tokio::fs;
 
+use crate::catalog::traits::Catalog;
 use crate::api::YoStarClient;
 use crate::cdn::{JapanCdn, JapanResources};
 use crate::download::download_file;
@@ -46,8 +47,6 @@ impl JapanCatalog {
             }
         })
     }
-
-    pub fn platform(&self) -> Platform { self.platform }
 
     async fn full_update(&self, version: String) -> Result<String, CatalogError> {
         info!(version = %version, "Performing full update");
@@ -97,21 +96,6 @@ impl JapanCatalog {
         .await?;
 
         Ok(catalog_url.to_string())
-    }
-
-    pub async fn fetch_resources(&self) -> Result<(String, JapanResources), CatalogError> {
-        let url = self.get_catalog_url().await?;
-        let cdn = JapanCdn::new(url.clone(), self.platform);
-        let resources = cdn.fetch().await?;
-        Ok((url, resources))
-    }
-
-    pub fn build_downloads(&self, resources: &JapanResources, url: &str) -> Downloads {
-        Downloads {
-            assets: JapanStrategy::build_asset_downloads(&resources.packing, url, self.platform),
-            tables: JapanStrategy::build_table_downloads(&resources.table, url),
-            media: JapanStrategy::build_media_downloads(&resources.media, url)
-        }
     }
 
     async fn download_resources_asset(&self) -> Result<PathBuf, CatalogError> {
@@ -178,5 +162,28 @@ impl JapanCatalog {
     async fn fetch_addressable(&self, url: &str) -> Result<JapanAddressable, CatalogError> {
         debug!(url = %url, "Fetching addressable");
         JapanCdn::fetch_addressable(url).await
+    }
+}
+
+impl Catalog for JapanCatalog {
+    type Resources = JapanResources;
+
+    async fn fetch_resources(&self) -> Result<(String, Self::Resources), CatalogError> {
+        let url = self.get_catalog_url().await?;
+        let cdn = JapanCdn::new(url.clone(), self.platform);
+        let resources = cdn.fetch().await?;
+        Ok((url, resources))
+    }
+
+    fn build_downloads(&self, resources: &Self::Resources, base_or_url: &str) -> Downloads {
+        Downloads {
+            assets: JapanStrategy::build_asset_downloads(
+                &resources.packing,
+                base_or_url,
+                self.platform
+            ),
+            tables: JapanStrategy::build_table_downloads(&resources.table, base_or_url),
+            media: JapanStrategy::build_media_downloads(&resources.media, base_or_url)
+        }
     }
 }

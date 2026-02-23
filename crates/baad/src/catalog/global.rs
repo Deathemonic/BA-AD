@@ -14,6 +14,7 @@ use baad_utils::file::get_data_path;
 use baad_utils::json::{load, update};
 use baad_utils::{info, warn};
 
+use crate::catalog::traits::Catalog;
 use crate::api::NexonClient;
 use crate::cdn::GlobalCdn;
 use crate::strategy::GlobalStrategy;
@@ -94,8 +95,12 @@ impl GlobalCatalog {
         let catalog = cdn.fetch().await?;
         Ok(catalog)
     }
+}
 
-    pub async fn fetch_resources(&self) -> Result<(String, GlobalCatalogData), CatalogError> {
+impl Catalog for GlobalCatalog {
+    type Resources = GlobalCatalogData;
+
+    async fn fetch_resources(&self) -> Result<(String, Self::Resources), CatalogError> {
         let version = self.nexon_client.get_version().await?;
         info!(version = %version, "Version");
 
@@ -105,11 +110,10 @@ impl GlobalCatalog {
             .to_string();
 
         let catalog = self.fetch_catalogs(&catalog_url).await?;
-
         Ok((base_url, catalog))
     }
 
-    pub fn build_downloads(catalog: &GlobalCatalogData, base_url: &str) -> Downloads {
-        GlobalStrategy::build_downloads(&catalog.resources, base_url)
+    fn build_downloads(&self, resources: &Self::Resources, base_or_url: &str) -> Downloads {
+        GlobalStrategy::build_downloads(&resources.resources, base_or_url)
     }
 }

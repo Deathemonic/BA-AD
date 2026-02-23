@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use baad::Platform;
 use baad::download::FilterMethod;
 use clap::{Parser, Subcommand, ValueEnum};
@@ -66,7 +68,7 @@ pub struct BaseDownloadArgs {
 
     /// Output directory for the downloaded files
     #[arg(long, default_value = "./output")]
-    pub output: String,
+    pub output: PathBuf,
 
     /// Set a limit on the concurrent downloads
     #[arg(long, default_value = "10")]

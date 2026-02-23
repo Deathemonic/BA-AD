@@ -1,6 +1,6 @@
 use std::process::exit;
 
-use baad::catalog::{GlobalCatalog, JapanCatalog};
+use baad::catalog::{Catalog, GlobalCatalog, JapanCatalog};
 use baad::download::{FilterMethod, ResourceCategory, ResourceDownloader, ResourceFilter};
 use baad::{BuildType, Platform, file, info};
 use clap::CommandFactory;
@@ -56,12 +56,11 @@ impl CommandHandler {
         info!(platform = %platform.as_ref(), "Starting Japan download");
 
         let catalog = JapanCatalog::new(platform)?;
-        let (url, resources) = catalog.fetch_resources().await?;
-        let downloads = catalog.build_downloads(&resources, &url);
+        let downloads = catalog.prepare_downloads().await?;
 
         info!("Catalog fetched successfully");
 
-        let output_dir = file::get_output_dir(Some(args.base.output.clone().into())).await?;
+        let output_dir = file::get_output_dir(Some(args.base.output.clone())).await?;
         let downloader =
             ResourceDownloader::new(output_dir, args.base.limit as usize, args.base.retries)
                 .with_proxy(args.base.proxy.clone());
@@ -87,12 +86,11 @@ impl CommandHandler {
         info!(platform = %platform.as_ref(), "Starting Global download");
 
         let catalog = GlobalCatalog::new(platform, build_type)?;
-        let (base_url, resources) = catalog.fetch_resources().await?;
-        let downloads = GlobalCatalog::build_downloads(&resources, &base_url);
+        let downloads = catalog.prepare_downloads().await?;
 
         info!("Catalog fetched successfully");
 
-        let output_dir = file::get_output_dir(Some(args.base.output.clone().into())).await?;
+        let output_dir = file::get_output_dir(Some(args.base.output.clone())).await?;
         let downloader =
             ResourceDownloader::new(output_dir, args.base.limit as usize, args.base.retries)
                 .with_proxy(args.base.proxy.clone());
