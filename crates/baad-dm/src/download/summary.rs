@@ -46,11 +46,12 @@ pub struct Summary {
     #[builder(default)]
     pub status: DownloadStatus,
     #[builder(default)]
-    pub resumable: bool,
+    pub resumable: bool
 }
 
 impl Summary {
     pub fn is_success(&self) -> bool { matches!(self.status, DownloadStatus::Success) }
+
     pub fn for_download(download: Download) -> Self {
         Self::builder().download(Arc::new(download)).build()
     }

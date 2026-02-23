@@ -4,6 +4,9 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
+    #[error(transparent)]
+    Hash(#[from] bacy::error::HashError),
+
     #[error("Invalid URL '{url}': {reason}")]
     InvalidUrl { url: Box<str>, reason: Box<str> },
 

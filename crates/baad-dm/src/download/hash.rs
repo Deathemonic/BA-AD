@@ -1,8 +1,11 @@
+use std::fs;
 use std::path::Path;
 
 use bacy::crypto::md5;
 use bacy::error::HashError;
 use bacy::hash::crc;
+
+use crate::error::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HashType {
@@ -18,7 +21,7 @@ pub fn detect_hash_type(hash: &str) -> Option<HashType> {
     }
 }
 
-pub fn verify_hash(file_path: &Path, expected: Option<&String>) -> Result<bool, HashError> {
+pub fn verify_hash(file_path: &Path, expected: Option<&String>) -> Result<bool, Error> {
     let Some(expected) = expected else {
         return Ok(true);
     };
@@ -29,7 +32,7 @@ pub fn verify_hash(file_path: &Path, expected: Option<&String>) -> Result<bool, 
 
     match detect_hash_type(expected) {
         Some(HashType::Md5) => {
-            let data = std::fs::read(file_path)?;
+            let data = fs::read(file_path)?;
             let hash_bytes = md5::compute_hash(&data);
             let calculated = md5::to_hex_string(&hash_bytes);
             Ok(calculated.eq_ignore_ascii_case(expected))
@@ -40,9 +43,8 @@ pub fn verify_hash(file_path: &Path, expected: Option<&String>) -> Result<bool, 
             };
             match crc::compare(file_path, expected_crc) {
                 Ok(()) => Ok(true),
-                Err(HashError::Mismatch { .. }) => Ok(false),
-                Err(HashError::InvalidPath) => Ok(false),
-                Err(e) => Err(e)
+                Err(HashError::Mismatch { .. }) | Err(HashError::InvalidPath) => Ok(false),
+                Err(e) => Err(e.into())
             }
         }
         None => Ok(false)
