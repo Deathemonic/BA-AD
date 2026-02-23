@@ -14,8 +14,8 @@ use baad_utils::file::get_data_path;
 use baad_utils::json::{load, update};
 use baad_utils::{info, warn};
 
-use crate::catalog::traits::Catalog;
 use crate::api::NexonClient;
+use crate::catalog::traits::Catalog;
 use crate::cdn::GlobalCdn;
 use crate::strategy::GlobalStrategy;
 

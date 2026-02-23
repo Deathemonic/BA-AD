@@ -60,7 +60,7 @@ impl CommandHandler {
 
         info!("Catalog fetched successfully");
 
-        let output_dir = file::get_output_dir(Some(args.base.output.clone())).await?;
+        let output_dir = file::get_output_dir(Some(&args.base.output)).await?;
         let downloader =
             ResourceDownloader::new(output_dir, args.base.limit as usize, args.base.retries)
                 .with_proxy(args.base.proxy.clone());
@@ -90,7 +90,7 @@ impl CommandHandler {
 
         info!("Catalog fetched successfully");
 
-        let output_dir = file::get_output_dir(Some(args.base.output.clone())).await?;
+        let output_dir = file::get_output_dir(Some(&args.base.output)).await?;
         let downloader =
             ResourceDownloader::new(output_dir, args.base.limit as usize, args.base.retries)
                 .with_proxy(args.base.proxy.clone());

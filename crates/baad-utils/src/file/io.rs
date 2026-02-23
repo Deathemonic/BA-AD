@@ -19,12 +19,9 @@ pub async fn create_parent_dir(path: &Path) -> Result<(), FileError> {
     Ok(())
 }
 
-pub async fn get_output_dir(path: Option<PathBuf>) -> Result<PathBuf, FileError> {
-    let output_dir = match path {
-        Some(path) => path,
-        None => env::current_dir()?.join("output")
-    };
-
+pub async fn get_output_dir(path: Option<&Path>) -> Result<PathBuf, FileError> {
+    let output_dir =
+        path.map_or_else(|| env::current_dir().map(|d| d.join("output")), |p| Ok(p.to_path_buf()))?;
     fs::create_dir_all(&output_dir).await?;
     Ok(output_dir)
 }

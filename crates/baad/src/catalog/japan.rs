@@ -19,8 +19,8 @@ use memchr::memmem::Finder;
 use serde_json::Value;
 use tokio::fs;
 
-use crate::catalog::traits::Catalog;
 use crate::api::YoStarClient;
+use crate::catalog::traits::Catalog;
 use crate::cdn::{JapanCdn, JapanResources};
 use crate::download::download_file;
 use crate::strategy::JapanStrategy;
