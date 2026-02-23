@@ -86,12 +86,12 @@ fn create_download(
     target: Option<&str>
 ) -> Option<Download> {
     let parsed_url = Url::parse(url).ok()?;
-
-    let mut download = Download::new(parsed_url, path).with_hash(hash.as_string());
-
-    if let Some(target_file) = target {
-        download = download.with_target_file(target_file);
-    }
-
-    Some(download)
+    Some(
+        Download::builder()
+            .url(parsed_url)
+            .filename(path.to_string())
+            .hash(hash.as_string())
+            .maybe_target_file(target.map(|s| s.to_string()))
+            .build()
+    )
 }

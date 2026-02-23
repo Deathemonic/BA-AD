@@ -49,6 +49,10 @@ pub const METADATA_PATTERN: &str = "global-metadata.dat";
 
 pub const EXECUTABLE_NAME: &str = "baad";
 
+pub const ASSET_BUNDLES: &str = "AssetBundles";
+pub const TABLE_BUNDLES: &str = "TableBundles";
+pub const MEDIA_RESOURCES: &str = "MediaResources";
+
 pub const PATCH_PACK_ANDROID: &str = "Android_PatchPack";
 pub const PATCH_PACK_IOS: &str = "iOS_PatchPack";
 pub const PATCH_PACK_WINDOWS: &str = "Windows_PatchPack";

@@ -1,5 +1,4 @@
-use std::env::current_dir;
-use std::path::PathBuf;
+use std::path::Path;
 use std::sync::Arc;
 
 use baad_core::DownloadObserver;
@@ -9,9 +8,8 @@ use reqwest_middleware::reqwest::Proxy;
 use reqwest_middleware::reqwest::header::HeaderMap;
 
 #[derive(Builder, Clone, Debug)]
-pub struct DownloaderConfig {
-    #[builder(default = current_dir().unwrap_or_default())]
-    pub directory: PathBuf,
+pub struct DownloaderConfig<'a> {
+    pub directory: &'a Path,
 
     #[builder(default = 32)]
     pub concurrent_downloads: usize,

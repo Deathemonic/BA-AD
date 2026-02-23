@@ -17,23 +17,21 @@ use crate::downloader::stream::download_stream;
 use crate::zip::ZipExtractor;
 
 #[derive(Clone, Debug)]
-pub struct Downloader {
-    config: DownloaderConfig
+pub struct Downloader<'a> {
+    config: DownloaderConfig<'a>,
 }
 
-impl Downloader {
-    pub fn new(config: DownloaderConfig) -> Self { Self { config } }
+impl<'a> Downloader<'a> {
+    pub fn new(config: DownloaderConfig<'a>) -> Self {
+        Self { config }
+    }
 
     pub async fn download(&self, downloads: &[Download]) -> Vec<Summary> {
-        let mut client_config = HttpClientConfig::new().with_retries(self.config.retries);
-
-        if let Some(ref proxy) = self.config.proxy {
-            client_config = client_config.with_proxy(proxy.clone());
-        }
-
-        if let Some(ref headers) = self.config.headers {
-            client_config = client_config.with_headers(headers.clone());
-        }
+        let client_config = HttpClientConfig::builder()
+            .retries(self.config.retries)
+            .maybe_proxy(self.config.proxy.clone())
+            .maybe_headers(self.config.headers.clone())
+            .build();
 
         let Ok(client) = create_http_client(client_config) else {
             return downloads
@@ -43,8 +41,8 @@ impl Downloader {
                         d.clone(),
                         FetchOutcome::failed(
                             "Failed to create HTTP client",
-                            StatusCode::INTERNAL_SERVER_ERROR
-                        )
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                        ),
                     )
                 })
                 .collect();
@@ -55,7 +53,7 @@ impl Downloader {
                 let ctx = FetchCtx {
                     client: &client,
                     download: d,
-                    file_path: self.config.directory.join(&d.filename)
+                    file_path: self.config.directory.join(&d.filename),
                 };
                 async move { self.fetch_with_progress(ctx).await }
             })
@@ -70,7 +68,7 @@ impl Downloader {
 
         self.config.observer.on_event(DownloadEvent::Started {
             filename: Arc::clone(&filename),
-            total_bytes: 0
+            total_bytes: 0,
         });
 
         let outcome = self.fetch_inner(&ctx, &filename).await.unwrap_or_else(|e| e);
@@ -81,7 +79,7 @@ impl Downloader {
     async fn fetch_inner(
         &self,
         ctx: &FetchCtx<'_>,
-        filename: &Arc<str>
+        filename: &Arc<str>,
     ) -> Result<FetchOutcome, FetchOutcome> {
         if !self.config.overwrite
             && ctx.file_path.exists()
@@ -108,7 +106,7 @@ impl Downloader {
 
         let size_on_disk = match resumable && ctx.file_path.exists() {
             true => fs::metadata(&ctx.file_path).await.map(|m| m.len()).unwrap_or(0),
-            false => 0
+            false => 0,
         };
 
         if let Some(len) = content_length
@@ -133,7 +131,7 @@ impl Downloader {
             Some(Arc::new(ProgressTracker::new(
                 Arc::clone(filename),
                 total_size,
-                Arc::clone(&self.config.observer)
+                Arc::clone(&self.config.observer),
             )))
         } else {
             None
@@ -146,7 +144,7 @@ impl Downloader {
                 chunk_count,
                 &resolved_url,
                 self.config.max_concurrent_chunks,
-                progress_tracker.clone()
+                progress_tracker.clone(),
             )
             .await
             .map(|()| total_size)
@@ -193,22 +191,22 @@ impl Downloader {
                 status_code: StatusCode::OK,
                 size,
                 status: DownloadStatus::Success,
-                resumable
+                resumable,
             },
             FetchOutcome::Skipped { reason, size } => Summary {
                 download,
                 status_code: StatusCode::OK,
                 size,
                 status: DownloadStatus::Skipped(reason.into()),
-                resumable: false
+                resumable: false,
             },
             FetchOutcome::Failed { error, status_code } => Summary {
                 download,
                 status_code,
                 size: 0,
                 status: DownloadStatus::Failed(error.into()),
-                resumable: false
-            }
+                resumable: false,
+            },
         }
     }
 
@@ -218,7 +216,7 @@ impl Downloader {
         self.config.observer.on_event(DownloadEvent::Completed {
             filename,
             size: summary.size,
-            status: summary.status.clone()
+            status: summary.status.clone(),
         });
 
         match &summary.status {

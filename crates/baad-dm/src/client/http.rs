@@ -27,13 +27,9 @@ pub fn create_http_client(config: HttpClientConfig) -> Result<ClientWithMiddlewa
         builder = builder.default_headers(headers);
     }
 
-    let inner_client = builder.build()?;
-
-    let client = ClientBuilder::new(inner_client)
+    Ok(ClientBuilder::new(builder.build()?)
         .with(RetryTransientMiddleware::new_with_policy(retry_policy))
-        .build();
-
-    Ok(client)
+        .build())
 }
 
 pub fn get_content_length(response: &Response) -> Option<u64> {

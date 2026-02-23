@@ -70,7 +70,7 @@ impl ResourceDownloader {
         info!(category = category, "Starting download");
 
         let mut config = DownloaderConfig::builder()
-            .directory(self.output_dir.clone())
+            .directory(self.output_dir.as_path())
             .concurrent_downloads(self.limit)
             .retries(self.retries)
             .build();
@@ -103,34 +103,27 @@ pub async fn download_file(
     retries: u32
 ) -> Result<(), CatalogError> {
     let parsed_url = Url::parse(url).map_err(|_| CatalogError::DeserializationFailed)?;
-
     let filename = output_path
         .file_name()
         .and_then(|n| n.to_str())
         .ok_or(CatalogError::DeserializationFailed)?;
-
     let output_dir = output_path.parent().ok_or(CatalogError::DeserializationFailed)?;
 
-    let mut download = Download::new(parsed_url, filename);
-
-    if let Some(h) = hash {
-        download = download.with_hash(h);
-    }
+    let download =
+        Download::builder().url(parsed_url).filename(filename.to_string()).maybe_hash(hash).build();
 
     let config = DownloaderConfig::builder()
-        .directory(output_dir.to_path_buf())
+        .directory(output_dir)
         .concurrent_downloads(1)
         .retries(retries)
         .build();
 
-    let downloader = Downloader::new(config);
-    let summaries = downloader.download(&[download]).await;
+    let summaries = Downloader::new(config).download(&[download]).await;
 
     if let Some(summary) = summaries.first()
         && matches!(summary.status, DownloadStatus::Failed(_))
     {
         return Err(CatalogError::DeserializationFailed);
     }
-
     Ok(())
 }

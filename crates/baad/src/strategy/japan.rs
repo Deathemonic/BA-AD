@@ -23,7 +23,7 @@ impl JapanStrategy {
             .chain(packing.update_packs.iter())
             .map(|pack| DownloadAsset {
                 url: format!("{}/{}/{}", catalog_url, platform.patch_pack(), pack.pack_name),
-                path: format!("AssetBundles/{}", pack.pack_name),
+                path: pack.pack_name.clone(),
                 hash: HashValue::Crc(pack.crc),
                 size: pack.pack_size,
                 bundle_files: pack.bundle_files.iter().map(|b| b.name.clone()).collect()
@@ -39,7 +39,7 @@ impl JapanStrategy {
                 let path = entry.path.replace('\\', "/");
                 DownloadMedia {
                     url: format!("{}/MediaResources/{}", catalog_url, path),
-                    path: format!("MediaResources/{}", path),
+                    path,
                     hash: HashValue::Crc(entry.crc),
                     size: entry.bytes
                 }
@@ -53,7 +53,7 @@ impl JapanStrategy {
             .values()
             .map(|entry| DownloadTable {
                 url: format!("{}/TableBundles/{}", catalog_url, entry.name),
-                path: format!("TableBundles/{}", entry.name),
+                path: entry.name.clone(),
                 hash: HashValue::Crc(entry.crc),
                 size: entry.size
             })

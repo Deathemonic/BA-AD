@@ -1,7 +1,16 @@
-use baad_core::{DownloadAsset, DownloadMedia, DownloadTable, Downloads, HashValue, Resource};
+use std::path::Path;
 
-const TABLE_BUNDLES_PREFIX: &str = "TableBundles/";
-const MEDIA_RESOURCES_PREFIX: &str = "MediaResources/";
+use baad_core::{
+    DownloadAsset,
+    DownloadMedia,
+    DownloadTable,
+    Downloads,
+    HashValue,
+    MEDIA_RESOURCES,
+    Resource,
+    TABLE_BUNDLES
+};
+
 const CATALOG_PREFIX: &str = "Catalog/";
 
 pub struct GlobalStrategy;
@@ -21,17 +30,29 @@ impl GlobalStrategy {
             let hash = HashValue::Md5(resource.resource_hash.clone());
             let size = resource.resource_size;
 
-            if resource.resource_path.contains(TABLE_BUNDLES_PREFIX) {
+            if resource.resource_path.contains(TABLE_BUNDLES) {
+                let filename = Path::new(&resource.resource_path)
+                    .file_name()
+                    .and_then(|f| f.to_str())
+                    .unwrap_or(&resource.resource_path)
+                    .to_string();
+
                 tables.push(DownloadTable {
                     url,
-                    path: resource.resource_path.clone(),
+                    path: filename,
                     hash,
                     size
                 });
-            } else if resource.resource_path.contains(MEDIA_RESOURCES_PREFIX) {
+            } else if resource.resource_path.contains(MEDIA_RESOURCES) {
+                let filename = Path::new(&resource.resource_path)
+                    .file_name()
+                    .and_then(|f| f.to_str())
+                    .unwrap_or(&resource.resource_path)
+                    .to_string();
+
                 media.push(DownloadMedia {
                     url,
-                    path: resource.resource_path.clone(),
+                    path: filename,
                     hash,
                     size
                 });
