@@ -18,7 +18,7 @@ impl Download {
     pub fn is_extraction(&self) -> bool { self.target_file.is_some() }
 
     pub fn verify_hash(&self, file_path: &Path) -> Result<bool, Error> {
-        Ok(verify_hash(file_path, self.hash.as_ref())?)
+        verify_hash(file_path, self.hash.as_ref())
     }
 }
 

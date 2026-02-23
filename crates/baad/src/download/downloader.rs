@@ -3,7 +3,8 @@ use std::path::{Path, PathBuf};
 use baad_core::{CatalogError, DownloadStatus, Downloads};
 use baad_dm::{Download, Downloader, DownloaderConfig};
 use baad_utils::{error, info, warn};
-use reqwest::Url;
+use bon::Builder;
+use reqwest::{Proxy, Url};
 
 use crate::download::{ResourceFilter, converter};
 
@@ -14,6 +15,7 @@ pub enum ResourceCategory {
     Media
 }
 
+#[derive(Builder)]
 pub struct ResourceDownloader {
     output_dir: PathBuf,
     limit: usize,
@@ -22,20 +24,6 @@ pub struct ResourceDownloader {
 }
 
 impl ResourceDownloader {
-    pub fn new(output_dir: PathBuf, limit: usize, retries: u32) -> Self {
-        Self {
-            output_dir,
-            limit,
-            retries,
-            proxy: None
-        }
-    }
-
-    pub fn with_proxy(mut self, proxy: Option<String>) -> Self {
-        self.proxy = proxy;
-        self
-    }
-
     pub async fn download(
         &self,
         downloads: Downloads,
@@ -69,17 +57,14 @@ impl ResourceDownloader {
 
         info!(category = category, "Starting download");
 
-        let mut config = DownloaderConfig::builder()
+        let proxy = self.proxy.as_deref().and_then(|url| Proxy::all(url).ok());
+
+        let config = DownloaderConfig::builder()
             .directory(self.output_dir.as_path())
             .concurrent_downloads(self.limit)
             .retries(self.retries)
+            .maybe_proxy(proxy)
             .build();
-
-        if let Some(ref proxy_url) = self.proxy
-            && let Ok(proxy) = reqwest::Proxy::all(proxy_url)
-        {
-            config.proxy = Some(proxy);
-        }
 
         let downloader = Downloader::new(config);
         let summaries = downloader.download(&downloads).await;
@@ -125,5 +110,6 @@ pub async fn download_file(
     {
         return Err(CatalogError::DeserializationFailed);
     }
+
     Ok(())
 }

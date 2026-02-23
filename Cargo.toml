@@ -23,6 +23,7 @@ reqwest = "0.13"
 lazy-regex = "3.5"
 derive_more = { version = "2", default-features = false, features = ["debug"] }
 strum = { version = "0.27", features = ["derive"] }
+bon = "3"
 bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "3.1.0" }
 
 baad = { path = "crates/baad" }

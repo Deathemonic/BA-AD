@@ -7,16 +7,16 @@ edition.workspace = true
 [dependencies]
 bacy = { workspace = true }
 baad-core = { workspace = true }
-derive_more = { workspace = true }
 
+derive_more = { workspace = true }
 tokio = { workspace = true }
 thiserror = { workspace = true }
 reqwest = { workspace = true, features = [ "http2", "stream", "socks", "gzip", "deflate", "brotli","zstd", "rustls" ]}
+bon = { workspace = true }
 
 futures = "0.3"
 reqwest-middleware = "0.5"
 reqwest-retry = "0.9"
-bon = "3"
 flate2 = "1.1"
 form_urlencoded = "1.2"
 tracing = "0.1"

@@ -175,6 +175,7 @@ dependencies = [
  "baad-utils",
  "bacy",
  "base64",
+ "bon",
  "glob",
  "lazy-regex",
  "memchr",

@@ -61,9 +61,12 @@ impl CommandHandler {
         info!("Catalog fetched successfully");
 
         let output_dir = file::get_output_dir(Some(&args.base.output)).await?;
-        let downloader =
-            ResourceDownloader::new(output_dir, args.base.limit as usize, args.base.retries)
-                .with_proxy(args.base.proxy.clone());
+        let downloader = ResourceDownloader::builder()
+            .output_dir(output_dir)
+            .limit(args.base.limit as usize)
+            .retries(args.base.retries)
+            .maybe_proxy(args.base.proxy.clone())
+            .build();
 
         let categories = self.resource_categories(&args.base);
         let filter = self.resource_filter(&args.base)?;
@@ -91,9 +94,12 @@ impl CommandHandler {
         info!("Catalog fetched successfully");
 
         let output_dir = file::get_output_dir(Some(&args.base.output)).await?;
-        let downloader =
-            ResourceDownloader::new(output_dir, args.base.limit as usize, args.base.retries)
-                .with_proxy(args.base.proxy.clone());
+        let downloader = ResourceDownloader::builder()
+            .output_dir(output_dir)
+            .limit(args.base.limit as usize)
+            .retries(args.base.retries)
+            .maybe_proxy(args.base.proxy.clone())
+            .build();
 
         let categories = self.resource_categories(&args.base);
         let filter = self.resource_filter(&args.base)?;
