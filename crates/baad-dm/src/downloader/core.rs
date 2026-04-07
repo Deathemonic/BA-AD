@@ -4,7 +4,7 @@ use baad_core::{DownloadEvent, DownloadStatus};
 use futures::stream::{self, StreamExt};
 use reqwest_middleware::reqwest::StatusCode;
 use tokio::fs;
-use tracing::{debug, info};
+use tracing::{error, info, warn};
 
 use crate::client::{HttpClientConfig, create_http_client};
 use crate::download::summary::FetchOutcome;
@@ -222,13 +222,13 @@ impl<'a> Downloader<'a> {
                 info!(file = %summary.download.filename, success = true, "Downloaded");
             }
             DownloadStatus::Failed(error) => {
-                info!(file = %summary.download.filename, error = %error, "Failed");
+                error!(file = %summary.download.filename, cause = %error, "Failed");
             }
             DownloadStatus::Skipped(reason) => {
-                debug!(file = %summary.download.filename, reason = %reason, "Skipped");
+                warn!(file = %summary.download.filename, cause = %reason, "Skipped");
             }
             DownloadStatus::HashMismatch(reason) => {
-                info!(file = %summary.download.filename, reason = %reason, "Hash mismatch");
+                error!(file = %summary.download.filename, cause = %reason, "Hash mismatch");
             }
             DownloadStatus::NotStarted => {}
         }
