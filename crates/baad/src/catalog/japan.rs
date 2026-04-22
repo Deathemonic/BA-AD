@@ -1,20 +1,15 @@
 use std::path::PathBuf;
 
 use baad_core::{
-    API_FILENAME,
-    ApiData,
-    CatalogError,
-    Downloads,
-    GAME_CONFIG_PATTERN,
-    JapanAddressable,
-    Platform
+    ApiData, CatalogError, Downloads, JapanAddressable, Platform,
+    API_FILENAME, GAME_CONFIG_PATTERN,
 };
 use baad_utils::file::get_data_path;
 use baad_utils::json::{load, update};
 use baad_utils::{debug, info};
 use bacy::crypto::table::{create_key, decrypt_string, encrypt_string};
-use base64::Engine;
 use base64::engine::general_purpose;
+use base64::Engine;
 use memchr::memmem::Finder;
 use serde_json::Value;
 use tokio::fs;
@@ -22,29 +17,31 @@ use tokio::fs;
 use crate::api::YoStarClient;
 use crate::catalog::traits::Catalog;
 use crate::cdn::{JapanCdn, JapanResources};
-use crate::download::download_file;
+use crate::download::{download_file, ResourceCategory};
 use crate::strategy::JapanStrategy;
 
 struct JapanPaths {
     api: PathBuf,
-    resources: PathBuf
+    resources: PathBuf,
 }
 
 pub struct JapanCatalog {
     yostar_client: YoStarClient,
     platform: Platform,
-    paths: JapanPaths
+    category: Vec<ResourceCategory>,
+    paths: JapanPaths,
 }
 
 impl JapanCatalog {
-    pub fn new(platform: Platform) -> Result<Self, CatalogError> {
+    pub fn new(platform: Platform, category: Vec<ResourceCategory>) -> Result<Self, CatalogError> {
         Ok(Self {
             yostar_client: YoStarClient::new(),
             platform,
+            category,
             paths: JapanPaths {
                 api: get_data_path(API_FILENAME)?,
-                resources: get_data_path("data/resources.assets")?
-            }
+                resources: get_data_path("data/resources.assets")?,
+            },
         })
     }
 
@@ -57,12 +54,11 @@ impl JapanCatalog {
         let addressable = self.fetch_addressable(&server_info_url).await?;
         let catalog_url = JapanCdn::extract_catalog_url(&addressable)?;
 
-        let platform = self.platform;
         update(&self.paths.api, |data: &mut ApiData| {
             data.japan.version = version;
             data.japan.server_info_url = server_info_url.clone();
             data.japan.catalog_url = catalog_url.to_string();
-            data.japan.platform = <&str>::from(platform).into();
+            data.japan.platform = self.platform.as_ref().into();
         })
         .await?;
 
@@ -74,8 +70,10 @@ impl JapanCatalog {
 
         let base_config = self.yostar_client.get_base_config().await?;
         let latest_version = base_config.game_latest_version;
+        let platform =
+            api_data.as_ref().map(|d| d.japan.platform.as_ref()) != Some(self.platform.as_ref());
 
-        if api_data.as_ref().map(|d| &d.japan.version) != Some(&latest_version) {
+        if api_data.as_ref().map(|d| &d.japan.version) != Some(&latest_version) || platform {
             info!("Version changed, performing full update");
             return self.full_update(latest_version).await;
         }
@@ -171,19 +169,27 @@ impl Catalog for JapanCatalog {
     async fn fetch_resources(&self) -> Result<(String, Self::Resources), CatalogError> {
         let url = self.get_catalog_url().await?;
         let cdn = JapanCdn::new(url.clone(), self.platform);
-        let resources = cdn.fetch().await?;
+        let resources = cdn.fetch(&self.category).await?;
         Ok((url, resources))
     }
 
     fn build_downloads(&self, resources: &Self::Resources, base_or_url: &str) -> Downloads {
         Downloads {
-            assets: JapanStrategy::build_asset_downloads(
-                &resources.packing,
-                base_or_url,
-                self.platform
-            ),
-            tables: JapanStrategy::build_table_downloads(&resources.table, base_or_url),
-            media: JapanStrategy::build_media_downloads(&resources.media, base_or_url)
+            assets: resources
+                .assets
+                .as_ref()
+                .map(|p| JapanStrategy::build_asset_downloads(p, base_or_url, self.platform))
+                .unwrap_or_default(),
+            tables: resources
+                .table
+                .as_ref()
+                .map(|t| JapanStrategy::build_table_downloads(t, base_or_url))
+                .unwrap_or_default(),
+            media: resources
+                .media
+                .as_ref()
+                .map(|m| JapanStrategy::build_media_downloads(m, base_or_url))
+                .unwrap_or_default(),
         }
     }
 }

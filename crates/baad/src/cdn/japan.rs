@@ -1,31 +1,28 @@
 use baad_core::{
-    BundlePatchPackInfo,
-    CatalogError,
-    JapanAddressable,
-    MediaCatalog,
-    Platform,
+    client, BundlePatchPackInfo, CatalogError, JapanAddressable, MediaCatalog, Platform,
     TableCatalog,
-    client
 };
 use baad_utils::file::get_data_path;
 use memorypack::MemoryPackSerializer;
 use tokio::fs;
 
-use crate::download::download_file;
+use crate::download::{download_file, ResourceCategory};
 
 pub struct JapanCdn {
     catalog_url: String,
-    platform: Platform
+    platform: Platform,
 }
 
 pub struct JapanResources {
-    pub packing: BundlePatchPackInfo,
-    pub table: TableCatalog,
-    pub media: MediaCatalog
+    pub assets: Option<BundlePatchPackInfo>,
+    pub table: Option<TableCatalog>,
+    pub media: Option<MediaCatalog>,
 }
 
 impl JapanCdn {
-    pub fn new(catalog_url: String, platform: Platform) -> Self { Self { catalog_url, platform } }
+    pub fn new(catalog_url: String, platform: Platform) -> Self {
+        Self { catalog_url, platform }
+    }
 
     pub async fn fetch_addressable(url: &str) -> Result<JapanAddressable, CatalogError> {
         let response = client().get(url).send().await?.json::<JapanAddressable>().await?;
@@ -41,18 +38,18 @@ impl JapanCdn {
             .ok_or(CatalogError::DeserializationFailed)
     }
 
-    pub async fn fetch(&self) -> Result<JapanResources, CatalogError> {
-        let packing = self.fetch_assets().await?;
-        let table = self.fetch_table().await?;
-        let media = self.fetch_media().await?;
-
-        Ok(JapanResources { packing, table, media })
+    pub async fn fetch(&self, category: &[ResourceCategory]) -> Result<JapanResources, CatalogError> {
+        Ok(JapanResources {
+            assets: if category.contains(&ResourceCategory::Assets) { Some(self.fetch_assets().await?) } else { None },
+            table: if category.contains(&ResourceCategory::Tables) { Some(self.fetch_table().await?) } else { None },
+            media: if category.contains(&ResourceCategory::Media) { Some(self.fetch_media().await?) } else { None },
+        })
     }
 
     pub async fn fetch_assets(&self) -> Result<BundlePatchPackInfo, CatalogError> {
-        let url =
-            format!("{}/{}/BundlePackingInfo.bytes", self.catalog_url, self.platform.patch_pack());
-        let bytes = self.fetch_bytes(&url, "BundlePackingInfo.bytes").await?;
+        let platform = self.platform.as_ref().to_lowercase();
+        let url = format!("{}/{}/BundlePackingInfo.bytes", self.catalog_url, self.platform.patch_pack());
+        let bytes = self.fetch_bytes(&url, &format!("{}/BundlePackingInfo.bytes", platform)).await?;
         let packing = MemoryPackSerializer::deserialize::<BundlePatchPackInfo>(&bytes)?;
         Ok(packing)
     }

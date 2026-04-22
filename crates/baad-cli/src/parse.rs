@@ -52,10 +52,11 @@ impl CommandHandler {
 
     async fn japan_download(&self, args: &JapanDownloadArgs) -> Result<()> {
         let platform = args.base.platform;
+        let categories = self.resource_categories(&args.base);
 
         info!(platform = %platform.as_ref(), "Starting Japan download");
 
-        let catalog = JapanCatalog::new(platform)?;
+        let catalog = JapanCatalog::new(platform, categories)?;
         let downloads = catalog.prepare_downloads().await?;
 
         info!("Catalog fetched successfully");
