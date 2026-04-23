@@ -39,7 +39,7 @@ impl GlobalStrategy {
                         .unwrap_or(&resource.resource_path)
                         .to_string();
 
-                    tables.push(DownloadTable { url, path: filename, hash, size });
+                    tables.push(DownloadTable { url, path: filename, hash, size, bundle_files: Vec::new() });
                 }
             } else if resource.resource_path.contains(MEDIA_RESOURCES) {
                 if category.contains(&ResourceCategory::Media) {

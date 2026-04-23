@@ -48,15 +48,22 @@ impl JapanStrategy {
     }
 
     pub fn build_table_downloads(catalog: &TableCatalog, catalog_url: &str) -> Vec<DownloadTable> {
-        catalog
-            .table
-            .values()
-            .map(|entry| DownloadTable {
-                url: format!("{}/TableBundles/{}", catalog_url, entry.name),
-                path: entry.name.clone(),
-                hash: HashValue::Crc(entry.crc),
-                size: entry.size
-            })
-            .collect()
+        let base = catalog.table.values().map(|entry| DownloadTable {
+            url: format!("{}/TableBundles/{}", catalog_url, entry.name),
+            path: entry.name.clone(),
+            hash: HashValue::Crc(entry.crc),
+            size: entry.size,
+            bundle_files: Vec::new(),
+        });
+
+        let packs = catalog.table_pack.values().map(|pack| DownloadTable {
+            url: format!("{}/TableBundles/{}", catalog_url, pack.name),
+            path: pack.name.clone(),
+            hash: HashValue::Crc(pack.crc),
+            size: pack.size,
+            bundle_files: pack.bundle_files.iter().map(|b| b.name.clone()).collect(),
+        });
+
+        base.chain(packs).collect()
     }
 }

@@ -295,7 +295,8 @@ pub struct DownloadTable {
     pub url: String,
     pub path: String,
     pub hash: HashValue,
-    pub size: i64
+    pub size: i64,
+    pub bundle_files: Vec<String>
 }
 
 #[derive(Debug, Clone)]
