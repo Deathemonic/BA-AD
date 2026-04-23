@@ -24,27 +24,18 @@ pub struct ResourceDownloader {
 }
 
 impl ResourceDownloader {
-    pub async fn download(
-        &self,
-        downloads: Downloads,
-        categories: &[ResourceCategory],
-        filter: Option<&ResourceFilter>
-    ) -> Result<(), CatalogError> {
-        for category in categories {
-            match category {
-                ResourceCategory::Assets => {
-                    let dm_downloads = converter::convert_assets(&downloads.assets, filter);
-                    self.execute(dm_downloads, "Assets").await?;
-                }
-                ResourceCategory::Tables => {
-                    let dm_downloads = converter::convert_tables(&downloads.tables, filter);
-                    self.execute(dm_downloads, "Tables").await?;
-                }
-                ResourceCategory::Media => {
-                    let dm_downloads = converter::convert_media(&downloads.media, filter);
-                    self.execute(dm_downloads, "Media").await?;
-                }
-            }
+    pub async fn download(&self, downloads: Downloads, filter: Option<&ResourceFilter>) -> Result<(), CatalogError> {
+        if !downloads.assets.is_empty() {
+            let convert = converter::convert_assets(&downloads.assets, filter);
+            self.execute(convert, "Assets").await?;
+        }
+        if !downloads.tables.is_empty() {
+            let convert = converter::convert_tables(&downloads.tables, filter);
+            self.execute(convert, "Tables").await?;
+        }
+        if !downloads.media.is_empty() {
+            let convert = converter::convert_media(&downloads.media, filter);
+            self.execute(convert, "Media").await?;
         }
         Ok(())
     }

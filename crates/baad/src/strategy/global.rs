@@ -10,13 +10,14 @@ use baad_core::{
     Resource,
     TABLE_BUNDLES
 };
+use crate::download::ResourceCategory;
 
 const CATALOG_PREFIX: &str = "Catalog/";
 
 pub struct GlobalStrategy;
 
 impl GlobalStrategy {
-    pub fn build_downloads(resources: &[Resource], base_url: &str) -> Downloads {
+    pub fn build_downloads(resources: &[Resource], base_url: &str, category: &[ResourceCategory]) -> Downloads {
         let mut assets = Vec::new();
         let mut tables = Vec::new();
         let mut media = Vec::new();
@@ -31,32 +32,26 @@ impl GlobalStrategy {
             let size = resource.resource_size;
 
             if resource.resource_path.contains(TABLE_BUNDLES) {
-                let filename = Path::new(&resource.resource_path)
-                    .file_name()
-                    .and_then(|f| f.to_str())
-                    .unwrap_or(&resource.resource_path)
-                    .to_string();
+                if category.contains(&ResourceCategory::Tables) {
+                    let filename = Path::new(&resource.resource_path)
+                        .file_name()
+                        .and_then(|f| f.to_str())
+                        .unwrap_or(&resource.resource_path)
+                        .to_string();
 
-                tables.push(DownloadTable {
-                    url,
-                    path: filename,
-                    hash,
-                    size
-                });
+                    tables.push(DownloadTable { url, path: filename, hash, size });
+                }
             } else if resource.resource_path.contains(MEDIA_RESOURCES) {
-                let filename = Path::new(&resource.resource_path)
-                    .file_name()
-                    .and_then(|f| f.to_str())
-                    .unwrap_or(&resource.resource_path)
-                    .to_string();
+                if category.contains(&ResourceCategory::Media) {
+                    let filename = Path::new(&resource.resource_path)
+                        .file_name()
+                        .and_then(|f| f.to_str())
+                        .unwrap_or(&resource.resource_path)
+                        .to_string();
 
-                media.push(DownloadMedia {
-                    url,
-                    path: filename,
-                    hash,
-                    size
-                });
-            } else {
+                    media.push(DownloadMedia { url, path: filename, hash, size });
+                }
+            } else if category.contains(&ResourceCategory::Assets) {
                 assets.push(DownloadAsset {
                     url,
                     path: resource.resource_path.clone(),

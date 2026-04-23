@@ -17,6 +17,7 @@ use baad_utils::{info, warn};
 use crate::api::NexonClient;
 use crate::catalog::traits::Catalog;
 use crate::cdn::GlobalCdn;
+use crate::download::ResourceCategory;
 use crate::strategy::GlobalStrategy;
 
 struct GlobalPaths {
@@ -25,17 +26,19 @@ struct GlobalPaths {
 
 pub struct GlobalCatalog {
     nexon_client: NexonClient,
+    category: Vec<ResourceCategory>,
     platform: Platform,
     build_type: BuildType,
     paths: GlobalPaths
 }
 
 impl GlobalCatalog {
-    pub fn new(platform: Platform, build_type: BuildType) -> Result<Self, CatalogError> {
+    pub fn new(category: Vec<ResourceCategory>, platform: Platform, build_type: BuildType) -> Result<Self, CatalogError> {
         MarketConfig::for_global(platform, build_type)?;
 
         Ok(Self {
             nexon_client: NexonClient::new(),
+            category,
             platform,
             build_type,
             paths: GlobalPaths {
@@ -56,14 +59,14 @@ impl GlobalCatalog {
             self.nexon_client.get_addressable(&market_config, &version, build_number).await?;
 
         let catalog_url = addressable.patch.resource_path.clone();
-        let platform = self.platform;
-        let build_type = self.build_type;
+        let platform: &'static str = self.platform.into();
+        let build_type: &'static str = self.build_type.into();
 
         update(&self.paths.api, |data: &mut ApiData| {
             data.global.version = version;
             data.global.catalog_url = catalog_url.clone();
-            data.global.platform = <&str>::from(platform).into();
-            data.global.build_type = <&str>::from(build_type).into();
+            data.global.platform = platform.into();
+            data.global.build_type = build_type.into();
         })
         .await?;
 
@@ -114,6 +117,6 @@ impl Catalog for GlobalCatalog {
     }
 
     fn build_downloads(&self, resources: &Self::Resources, base_or_url: &str) -> Downloads {
-        GlobalStrategy::build_downloads(&resources.resources, base_or_url)
+        GlobalStrategy::build_downloads(&resources.resources, base_or_url, &self.category)
     }
 }

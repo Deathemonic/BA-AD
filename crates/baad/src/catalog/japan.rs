@@ -27,17 +27,17 @@ struct JapanPaths {
 
 pub struct JapanCatalog {
     yostar_client: YoStarClient,
-    platform: Platform,
     category: Vec<ResourceCategory>,
+    platform: Platform,
     paths: JapanPaths,
 }
 
 impl JapanCatalog {
-    pub fn new(platform: Platform, category: Vec<ResourceCategory>) -> Result<Self, CatalogError> {
+    pub fn new(category: Vec<ResourceCategory>, platform: Platform) -> Result<Self, CatalogError> {
         Ok(Self {
             yostar_client: YoStarClient::new(),
-            platform,
             category,
+            platform,
             paths: JapanPaths {
                 api: get_data_path(API_FILENAME)?,
                 resources: get_data_path("data/resources.assets")?,
@@ -53,12 +53,13 @@ impl JapanCatalog {
         let server_info_url = self.decrypt_game_main(&game_main_data)?;
         let addressable = self.fetch_addressable(&server_info_url).await?;
         let catalog_url = JapanCdn::extract_catalog_url(&addressable)?;
+        let platform: &'static str = self.platform.into();
 
         update(&self.paths.api, |data: &mut ApiData| {
             data.japan.version = version;
             data.japan.server_info_url = server_info_url.clone();
             data.japan.catalog_url = catalog_url.to_string();
-            data.japan.platform = self.platform.as_ref().into();
+            data.japan.platform = platform.into();
         })
         .await?;
 

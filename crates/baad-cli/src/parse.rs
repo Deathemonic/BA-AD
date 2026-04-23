@@ -53,15 +53,16 @@ impl CommandHandler {
     async fn japan_download(&self, args: &JapanDownloadArgs) -> Result<()> {
         let platform = args.base.platform;
         let categories = self.resource_categories(&args.base);
+        let filter = self.resource_filter(&args.base)?;
+        let output_dir = file::get_output_dir(Some(&args.base.output)).await?;
 
         info!(platform = %platform.as_ref(), "Starting Japan download");
 
-        let catalog = JapanCatalog::new(platform, categories)?;
+        let catalog = JapanCatalog::new(categories, platform)?;
         let downloads = catalog.prepare_downloads().await?;
 
         info!("Catalog fetched successfully");
 
-        let output_dir = file::get_output_dir(Some(&args.base.output)).await?;
         let downloader = ResourceDownloader::builder()
             .output_dir(output_dir)
             .limit(args.base.limit as usize)
@@ -69,15 +70,15 @@ impl CommandHandler {
             .maybe_proxy(args.base.proxy.clone())
             .build();
 
-        let categories = self.resource_categories(&args.base);
-        let filter = self.resource_filter(&args.base)?;
-
-        downloader.download(downloads, &categories, filter.as_ref()).await?;
+        downloader.download(downloads, filter.as_ref()).await?;
         Ok(())
     }
 
     async fn global_download(&self, args: &GlobalDownloadArgs) -> Result<()> {
         let platform = args.base.platform;
+        let categories = self.resource_categories(&args.base);
+        let filter = self.resource_filter(&args.base)?;
+        let output_dir = file::get_output_dir(Some(&args.base.output)).await?;
 
         if matches!(platform, Platform::Windows) {
             return Err(eyre!(
@@ -89,12 +90,11 @@ impl CommandHandler {
 
         info!(platform = %platform.as_ref(), "Starting Global download");
 
-        let catalog = GlobalCatalog::new(platform, build_type)?;
+        let catalog = GlobalCatalog::new(categories, platform, build_type)?;
         let downloads = catalog.prepare_downloads().await?;
 
         info!("Catalog fetched successfully");
 
-        let output_dir = file::get_output_dir(Some(&args.base.output)).await?;
         let downloader = ResourceDownloader::builder()
             .output_dir(output_dir)
             .limit(args.base.limit as usize)
@@ -102,10 +102,7 @@ impl CommandHandler {
             .maybe_proxy(args.base.proxy.clone())
             .build();
 
-        let categories = self.resource_categories(&args.base);
-        let filter = self.resource_filter(&args.base)?;
-
-        downloader.download(downloads, &categories, filter.as_ref()).await?;
+        downloader.download(downloads, filter.as_ref()).await?;
         Ok(())
     }
 
