@@ -33,7 +33,11 @@ pub struct GlobalCatalog {
 }
 
 impl GlobalCatalog {
-    pub fn new(category: Vec<ResourceCategory>, platform: Platform, build_type: BuildType) -> Result<Self, CatalogError> {
+    pub fn new(
+        category: Vec<ResourceCategory>,
+        platform: Platform,
+        build_type: BuildType
+    ) -> Result<Self, CatalogError> {
         MarketConfig::for_global(platform, build_type)?;
 
         Ok(Self {

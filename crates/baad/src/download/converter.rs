@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::path::Path;
 
 use baad_core::{DownloadAsset, DownloadMedia, DownloadTable, HashValue};
@@ -8,13 +9,16 @@ use crate::download::ResourceFilter;
 
 pub fn convert_assets(assets: &[DownloadAsset], filter: Option<&ResourceFilter>) -> Vec<Download> {
     let mut downloads = Vec::new();
+    let mut seen = HashSet::new();
 
     for asset in assets {
         if let Some(f) = filter
             && let Some(filename) = Path::new(&asset.path).file_name().and_then(|n| n.to_str())
             && f.matches(filename)
         {
-            if let Some(dl) = create_download(&asset.url, &asset.path, &asset.hash, None) {
+            if seen.insert(asset.path.clone())
+                && let Some(dl) = create_download(&asset.url, &asset.path, &asset.hash, None)
+            {
                 downloads.push(dl);
             }
             continue;
@@ -23,6 +27,7 @@ pub fn convert_assets(assets: &[DownloadAsset], filter: Option<&ResourceFilter>)
         if let Some(f) = filter {
             for bundle_name in &asset.bundle_files {
                 if f.matches(bundle_name)
+                    && seen.insert(bundle_name.clone())
                     && let Some(dl) = create_download(
                         &asset.url,
                         &convert_path_to_bundle(&asset.path, bundle_name),
@@ -33,7 +38,9 @@ pub fn convert_assets(assets: &[DownloadAsset], filter: Option<&ResourceFilter>)
                     downloads.push(dl);
                 }
             }
-        } else if let Some(dl) = create_download(&asset.url, &asset.path, &asset.hash, None) {
+        } else if seen.insert(asset.path.clone())
+            && let Some(dl) = create_download(&asset.url, &asset.path, &asset.hash, None)
+        {
             downloads.push(dl);
         }
     }

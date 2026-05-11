@@ -10,6 +10,7 @@ use baad_core::{
     Resource,
     TABLE_BUNDLES
 };
+
 use crate::download::ResourceCategory;
 
 const CATALOG_PREFIX: &str = "Catalog/";
@@ -17,7 +18,11 @@ const CATALOG_PREFIX: &str = "Catalog/";
 pub struct GlobalStrategy;
 
 impl GlobalStrategy {
-    pub fn build_downloads(resources: &[Resource], base_url: &str, category: &[ResourceCategory]) -> Downloads {
+    pub fn build_downloads(
+        resources: &[Resource],
+        base_url: &str,
+        category: &[ResourceCategory]
+    ) -> Downloads {
         let mut assets = Vec::new();
         let mut tables = Vec::new();
         let mut media = Vec::new();
@@ -39,7 +44,13 @@ impl GlobalStrategy {
                         .unwrap_or(&resource.resource_path)
                         .to_string();
 
-                    tables.push(DownloadTable { url, path: filename, hash, size, bundle_files: Vec::new() });
+                    tables.push(DownloadTable {
+                        url,
+                        path: filename,
+                        hash,
+                        size,
+                        bundle_files: Vec::new()
+                    });
                 }
             } else if resource.resource_path.contains(MEDIA_RESOURCES) {
                 if category.contains(&ResourceCategory::Media) {
@@ -49,7 +60,12 @@ impl GlobalStrategy {
                         .unwrap_or(&resource.resource_path)
                         .to_string();
 
-                    media.push(DownloadMedia { url, path: filename, hash, size });
+                    media.push(DownloadMedia {
+                        url,
+                        path: filename,
+                        hash,
+                        size
+                    });
                 }
             } else if category.contains(&ResourceCategory::Assets) {
                 assets.push(DownloadAsset {

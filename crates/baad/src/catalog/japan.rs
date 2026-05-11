@@ -1,15 +1,20 @@
 use std::path::PathBuf;
 
 use baad_core::{
-    ApiData, CatalogError, Downloads, JapanAddressable, Platform,
-    API_FILENAME, GAME_CONFIG_PATTERN,
+    API_FILENAME,
+    ApiData,
+    CatalogError,
+    Downloads,
+    GAME_CONFIG_PATTERN,
+    JapanAddressable,
+    Platform
 };
 use baad_utils::file::get_data_path;
 use baad_utils::json::{load, update};
 use baad_utils::{debug, info};
 use bacy::crypto::table::{create_key, decrypt_string, encrypt_string};
-use base64::engine::general_purpose;
 use base64::Engine;
+use base64::engine::general_purpose;
 use memchr::memmem::Finder;
 use serde_json::Value;
 use tokio::fs;
@@ -17,19 +22,19 @@ use tokio::fs;
 use crate::api::YoStarClient;
 use crate::catalog::traits::Catalog;
 use crate::cdn::{JapanCdn, JapanResources};
-use crate::download::{download_file, ResourceCategory};
+use crate::download::{ResourceCategory, download_file};
 use crate::strategy::JapanStrategy;
 
 struct JapanPaths {
     api: PathBuf,
-    resources: PathBuf,
+    resources: PathBuf
 }
 
 pub struct JapanCatalog {
     yostar_client: YoStarClient,
     category: Vec<ResourceCategory>,
     platform: Platform,
-    paths: JapanPaths,
+    paths: JapanPaths
 }
 
 impl JapanCatalog {
@@ -40,8 +45,8 @@ impl JapanCatalog {
             platform,
             paths: JapanPaths {
                 api: get_data_path(API_FILENAME)?,
-                resources: get_data_path("data/resources.assets")?,
-            },
+                resources: get_data_path("data/resources.assets")?
+            }
         })
     }
 
@@ -189,8 +194,8 @@ impl Catalog for JapanCatalog {
             media: resources
                 .media
                 .as_ref()
-                .map(|m| JapanStrategy::build_media_downloads(m, base_or_url))
-                .unwrap_or_default(),
+                .map(|m| JapanStrategy::build_media_downloads(m, base_or_url, self.platform))
+                .unwrap_or_default()
         }
     }
 }

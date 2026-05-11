@@ -24,7 +24,11 @@ pub struct ResourceDownloader {
 }
 
 impl ResourceDownloader {
-    pub async fn download(&self, downloads: Downloads, filter: Option<&ResourceFilter>) -> Result<(), CatalogError> {
+    pub async fn download(
+        &self,
+        downloads: Downloads,
+        filter: Option<&ResourceFilter>
+    ) -> Result<(), CatalogError> {
         if !downloads.assets.is_empty() {
             let convert = converter::convert_assets(&downloads.assets, filter);
             self.execute(convert, "Assets").await?;
