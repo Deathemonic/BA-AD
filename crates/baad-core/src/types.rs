@@ -8,6 +8,8 @@ fn default_platform() -> Cow<'static, str> { Cow::Borrowed("Android") }
 
 fn default_build_type() -> Cow<'static, str> { Cow::Borrowed("Standard") }
 
+fn default_group() -> Cow<'static, str> { Cow::Borrowed("GameData") }
+
 #[derive(Serialize, Deserialize, Clone, Default)]
 pub struct JapanData {
     #[serde(default)]
@@ -129,7 +131,8 @@ pub struct CategoryMapping {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Resource {
-    pub group: String,
+    #[serde(default = "default_group")]
+    pub group: Cow<'static, str>,
     pub resource_path: String,
     pub resource_size: i64,
     pub resource_hash: String
