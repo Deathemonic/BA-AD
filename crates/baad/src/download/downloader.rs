@@ -71,7 +71,7 @@ impl ResourceDownloader {
             error!(category = category, failed = failed_count, "Some downloads failed");
         }
 
-        info!(category = category, "Download complete");
+        info!(category = category, success = true, "Download complete");
         Ok(())
     }
 }
