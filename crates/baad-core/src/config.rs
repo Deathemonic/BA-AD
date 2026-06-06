@@ -3,13 +3,13 @@ use strum::{AsRefStr, EnumString, IntoStaticStr};
 
 use crate::error::ServerConfigError;
 
-pub static REGEX_VERSION: Lazy<Regex> = lazy_regex!(r"\d\.\d{2}\.\d{6}");
+pub static REGEX_VERSION: Lazy<Regex> = lazy_regex!(r"\d+\.\d+\.\d+");
 
 pub const GLOBAL_API_URL: &str = "https://api-pub.nexon.com/patch/v1.1/version-check";
 
-pub const GLOBAL_PLAYSTORE_URL: &str =
-    "https://play.google.com/store/apps/details?id=com.nexon.bluearchive";
-pub const GLOBAL_APPSTORE_URL: &str = "https://apps.apple.com/us/app/blue-archive/id1571873795e";
+// pub const GLOBAL_PLAYSTORE_URL: &str = "https://play.google.com/store/apps/details?id=com.nexon.bluearchive";
+pub const GLOBAL_PLAYSTORE_URL: &str = "https://apptopia.com/google-play/app/com.nexon.bluearchive/about";
+pub const GLOBAL_APPSTORE_URL: &str = "https://apps.apple.com/us/app/blue-archive/id1571873795";
 
 pub const GLOBAL_ANDROID_STANDARD_ID: &str = "com.nexon.bluearchive";
 pub const GLOBAL_ANDROID_TEEN_ID: &str = "com.nexon.bluearchiveteen";
