@@ -78,10 +78,17 @@ impl GlobalCatalog {
     }
 
     pub async fn get_catalog_url(&self, version: &str) -> Result<String, CatalogError> {
+        let platform: &'static str = self.platform.into();
+        let build_type: &'static str = self.build_type.into();
+
         let api_data = load::<ApiData>(&self.paths.api)
             .await
             .ok()
-            .filter(|d| d.global.version == version)
+            .filter(|d| {
+                d.global.version == version
+                    && d.global.platform == platform
+                    && d.global.build_type == build_type
+            })
             .map(|d| d.global.catalog_url)
             .filter(|url| !url.is_empty());
 
