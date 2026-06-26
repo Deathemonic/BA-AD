@@ -9,8 +9,8 @@ use baad_core::{
     TableCatalog,
     client
 };
-use baad_utils::file::get_data_path;
 use baad_utils::debug;
+use baad_utils::file::get_data_path;
 use memorypack::MemoryPackSerializer;
 use tokio::fs;
 
@@ -28,9 +28,7 @@ pub struct JapanResources {
 }
 
 impl JapanCdn {
-    pub fn new(catalog_url: String, platform: Platform) -> Self {
-        Self { catalog_url, platform }
-    }
+    pub fn new(catalog_url: String, platform: Platform) -> Self { Self { catalog_url, platform } }
 
     pub async fn fetch_addressable(url: &str) -> Result<JapanAddressable, CatalogError> {
         let response = client().get(url).send().await?.json::<JapanAddressable>().await?;

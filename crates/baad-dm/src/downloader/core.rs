@@ -14,7 +14,7 @@ use crate::downloader::config::DownloaderConfig;
 use crate::downloader::helpers::{FetchCtx, StreamOpts, check_server, ensure_parent_dir};
 use crate::downloader::progress::ProgressTracker;
 use crate::downloader::stream::download_stream;
-use crate::zip::ZipExtractor;
+use crate::zip::{ZipCache, ZipExtractor};
 
 #[derive(Clone, Debug)]
 pub struct Downloader<'a> {
@@ -46,12 +46,15 @@ impl<'a> Downloader<'a> {
                 .collect();
         };
 
+        let zip_cache = ZipCache::new();
+
         stream::iter(downloads)
             .map(|d| {
                 let ctx = FetchCtx {
                     client: &client,
                     download: d,
-                    file_path: self.config.directory.join(&d.filename)
+                    file_path: self.config.directory.join(&d.filename),
+                    cache: &zip_cache
                 };
                 async move { self.fetch_with_progress(ctx).await }
             })
@@ -158,12 +161,20 @@ impl<'a> Downloader<'a> {
             FetchOutcome::failed("No target file for ZIP extraction", StatusCode::BAD_REQUEST)
         })?;
 
-        let extractor = ZipExtractor::new(ctx.client, &ctx.download.url)
+        let index = ctx
+            .cache
+            .get_index(ctx.client, &ctx.download.url)
             .await
             .map_err(|e| FetchOutcome::failed(e, StatusCode::BAD_REQUEST))?;
 
-        let data = extractor
-            .extract_file(target)
+        let info = index.get(target).ok_or_else(|| {
+            FetchOutcome::failed(
+                format!("File '{}' not found in ZIP", target),
+                StatusCode::NOT_FOUND
+            )
+        })?;
+
+        let data = ZipExtractor::extract_member(ctx.client, &ctx.download.url, info)
             .await
             .map_err(|e| FetchOutcome::failed(e, StatusCode::NOT_FOUND))?;
 

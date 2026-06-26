@@ -12,9 +12,7 @@ pub struct GlobalCdn {
 }
 
 impl GlobalCdn {
-    pub fn new(catalog_url: String, platform: Platform) -> Self {
-        Self { catalog_url, platform }
-    }
+    pub fn new(catalog_url: String, platform: Platform) -> Self { Self { catalog_url, platform } }
 
     pub async fn fetch(&self) -> Result<GlobalCatalogData, CatalogError> {
         let filename = Self::catalog_filename(&self.catalog_url)?;
@@ -44,7 +42,11 @@ impl GlobalCdn {
     }
 
     fn catalog_filename(catalog_url: &str) -> Result<&str, CatalogError> {
-        catalog_url.rsplit('/').next().filter(|f| !f.is_empty()).ok_or(CatalogError::DeserializationFailed)
+        catalog_url
+            .rsplit('/')
+            .next()
+            .filter(|f| !f.is_empty())
+            .ok_or(CatalogError::DeserializationFailed)
     }
 
     pub fn derive_base_url(resource_path: &str) -> Option<&str> {

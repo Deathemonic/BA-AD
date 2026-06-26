@@ -16,4 +16,4 @@ pub use client::{HttpClientConfig, create_http_client};
 pub use download::{Download, HashType, Summary, detect_hash_type, verify_hash};
 pub use downloader::{Downloader, DownloaderConfig};
 pub use error::Error;
-pub use zip::{ZipExtractor, ZipFileInfo};
+pub use zip::{ZipCache, ZipExtractor, ZipFileInfo, ZipIndex};

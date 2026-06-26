@@ -6,12 +6,14 @@ use tokio::fs;
 use crate::client::{parse_accept_ranges, parse_content_length};
 use crate::download::Download;
 use crate::error::Error;
+use crate::zip::ZipCache;
 
 #[derive(Debug)]
 pub struct FetchCtx<'a> {
     pub client: &'a ClientWithMiddleware,
     pub download: &'a Download,
-    pub file_path: PathBuf
+    pub file_path: PathBuf,
+    pub cache: &'a ZipCache
 }
 
 pub struct StreamOpts {

@@ -11,8 +11,8 @@ use baad_core::{
     Platform
 };
 use baad_utils::file::get_data_path;
-use baad_utils::json::{load, update};
 use baad_utils::info;
+use baad_utils::json::{load, update};
 
 use crate::api::NexonClient;
 use crate::catalog::traits::Catalog;
@@ -99,7 +99,10 @@ impl GlobalCatalog {
         self.full_update(version.to_string()).await
     }
 
-    pub async fn fetch_catalogs(&self, catalog_url: &str) -> Result<GlobalCatalogData, CatalogError> {
+    pub async fn fetch_catalogs(
+        &self,
+        catalog_url: &str
+    ) -> Result<GlobalCatalogData, CatalogError> {
         let cdn = GlobalCdn::new(catalog_url.to_string(), self.platform);
         let catalog = cdn.fetch().await?;
         Ok(catalog)

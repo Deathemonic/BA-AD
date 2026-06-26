@@ -1,5 +1,7 @@
+mod cache;
 mod extractor;
 mod types;
 
-pub use extractor::ZipExtractor;
+pub use cache::ZipCache;
+pub use extractor::{ZipExtractor, ZipIndex};
 pub use types::ZipFileInfo;

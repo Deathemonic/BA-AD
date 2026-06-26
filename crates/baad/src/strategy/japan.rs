@@ -17,16 +17,15 @@ impl JapanStrategy {
         catalog_url: &str,
         platform: Platform
     ) -> Vec<DownloadAsset> {
-        let packs = packing
-            .full_patch_packs
-            .iter()
-            .chain(packing.update_packs.iter())
-            .map(|pack| DownloadAsset {
-                url: format!("{}/{}/{}", catalog_url, platform.patch_pack(), pack.pack_name),
-                path: pack.pack_name.clone(),
-                hash: HashValue::Crc(pack.crc),
-                size: pack.pack_size,
-                bundle_files: pack.bundle_files.iter().map(|b| b.name.clone()).collect()
+        let packs =
+            packing.full_patch_packs.iter().chain(packing.update_packs.iter()).map(|pack| {
+                DownloadAsset {
+                    url: format!("{}/{}/{}", catalog_url, platform.patch_pack(), pack.pack_name),
+                    path: pack.pack_name.clone(),
+                    hash: HashValue::Crc(pack.crc),
+                    size: pack.pack_size,
+                    bundle_files: pack.bundle_files.iter().map(|b| b.name.clone()).collect()
+                }
             });
 
         packs.collect()
