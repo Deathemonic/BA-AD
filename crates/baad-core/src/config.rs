@@ -26,6 +26,11 @@ pub const YOSTAR_GAME_TAG: &str = "BlueArchive_JP";
 pub const YOSTAR_SIGNATURE_DATA: &str = "DE7108E9B2842FD460F4777702727869";
 pub const YOSTAR_VERSION: &str = "1.7.2";
 
+pub const ROSTAR_VERSION_URL: &str = "https://bluearchive-cn.com/api/meta/setup";
+pub const ROSTAR_STATE_URL: &str = "https://gs-api.bluearchive-cn.com/api/state";
+pub const ROSTAR_PLATFORM_ID: &str = "1";
+pub const ROSTAR_CHANNEL_ID: &str = "2";
+
 pub const API_FILENAME: &str = "api_data.json";
 pub const GAME_CONFIG_PATTERN: &[u8] = &[
     0x47, 0x61, 0x6D, 0x65, 0x4D, 0x61, 0x69, 0x6E, 0x43, 0x6F, 0x6E, 0x66, 0x69, 0x67, 0x00, 0x00,

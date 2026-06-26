@@ -173,6 +173,18 @@ pub struct GameJsonData {
     pub file: Vec<GameFile>
 }
 
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct ChinaState {
+    pub addressables_catalog_url_roots: Vec<String>,
+    pub resource_version: String,
+    pub table_version: String,
+    pub media_version: String,
+    pub patch_version: String,
+    pub state: i32,
+    pub is_open_pre_download: bool
+}
+
 #[derive(Deserialize)]
 pub struct Domain {
     pub primary_cdn: String,
