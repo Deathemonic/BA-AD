@@ -35,11 +35,29 @@ pub struct GlobalData {
 }
 
 #[derive(Serialize, Deserialize, Clone, Default)]
+pub struct ChinaData {
+    #[serde(default)]
+    pub version: String,
+    #[serde(default)]
+    pub catalog_url: String,
+    #[serde(default)]
+    pub resource_version: String,
+    #[serde(default)]
+    pub table_version: String,
+    #[serde(default)]
+    pub media_version: String,
+    #[serde(default = "default_platform")]
+    pub platform: Cow<'static, str>
+}
+
+#[derive(Serialize, Deserialize, Clone, Default)]
 pub struct ApiData {
     #[serde(default)]
     pub japan: JapanData,
     #[serde(default)]
-    pub global: GlobalData
+    pub global: GlobalData,
+    #[serde(default)]
+    pub china: ChinaData
 }
 
 #[derive(Serialize, Deserialize)]
@@ -183,6 +201,50 @@ pub struct ChinaState {
     pub patch_version: String,
     pub state: i32,
     pub is_open_pre_download: bool
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct ChinaTableManifest {
+    pub table: HashMap<String, ChinaTableEntry>
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct ChinaTableEntry {
+    pub name: String,
+    pub size: i64,
+    pub crc: String,
+    #[serde(rename = "isInbuild")]
+    pub is_inbuild: bool,
+    #[serde(rename = "isChanged")]
+    pub is_changed: bool,
+    pub is_prologue: bool,
+    pub is_split_download: bool,
+    pub includes: Option<Vec<String>>
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct ChinaBundleManifest {
+    pub bundle_files: Vec<ChinaBundleFile>
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct ChinaBundleFile {
+    pub name: String,
+    pub size: i64,
+    pub is_prologue: bool,
+    pub crc: String,
+    pub is_split_download: bool
+}
+
+pub struct ChinaMediaEntry {
+    pub path: String,
+    pub hash: String,
+    pub media_type: i32,
+    pub bytes: i64
 }
 
 #[derive(Deserialize)]

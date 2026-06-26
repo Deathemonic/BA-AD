@@ -54,7 +54,7 @@ impl CommandHandler {
         let platform = args.base.platform;
         let categories = self.resource_categories(&args.base);
 
-        info!(platform = %platform.as_ref(), "Starting Japan download");
+        info!(platform = %platform.display_name(), "Starting Japan download");
 
         let catalog = JapanCatalog::new(categories, platform)?;
         self.run_download(&args.base, catalog).await
@@ -65,7 +65,7 @@ impl CommandHandler {
         let categories = self.resource_categories(&args.base);
         let build_type = if args.teen { BuildType::Teen } else { BuildType::Standard };
 
-        info!(platform = %platform.as_ref(), "Starting Global download");
+        info!(platform = %platform.display_name(), "Starting Global download");
 
         let catalog = GlobalCatalog::new(categories, platform, build_type)?;
         self.run_download(&args.base, catalog).await

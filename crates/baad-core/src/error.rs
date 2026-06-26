@@ -55,7 +55,7 @@ pub enum ServerConfigError {
     #[error("Unsupported platform and build type combination")]
     UnsupportedCombination,
 
-    #[error("Global server does not support Windows platform. Use Android or iOS instead")]
+    #[error("Server does not support Windows platform. Use Android or iOS instead")]
     WindowsNotSupported
 }
 
