@@ -60,7 +60,7 @@ impl GlobalCatalog {
         let addressable =
             self.nexon_client.get_addressable(&market_config, &version, build_number).await?;
 
-        let catalog_url = addressable.patch.resource_path.clone();
+        let catalog_url = addressable.patch.resource_path;
         let platform: &'static str = self.platform.into();
         let build_type: &'static str = self.build_type.into();
 

@@ -60,7 +60,7 @@ impl JapanCatalog {
 
         update(&self.paths.api, |data: &mut ApiData| {
             data.japan.version = version;
-            data.japan.server_info_url = server_info_url.clone();
+            data.japan.server_info_url = server_info_url;
             data.japan.catalog_url = catalog_url.to_string();
             data.japan.platform = platform.into();
         })
