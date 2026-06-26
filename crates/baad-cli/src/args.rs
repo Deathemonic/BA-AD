@@ -49,7 +49,10 @@ pub enum RegionCommands {
     Global(GlobalDownloadArgs),
 
     /// Download from Japan server
-    Japan(JapanDownloadArgs)
+    Japan(JapanDownloadArgs),
+
+    /// Download from China server (beta)
+    China(ChinaDownloadArgs)
 }
 
 #[derive(Parser)]
@@ -108,6 +111,12 @@ pub struct GlobalDownloadArgs {
 
 #[derive(Parser)]
 pub struct JapanDownloadArgs {
+    #[command(flatten)]
+    pub base: BaseDownloadArgs
+}
+
+#[derive(Parser)]
+pub struct ChinaDownloadArgs {
     #[command(flatten)]
     pub base: BaseDownloadArgs
 }

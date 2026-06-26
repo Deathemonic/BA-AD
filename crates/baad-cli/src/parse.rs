@@ -1,14 +1,15 @@
 use std::process::exit;
 
-use baad::catalog::{Catalog, GlobalCatalog, JapanCatalog};
+use baad::catalog::{Catalog, ChinaCatalog, GlobalCatalog, JapanCatalog};
 use baad::download::{FilterMethod, ResourceCategory, ResourceDownloader, ResourceFilter};
-use baad::{BuildType, file, info};
+use baad::{BuildType, file, info, warn};
 use clap::CommandFactory;
 use eyre::{Result, eyre};
 
 use crate::args::{
     Args,
     BaseDownloadArgs,
+    ChinaDownloadArgs,
     Commands,
     GlobalDownloadArgs,
     JapanDownloadArgs,
@@ -46,7 +47,8 @@ impl CommandHandler {
     async fn handle_download(&self, region: &RegionCommands) -> Result<()> {
         match region {
             RegionCommands::Global(download_args) => self.global_download(download_args).await,
-            RegionCommands::Japan(download_args) => self.japan_download(download_args).await
+            RegionCommands::Japan(download_args) => self.japan_download(download_args).await,
+            RegionCommands::China(download_args) => self.china_download(download_args).await
         }
     }
 
@@ -69,6 +71,19 @@ impl CommandHandler {
 
         let catalog = GlobalCatalog::new(categories, platform, build_type)?;
         self.run_download(&args.base, catalog).await
+    }
+
+    async fn china_download(&self, args: &ChinaDownloadArgs) -> Result<()> {
+        let platform = args.base.platform;
+        let categories = self.resource_categories(&args.base);
+
+        info!(platform = %platform.display_name(), "Starting China download");
+
+        let catalog = ChinaCatalog::new(categories, platform)?;
+        let (_root, _resources) = catalog.fetch_resources().await?;
+
+        warn!("China downloads are not implemented yet.");
+        Ok(())
     }
 
     async fn run_download<C: Catalog>(&self, base: &BaseDownloadArgs, catalog: C) -> Result<()> {

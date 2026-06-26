@@ -1,13 +1,6 @@
 use std::path::PathBuf;
 
-use baad_core::{
-    API_FILENAME,
-    ApiData,
-    CatalogError,
-    ChinaState,
-    Platform,
-    ServerConfigError
-};
+use baad_core::{API_FILENAME, ApiData, CatalogError, ChinaState, Platform, ServerConfigError};
 use baad_utils::file::get_data_path;
 use baad_utils::info;
 use baad_utils::json::{load, update};

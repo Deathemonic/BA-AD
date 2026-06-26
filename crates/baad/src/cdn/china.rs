@@ -6,12 +6,12 @@ use baad_core::{
     ChinaTableManifest,
     MEDIA_RESOURCES,
     Platform,
-    ServerConfigError,
     ROSTAR_BUNDLE_INFO_FILE,
     ROSTAR_CATALOG_DIR,
     ROSTAR_MANIFEST_DIR,
     ROSTAR_MEDIA_MANIFEST_FILE,
     ROSTAR_TABLE_MANIFEST_FILE,
+    ServerConfigError,
     TABLE_BUNDLES,
     client
 };
