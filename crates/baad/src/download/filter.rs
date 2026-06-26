@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+
 use baad_core::error::FilterError;
 use glob::Pattern as GlobPattern;
 use lazy_regex::Regex;
@@ -21,7 +23,7 @@ pub struct ResourceFilter {
     pattern: String,
     method: FilterMethod,
     compiled_regex: Option<Regex>,
-    fuzzy_matcher: Option<Matcher>,
+    fuzzy_matcher: Option<RefCell<Matcher>>,
     lowercase_pattern: Option<String>
 }
 
@@ -39,7 +41,7 @@ impl ResourceFilter {
                 );
             }
             FilterMethod::Fuzzy => {
-                fuzzy_matcher = Some(Matcher::new(Config::DEFAULT));
+                fuzzy_matcher = Some(RefCell::new(Matcher::new(Config::DEFAULT)));
             }
             FilterMethod::Glob => {
                 GlobPattern::new(pattern)
@@ -82,7 +84,7 @@ impl ResourceFilter {
 
     fn match_fuzzy(&self, path: &str) -> bool {
         if let Some(matcher) = &self.fuzzy_matcher {
-            let mut matcher = matcher.clone();
+            let mut matcher = matcher.borrow_mut();
             let mut pattern_buf = Vec::new();
             let mut haystack_buf = Vec::new();
 
