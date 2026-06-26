@@ -12,7 +12,7 @@ use baad_core::{
 };
 use baad_utils::file::get_data_path;
 use baad_utils::json::{load, update};
-use baad_utils::{info, warn};
+use baad_utils::info;
 
 use crate::api::NexonClient;
 use crate::catalog::traits::Catalog;
@@ -52,8 +52,6 @@ impl GlobalCatalog {
     }
 
     async fn full_update(&self, version: String) -> Result<String, CatalogError> {
-        info!(version = %version, "Performing full update");
-
         let market_config = MarketConfig::for_global(self.platform, self.build_type)?;
 
         let build_number =
@@ -93,19 +91,16 @@ impl GlobalCatalog {
             .filter(|url| !url.is_empty());
 
         if let Some(catalog_url) = api_data {
-            info!("Using existing catalog URL");
+            info!("Catalog up to date");
             return Ok(catalog_url);
         }
 
-        warn!("Catalog URL doesn't exist");
+        info!("Fetching latest update");
         self.full_update(version.to_string()).await
     }
 
-    pub async fn fetch_catalogs(
-        &self,
-        catalog_url: &str
-    ) -> Result<GlobalCatalogData, CatalogError> {
-        let cdn = GlobalCdn::new(catalog_url.to_string());
+    pub async fn fetch_catalogs(&self, catalog_url: &str) -> Result<GlobalCatalogData, CatalogError> {
+        let cdn = GlobalCdn::new(catalog_url.to_string(), self.platform);
         let catalog = cdn.fetch().await?;
         Ok(catalog)
     }

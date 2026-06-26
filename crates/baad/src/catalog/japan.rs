@@ -51,8 +51,6 @@ impl JapanCatalog {
     }
 
     async fn full_update(&self, version: String) -> Result<String, CatalogError> {
-        info!(version = %version, "Performing full update");
-
         let resources_path = self.download_resources_asset().await?;
         let game_main_data = self.extract_game_main(&resources_path).await?;
         let server_info_url = self.decrypt_game_main(&game_main_data)?;
@@ -76,11 +74,10 @@ impl JapanCatalog {
 
         let base_config = self.yostar_client.get_base_config().await?;
         let latest_version = base_config.game_latest_version;
-        let platform =
-            api_data.as_ref().map(|d| d.japan.platform.as_ref()) != Some(self.platform.as_ref());
+        info!(version = %latest_version, "Version");
 
-        if api_data.as_ref().map(|d| &d.japan.version) != Some(&latest_version) || platform {
-            info!("Version changed, performing full update");
+        if api_data.as_ref().map(|d| &d.japan.version) != Some(&latest_version) {
+            info!("Fetching latest update");
             return self.full_update(latest_version).await;
         }
 
@@ -89,11 +86,11 @@ impl JapanCatalog {
         let catalog_url = JapanCdn::extract_catalog_url(&addressable)?;
 
         if api_data.japan.catalog_url == catalog_url {
-            info!("Catalog URL unchanged, using cache");
+            info!("Catalog up to date");
             return Ok(api_data.japan.catalog_url);
         }
 
-        info!("Catalog URL changed, updating cache");
+        info!("Catalog changed, updating...");
         update(&self.paths.api, |data: &mut ApiData| {
             data.japan.catalog_url = catalog_url.to_string();
         })
@@ -104,11 +101,6 @@ impl JapanCatalog {
 
     async fn download_resources_asset(&self) -> Result<PathBuf, CatalogError> {
         let (download_url, file_info) = self.yostar_client.get_resources_asset().await?;
-
-        if self.paths.resources.exists() {
-            debug!("resources.assets already exists, skipping download");
-            return Ok(self.paths.resources.clone());
-        }
 
         debug!(url = %download_url, "Downloading resources.assets");
         debug!(hash = %file_info.hash, size = %file_info.size, "Expected file info");
