@@ -7,7 +7,6 @@ pub static REGEX_VERSION: Lazy<Regex> = lazy_regex!(r"\d+\.\d+\.\d+");
 
 pub const GLOBAL_API_URL: &str = "https://api-pub.nexon.com/patch/v1.1/version-check";
 
-// pub const GLOBAL_PLAYSTORE_URL: &str = "https://play.google.com/store/apps/details?id=com.nexon.bluearchive";
 pub const GLOBAL_PLAYSTORE_URL: &str = "https://apptopia.com/google-play/app/com.nexon.bluearchive/about";
 pub const GLOBAL_APPSTORE_URL: &str = "https://apps.apple.com/us/app/blue-archive/id1571873795";
 
@@ -110,7 +109,7 @@ impl MarketConfig {
             (Platform::Android, BuildType::Teen) => (GLOBAL_ANDROID_TEEN_ID, PLAYSTORE_CODE),
             (Platform::Ios, BuildType::Standard) => (GLOBAL_IOS_STANDARD_ID, APPSTORE_CODE),
             (Platform::Ios, BuildType::Teen) => (GLOBAL_IOS_TEEN_ID, APPSTORE_CODE),
-            (Platform::Windows, _) => return Err(ServerConfigError::UnsupportedCombination)
+            (Platform::Windows, _) => return Err(ServerConfigError::WindowsNotSupported)
         };
 
         Ok(Self {

@@ -53,7 +53,10 @@ pub enum ServerConfigError {
     TeenNotAvailable,
 
     #[error("Unsupported platform and build type combination")]
-    UnsupportedCombination
+    UnsupportedCombination,
+
+    #[error("Global server does not support Windows platform. Use Android or iOS instead")]
+    WindowsNotSupported
 }
 
 #[derive(Error, Debug)]

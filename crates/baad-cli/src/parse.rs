@@ -2,7 +2,7 @@ use std::process::exit;
 
 use baad::catalog::{Catalog, GlobalCatalog, JapanCatalog};
 use baad::download::{FilterMethod, ResourceCategory, ResourceDownloader, ResourceFilter};
-use baad::{BuildType, Platform, file, info};
+use baad::{BuildType, file, info};
 use clap::CommandFactory;
 use eyre::{Result, eyre};
 
@@ -53,53 +53,37 @@ impl CommandHandler {
     async fn japan_download(&self, args: &JapanDownloadArgs) -> Result<()> {
         let platform = args.base.platform;
         let categories = self.resource_categories(&args.base);
-        let filter = self.resource_filter(&args.base)?;
-        let output_dir = file::get_output_dir(Some(&args.base.output)).await?;
 
         info!(platform = %platform.as_ref(), "Starting Japan download");
 
         let catalog = JapanCatalog::new(categories, platform)?;
-        let downloads = catalog.prepare_downloads().await?;
-
-        info!("Catalog fetched successfully");
-
-        let downloader = ResourceDownloader::builder()
-            .output_dir(output_dir)
-            .limit(args.base.limit as usize)
-            .retries(args.base.retries)
-            .maybe_proxy(args.base.proxy.clone())
-            .build();
-
-        downloader.download(downloads, filter.as_ref()).await?;
-        Ok(())
+        self.run_download(&args.base, catalog).await
     }
 
     async fn global_download(&self, args: &GlobalDownloadArgs) -> Result<()> {
         let platform = args.base.platform;
         let categories = self.resource_categories(&args.base);
-        let filter = self.resource_filter(&args.base)?;
-        let output_dir = file::get_output_dir(Some(&args.base.output)).await?;
-
-        if matches!(platform, Platform::Windows) {
-            return Err(eyre!(
-                "Global server does not support Windows platform. Use --platform android or --platform ios"
-            ));
-        }
-
         let build_type = if args.teen { BuildType::Teen } else { BuildType::Standard };
 
         info!(platform = %platform.as_ref(), "Starting Global download");
 
         let catalog = GlobalCatalog::new(categories, platform, build_type)?;
+        self.run_download(&args.base, catalog).await
+    }
+
+    async fn run_download<C: Catalog>(&self, base: &BaseDownloadArgs, catalog: C) -> Result<()> {
+        let filter = self.resource_filter(base)?;
+        let output_dir = file::get_output_dir(Some(&base.output)).await?;
+
         let downloads = catalog.prepare_downloads().await?;
 
         info!("Catalog fetched successfully");
 
         let downloader = ResourceDownloader::builder()
             .output_dir(output_dir)
-            .limit(args.base.limit as usize)
-            .retries(args.base.retries)
-            .maybe_proxy(args.base.proxy.clone())
+            .limit(base.limit as usize)
+            .retries(base.retries)
+            .maybe_proxy(base.proxy.clone())
             .build();
 
         downloader.download(downloads, filter.as_ref()).await?;
