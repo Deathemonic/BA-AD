@@ -2,7 +2,7 @@ use lazy_regex::regex;
 use owo_colors::Style;
 use tracing::Level;
 
-pub const LEVEL_PREFIXES: &[&str] = &["[ERROR]", "[WARN]", "[INFO]", "[DEBUG]", "[TRACE]"];
+pub const LEVEL_PREFIXES: &[&str] = &["[ERROR]", "[WARNING]", "[INFO]", "[DEBUG]", "[TRACE]"];
 pub const SUCCESS_PREFIX: &str = "[SUCCESS]";
 pub const CAUSE_PREFIX: &str = "[CAUSE]";
 
