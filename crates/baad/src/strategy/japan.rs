@@ -17,7 +17,7 @@ impl JapanStrategy {
         catalog_url: &str,
         platform: Platform
     ) -> Vec<DownloadAsset> {
-        packing
+        let packs = packing
             .full_patch_packs
             .iter()
             .chain(packing.update_packs.iter())
@@ -27,8 +27,9 @@ impl JapanStrategy {
                 hash: HashValue::Crc(pack.crc),
                 size: pack.pack_size,
                 bundle_files: pack.bundle_files.iter().map(|b| b.name.clone()).collect()
-            })
-            .collect()
+            });
+
+        packs.collect()
     }
 
     pub fn build_media_downloads(
@@ -36,19 +37,17 @@ impl JapanStrategy {
         catalog_url: &str,
         platform: Platform
     ) -> Vec<DownloadMedia> {
-        catalog
-            .table
-            .values()
-            .map(|entry| {
-                let path = entry.path.replace('\\', "/");
-                DownloadMedia {
-                    url: format!("{}/{}/{}", catalog_url, platform.media_path(), path),
-                    path,
-                    hash: HashValue::Crc(entry.crc),
-                    size: entry.bytes
-                }
-            })
-            .collect()
+        let media = catalog.table.values().map(|entry| {
+            let path = entry.path.replace('\\', "/");
+            DownloadMedia {
+                url: format!("{}/{}/{}", catalog_url, platform.media_path(), path),
+                path,
+                hash: HashValue::Crc(entry.crc),
+                size: entry.bytes
+            }
+        });
+
+        media.collect()
     }
 
     pub fn build_table_downloads(catalog: &TableCatalog, catalog_url: &str) -> Vec<DownloadTable> {
