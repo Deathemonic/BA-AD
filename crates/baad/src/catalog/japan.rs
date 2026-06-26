@@ -171,21 +171,18 @@ impl Catalog for JapanCatalog {
         Ok((url, resources))
     }
 
-    fn build_downloads(&self, resources: &Self::Resources, base_or_url: &str) -> Downloads {
+    fn build_downloads(&self, resources: Self::Resources, base_or_url: &str) -> Downloads {
         Downloads {
             assets: resources
                 .assets
-                .as_ref()
                 .map(|p| JapanStrategy::build_asset_downloads(p, base_or_url, self.platform))
                 .unwrap_or_default(),
             tables: resources
                 .table
-                .as_ref()
                 .map(|t| JapanStrategy::build_table_downloads(t, base_or_url))
                 .unwrap_or_default(),
             media: resources
                 .media
-                .as_ref()
                 .map(|m| JapanStrategy::build_media_downloads(m, base_or_url, self.platform))
                 .unwrap_or_default()
         }

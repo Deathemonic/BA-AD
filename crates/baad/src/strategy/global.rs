@@ -19,7 +19,7 @@ pub struct GlobalStrategy;
 
 impl GlobalStrategy {
     pub fn build_downloads(
-        resources: &[Resource],
+        resources: Vec<Resource>,
         base_url: &str,
         category: &[ResourceCategory]
     ) -> Downloads {
@@ -33,7 +33,7 @@ impl GlobalStrategy {
             }
 
             let url = format!("{}{}", base_url, resource.resource_path);
-            let hash = HashValue::Md5(resource.resource_hash.clone());
+            let hash = HashValue::Md5(resource.resource_hash);
             let size = resource.resource_size;
 
             if resource.resource_path.contains(TABLE_BUNDLES) {
@@ -70,7 +70,7 @@ impl GlobalStrategy {
             } else if category.contains(&ResourceCategory::Assets) {
                 assets.push(DownloadAsset {
                     url,
-                    path: resource.resource_path.clone(),
+                    path: resource.resource_path,
                     hash,
                     size,
                     bundle_files: Vec::new()

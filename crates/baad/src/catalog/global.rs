@@ -125,7 +125,7 @@ impl Catalog for GlobalCatalog {
         Ok((base_url, catalog))
     }
 
-    fn build_downloads(&self, resources: &Self::Resources, base_or_url: &str) -> Downloads {
-        GlobalStrategy::build_downloads(&resources.resources, base_or_url, &self.category)
+    fn build_downloads(&self, resources: Self::Resources, base_or_url: &str) -> Downloads {
+        GlobalStrategy::build_downloads(resources.resources, base_or_url, &self.category)
     }
 }
