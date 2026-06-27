@@ -53,8 +53,11 @@ baad download japan --assets --media
 # Downloads the AssetBundles with a limit of 15 concurrent downloads
 baad download global --assets --limit 15 
 
-# Downloads the AssetBundles from JP server that contains CH0230 in it using contains but ignore case 
-baad download japan --assets --filter "CH0230" --filter-method contains-ignore-case
+# Downloads the AssetBundles from CN server that contains CH0230 in it using contains but ignore case 
+baad download china --assets --filter "CH0230" --filter-method contains-ignore-case
+
+# Downloads MediaResources from CN server matching multiple characters with a regex (alternation = multi filter)
+baad download china --media --filter "(ch0230|ch0255|hoshino).*battle" --filter-method regex
 
 # Downloads all AssetBundles, TableBundles, and MediaResources from JP server that contains ch0069 in it using fuzzy search  
 baad download japan --filter "ch0069" --filter-method fuzzy
@@ -89,6 +92,7 @@ baad download japan --assets --platform windows
 |----------|-----------------------------------------------------------|
 | `global` | Download from Global server                               |
 | `japan`  | Download from Japan server                                |
+| `china`  | Download from China server                                |
 | `help`   | Print this message or the help of the given subcommand(s) |
 
 ---
@@ -127,11 +131,38 @@ cargo build
 ```
 
 ## Library
+
+Add `baad` to your `Cargo.toml`:
+
 ```toml
+[dependencies]
 baad = { git = "https://github.com/Deathemonic/BA-AD" }
 ```
 
-For more info check out [Library](.github/docs/LIBRARY.md)
+Download all assets from the `JP` server:
+
+```rust
+use baad::catalog::{Catalog, JapanCatalog};
+use baad::download::{ResourceCategory, ResourceDownloader};
+use baad::Platform;
+
+#[tokio::main]
+async fn main() -> eyre::Result<()> {
+    // Pick what to download and from which platform
+    let catalog = JapanCatalog::new(vec![ResourceCategory::Assets], Platform::Android)?;
+    let downloads = catalog.prepare_downloads().await?;
+
+    // Download into ./output
+    let downloader = ResourceDownloader::builder()
+        .output_dir("./output".into())
+        .limit(10)
+        .retries(10)
+        .build();
+    downloader.download(downloads, None).await?;
+
+    Ok(())
+}
+```
 
 ### Other Projects
 

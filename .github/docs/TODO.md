@@ -1,9 +1,0 @@
-- [x] iOS asset download support
-- [x] Teen asset download support
-- [x] Improve logging system
-- [ ] Improve download speed
-- [ ] China asset download support
-- [x] Proxy support
-- [ ] Uniffi support
-- [ ] {Concept} TUI written in Go, to showcase ffi support
-- [ ] {Concept} Steam client assets download support (Make a C# extension for BA-AD)
