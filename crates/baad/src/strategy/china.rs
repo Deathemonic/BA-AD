@@ -1,10 +1,13 @@
 use baad_core::{
     ASSET_BUNDLES,
     ChinaBundleCatalog,
+    ChinaMediaEntry,
     ChinaTableCatalog,
     DownloadAsset,
+    DownloadMedia,
     DownloadTable,
     HashValue,
+    MEDIA_RESOURCES,
     Platform,
     TABLE_BUNDLES
 };
@@ -32,6 +35,17 @@ impl ChinaStrategy {
         });
 
         assets.collect()
+    }
+
+    pub fn build_media_downloads(media: Vec<ChinaMediaEntry>, catalog_url: &str) -> Vec<DownloadMedia> {
+        let entries = media.into_iter().map(|entry| DownloadMedia {
+            url: format!("{}/{}/{}", catalog_url, MEDIA_RESOURCES, entry.path),
+            path: entry.path,
+            hash: HashValue::Md5(entry.hash),
+            size: entry.bytes
+        });
+
+        entries.collect()
     }
 
     pub fn build_table_downloads(catalog: ChinaTableCatalog, catalog_url: &str) -> Vec<DownloadTable> {

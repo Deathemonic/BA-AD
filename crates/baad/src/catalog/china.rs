@@ -10,7 +10,7 @@ use baad_core::{
 };
 use baad_utils::file::get_data_path;
 use baad_utils::json::{load, update};
-use baad_utils::{info, warn};
+use baad_utils::info;
 
 use crate::api::RoStarClient;
 use crate::catalog::traits::Catalog;
@@ -105,10 +105,6 @@ impl Catalog for ChinaCatalog {
     }
 
     fn build_downloads(&self, resources: Self::Resources, base_or_url: &str) -> Downloads {
-        if resources.media.is_some() {
-            warn!("China media downloads are not implemented yet");
-        }
-
         Downloads {
             assets: resources
                 .assets
@@ -118,7 +114,10 @@ impl Catalog for ChinaCatalog {
                 .table
                 .map(|t| ChinaStrategy::build_table_downloads(t, base_or_url))
                 .unwrap_or_default(),
-            media: Vec::new()
+            media: resources
+                .media
+                .map(|m| ChinaStrategy::build_media_downloads(m, base_or_url))
+                .unwrap_or_default()
         }
     }
 }

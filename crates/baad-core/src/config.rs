@@ -60,14 +60,12 @@ pub const EXECUTABLE_NAME: &str = "baad";
 pub const ASSET_BUNDLES: &str = "AssetBundles";
 pub const TABLE_BUNDLES: &str = "TableBundles";
 pub const MEDIA_RESOURCES: &str = "MediaResources";
+pub const MEDIA_RESOURCES_WINDOWS: &str = "MediaResources-Windows";
 
 pub const PATCH_PACK_ANDROID: &str = "Android_PatchPack";
 pub const PATCH_PACK_IOS: &str = "iOS_PatchPack";
 pub const PATCH_PACK_WINDOWS: &str = "Windows_PatchPack";
 
-pub const MEDIA_RESOURCES_ANDROID: &str = "MediaResources";
-pub const MEDIA_RESOURCES_IOS: &str = "MediaResources";
-pub const MEDIA_RESOURCES_WINDOWS: &str = "MediaResources-Windows";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, AsRefStr, IntoStaticStr)]
 #[strum(serialize_all = "lowercase")]
@@ -88,8 +86,7 @@ impl Platform {
 
     pub const fn media_path(self) -> &'static str {
         match self {
-            Self::Android => MEDIA_RESOURCES_ANDROID,
-            Self::Ios => MEDIA_RESOURCES_IOS,
+            Self::Android | Self::Ios => MEDIA_RESOURCES,
             Self::Windows => MEDIA_RESOURCES_WINDOWS
         }
     }
