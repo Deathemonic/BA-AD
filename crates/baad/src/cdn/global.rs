@@ -4,6 +4,7 @@ use baad_utils::json::load;
 use baad_utils::{debug, warn};
 use tokio::fs;
 
+use crate::cdn::cache;
 use crate::download::download_file;
 
 pub struct GlobalCdn {
@@ -19,14 +20,21 @@ impl GlobalCdn {
         let path =
             get_data_path(&format!("catalog/global/{}/{}", self.platform.as_ref(), filename))?;
         let marker = path.with_extension("url");
+        let pack = path.with_extension("bytes");
 
         let cached_url = fs::read_to_string(&marker).await.ok().map(|url| url.trim().to_string());
         let outdated = !path.exists() || cached_url.as_deref() != Some(self.catalog_url.as_str());
 
         if !outdated {
+            if let Some(catalog) = cache::read_pack::<GlobalCatalogData>(&pack).await {
+                debug!("Catalog up to date");
+                return Ok(catalog);
+            }
+
             match load::<GlobalCatalogData>(&path).await {
                 Ok(catalog) => {
-                    debug!("Catalog up to date");
+                    debug!("Catalog up to date, rebuilding cache");
+                    cache::write_pack(&pack, &catalog).await?;
                     return Ok(catalog);
                 }
                 Err(_) => warn!("Catalog invalid, refetching...")
@@ -37,6 +45,7 @@ impl GlobalCdn {
         download_file(&self.catalog_url, &path, None, 3).await?;
         fs::write(&marker, &self.catalog_url).await?;
         let catalog = load::<GlobalCatalogData>(&path).await?;
+        cache::write_pack(&pack, &catalog).await?;
 
         Ok(catalog)
     }

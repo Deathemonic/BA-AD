@@ -107,7 +107,7 @@ pub struct GlobalPatch {
     pub bdiff_path: Vec<HashMap<String, String>>
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(MemoryPackable, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct GlobalCatalog {
     pub id: i32,
     pub market_game_id: String,
@@ -133,7 +133,7 @@ pub struct GlobalCatalog {
     pub resources: Vec<Resource>
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(MemoryPackable, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Category {
     pub lang: Option<String>,
     pub texture_encode_type: Option<String>,
@@ -141,13 +141,13 @@ pub struct Category {
     pub group: Vec<String>
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(MemoryPackable, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct CategoryMapping {
     pub group: String,
     pub paths: Vec<String>
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(MemoryPackable, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Resource {
     #[serde(default = "default_group")]
     pub group: Cow<'static, str>,
