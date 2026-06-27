@@ -30,11 +30,6 @@ pub const ROSTAR_VERSION_URL: &str = "https://bluearchive-cn.com/api/meta/setup"
 pub const ROSTAR_STATE_URL: &str = "https://gs-api.bluearchive-cn.com/api/state";
 pub const ROSTAR_PLATFORM_ID: &str = "1";
 pub const ROSTAR_CHANNEL_ID: &str = "2";
-pub const ROSTAR_MANIFEST_DIR: &str = "Manifest";
-pub const ROSTAR_CATALOG_DIR: &str = "Catalog";
-pub const ROSTAR_TABLE_MANIFEST_FILE: &str = "TableManifest";
-pub const ROSTAR_MEDIA_MANIFEST_FILE: &str = "MediaManifest";
-pub const ROSTAR_BUNDLE_INFO_FILE: &str = "bundleDownloadInfo.json";
 
 pub const PLATFORM_NAME_ANDROID: &str = "Android";
 pub const PLATFORM_NAME_IOS: &str = "iOS";

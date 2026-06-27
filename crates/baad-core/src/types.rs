@@ -205,7 +205,7 @@ pub struct ChinaState {
 
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
-pub struct ChinaTableManifest {
+pub struct ChinaTableCatalog {
     pub table: HashMap<String, ChinaTableEntry>
 }
 
@@ -226,7 +226,7 @@ pub struct ChinaTableEntry {
 
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
-pub struct ChinaBundleManifest {
+pub struct ChinaBundleCatalog {
     pub bundle_files: Vec<ChinaBundleFile>
 }
 

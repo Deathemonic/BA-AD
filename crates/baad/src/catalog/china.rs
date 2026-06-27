@@ -1,13 +1,23 @@
 use std::path::PathBuf;
 
-use baad_core::{API_FILENAME, ApiData, CatalogError, ChinaState, Platform, ServerConfigError};
+use baad_core::{
+    API_FILENAME,
+    ApiData,
+    CatalogError,
+    ChinaState,
+    Downloads,
+    Platform,
+    ServerConfigError
+};
 use baad_utils::file::get_data_path;
-use baad_utils::info;
 use baad_utils::json::{load, update};
+use baad_utils::{info, warn};
 
 use crate::api::RoStarClient;
+use crate::catalog::traits::Catalog;
 use crate::cdn::{ChinaCdn, ChinaResources};
 use crate::download::ResourceCategory;
+use crate::strategy::ChinaStrategy;
 
 struct ChinaPaths {
     api: PathBuf
@@ -36,7 +46,49 @@ impl ChinaCatalog {
         })
     }
 
-    pub async fn fetch_resources(&self) -> Result<(String, ChinaResources), CatalogError> {
+    async fn resolve(&self, version: String, state: &ChinaState) -> Result<String, CatalogError> {
+        let catalog_url = state
+            .addressables_catalog_url_roots
+            .first()
+            .ok_or(CatalogError::DeserializationFailed)?
+            .trim_end_matches('/')
+            .to_string();
+
+        let platform: &'static str = self.platform.into();
+        let api_data = load::<ApiData>(&self.paths.api).await.ok();
+        let up_to_date = api_data.as_ref().is_some_and(|data| {
+            data.china.version == version
+                && data.china.catalog_url == catalog_url
+                && data.china.resource_version == state.resource_version
+                && data.china.table_version == state.table_version
+                && data.china.media_version == state.media_version
+                && data.china.platform == platform
+        });
+
+        if up_to_date {
+            info!("Catalog up to date");
+            return Ok(catalog_url);
+        }
+
+        info!("Catalog changed, updating...");
+        update(&self.paths.api, |data: &mut ApiData| {
+            data.china.version = version;
+            data.china.catalog_url = catalog_url.clone();
+            data.china.resource_version = state.resource_version.clone();
+            data.china.table_version = state.table_version.clone();
+            data.china.media_version = state.media_version.clone();
+            data.china.platform = platform.into();
+        })
+        .await?;
+
+        Ok(catalog_url)
+    }
+}
+
+impl Catalog for ChinaCatalog {
+    type Resources = ChinaResources;
+
+    async fn fetch_resources(&self) -> Result<(String, Self::Resources), CatalogError> {
         let version = self.rostar_client.get_version().await?;
         info!(version = %version, "Version");
 
@@ -55,41 +107,18 @@ impl ChinaCatalog {
         Ok((root, resources))
     }
 
-    async fn resolve(&self, version: String, state: &ChinaState) -> Result<String, CatalogError> {
-        let root = state
-            .addressables_catalog_url_roots
-            .first()
-            .ok_or(CatalogError::DeserializationFailed)?
-            .trim_end_matches('/')
-            .to_string();
-
-        let platform: &'static str = self.platform.into();
-        let api_data = load::<ApiData>(&self.paths.api).await.ok();
-        let up_to_date = api_data.as_ref().is_some_and(|data| {
-            data.china.version == version
-                && data.china.catalog_url == root
-                && data.china.resource_version == state.resource_version
-                && data.china.table_version == state.table_version
-                && data.china.media_version == state.media_version
-                && data.china.platform == platform
-        });
-
-        if up_to_date {
-            info!("Catalog up to date");
-            return Ok(root);
+    fn build_downloads(&self, resources: Self::Resources, base_or_url: &str) -> Downloads {
+        if resources.table.is_some() || resources.media.is_some() {
+            warn!("China table and media downloads are not implemented yet");
         }
 
-        info!("Catalog changed, updating...");
-        update(&self.paths.api, |data: &mut ApiData| {
-            data.china.version = version;
-            data.china.catalog_url = root.clone();
-            data.china.resource_version = state.resource_version.clone();
-            data.china.table_version = state.table_version.clone();
-            data.china.media_version = state.media_version.clone();
-            data.china.platform = platform.into();
-        })
-        .await?;
-
-        Ok(root)
+        Downloads {
+            assets: resources
+                .assets
+                .map(|m| ChinaStrategy::build_asset_downloads(m, base_or_url, self.platform))
+                .unwrap_or_default(),
+            tables: Vec::new(),
+            media: Vec::new()
+        }
     }
 }

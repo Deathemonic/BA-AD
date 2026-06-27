@@ -106,7 +106,7 @@ impl JapanCdn {
             };
 
         if outdated {
-            debug!(filename, "Catalog outdated, downloading");
+            debug!(filename, "Catalog outdated, fetching...");
             download_file(url, &path, None, 3).await?;
             if let Some(remote) = &remote {
                 fs::write(&hash_path, remote).await?;

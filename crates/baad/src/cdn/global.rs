@@ -29,7 +29,7 @@ impl GlobalCdn {
                     debug!("Catalog up to date");
                     return Ok(catalog);
                 }
-                Err(_) => warn!("Cached catalog invalid, refetching")
+                Err(_) => warn!("Catalog invalid, refetching...")
             }
         }
 

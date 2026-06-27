@@ -1,16 +1,13 @@
+use std::path::Path;
+
 use baad_core::{
     ASSET_BUNDLES,
     CatalogError,
-    ChinaBundleManifest,
+    ChinaBundleCatalog,
     ChinaMediaEntry,
-    ChinaTableManifest,
+    ChinaTableCatalog,
     MEDIA_RESOURCES,
     Platform,
-    ROSTAR_BUNDLE_INFO_FILE,
-    ROSTAR_CATALOG_DIR,
-    ROSTAR_MANIFEST_DIR,
-    ROSTAR_MEDIA_MANIFEST_FILE,
-    ROSTAR_TABLE_MANIFEST_FILE,
     ServerConfigError,
     TABLE_BUNDLES,
     client
@@ -24,7 +21,7 @@ use tokio::fs;
 use crate::download::{ResourceCategory, download_file};
 
 pub struct ChinaCdn {
-    root: String,
+    catalog_url: String,
     platform: Platform,
     resource_version: String,
     table_version: String,
@@ -32,14 +29,14 @@ pub struct ChinaCdn {
 }
 
 pub struct ChinaResources {
-    pub assets: Option<ChinaBundleManifest>,
-    pub table: Option<ChinaTableManifest>,
+    pub assets: Option<ChinaBundleCatalog>,
+    pub table: Option<ChinaTableCatalog>,
     pub media: Option<Vec<ChinaMediaEntry>>
 }
 
 impl ChinaCdn {
     pub fn new(
-        root: String,
+        catalog_url: String,
         platform: Platform,
         resource_version: String,
         table_version: String,
@@ -50,7 +47,7 @@ impl ChinaCdn {
         }
 
         Ok(Self {
-            root: root.trim_end_matches('/').to_string(),
+            catalog_url: catalog_url.trim_end_matches('/').to_string(),
             platform,
             resource_version,
             table_version,
@@ -81,58 +78,36 @@ impl ChinaCdn {
         })
     }
 
-    pub async fn fetch_assets(&self) -> Result<ChinaBundleManifest, CatalogError> {
+    pub async fn fetch_assets(&self) -> Result<ChinaBundleCatalog, CatalogError> {
         let url = format!(
-            "{}/{}/{}/{}/{}/{}",
-            self.root,
+            "{}/{}/Catalog/{}/{}/bundleDownloadInfo.json",
+            self.catalog_url,
             ASSET_BUNDLES,
-            ROSTAR_CATALOG_DIR,
             self.resource_version,
-            self.platform.display_name(),
-            ROSTAR_BUNDLE_INFO_FILE
+            self.platform.display_name()
         );
-        let cache = format!("bundleDownloadInfo_{}.json", self.resource_version);
-        self.fetch_json(&url, &cache).await
+        self.fetch_json(&url, "bundleDownloadInfo.json").await
     }
 
-    pub async fn fetch_table(&self) -> Result<ChinaTableManifest, CatalogError> {
+    pub async fn fetch_table(&self) -> Result<ChinaTableCatalog, CatalogError> {
         let url = format!(
-            "{}/{}/{}/{}/{}",
-            self.root,
-            ROSTAR_MANIFEST_DIR,
+            "{}/Manifest/{}/{}/TableManifest",
+            self.catalog_url,
             TABLE_BUNDLES,
-            self.table_version,
-            ROSTAR_TABLE_MANIFEST_FILE
+            self.table_version
         );
-        let cache = format!("TableManifest_{}.json", self.table_version);
-        self.fetch_json(&url, &cache).await
+        self.fetch_json(&url, "TableManifest.json").await
     }
 
     pub async fn fetch_media(&self) -> Result<Vec<ChinaMediaEntry>, CatalogError> {
         let url = format!(
-            "{}/{}/{}/{}/{}",
-            self.root,
-            ROSTAR_MANIFEST_DIR,
+            "{}/Manifest/{}/{}/MediaManifest",
+            self.catalog_url,
             MEDIA_RESOURCES,
-            self.media_version,
-            ROSTAR_MEDIA_MANIFEST_FILE
+            self.media_version
         );
-        let path =
-            get_data_path(&self.cache_key(&format!("MediaManifest_{}.txt", self.media_version)))?;
-
-        let text = if path.exists() {
-            debug!("Media manifest up to date, using cache");
-            fs::read_to_string(&path).await?
-        } else {
-            debug!("Media manifest outdated, downloading");
-            let body = client().get(&url).send().await?.text().await?;
-            if let Some(parent) = path.parent() {
-                fs::create_dir_all(parent).await?;
-            }
-            fs::write(&path, &body).await?;
-            body
-        };
-
+        let bytes = self.fetch_bytes(&url, "MediaManifest.txt").await?;
+        let text = String::from_utf8_lossy(&bytes);
         Ok(Self::parse_media(&text))
     }
 
@@ -142,19 +117,65 @@ impl ChinaCdn {
         filename: &str
     ) -> Result<T, CatalogError> {
         let path = get_data_path(&self.cache_key(filename))?;
+        self.ensure_cached(url, &path, filename).await?;
+        Ok(load::<T>(&path).await?)
+    }
 
-        if !path.exists() {
-            debug!(filename, "Manifest outdated, downloading");
-            download_file(url, &path, None, 3).await?;
+    async fn fetch_bytes(&self, url: &str, filename: &str) -> Result<Vec<u8>, CatalogError> {
+        let path = get_data_path(&self.cache_key(filename))?;
+        self.ensure_cached(url, &path, filename).await?;
+        Ok(fs::read(&path).await?)
+    }
+
+    async fn ensure_cached(
+        &self,
+        url: &str,
+        path: &Path,
+        filename: &str
+    ) -> Result<(), CatalogError> {
+        let hash_path = path.with_extension("hash");
+
+        let remote = Self::remote_hash(&Self::hash_url(url)).await;
+        let local = Self::local_hash(&hash_path).await;
+
+        let outdated = !path.exists()
+            || match (&remote, &local) {
+                (Some(remote), Some(local)) => remote != local,
+                (Some(_), None) => true,
+                (None, _) => false
+            };
+
+        if outdated {
+            debug!(filename, "Catalog outdated, fetching...");
+            download_file(url, path, None, 3).await?;
+            if let Some(remote) = &remote {
+                fs::write(&hash_path, remote).await?;
+            }
         } else {
-            debug!(filename, "Manifest up to date, using cache");
+            debug!(filename, "Catalog up to date, using cache");
         }
 
-        Ok(load::<T>(&path).await?)
+        Ok(())
     }
 
     fn cache_key(&self, filename: &str) -> String {
         format!("catalog/china/{}/{}", self.platform.as_ref(), filename)
+    }
+
+    fn hash_url(url: &str) -> String {
+        let (dir, file) = url.rsplit_once('/').unwrap_or(("", url));
+        let stem = file.rsplit_once('.').map_or(file, |(stem, _)| stem);
+        format!("{dir}/{stem}.hash")
+    }
+
+    async fn remote_hash(url: &str) -> Option<String> {
+        let response = client().get(url).send().await.ok()?.error_for_status().ok()?;
+        let text = response.text().await.ok()?;
+        Some(text.trim().to_string())
+    }
+
+    async fn local_hash(path: &Path) -> Option<String> {
+        fs::read_to_string(path).await.ok().map(|hash| hash.trim().to_string())
     }
 
     fn parse_media(text: &str) -> Vec<ChinaMediaEntry> {

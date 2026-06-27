@@ -2,7 +2,7 @@ use std::process::exit;
 
 use baad::catalog::{Catalog, ChinaCatalog, GlobalCatalog, JapanCatalog};
 use baad::download::{FilterMethod, ResourceCategory, ResourceDownloader, ResourceFilter};
-use baad::{BuildType, file, info, warn};
+use baad::{BuildType, file, info};
 use clap::CommandFactory;
 use eyre::{Result, eyre};
 
@@ -80,10 +80,7 @@ impl CommandHandler {
         info!(platform = %platform.display_name(), "Starting China download");
 
         let catalog = ChinaCatalog::new(categories, platform)?;
-        let (_root, _resources) = catalog.fetch_resources().await?;
-
-        warn!("China downloads are not implemented yet.");
-        Ok(())
+        self.run_download(&args.base, catalog).await
     }
 
     async fn run_download<C: Catalog>(&self, base: &BaseDownloadArgs, catalog: C) -> Result<()> {
