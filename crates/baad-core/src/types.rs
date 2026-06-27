@@ -203,13 +203,13 @@ pub struct ChinaState {
     pub is_open_pre_download: bool
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
 pub struct ChinaTableCatalog {
     pub table: HashMap<String, ChinaTableEntry>
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
 pub struct ChinaTableEntry {
     pub name: String,
@@ -224,13 +224,13 @@ pub struct ChinaTableEntry {
     pub includes: Option<Vec<String>>
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
 pub struct ChinaBundleCatalog {
     pub bundle_files: Vec<ChinaBundleFile>
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
 pub struct ChinaBundleFile {
     pub name: String,
@@ -240,6 +240,8 @@ pub struct ChinaBundleFile {
     pub is_split_download: bool
 }
 
+#[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "PascalCase")]
 pub struct ChinaMediaEntry {
     pub path: String,
     pub hash: String,

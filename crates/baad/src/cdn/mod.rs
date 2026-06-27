@@ -1,3 +1,4 @@
+pub mod cache;
 pub mod china;
 pub mod global;
 pub mod japan;

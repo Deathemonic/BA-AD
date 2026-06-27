@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use baad_core::{
     ASSET_BUNDLES,
     CatalogError,
@@ -9,16 +7,17 @@ use baad_core::{
     MEDIA_RESOURCES,
     Platform,
     ServerConfigError,
-    TABLE_BUNDLES,
-    client
+    TABLE_BUNDLES
 };
-use baad_utils::debug;
 use baad_utils::file::get_data_path;
 use baad_utils::json::load;
+use memorypack::{MemoryPackDeserialize, MemoryPackSerialize};
 use serde::de::DeserializeOwned;
 use tokio::fs;
 
-use crate::download::{ResourceCategory, download_file};
+use crate::cdn::cache;
+use crate::cdn::cache::CatalogFile;
+use crate::download::ResourceCategory;
 
 pub struct ChinaCdn {
     catalog_url: String,
@@ -86,101 +85,73 @@ impl ChinaCdn {
             self.resource_version,
             self.platform.display_name()
         );
-        let url = format!("{base}/bundleDownloadInfo.json");
-        let hash_url = format!("{base}/bundleDownloadInfo.hash");
-        self.fetch_json(&url, &hash_url, "bundleDownloadInfo.json").await
+        let file = self.catalog_file(
+            format!("{base}/bundleDownloadInfo.json"),
+            format!("{base}/bundleDownloadInfo.hash"),
+            "bundleDownloadInfo.json"
+        )?;
+        self.fetch_json(&file).await
     }
 
     pub async fn fetch_table(&self) -> Result<ChinaTableCatalog, CatalogError> {
         let url = format!(
             "{}/Manifest/{}/{}/TableManifest",
-            self.catalog_url,
-            TABLE_BUNDLES,
-            self.table_version
+            self.catalog_url, TABLE_BUNDLES, self.table_version
         );
         let hash_url = format!("{url}Hash");
-        self.fetch_json(&url, &hash_url, "TableManifest.json").await
+        let file = self.catalog_file(url, hash_url, "TableManifest.json")?;
+        self.fetch_json(&file).await
     }
 
     pub async fn fetch_media(&self) -> Result<Vec<ChinaMediaEntry>, CatalogError> {
         let url = format!(
             "{}/Manifest/{}/{}/MediaManifest",
-            self.catalog_url,
-            MEDIA_RESOURCES,
-            self.media_version
+            self.catalog_url, MEDIA_RESOURCES, self.media_version
         );
         let hash_url = format!("{url}Hash");
-        let bytes = self.fetch_bytes(&url, &hash_url, "MediaManifest.txt").await?;
-        let text = String::from_utf8_lossy(&bytes);
-        Ok(Self::parse_media(&text))
-    }
+        let file = self.catalog_file(url, hash_url, "MediaManifest.txt")?;
+        let downloaded = cache::ensure_cached(&file).await?;
 
-    async fn fetch_json<T: DeserializeOwned>(
-        &self,
-        url: &str,
-        hash_url: &str,
-        filename: &str
-    ) -> Result<T, CatalogError> {
-        let path = get_data_path(&self.cache_key(filename))?;
-        self.ensure_cached(url, hash_url, &path, filename).await?;
-        Ok(load::<T>(&path).await?)
-    }
-
-    async fn fetch_bytes(
-        &self,
-        url: &str,
-        hash_url: &str,
-        filename: &str
-    ) -> Result<Vec<u8>, CatalogError> {
-        let path = get_data_path(&self.cache_key(filename))?;
-        self.ensure_cached(url, hash_url, &path, filename).await?;
-        Ok(fs::read(&path).await?)
-    }
-
-    async fn ensure_cached(
-        &self,
-        url: &str,
-        hash_url: &str,
-        path: &Path,
-        filename: &str
-    ) -> Result<(), CatalogError> {
-        let hash_path = path.with_extension("hash");
-
-        let remote = Self::remote_hash(hash_url).await;
-        let local = Self::local_hash(&hash_path).await;
-
-        let outdated = !path.exists()
-            || match (&remote, &local) {
-                (Some(remote), Some(local)) => remote != local,
-                (Some(_), None) => true,
-                (None, _) => false
-            };
-
-        if outdated {
-            debug!(filename, "Catalog outdated, fetching...");
-            download_file(url, path, None, 3).await?;
-            if let Some(remote) = &remote {
-                fs::write(&hash_path, remote).await?;
-            }
-        } else {
-            debug!(filename, "Catalog up to date, using cache");
+        if !downloaded
+            && let Some(value) = cache::read_pack::<Vec<ChinaMediaEntry>>(&file.pack_path()).await
+        {
+            return Ok(value);
         }
 
-        Ok(())
+        let bytes = fs::read(&file.path).await?;
+        let text = String::from_utf8_lossy(&bytes);
+        let entries = Self::parse_media(&text);
+        cache::write_pack(&file.pack_path(), &entries).await?;
+        Ok(entries)
     }
 
-    fn cache_key(&self, filename: &str) -> String {
-        format!("catalog/china/{}/{}", self.platform.as_ref(), filename)
+    async fn fetch_json<T>(&self, file: &CatalogFile) -> Result<T, CatalogError>
+    where
+        T: DeserializeOwned + MemoryPackSerialize + MemoryPackDeserialize
+    {
+        let downloaded = cache::ensure_cached(file).await?;
+
+        if !downloaded && let Some(value) = cache::read_pack::<T>(&file.pack_path()).await {
+            return Ok(value);
+        }
+
+        let value = load::<T>(&file.path).await?;
+        cache::write_pack(&file.pack_path(), &value).await?;
+        Ok(value)
     }
 
-    async fn remote_hash(url: &str) -> Option<String> {
-        let response = client().get(url).send().await.ok()?.error_for_status().ok()?;
-        let text = response.text().await.ok()?;
-        Some(text.trim().to_string())
-    }
-
-    async fn local_hash(path: &Path) -> Option<String> {
-        fs::read_to_string(path).await.ok().map(|hash| hash.trim().to_string())
+    fn catalog_file(
+        &self,
+        url: String,
+        hash_url: String,
+        filename: &str
+    ) -> Result<CatalogFile, CatalogError> {
+        let key = format!("catalog/china/{}/{}", self.platform.as_ref(), filename);
+        Ok(CatalogFile {
+            url,
+            hash_url,
+            path: get_data_path(&key)?
+        })
     }
 
     fn parse_media(text: &str) -> Vec<ChinaMediaEntry> {
