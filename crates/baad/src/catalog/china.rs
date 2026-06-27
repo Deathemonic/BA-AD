@@ -108,8 +108,8 @@ impl Catalog for ChinaCatalog {
     }
 
     fn build_downloads(&self, resources: Self::Resources, base_or_url: &str) -> Downloads {
-        if resources.table.is_some() || resources.media.is_some() {
-            warn!("China table and media downloads are not implemented yet");
+        if resources.media.is_some() {
+            warn!("China media downloads are not implemented yet");
         }
 
         Downloads {
@@ -117,7 +117,10 @@ impl Catalog for ChinaCatalog {
                 .assets
                 .map(|m| ChinaStrategy::build_asset_downloads(m, base_or_url, self.platform))
                 .unwrap_or_default(),
-            tables: Vec::new(),
+            tables: resources
+                .table
+                .map(|t| ChinaStrategy::build_table_downloads(t, base_or_url))
+                .unwrap_or_default(),
             media: Vec::new()
         }
     }

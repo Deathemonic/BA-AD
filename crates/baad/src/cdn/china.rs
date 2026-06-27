@@ -79,14 +79,16 @@ impl ChinaCdn {
     }
 
     pub async fn fetch_assets(&self) -> Result<ChinaBundleCatalog, CatalogError> {
-        let url = format!(
-            "{}/{}/Catalog/{}/{}/bundleDownloadInfo.json",
+        let base = format!(
+            "{}/{}/Catalog/{}/{}",
             self.catalog_url,
             ASSET_BUNDLES,
             self.resource_version,
             self.platform.display_name()
         );
-        self.fetch_json(&url, "bundleDownloadInfo.json").await
+        let url = format!("{base}/bundleDownloadInfo.json");
+        let hash_url = format!("{base}/bundleDownloadInfo.hash");
+        self.fetch_json(&url, &hash_url, "bundleDownloadInfo.json").await
     }
 
     pub async fn fetch_table(&self) -> Result<ChinaTableCatalog, CatalogError> {
@@ -96,7 +98,8 @@ impl ChinaCdn {
             TABLE_BUNDLES,
             self.table_version
         );
-        self.fetch_json(&url, "TableManifest.json").await
+        let hash_url = format!("{url}Hash");
+        self.fetch_json(&url, &hash_url, "TableManifest.json").await
     }
 
     pub async fn fetch_media(&self) -> Result<Vec<ChinaMediaEntry>, CatalogError> {
@@ -106,7 +109,8 @@ impl ChinaCdn {
             MEDIA_RESOURCES,
             self.media_version
         );
-        let bytes = self.fetch_bytes(&url, "MediaManifest.txt").await?;
+        let hash_url = format!("{url}Hash");
+        let bytes = self.fetch_bytes(&url, &hash_url, "MediaManifest.txt").await?;
         let text = String::from_utf8_lossy(&bytes);
         Ok(Self::parse_media(&text))
     }
@@ -114,28 +118,35 @@ impl ChinaCdn {
     async fn fetch_json<T: DeserializeOwned>(
         &self,
         url: &str,
+        hash_url: &str,
         filename: &str
     ) -> Result<T, CatalogError> {
         let path = get_data_path(&self.cache_key(filename))?;
-        self.ensure_cached(url, &path, filename).await?;
+        self.ensure_cached(url, hash_url, &path, filename).await?;
         Ok(load::<T>(&path).await?)
     }
 
-    async fn fetch_bytes(&self, url: &str, filename: &str) -> Result<Vec<u8>, CatalogError> {
+    async fn fetch_bytes(
+        &self,
+        url: &str,
+        hash_url: &str,
+        filename: &str
+    ) -> Result<Vec<u8>, CatalogError> {
         let path = get_data_path(&self.cache_key(filename))?;
-        self.ensure_cached(url, &path, filename).await?;
+        self.ensure_cached(url, hash_url, &path, filename).await?;
         Ok(fs::read(&path).await?)
     }
 
     async fn ensure_cached(
         &self,
         url: &str,
+        hash_url: &str,
         path: &Path,
         filename: &str
     ) -> Result<(), CatalogError> {
         let hash_path = path.with_extension("hash");
 
-        let remote = Self::remote_hash(&Self::hash_url(url)).await;
+        let remote = Self::remote_hash(hash_url).await;
         let local = Self::local_hash(&hash_path).await;
 
         let outdated = !path.exists()
@@ -160,12 +171,6 @@ impl ChinaCdn {
 
     fn cache_key(&self, filename: &str) -> String {
         format!("catalog/china/{}/{}", self.platform.as_ref(), filename)
-    }
-
-    fn hash_url(url: &str) -> String {
-        let (dir, file) = url.rsplit_once('/').unwrap_or(("", url));
-        let stem = file.rsplit_once('.').map_or(file, |(stem, _)| stem);
-        format!("{dir}/{stem}.hash")
     }
 
     async fn remote_hash(url: &str) -> Option<String> {
