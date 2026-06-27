@@ -101,6 +101,13 @@ impl Platform {
             Self::Windows => PLATFORM_NAME_WINDOWS
         }
     }
+
+    pub fn ensure_supported(self) -> Result<(), ServerConfigError> {
+        match self {
+            Self::Windows => Err(ServerConfigError::WindowsNotSupported),
+            _ => Ok(())
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, AsRefStr, IntoStaticStr)]

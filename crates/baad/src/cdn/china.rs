@@ -6,7 +6,6 @@ use baad_core::{
     ChinaTableCatalog,
     MEDIA_RESOURCES,
     Platform,
-    ServerConfigError,
     TABLE_BUNDLES
 };
 use baad_utils::file::get_data_path;
@@ -20,7 +19,7 @@ use crate::cdn::cache::CatalogFile;
 use crate::download::ResourceCategory;
 
 pub struct ChinaCdn {
-    catalog_url: String,
+    pub(crate) catalog_url: String,
     platform: Platform,
     resource_version: String,
     table_version: String,
@@ -40,18 +39,8 @@ impl ChinaCdn {
         resource_version: String,
         table_version: String,
         media_version: String
-    ) -> Result<Self, ServerConfigError> {
-        if platform == Platform::Windows {
-            return Err(ServerConfigError::WindowsNotSupported);
-        }
-
-        Ok(Self {
-            catalog_url: catalog_url.trim_end_matches('/').to_string(),
-            platform,
-            resource_version,
-            table_version,
-            media_version
-        })
+    ) -> Self {
+        Self { catalog_url, platform, resource_version, table_version, media_version }
     }
 
     pub async fn fetch(

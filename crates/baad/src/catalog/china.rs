@@ -6,8 +6,7 @@ use baad_core::{
     CatalogError,
     ChinaState,
     Downloads,
-    Platform,
-    ServerConfigError
+    Platform
 };
 use baad_utils::file::get_data_path;
 use baad_utils::json::{load, update};
@@ -32,9 +31,7 @@ pub struct ChinaCatalog {
 
 impl ChinaCatalog {
     pub fn new(category: Vec<ResourceCategory>, platform: Platform) -> Result<Self, CatalogError> {
-        if platform == Platform::Windows {
-            return Err(ServerConfigError::WindowsNotSupported.into());
-        }
+        platform.ensure_supported()?;
 
         Ok(Self {
             rostar_client: RoStarClient::new(),
@@ -96,15 +93,15 @@ impl Catalog for ChinaCatalog {
         let root = self.resolve(version, &state).await?;
 
         let cdn = ChinaCdn::new(
-            root.clone(),
+            root,
             self.platform,
             state.resource_version,
             state.table_version,
             state.media_version
-        )?;
+        );
         let resources = cdn.fetch(&self.category).await?;
 
-        Ok((root, resources))
+        Ok((cdn.catalog_url, resources))
     }
 
     fn build_downloads(&self, resources: Self::Resources, base_or_url: &str) -> Downloads {
