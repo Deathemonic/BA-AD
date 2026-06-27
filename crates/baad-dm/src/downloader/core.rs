@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::sync::Arc;
 
 use baad_core::{DownloadEvent, DownloadStatus};
@@ -228,18 +229,23 @@ impl<'a> Downloader<'a> {
             status: summary.status.clone()
         });
 
+        let name = Path::new(&summary.download.filename)
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or(&summary.download.filename);
+
         match &summary.status {
             DownloadStatus::Success => {
-                info!(file = %summary.download.filename, success = true, "Downloaded");
+                info!(file = name, success = true, "Downloaded");
             }
             DownloadStatus::Failed(error) => {
-                error!(file = %summary.download.filename, cause = %error, "Failed");
+                error!(file = name, cause = %error, "Failed");
             }
             DownloadStatus::Skipped(reason) => {
-                warn!(file = %summary.download.filename, cause = %reason, "Skipped");
+                warn!(file = name, cause = %reason, "Skipped");
             }
             DownloadStatus::HashMismatch(reason) => {
-                error!(file = %summary.download.filename, cause = %reason, "Hash mismatch");
+                error!(file = name, cause = %reason, "Hash mismatch");
             }
             DownloadStatus::NotStarted => {}
         }
