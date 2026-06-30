@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-use baad_core::{DownloadEvent, DownloadObserver};
+use baad_shared::{DownloadEvent, DownloadObserver};
 use derive_more::Debug;
 
 #[derive(Clone, Debug)]

@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::sync::Arc;
 
-use baad_core::{DownloadEvent, DownloadStatus};
+use baad_shared::{DownloadEvent, DownloadStatus};
 use futures::stream::{self, StreamExt};
 use reqwest_middleware::reqwest::StatusCode;
 use tokio::fs;

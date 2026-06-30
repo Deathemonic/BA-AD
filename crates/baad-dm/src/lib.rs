@@ -4,7 +4,7 @@ pub mod downloader;
 pub mod error;
 pub mod zip;
 
-pub use baad_core::{
+pub use baad_shared::{
     DownloadEvent,
     DownloadObserver,
     DownloadStatus,

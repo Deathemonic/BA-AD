@@ -1,4 +1,4 @@
-use baad_core::{
+use baad_shared::{
     CatalogError,
     ChinaState,
     REGEX_VERSION,

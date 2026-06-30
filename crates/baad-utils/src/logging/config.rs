@@ -2,8 +2,8 @@ use std::io;
 use std::sync::Arc;
 use std::time::Duration;
 
-pub use baad_core::ConfigError;
-use baad_core::set_observer;
+pub use baad_shared::ConfigError;
+use baad_shared::set_observer;
 use better_default::Default;
 use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::fmt::{self};

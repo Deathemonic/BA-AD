@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use baad_core::error::FilterError;
+use baad_shared::error::FilterError;
 use glob::Pattern as GlobPattern;
 use lazy_regex::Regex;
 use nucleo::{Config, Matcher, Utf32Str};

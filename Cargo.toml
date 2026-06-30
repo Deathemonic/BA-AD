@@ -1,10 +1,10 @@
 [workspace]
 members = [
-    "crates/baad-core",
     "crates/baad",
     "crates/baad-utils",
     "crates/baad-dm",
-    "crates/baad-cli"
+    "crates/baad-cli",
+    "crates/baad-shared",
 ]
 resolver = "2"
 
@@ -24,9 +24,10 @@ lazy-regex = "3.5"
 derive_more = { version = "2", default-features = false, features = ["debug"] }
 strum = { version = "0.27", features = ["derive"] }
 bon = "3"
+memorypack = "1.2.2"
 bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "3.1.0" }
 
 baad = { path = "crates/baad" }
-baad-core = { path = "crates/baad-core" }
+baad-shared = { path = "crates/baad-shared" }
 baad-utils = { path = "crates/baad-utils" }
 baad-dm = { path = "crates/baad-dm" }

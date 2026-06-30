@@ -1,4 +1,4 @@
-use baad_core::{
+use baad_shared::{
     ASSET_BUNDLES,
     CatalogError,
     ChinaBundleCatalog,
@@ -40,7 +40,13 @@ impl ChinaCdn {
         table_version: String,
         media_version: String
     ) -> Self {
-        Self { catalog_url, platform, resource_version, table_version, media_version }
+        Self {
+            catalog_url,
+            platform,
+            resource_version,
+            table_version,
+            media_version
+        }
     }
 
     pub async fn fetch(

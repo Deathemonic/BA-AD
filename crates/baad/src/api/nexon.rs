@@ -1,4 +1,4 @@
-use baad_core::{
+use baad_shared::{
     CatalogError,
     GLOBAL_API_URL,
     GLOBAL_PLAYSTORE_URL,

@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use baad_core::{
+use baad_shared::{
     DownloadAsset,
     DownloadMedia,
     DownloadTable,

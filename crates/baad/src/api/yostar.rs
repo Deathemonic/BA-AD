@@ -1,6 +1,6 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use baad_core::{
+use baad_shared::{
     CatalogError,
     Domain,
     GameBaseConfig,

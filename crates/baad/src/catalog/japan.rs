@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use baad_core::{
+use baad_shared::{
     API_FILENAME,
     ApiData,
     CatalogError,

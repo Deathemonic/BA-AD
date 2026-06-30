@@ -170,8 +170,8 @@ dependencies = [
 name = "baad"
 version = "3.0.0"
 dependencies = [
- "baad-core",
  "baad-dm",
+ "baad-shared",
  "baad-utils",
  "bacy",
  "base64",
@@ -205,24 +205,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "baad-core"
-version = "3.0.0"
-dependencies = [
- "bacy",
- "lazy-regex",
- "memorypack",
- "reqwest",
- "serde",
- "serde_json",
- "strum",
- "thiserror 2.0.17",
-]
-
-[[package]]
 name = "baad-dm"
 version = "3.0.0"
 dependencies = [
- "baad-core",
+ "baad-shared",
  "bacy",
  "bon",
  "derive_more",
@@ -238,11 +224,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "baad-shared"
+version = "3.0.0"
+dependencies = [
+ "bacy",
+ "lazy-regex",
+ "memorypack",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "strum",
+ "thiserror 2.0.17",
+]
+
+[[package]]
 name = "baad-utils"
 version = "3.0.0"
 dependencies = [
  "anyhow",
- "baad-core",
+ "baad-shared",
  "better_default",
  "chrono",
  "crossbeam-channel",

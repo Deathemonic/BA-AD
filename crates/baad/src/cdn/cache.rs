@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use baad_core::{CatalogError, client};
+use baad_shared::{CatalogError, client};
 use baad_utils::debug;
 use memorypack::{MemoryPackDeserialize, MemoryPackSerialize, MemoryPackSerializer};
 use tokio::fs;

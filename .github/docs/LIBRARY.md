@@ -109,7 +109,7 @@ let downloader = ResourceDownloader::builder()
 downloader.download(downloads, None).await?;
 ```
 
-The `download` method takes the [`Downloads`](../../crates/baad-core/src/types.rs) returned by `prepare_downloads()` and downloads
+The `download` method takes the [`Downloads`](../../crates/baad-shared/src/types.rs) returned by `prepare_downloads()` and downloads
 every category present in it.
 
 ## Filtering
@@ -149,7 +149,7 @@ Each method has a matching helper constructor (`ResourceFilter::exact`, `::start
 
 ## Downloads
 
-`prepare_downloads()` returns a [`Downloads`](../../crates/baad-core/src/types.rs) struct you can inspect before downloading:
+`prepare_downloads()` returns a [`Downloads`](../../crates/baad-shared/src/types.rs) struct you can inspect before downloading:
 
 ```rust
 let downloads = catalog.prepare_downloads().await?;
@@ -175,7 +175,7 @@ init_logging(LoggingConfig {
 
 ## Progress (Observers)
 
-To react to download progress, implement [`DownloadObserver`](../../crates/baad-core/src/observer.rs) and register it globally with
+To react to download progress, implement [`DownloadObserver`](../../crates/baad-shared/src/observer.rs) and register it globally with
 `set_observer` before downloading. Useful for progress bars or custom UIs.
 
 ```rust

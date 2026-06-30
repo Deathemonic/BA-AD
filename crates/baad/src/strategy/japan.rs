@@ -1,4 +1,4 @@
-use baad_core::{
+use baad_shared::{
     BundlePatchPackInfo,
     DownloadAsset,
     DownloadMedia,

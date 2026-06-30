@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use baad_core::DownloadStatus;
+use baad_shared::DownloadStatus;
 use bon::Builder;
 use reqwest_middleware::reqwest::StatusCode;
 

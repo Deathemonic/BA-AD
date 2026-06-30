@@ -1,16 +1,9 @@
 use std::path::PathBuf;
 
-use baad_core::{
-    API_FILENAME,
-    ApiData,
-    CatalogError,
-    ChinaState,
-    Downloads,
-    Platform
-};
+use baad_shared::{API_FILENAME, ApiData, CatalogError, ChinaState, Downloads, Platform};
 use baad_utils::file::get_data_path;
-use baad_utils::json::{load, update};
 use baad_utils::info;
+use baad_utils::json::{load, update};
 
 use crate::api::RoStarClient;
 use crate::catalog::traits::Catalog;

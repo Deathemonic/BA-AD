@@ -1,4 +1,4 @@
-use baad_core::{CatalogError, GlobalCatalog as GlobalCatalogData, Platform};
+use baad_shared::{CatalogError, GlobalCatalog as GlobalCatalogData, Platform};
 use baad_utils::file::get_data_path;
 use baad_utils::json::load;
 use baad_utils::{debug, warn};

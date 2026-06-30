@@ -7,7 +7,8 @@ pub static REGEX_VERSION: Lazy<Regex> = lazy_regex!(r"\d+\.\d+\.\d+");
 
 pub const GLOBAL_API_URL: &str = "https://api-pub.nexon.com/patch/v1.1/version-check";
 
-pub const GLOBAL_PLAYSTORE_URL: &str = "https://apptopia.com/google-play/app/com.nexon.bluearchive/about";
+pub const GLOBAL_PLAYSTORE_URL: &str =
+    "https://apptopia.com/google-play/app/com.nexon.bluearchive/about";
 pub const GLOBAL_APPSTORE_URL: &str = "https://apps.apple.com/us/app/blue-archive/id1571873795";
 
 pub const GLOBAL_ANDROID_STANDARD_ID: &str = "com.nexon.bluearchive";
@@ -65,7 +66,6 @@ pub const MEDIA_RESOURCES_WINDOWS: &str = "MediaResources-Windows";
 pub const PATCH_PACK_ANDROID: &str = "Android_PatchPack";
 pub const PATCH_PACK_IOS: &str = "iOS_PatchPack";
 pub const PATCH_PACK_WINDOWS: &str = "Windows_PatchPack";
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, AsRefStr, IntoStaticStr)]
 #[strum(serialize_all = "lowercase")]

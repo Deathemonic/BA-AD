@@ -1,4 +1,4 @@
-use baad_core::{
+use baad_shared::{
     ASSET_BUNDLES,
     ChinaBundleCatalog,
     ChinaMediaEntry,
@@ -37,7 +37,10 @@ impl ChinaStrategy {
         assets.collect()
     }
 
-    pub fn build_media_downloads(media: Vec<ChinaMediaEntry>, catalog_url: &str) -> Vec<DownloadMedia> {
+    pub fn build_media_downloads(
+        media: Vec<ChinaMediaEntry>,
+        catalog_url: &str
+    ) -> Vec<DownloadMedia> {
         let entries = media.into_iter().map(|entry| DownloadMedia {
             url: format!("{}/{}/{}", catalog_url, MEDIA_RESOURCES, entry.path),
             path: entry.path,
@@ -48,7 +51,10 @@ impl ChinaStrategy {
         entries.collect()
     }
 
-    pub fn build_table_downloads(catalog: ChinaTableCatalog, catalog_url: &str) -> Vec<DownloadTable> {
+    pub fn build_table_downloads(
+        catalog: ChinaTableCatalog,
+        catalog_url: &str
+    ) -> Vec<DownloadTable> {
         let tables = catalog.table.into_values().map(|entry| DownloadTable {
             url: format!("{}/{}/{}", catalog_url, TABLE_BUNDLES, entry.name),
             path: entry.name,

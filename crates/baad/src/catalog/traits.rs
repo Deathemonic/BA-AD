@@ -1,4 +1,4 @@
-use baad_core::{CatalogError, Downloads};
+use baad_shared::{CatalogError, Downloads};
 
 #[allow(async_fn_in_trait)]
 pub trait Catalog {

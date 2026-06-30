@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use baad_core::{DownloadEvent, DownloadObserver, DownloadStatus};
+use baad_shared::{DownloadEvent, DownloadObserver, DownloadStatus};
 use better_default::Default;
 use tracing::Level;
 

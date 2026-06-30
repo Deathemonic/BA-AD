@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 use std::path::Path;
 
-use baad_core::{DownloadAsset, DownloadMedia, DownloadTable, HashValue};
 use baad_dm::Download;
+use baad_shared::{DownloadAsset, DownloadMedia, DownloadTable, HashValue};
 use reqwest::Url;
 
 use crate::download::ResourceFilter;

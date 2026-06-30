@@ -10,7 +10,7 @@ no_debug = []
 no_error = []
 
 [dependencies]
-baad-core = { workspace = true }
+baad-shared = { workspace = true }
 
 tokio = { workspace = true }
 eyre = { workspace = true }

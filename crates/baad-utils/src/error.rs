@@ -1,6 +1,6 @@
 use std::iter::successors;
 
-pub use baad_core::{ConfigError, FileError, JsonError, NetworkError, ProgressError};
+pub use baad_shared::{ConfigError, FileError, JsonError, NetworkError, ProgressError};
 use eyre::Report;
 use tracing::warn;
 

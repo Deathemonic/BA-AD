@@ -4,7 +4,7 @@ pub mod cdn;
 pub mod download;
 pub mod strategy;
 
-pub use baad_core::{
+pub use baad_shared::{
     BuildType,
     DownloadEvent,
     DownloadObserver,
