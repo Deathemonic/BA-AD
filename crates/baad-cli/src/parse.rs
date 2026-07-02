@@ -89,8 +89,6 @@ impl CommandHandler {
 
         let downloads = catalog.prepare_downloads().await?;
 
-        info!("Catalog fetched successfully");
-
         let downloader = ResourceDownloader::builder()
             .output_dir(output_dir)
             .limit(base.limit as usize)

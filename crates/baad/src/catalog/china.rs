@@ -36,7 +36,7 @@ impl ChinaCatalog {
         })
     }
 
-    async fn resolve(&self, version: String, state: &ChinaState) -> Result<String, CatalogError> {
+    async fn resolve(&self, version: String, state: &ChinaState) -> Result<(String, bool), CatalogError> {
         let catalog_url = state
             .addressables_catalog_url_roots
             .first()
@@ -56,8 +56,7 @@ impl ChinaCatalog {
         });
 
         if up_to_date {
-            info!("Catalog up to date");
-            return Ok(catalog_url);
+            return Ok((catalog_url, true));
         }
 
         info!("Catalog changed, updating...");
@@ -71,19 +70,19 @@ impl ChinaCatalog {
         })
         .await?;
 
-        Ok(catalog_url)
+        Ok((catalog_url, false))
     }
 }
 
 impl Catalog for ChinaCatalog {
     type Resources = ChinaResources;
 
-    async fn fetch_resources(&self) -> Result<(String, Self::Resources), CatalogError> {
+    async fn fetch_resources(&self) -> Result<(String, Self::Resources, bool), CatalogError> {
         let version = self.rostar_client.get_version().await?;
         info!(version = %version, "Version");
 
         let state = self.rostar_client.get_state(&version).await?;
-        let root = self.resolve(version, &state).await?;
+        let (root, up_to_date) = self.resolve(version, &state).await?;
 
         let cdn = ChinaCdn::new(
             root,
@@ -94,7 +93,7 @@ impl Catalog for ChinaCatalog {
         );
         let resources = cdn.fetch(&self.category).await?;
 
-        Ok((cdn.catalog_url, resources))
+        Ok((cdn.catalog_url, resources, up_to_date))
     }
 
     fn build_downloads(&self, resources: Self::Resources, base_or_url: &str) -> Downloads {

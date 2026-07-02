@@ -75,7 +75,7 @@ impl GlobalCatalog {
         Ok(catalog_url)
     }
 
-    pub async fn get_catalog_url(&self, version: &str) -> Result<String, CatalogError> {
+    pub async fn get_catalog_url(&self, version: &str) -> Result<(String, bool), CatalogError> {
         let platform: &'static str = self.platform.into();
         let build_type: &'static str = self.build_type.into();
 
@@ -91,12 +91,12 @@ impl GlobalCatalog {
             .filter(|url| !url.is_empty());
 
         if let Some(catalog_url) = api_data {
-            info!("Catalog up to date");
-            return Ok(catalog_url);
+            return Ok((catalog_url, true));
         }
 
         info!("Fetching latest update");
-        self.full_update(version.to_string()).await
+        let catalog_url = self.full_update(version.to_string()).await?;
+        Ok((catalog_url, false))
     }
 
     pub async fn fetch_catalogs(
@@ -112,17 +112,17 @@ impl GlobalCatalog {
 impl Catalog for GlobalCatalog {
     type Resources = GlobalCatalogData;
 
-    async fn fetch_resources(&self) -> Result<(String, Self::Resources), CatalogError> {
+    async fn fetch_resources(&self) -> Result<(String, Self::Resources, bool), CatalogError> {
         let version = self.nexon_client.get_version().await?;
         info!(version = %version, "Version");
 
-        let catalog_url = self.get_catalog_url(&version).await?;
+        let (catalog_url, up_to_date) = self.get_catalog_url(&version).await?;
         let base_url = GlobalCdn::derive_base_url(&catalog_url)
             .ok_or(CatalogError::DeserializationFailed)?
             .to_string();
 
         let catalog = self.fetch_catalogs(&catalog_url).await?;
-        Ok((base_url, catalog))
+        Ok((base_url, catalog, up_to_date))
     }
 
     fn build_downloads(&self, resources: Self::Resources, base_or_url: &str) -> Downloads {

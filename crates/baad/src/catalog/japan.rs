@@ -69,7 +69,7 @@ impl JapanCatalog {
         Ok(catalog_url.to_string())
     }
 
-    pub async fn get_catalog_url(&self) -> Result<String, CatalogError> {
+    pub async fn get_catalog_url(&self) -> Result<(String, bool), CatalogError> {
         let api_data = load::<ApiData>(&self.paths.api).await.ok();
 
         let base_config = self.yostar_client.get_base_config().await?;
@@ -78,7 +78,8 @@ impl JapanCatalog {
 
         if api_data.as_ref().map(|d| &d.japan.version) != Some(&latest_version) {
             info!("Fetching latest update");
-            return self.full_update(latest_version).await;
+            let catalog_url = self.full_update(latest_version).await?;
+            return Ok((catalog_url, false));
         }
 
         let api_data = api_data.ok_or(CatalogError::DeserializationFailed)?;
@@ -86,8 +87,7 @@ impl JapanCatalog {
         let catalog_url = JapanCdn::extract_catalog_url(&addressable)?;
 
         if api_data.japan.catalog_url == catalog_url {
-            info!("Catalog up to date");
-            return Ok(api_data.japan.catalog_url);
+            return Ok((api_data.japan.catalog_url, true));
         }
 
         info!("Catalog changed, updating...");
@@ -96,7 +96,7 @@ impl JapanCatalog {
         })
         .await?;
 
-        Ok(catalog_url.to_string())
+        Ok((catalog_url.to_string(), false))
     }
 
     async fn download_resources_asset(&self) -> Result<PathBuf, CatalogError> {
@@ -164,11 +164,11 @@ impl JapanCatalog {
 impl Catalog for JapanCatalog {
     type Resources = JapanResources;
 
-    async fn fetch_resources(&self) -> Result<(String, Self::Resources), CatalogError> {
-        let url = self.get_catalog_url().await?;
+    async fn fetch_resources(&self) -> Result<(String, Self::Resources, bool), CatalogError> {
+        let (url, up_to_date) = self.get_catalog_url().await?;
         let cdn = JapanCdn::new(url.clone(), self.platform);
         let resources = cdn.fetch(&self.category).await?;
-        Ok((url, resources))
+        Ok((url, resources, up_to_date))
     }
 
     fn build_downloads(&self, resources: Self::Resources, base_or_url: &str) -> Downloads {
