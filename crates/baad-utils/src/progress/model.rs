@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::path::Path;
 use std::sync::Arc;
 
 use baad_shared::{DownloadEvent, DownloadObserver, DownloadStatus};
@@ -54,9 +55,13 @@ impl DownloadProgressModel {
 impl ProgressModel for DownloadProgressModel {
     fn render(&mut self, _width: usize, output: &mut String) {
         for filename in self.active.keys() {
+            let name = Path::new(filename.as_ref())
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or(filename);
             let _ = self
                 .formatter
-                .write_line(output, &Level::INFO, false, "Downloading", &[("file", filename)]);
+                .write_line(output, &Level::INFO, false, "Downloading", &[("file", name)]);
         }
     }
 
