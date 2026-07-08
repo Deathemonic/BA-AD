@@ -173,6 +173,36 @@ println!("tables: {}", downloads.tables.len());
 println!("media:  {}", downloads.media.len());
 ```
 
+To list files without downloading them, iterate over the returned vectors:
+
+```rust
+use baad::catalog::{Catalog, JapanCatalog};
+use baad::download::ResourceCategory;
+use baad::Platform;
+
+#[tokio::main]
+async fn main() -> eyre::Result<()> {
+    let catalog = JapanCatalog::new(
+        vec![ResourceCategory::Assets, ResourceCategory::Tables],
+        Platform::Android,
+    )?;
+
+    let downloads = catalog.prepare_downloads().await?;
+
+    for asset in &downloads.assets {
+        println!("asset: {} ({} bytes)", asset.path, asset.size);
+    }
+
+    for table in &downloads.tables {
+        println!("table: {} ({} bytes)", table.path, table.size);
+    }
+
+    Ok(())
+}
+```
+
+Each entry also includes the source `url`, expected `hash`, and, for assets/tables, any `bundle_files` listed by the catalog.
+
 ## Logging
 
 Logging is off by default. Initialize it once at startup with `init_logging`:
