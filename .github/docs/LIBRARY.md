@@ -43,6 +43,20 @@ async fn main() -> eyre::Result<()> {
 
 The flow is always the same: **build a catalog → `prepare_downloads()` → feed it to a `ResourceDownloader`**.
 
+## Data Directory
+
+BA-AD stores cached API and catalog data in the platform data directory by default. To use a custom directory, set it once at startup before creating any catalogs:
+
+```rust
+use baad::file;
+
+file::set_data_dir("./my-cache".into())?;
+
+let catalog = JapanCatalog::new(vec![ResourceCategory::Assets], Platform::Android)?;
+```
+
+`set_data_dir` is process-global and can only be called once. Use it for app-level cache configuration before constructing catalogs.
+
 ## Catalogs
 
 Each server has its own catalog type, all implementing the [`Catalog`](../../crates/baad/src/catalog/traits.rs) trait (which provides
