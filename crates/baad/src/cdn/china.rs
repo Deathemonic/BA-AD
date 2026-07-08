@@ -155,8 +155,8 @@ impl ChinaCdn {
             .filter_map(|line| {
                 let mut parts = line.split(',');
                 Some(ChinaMediaEntry {
-                    path: parts.next()?.to_string(),
-                    hash: parts.next()?.to_string(),
+                    path: parts.next()?.into(),
+                    hash: parts.next()?.into(),
                     media_type: parts.next()?.parse().ok()?,
                     bytes: parts.next()?.parse().ok()?
                 })

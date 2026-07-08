@@ -95,7 +95,7 @@ impl GlobalCatalog {
         }
 
         info!("Fetching latest update");
-        let catalog_url = self.full_update(version.to_string()).await?;
+        let catalog_url = self.full_update(version.into()).await?;
         Ok((catalog_url, false))
     }
 
@@ -103,7 +103,7 @@ impl GlobalCatalog {
         &self,
         catalog_url: &str
     ) -> Result<GlobalCatalogData, CatalogError> {
-        let cdn = GlobalCdn::new(catalog_url.to_string(), self.platform);
+        let cdn = GlobalCdn::new(catalog_url.into(), self.platform);
         let catalog = cdn.fetch().await?;
         Ok(catalog)
     }
@@ -125,7 +125,7 @@ impl Catalog for GlobalCatalog {
         Ok((base_url, catalog, up_to_date))
     }
 
-    fn build_downloads(&self, resources: Self::Resources, base_or_url: &str) -> Downloads {
-        GlobalStrategy::build_downloads(resources.resources, base_or_url, &self.category)
+    fn build_downloads(&self, resources: Self::Resources, url: &str) -> Downloads {
+        GlobalStrategy::build_downloads(resources.resources, url, &self.category)
     }
 }

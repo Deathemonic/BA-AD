@@ -82,10 +82,10 @@ impl Catalog for ChinaCatalog {
         info!(version = %version, "Version");
 
         let state = self.rostar_client.get_state(&version).await?;
-        let (root, up_to_date) = self.resolve(version, &state).await?;
+        let (url, up_to_date) = self.resolve(version, &state).await?;
 
         let cdn = ChinaCdn::new(
-            root,
+            url,
             self.platform,
             state.resource_version,
             state.table_version,
@@ -96,19 +96,19 @@ impl Catalog for ChinaCatalog {
         Ok((cdn.catalog_url, resources, up_to_date))
     }
 
-    fn build_downloads(&self, resources: Self::Resources, base_or_url: &str) -> Downloads {
+    fn build_downloads(&self, resources: Self::Resources, url: &str) -> Downloads {
         Downloads {
             assets: resources
                 .assets
-                .map(|m| ChinaStrategy::build_asset_downloads(m, base_or_url, self.platform))
+                .map(|m| ChinaStrategy::build_asset_downloads(m, url, self.platform))
                 .unwrap_or_default(),
             tables: resources
                 .table
-                .map(|t| ChinaStrategy::build_table_downloads(t, base_or_url))
+                .map(|t| ChinaStrategy::build_table_downloads(t, url))
                 .unwrap_or_default(),
             media: resources
                 .media
-                .map(|m| ChinaStrategy::build_media_downloads(m, base_or_url))
+                .map(|m| ChinaStrategy::build_media_downloads(m, url))
                 .unwrap_or_default()
         }
     }
