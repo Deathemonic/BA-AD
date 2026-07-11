@@ -1,4 +1,5 @@
 [workspace]
+resolver = "3"
 members = [
     "crates/baad",
     "crates/baad-utils",
@@ -6,7 +7,6 @@ members = [
     "crates/baad-cli",
     "crates/baad-shared",
 ]
-resolver = "2"
 
 [workspace.package]
 version = "3.0.0"
@@ -14,18 +14,19 @@ edition = "2024"
 authors = ["Zinth"]
 
 [workspace.dependencies]
-tokio = { version = "1.49", features = ["full"] }
+tokio = { version = "1.52", features = ["full"] }
 eyre = "0.6"
 thiserror = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 reqwest = "0.13"
-lazy-regex = "3.5"
+lazy-regex = "3.6"
 derive_more = { version = "2", default-features = false, features = ["debug"] }
-strum = { version = "0.27", features = ["derive"] }
+strum = { version = "0.28", features = ["derive"] }
 bon = "3"
 memorypack = "1.2.2"
-bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "3.1.0" }
+tracing = "0.1"
+bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "3.3.0" }
 
 baad = { path = "crates/baad" }
 baad-shared = { path = "crates/baad-shared" }

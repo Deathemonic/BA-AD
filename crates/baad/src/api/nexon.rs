@@ -7,7 +7,8 @@ use baad_shared::{
     REGEX_VERSION,
     client
 };
-use crate::errors::CatalogError;
+
+use crate::error::CatalogError;
 
 #[derive(Default)]
 pub struct NexonClient;

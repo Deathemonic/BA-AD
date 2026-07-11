@@ -2,10 +2,10 @@ use std::io::{self, Write as IoWrite};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use crate::error::ProgressError;
 use simdutf8::basic::from_utf8;
 use tracing_subscriber::fmt::MakeWriter;
 
+use crate::error::ProgressError;
 use crate::progress::{ansi, terminal};
 
 pub trait ProgressModel: Send + 'static {

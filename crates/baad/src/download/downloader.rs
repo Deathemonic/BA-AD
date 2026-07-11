@@ -2,12 +2,12 @@ use std::path::{Path, PathBuf};
 
 use baad_dm::{Download, Downloader, DownloaderConfig};
 use baad_shared::{DownloadStatus, Downloads};
-use crate::errors::CatalogError;
 use baad_utils::{error, info, warn};
 use bon::Builder;
 use reqwest::{Proxy, Url};
 
 use crate::download::{ResourceFilter, converter};
+use crate::error::CatalogError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ResourceCategory {

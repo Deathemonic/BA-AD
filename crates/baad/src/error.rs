@@ -1,6 +1,6 @@
 use std::io;
 
-use baad_utils::error::{FileError, JsonError, NetworkError};
+use baad_utils::{FileError, JsonError, NetworkError};
 use thiserror::Error;
 
 #[derive(Error, Debug)]

@@ -2,7 +2,6 @@ use std::io;
 use std::sync::Arc;
 use std::time::Duration;
 
-pub use crate::error::ConfigError;
 use baad_shared::set_observer;
 use better_default::Default;
 use tracing_subscriber::fmt::format::FmtSpan;
@@ -11,6 +10,7 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, registry};
 
+pub use crate::error::ConfigError;
 use crate::formatter::ConsoleFormatter;
 use crate::logging::handler;
 use crate::logging::writer::{AsyncMakeWriter, store_guard};

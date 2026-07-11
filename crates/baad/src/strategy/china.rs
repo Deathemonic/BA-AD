@@ -1,3 +1,4 @@
+use baad_shared::platform::Platform;
 use baad_shared::{
     ASSET_BUNDLES,
     ChinaBundleCatalog,
@@ -8,7 +9,6 @@ use baad_shared::{
     DownloadTable,
     HashValue,
     MEDIA_RESOURCES,
-    Platform,
     TABLE_BUNDLES
 };
 

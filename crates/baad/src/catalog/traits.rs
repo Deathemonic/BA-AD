@@ -1,6 +1,7 @@
 use baad_shared::Downloads;
-use crate::errors::CatalogError;
 use baad_utils::info;
+
+use crate::error::CatalogError;
 
 #[allow(async_fn_in_trait)]
 pub trait Catalog {

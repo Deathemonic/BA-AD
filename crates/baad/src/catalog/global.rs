@@ -1,15 +1,7 @@
 use std::path::PathBuf;
 
-use crate::errors::CatalogError;
-use baad_shared::{
-    API_FILENAME,
-    ApiData,
-    BuildType,
-    Downloads,
-    GlobalCatalog as GlobalCatalogData,
-    MarketConfig,
-    Platform
-};
+use baad_shared::platform::{BuildType, MarketConfig, Platform};
+use baad_shared::{API_FILENAME, ApiData, Downloads, GlobalCatalog as GlobalCatalogData};
 use baad_utils::file::get_data_path;
 use baad_utils::info;
 use baad_utils::json::{load, update};
@@ -18,6 +10,7 @@ use crate::api::NexonClient;
 use crate::catalog::traits::Catalog;
 use crate::cdn::GlobalCdn;
 use crate::download::ResourceCategory;
+use crate::error::CatalogError;
 use crate::strategy::GlobalStrategy;
 
 struct GlobalPaths {

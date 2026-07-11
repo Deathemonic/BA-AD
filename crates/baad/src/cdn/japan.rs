@@ -6,7 +6,6 @@ use baad_shared::{
     TableCatalog,
     client
 };
-use crate::errors::CatalogError;
 use baad_utils::file::get_data_path;
 use memorypack::MemoryPackSerializer;
 use tokio::fs;
@@ -14,6 +13,7 @@ use tokio::fs;
 use crate::cdn::cache;
 use crate::cdn::cache::CatalogFile;
 use crate::download::ResourceCategory;
+use crate::error::CatalogError;
 
 pub struct JapanCdn {
     catalog_url: String,

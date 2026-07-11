@@ -1,6 +1,5 @@
 use std::path::PathBuf;
 
-use crate::errors::CatalogError;
 use baad_shared::{
     API_FILENAME,
     ApiData,
@@ -23,6 +22,7 @@ use crate::api::YoStarClient;
 use crate::catalog::traits::Catalog;
 use crate::cdn::{JapanCdn, JapanResources};
 use crate::download::{ResourceCategory, download_file};
+use crate::error::CatalogError;
 use crate::strategy::JapanStrategy;
 
 struct JapanPaths {

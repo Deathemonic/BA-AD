@@ -11,7 +11,7 @@ baad-shared = { workspace = true }
 derive_more = { workspace = true }
 tokio = { workspace = true }
 thiserror = { workspace = true }
-reqwest = { workspace = true, features = [ "http2", "stream", "socks", "gzip", "deflate", "brotli","zstd", "rustls" ]}
+reqwest = { workspace = true, features = ["http2", "stream", "socks", "gzip", "deflate", "brotli", "zstd", "rustls"] }
 bon = { workspace = true }
 
 futures = "0.3"

@@ -1,5 +1,5 @@
-use baad_shared::{GlobalCatalog as GlobalCatalogData, Platform};
-use crate::errors::CatalogError;
+use baad_shared::GlobalCatalog as GlobalCatalogData;
+use baad_shared::platform::Platform;
 use baad_utils::file::get_data_path;
 use baad_utils::json::load;
 use baad_utils::{debug, warn};
@@ -7,6 +7,7 @@ use tokio::fs;
 
 use crate::cdn::cache;
 use crate::download::download_file;
+use crate::error::CatalogError;
 
 pub struct GlobalCdn {
     catalog_url: String,
@@ -23,7 +24,7 @@ impl GlobalCdn {
         let marker = path.with_extension("url");
         let pack = path.with_extension("bytes");
 
-        let cached_url = fs::read_to_string(&marker).await.ok().map(|url| url.trim().to_string());
+        let cached_url = fs::read_to_string(&marker).await.ok().map(|url| String::from(url.trim()));
         let outdated = !path.exists() || cached_url.as_deref() != Some(self.catalog_url.as_str());
 
         if !outdated {

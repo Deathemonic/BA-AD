@@ -1,12 +1,12 @@
 use std::path::{Path, PathBuf};
 
 use baad_shared::client;
-use crate::errors::CatalogError;
 use baad_utils::debug;
 use memorypack::{MemoryPackDeserialize, MemoryPackSerialize, MemoryPackSerializer};
 use tokio::fs;
 
 use crate::download::download_file;
+use crate::error::CatalogError;
 
 pub struct CatalogFile {
     pub url: String,

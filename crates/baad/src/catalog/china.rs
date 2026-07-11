@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
 use baad_shared::{API_FILENAME, ApiData, ChinaState, Downloads, Platform};
-use crate::errors::CatalogError;
 use baad_utils::file::get_data_path;
 use baad_utils::info;
 use baad_utils::json::{load, update};
@@ -10,6 +9,7 @@ use crate::api::RoStarClient;
 use crate::catalog::traits::Catalog;
 use crate::cdn::{ChinaCdn, ChinaResources};
 use crate::download::ResourceCategory;
+use crate::error::CatalogError;
 use crate::strategy::ChinaStrategy;
 
 struct ChinaPaths {
@@ -37,7 +37,11 @@ impl ChinaCatalog {
         })
     }
 
-    async fn resolve(&self, version: String, state: &ChinaState) -> Result<(String, bool), CatalogError> {
+    async fn resolve(
+        &self,
+        version: String,
+        state: &ChinaState
+    ) -> Result<(String, bool), CatalogError> {
         let catalog_url = state
             .addressables_catalog_url_roots
             .first()

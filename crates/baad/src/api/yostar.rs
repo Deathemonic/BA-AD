@@ -1,6 +1,5 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::errors::CatalogError;
 use baad_shared::{
     Domain,
     GameBaseConfig,
@@ -18,6 +17,8 @@ use baad_shared::{
 };
 use bacy::crypto::md5::compute_hash_str;
 use serde::{Deserialize, Serialize};
+
+use crate::error::CatalogError;
 
 #[derive(Serialize, Deserialize)]
 struct YoStarHead {

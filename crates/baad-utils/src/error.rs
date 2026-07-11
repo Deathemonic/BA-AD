@@ -1,5 +1,5 @@
-use std::io;
 use std::iter::successors;
+use std::{error, io};
 
 use eyre::Report;
 use thiserror::Error;
@@ -78,7 +78,7 @@ pub trait IntoEyreReport {
     fn into_eyre_report(self) -> Report;
 }
 
-impl IntoEyreReport for anyhow::Error {
+impl<E: error::Error + Send + Sync + 'static> IntoEyreReport for E {
     fn into_eyre_report(self) -> Report {
         let mut report = Report::msg(self.to_string());
 

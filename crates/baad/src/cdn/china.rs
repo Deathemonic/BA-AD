@@ -7,7 +7,6 @@ use baad_shared::{
     Platform,
     TABLE_BUNDLES
 };
-use crate::errors::CatalogError;
 use baad_utils::file::get_data_path;
 use baad_utils::json::load;
 use memorypack::{MemoryPackDeserialize, MemoryPackSerialize};
@@ -17,6 +16,7 @@ use tokio::fs;
 use crate::cdn::cache;
 use crate::cdn::cache::CatalogFile;
 use crate::download::ResourceCategory;
+use crate::error::CatalogError;
 
 pub struct ChinaCdn {
     pub(crate) catalog_url: String,

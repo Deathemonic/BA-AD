@@ -1,10 +1,11 @@
 use std::cell::RefCell;
 
-use crate::errors::FilterError;
 use glob::Pattern as GlobPattern;
 use lazy_regex::Regex;
 use nucleo::{Config, Matcher, Utf32Str};
 use strum::{AsRefStr, EnumString};
+
+use crate::error::FilterError;
 
 #[derive(Debug, Clone, EnumString, AsRefStr)]
 #[strum(serialize_all = "kebab-case")]

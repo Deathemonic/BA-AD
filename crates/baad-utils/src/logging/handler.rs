@@ -2,9 +2,10 @@ use std::iter::successors;
 use std::sync::Once;
 use std::{error, fmt, panic};
 
-pub use crate::error::ConfigError;
 use eyre::EyreHandler;
 use tracing::error;
+
+pub use crate::error::ConfigError;
 
 #[derive(Debug)]
 pub struct TracingHandler;

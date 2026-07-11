@@ -2,7 +2,7 @@ pub mod api;
 pub mod catalog;
 pub mod cdn;
 pub mod download;
-pub mod errors;
+pub mod error;
 pub mod strategy;
 
 pub use baad_shared::{
@@ -17,5 +17,6 @@ pub use baad_shared::{
     set_observer
 };
 pub use baad_utils::config::{LoggingConfig, init_logging};
-pub use baad_utils::{debug, error, file, info, trace, warn};
-pub use errors::*;
+pub use baad_utils::file;
+pub use error::*;
+pub use tracing::{debug, error, info, trace, warn};

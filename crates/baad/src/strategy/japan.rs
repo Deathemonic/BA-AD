@@ -1,3 +1,4 @@
+use baad_shared::platform::Platform;
 use baad_shared::{
     BundlePatchPackInfo,
     DownloadAsset,
@@ -5,7 +6,6 @@ use baad_shared::{
     DownloadTable,
     HashValue,
     MediaCatalog,
-    Platform,
     TableCatalog
 };
 

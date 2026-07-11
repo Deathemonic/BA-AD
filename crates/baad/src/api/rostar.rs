@@ -7,7 +7,8 @@ use baad_shared::{
     ROSTAR_VERSION_URL,
     client
 };
-use crate::errors::CatalogError;
+
+use crate::error::CatalogError;
 
 #[derive(Default)]
 pub struct RoStarClient;

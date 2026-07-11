@@ -18,13 +18,14 @@ strum = { workspace = true }
 bon = { workspace = true }
 memorypack = { workspace = true }
 bacy = { workspace = true }
+tracing = { workspace = true }
 
 walkdir = "2.5.0"
 zip = "7.2"
 base64 = "0.22"
 glob = "0.3"
 nucleo = "0.5"
-url = "2.5"
+ada-url = "3.4"
 rayon = "1.11.0"
 memchr = "2.7.6"
 urlencoding = "2.1.3"
