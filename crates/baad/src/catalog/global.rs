@@ -1,10 +1,10 @@
 use std::path::PathBuf;
 
+use crate::errors::CatalogError;
 use baad_shared::{
     API_FILENAME,
     ApiData,
     BuildType,
-    CatalogError,
     Downloads,
     GlobalCatalog as GlobalCatalogData,
     MarketConfig,

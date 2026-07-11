@@ -2,7 +2,7 @@ use std::io::{self, Write as IoWrite};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use baad_shared::ProgressError;
+use crate::error::ProgressError;
 use simdutf8::basic::from_utf8;
 use tracing_subscriber::fmt::MakeWriter;
 

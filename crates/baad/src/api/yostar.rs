@@ -1,7 +1,7 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use crate::errors::CatalogError;
 use baad_shared::{
-    CatalogError,
     Domain,
     GameBaseConfig,
     GameFile,

@@ -1,5 +1,4 @@
 use baad_shared::{
-    CatalogError,
     GLOBAL_API_URL,
     GLOBAL_PLAYSTORE_URL,
     GlobalAddressable,
@@ -8,6 +7,7 @@ use baad_shared::{
     REGEX_VERSION,
     client
 };
+use crate::errors::CatalogError;
 
 #[derive(Default)]
 pub struct NexonClient;

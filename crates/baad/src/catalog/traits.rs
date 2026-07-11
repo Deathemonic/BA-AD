@@ -1,4 +1,5 @@
-use baad_shared::{CatalogError, Downloads};
+use baad_shared::Downloads;
+use crate::errors::CatalogError;
 use baad_utils::info;
 
 #[allow(async_fn_in_trait)]

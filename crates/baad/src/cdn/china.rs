@@ -1,6 +1,5 @@
 use baad_shared::{
     ASSET_BUNDLES,
-    CatalogError,
     ChinaBundleCatalog,
     ChinaMediaEntry,
     ChinaTableCatalog,
@@ -8,6 +7,7 @@ use baad_shared::{
     Platform,
     TABLE_BUNDLES
 };
+use crate::errors::CatalogError;
 use baad_utils::file::get_data_path;
 use baad_utils::json::load;
 use memorypack::{MemoryPackDeserialize, MemoryPackSerialize};

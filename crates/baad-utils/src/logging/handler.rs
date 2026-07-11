@@ -2,7 +2,7 @@ use std::iter::successors;
 use std::sync::Once;
 use std::{error, fmt, panic};
 
-pub use baad_shared::ConfigError;
+pub use crate::error::ConfigError;
 use eyre::EyreHandler;
 use tracing::error;
 

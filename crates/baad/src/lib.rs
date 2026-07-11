@@ -2,6 +2,7 @@ pub mod api;
 pub mod catalog;
 pub mod cdn;
 pub mod download;
+pub mod errors;
 pub mod strategy;
 
 pub use baad_shared::{
@@ -17,3 +18,4 @@ pub use baad_shared::{
 };
 pub use baad_utils::config::{LoggingConfig, init_logging};
 pub use baad_utils::{debug, error, file, info, trace, warn};
+pub use errors::*;

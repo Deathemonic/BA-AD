@@ -1,8 +1,78 @@
+use std::io;
 use std::iter::successors;
 
-pub use baad_shared::{ConfigError, FileError, JsonError, NetworkError, ProgressError};
 use eyre::Report;
+use thiserror::Error;
 use tracing::warn;
+
+#[derive(Error, Debug)]
+pub enum FileError {
+    #[error(transparent)]
+    Io(#[from] io::Error),
+
+    #[error(transparent)]
+    External(Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("Failed to create app directories")]
+    AppDirectoryCreationFailed,
+
+    #[error("App name has already been set")]
+    AppNameAlreadySet,
+
+    #[error("Data directory has already been set")]
+    DataDirAlreadySet
+}
+
+#[derive(Error, Debug)]
+pub enum NetworkError {
+    #[error(transparent)]
+    Reqwest(#[from] reqwest::Error),
+
+    #[error("Unable to set proxy")]
+    Proxy
+}
+
+#[derive(Error, Debug)]
+pub enum JsonError {
+    #[error(transparent)]
+    SerdeJson(#[from] serde_json::Error),
+
+    #[error(transparent)]
+    Io(#[from] io::Error),
+
+    #[error(transparent)]
+    File(#[from] FileError),
+
+    #[error("Failed to convert file content to UTF-8")]
+    InvalidUtf8,
+
+    #[error("Failed to get file path")]
+    PathError
+}
+
+#[derive(Error, Debug)]
+pub enum ConfigError {
+    #[error(transparent)]
+    External(Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("Failed to initialize logging")]
+    LoggingInitFailed
+}
+
+#[derive(Error, Debug)]
+pub enum ProgressError {
+    #[error(transparent)]
+    Io(#[from] io::Error),
+
+    #[error("Progress view mutex was poisoned")]
+    MutexPoisoned,
+
+    #[error("Progress view has already been finished")]
+    AlreadyFinished,
+
+    #[error("Invalid UTF-8 in progress message")]
+    InvalidUtf8
+}
 
 pub trait IntoEyreReport {
     fn into_eyre_report(self) -> Report;

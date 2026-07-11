@@ -1,5 +1,4 @@
 use baad_shared::{
-    CatalogError,
     ChinaState,
     REGEX_VERSION,
     ROSTAR_CHANNEL_ID,
@@ -8,6 +7,7 @@ use baad_shared::{
     ROSTAR_VERSION_URL,
     client
 };
+use crate::errors::CatalogError;
 
 #[derive(Default)]
 pub struct RoStarClient;

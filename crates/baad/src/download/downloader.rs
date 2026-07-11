@@ -1,7 +1,8 @@
 use std::path::{Path, PathBuf};
 
 use baad_dm::{Download, Downloader, DownloaderConfig};
-use baad_shared::{CatalogError, DownloadStatus, Downloads};
+use baad_shared::{DownloadStatus, Downloads};
+use crate::errors::CatalogError;
 use baad_utils::{error, info, warn};
 use bon::Builder;
 use reqwest::{Proxy, Url};

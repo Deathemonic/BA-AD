@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
-use baad_shared::{API_FILENAME, ApiData, CatalogError, ChinaState, Downloads, Platform};
+use baad_shared::{API_FILENAME, ApiData, ChinaState, Downloads, Platform};
+use crate::errors::CatalogError;
 use baad_utils::file::get_data_path;
 use baad_utils::info;
 use baad_utils::json::{load, update};

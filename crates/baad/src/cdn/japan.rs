@@ -1,12 +1,12 @@
 use baad_shared::{
     BundlePatchPackInfo,
-    CatalogError,
     JapanAddressable,
     MediaCatalog,
     Platform,
     TableCatalog,
     client
 };
+use crate::errors::CatalogError;
 use baad_utils::file::get_data_path;
 use memorypack::MemoryPackSerializer;
 use tokio::fs;
