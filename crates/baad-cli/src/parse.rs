@@ -100,22 +100,12 @@ impl CommandHandler {
         Ok(())
     }
 
-    fn resource_categories(&self, args: &BaseDownloadArgs) -> Vec<ResourceCategory> {
-        let has_assets = args.assets;
-        let has_tables = args.tables;
-        let has_media = args.media;
-
-        match (has_assets, has_tables, has_media) {
-            (true, false, false) => vec![ResourceCategory::Assets],
-            (false, true, false) => vec![ResourceCategory::Tables],
-            (false, false, true) => vec![ResourceCategory::Media],
-            (true, true, false) => vec![ResourceCategory::Assets, ResourceCategory::Tables],
-            (true, false, true) => vec![ResourceCategory::Assets, ResourceCategory::Media],
-            (false, true, true) => vec![ResourceCategory::Tables, ResourceCategory::Media],
-            (true, true, true) | (false, false, false) => {
-                vec![ResourceCategory::Assets, ResourceCategory::Tables, ResourceCategory::Media]
-            }
-        }
+    fn resource_categories(&self, args: &BaseDownloadArgs) -> ResourceCategory {
+        ResourceCategory::new()
+            .include_if(args.assets, ResourceCategory::Assets)
+            .include_if(args.tables, ResourceCategory::Tables)
+            .include_if(args.media, ResourceCategory::Media)
+            .or_all_if_empty()
     }
 
     fn resource_filter(&self, args: &BaseDownloadArgs) -> Result<Option<ResourceFilter>> {

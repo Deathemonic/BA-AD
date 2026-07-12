@@ -19,13 +19,13 @@ struct ChinaPaths {
 
 pub struct ChinaCatalog {
     rostar_client: RoStarClient,
-    category: Vec<ResourceCategory>,
+    category: ResourceCategory,
     platform: Platform,
     paths: ChinaPaths
 }
 
 impl ChinaCatalog {
-    pub fn new(category: Vec<ResourceCategory>, platform: Platform) -> Result<Self, CatalogError> {
+    pub fn new(category: ResourceCategory, platform: Platform) -> Result<Self, CatalogError> {
         platform.ensure_supported()?;
 
         Ok(Self {
@@ -97,7 +97,7 @@ impl Catalog for ChinaCatalog {
             state.table_version,
             state.media_version
         );
-        let resources = cdn.fetch(&self.category).await?;
+        let resources = cdn.fetch(self.category).await?;
 
         Ok((cdn.catalog_url, resources, up_to_date))
     }

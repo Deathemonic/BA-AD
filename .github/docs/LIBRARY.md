@@ -24,7 +24,7 @@ use baad::Platform;
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
     // Pick what to download and from which platform
-    let catalog = JapanCatalog::new(vec![ResourceCategory::Assets], Platform::Android)?;
+    let catalog = JapanCatalog::new(ResourceCategory::Assets, Platform::Android)?;
 
     // Fetch the catalog and turn it into a list of downloads
     let downloads = catalog.prepare_downloads().await?;
@@ -52,7 +52,7 @@ use baad::file;
 
 file::set_data_dir("./my-cache".into())?;
 
-let catalog = JapanCatalog::new(vec![ResourceCategory::Assets], Platform::Android)?;
+let catalog = JapanCatalog::new(ResourceCategory::Assets, Platform::Android)?;
 ```
 
 `set_data_dir` is process-global and can only be called once. Use it for app-level cache configuration before constructing catalogs.
@@ -67,13 +67,13 @@ use baad::catalog::{ChinaCatalog, GlobalCatalog, JapanCatalog};
 use baad::download::ResourceCategory;
 use baad::{BuildType, Platform};
 
-let categories = vec![ResourceCategory::Assets, ResourceCategory::Media];
+let categories = ResourceCategory::from([ResourceCategory::Assets, ResourceCategory::Media]);
 
 // Japan
-let japan = JapanCatalog::new(categories.clone(), Platform::Android)?;
+let japan = JapanCatalog::new(categories, Platform::Android)?;
 
 // China
-let china = ChinaCatalog::new(categories.clone(), Platform::Android)?;
+let china = ChinaCatalog::new(categories, Platform::Android)?;
 
 // Global also takes a BuildType (Standard or Teen)
 let global = GlobalCatalog::new(categories, Platform::Ios, BuildType::Teen)?;
@@ -91,9 +91,37 @@ use baad::download::ResourceCategory;
 ResourceCategory::Assets   // asset bundles
 ResourceCategory::Tables   // table bundles
 ResourceCategory::Media    // media resources (audio, video, etc.)
+ResourceCategory::ALL      // everything
 ```
 
-Pass any combination as the `Vec` to a catalog. An empty `Vec` or all three downloads everything.
+Pass a single category directly:
+
+```rust
+let catalog = JapanCatalog::new(ResourceCategory::Assets, Platform::Android)?;
+```
+
+Or combine categories with `ResourceCategory::from`:
+
+```rust
+let categories = ResourceCategory::from([
+    ResourceCategory::Assets,
+    ResourceCategory::Media,
+]);
+
+let catalog = JapanCatalog::new(categories, Platform::Android)?;
+```
+
+You can also build categories conditionally:
+
+```rust
+let categories = ResourceCategory::new()
+    .include_if(include_assets, ResourceCategory::Assets)
+    .include_if(include_tables, ResourceCategory::Tables)
+    .include_if(include_media, ResourceCategory::Media)
+    .or_all_if_empty();
+```
+
+`ResourceCategory` is `Copy`, so you can reuse it across catalog constructors without cloning.
 
 ### Platform
 
@@ -183,7 +211,7 @@ use baad::Platform;
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
     let catalog = JapanCatalog::new(
-        vec![ResourceCategory::Assets, ResourceCategory::Tables],
+        ResourceCategory::from([ResourceCategory::Assets, ResourceCategory::Tables]),
         Platform::Android,
     )?;
 

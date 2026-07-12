@@ -198,6 +198,7 @@ dependencies = [
  "baad-utils",
  "bacy",
  "base64",
+ "bitflags",
  "bon",
  "glob",
  "lazy-regex",

@@ -49,22 +49,19 @@ impl ChinaCdn {
         }
     }
 
-    pub async fn fetch(
-        &self,
-        category: &[ResourceCategory]
-    ) -> Result<ChinaResources, CatalogError> {
+    pub async fn fetch(&self, category: ResourceCategory) -> Result<ChinaResources, CatalogError> {
         Ok(ChinaResources {
-            assets: if category.contains(&ResourceCategory::Assets) {
+            assets: if category.contains(ResourceCategory::Assets) {
                 Some(self.fetch_assets().await?)
             } else {
                 None
             },
-            table: if category.contains(&ResourceCategory::Tables) {
+            table: if category.contains(ResourceCategory::Tables) {
                 Some(self.fetch_table().await?)
             } else {
                 None
             },
-            media: if category.contains(&ResourceCategory::Media) {
+            media: if category.contains(ResourceCategory::Media) {
                 Some(self.fetch_media().await?)
             } else {
                 None

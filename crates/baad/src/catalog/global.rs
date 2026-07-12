@@ -26,7 +26,7 @@ struct GlobalPaths {
 
 pub struct GlobalCatalog {
     nexon_client: NexonClient,
-    category: Vec<ResourceCategory>,
+    category: ResourceCategory,
     platform: Platform,
     build_type: BuildType,
     paths: GlobalPaths
@@ -34,7 +34,7 @@ pub struct GlobalCatalog {
 
 impl GlobalCatalog {
     pub fn new(
-        category: Vec<ResourceCategory>,
+        category: ResourceCategory,
         platform: Platform,
         build_type: BuildType
     ) -> Result<Self, CatalogError> {
@@ -126,6 +126,6 @@ impl Catalog for GlobalCatalog {
     }
 
     fn build_downloads(&self, resources: Self::Resources, url: &str) -> Downloads {
-        GlobalStrategy::build_downloads(resources.resources, url, &self.category)
+        GlobalStrategy::build_downloads(resources.resources, url, self.category)
     }
 }

@@ -21,7 +21,7 @@ impl GlobalStrategy {
     pub fn build_downloads(
         resources: Vec<Resource>,
         base_url: &str,
-        category: &[ResourceCategory]
+        category: ResourceCategory
     ) -> Downloads {
         let mut assets = Vec::new();
         let mut tables = Vec::new();
@@ -37,7 +37,7 @@ impl GlobalStrategy {
             let size = resource.resource_size;
 
             if resource.resource_path.contains(TABLE_BUNDLES) {
-                if category.contains(&ResourceCategory::Tables) {
+                if category.contains(ResourceCategory::Tables) {
                     let filename = Path::new(&resource.resource_path)
                         .file_name()
                         .and_then(|f| f.to_str())
@@ -53,7 +53,7 @@ impl GlobalStrategy {
                     });
                 }
             } else if resource.resource_path.contains(MEDIA_RESOURCES) {
-                if category.contains(&ResourceCategory::Media) {
+                if category.contains(ResourceCategory::Media) {
                     let filename = Path::new(&resource.resource_path)
                         .file_name()
                         .and_then(|f| f.to_str())
@@ -67,7 +67,7 @@ impl GlobalStrategy {
                         size
                     });
                 }
-            } else if category.contains(&ResourceCategory::Assets) {
+            } else if category.contains(ResourceCategory::Assets) {
                 assets.push(DownloadAsset {
                     url,
                     path: resource.resource_path,

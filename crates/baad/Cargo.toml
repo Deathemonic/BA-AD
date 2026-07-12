@@ -19,6 +19,7 @@ bon = { workspace = true }
 memorypack = { workspace = true }
 bacy = { workspace = true }
 tracing = { workspace = true }
+bitflags = { workspace = true }
 
 walkdir = "2.5.0"
 zip = "7.2"

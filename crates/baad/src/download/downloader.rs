@@ -9,13 +9,6 @@ use reqwest::{Proxy, Url};
 use crate::download::{ResourceFilter, converter};
 use crate::error::CatalogError;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ResourceCategory {
-    Assets,
-    Tables,
-    Media
-}
-
 #[derive(Builder)]
 pub struct ResourceDownloader {
     output_dir: PathBuf,

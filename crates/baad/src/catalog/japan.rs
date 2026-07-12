@@ -32,13 +32,13 @@ struct JapanPaths {
 
 pub struct JapanCatalog {
     yostar_client: YoStarClient,
-    category: Vec<ResourceCategory>,
+    category: ResourceCategory,
     platform: Platform,
     paths: JapanPaths
 }
 
 impl JapanCatalog {
-    pub fn new(category: Vec<ResourceCategory>, platform: Platform) -> Result<Self, CatalogError> {
+    pub fn new(category: ResourceCategory, platform: Platform) -> Result<Self, CatalogError> {
         Ok(Self {
             yostar_client: YoStarClient::new(),
             category,
@@ -167,7 +167,7 @@ impl Catalog for JapanCatalog {
     async fn fetch_resources(&self) -> Result<(String, Self::Resources, bool), CatalogError> {
         let (url, up_to_date) = self.get_catalog_url().await?;
         let cdn = JapanCdn::new(url.clone(), self.platform);
-        let resources = cdn.fetch(&self.category).await?;
+        let resources = cdn.fetch(self.category).await?;
         Ok((url, resources, up_to_date))
     }
 
