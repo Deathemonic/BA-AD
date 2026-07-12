@@ -206,12 +206,12 @@ pub struct ChinaState {
 #[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
 pub struct ChinaTableCatalog {
-    pub table: HashMap<String, ChinaTableEntry>
+    pub table: HashMap<String, ChinaTableBundle>
 }
 
 #[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
-pub struct ChinaTableEntry {
+pub struct ChinaTableBundle {
     pub name: String,
     pub size: i64,
     pub crc: String,
@@ -242,9 +242,9 @@ pub struct ChinaBundleFile {
 
 #[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
-pub struct ChinaMediaEntry {
+pub struct ChinaMedia {
     pub path: String,
-    pub hash: String,
+    pub crc: String,
     pub media_type: i32,
     pub bytes: i64
 }

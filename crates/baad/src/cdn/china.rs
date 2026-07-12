@@ -1,7 +1,7 @@
 use baad_shared::{
     ASSET_BUNDLES,
     ChinaBundleCatalog,
-    ChinaMediaEntry,
+    ChinaMedia,
     ChinaTableCatalog,
     MEDIA_RESOURCES,
     Platform,
@@ -29,7 +29,7 @@ pub struct ChinaCdn {
 pub struct ChinaResources {
     pub assets: Option<ChinaBundleCatalog>,
     pub table: Option<ChinaTableCatalog>,
-    pub media: Option<Vec<ChinaMediaEntry>>
+    pub media: Option<Vec<ChinaMedia>>
 }
 
 impl ChinaCdn {
@@ -95,7 +95,7 @@ impl ChinaCdn {
         self.fetch_json(&file).await
     }
 
-    pub async fn fetch_media(&self) -> Result<Vec<ChinaMediaEntry>, CatalogError> {
+    pub async fn fetch_media(&self) -> Result<Vec<ChinaMedia>, CatalogError> {
         let url = format!(
             "{}/Manifest/{}/{}/MediaManifest",
             self.catalog_url, MEDIA_RESOURCES, self.media_version
@@ -105,7 +105,7 @@ impl ChinaCdn {
         let downloaded = cache::ensure_cached(&file).await?;
 
         if !downloaded
-            && let Some(value) = cache::read_pack::<Vec<ChinaMediaEntry>>(&file.pack_path()).await
+            && let Some(value) = cache::read_pack::<Vec<ChinaMedia>>(&file.pack_path()).await
         {
             return Ok(value);
         }
@@ -146,14 +146,14 @@ impl ChinaCdn {
         })
     }
 
-    fn parse_media(text: &str) -> Vec<ChinaMediaEntry> {
+    fn parse_media(text: &str) -> Vec<ChinaMedia> {
         text.lines()
             .filter(|line| !line.trim().is_empty())
             .filter_map(|line| {
                 let mut parts = line.split(',');
-                Some(ChinaMediaEntry {
+                Some(ChinaMedia {
                     path: parts.next()?.into(),
-                    hash: parts.next()?.into(),
+                    crc: parts.next()?.into(),
                     media_type: parts.next()?.parse().ok()?,
                     bytes: parts.next()?.parse().ok()?
                 })

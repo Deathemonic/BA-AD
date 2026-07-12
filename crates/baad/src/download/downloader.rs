@@ -84,7 +84,7 @@ pub async fn download_file(
     let output_dir = output_path.parent().ok_or(CatalogError::DeserializationFailed)?;
 
     let download =
-        Download::builder().url(parsed_url).filename(filename.to_string()).maybe_hash(hash).build();
+        Download::builder().url(parsed_url).filename(filename.into()).maybe_hash(hash).build();
 
     let config = DownloaderConfig::builder()
         .directory(output_dir)

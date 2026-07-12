@@ -1,7 +1,7 @@
 use baad_shared::{
     ASSET_BUNDLES,
     ChinaBundleCatalog,
-    ChinaMediaEntry,
+    ChinaMedia,
     ChinaTableCatalog,
     DownloadAsset,
     DownloadMedia,
@@ -38,14 +38,18 @@ impl ChinaStrategy {
     }
 
     pub fn build_media_downloads(
-        media: Vec<ChinaMediaEntry>,
+        catalog: Vec<ChinaMedia>,
         catalog_url: &str
     ) -> Vec<DownloadMedia> {
-        let entries = media.into_iter().map(|entry| DownloadMedia {
-            url: format!("{}/{}/{}", catalog_url, MEDIA_RESOURCES, entry.path),
-            path: entry.path,
-            hash: HashValue::Md5(entry.hash),
-            size: entry.bytes
+        let entries = catalog.into_iter().map(|entry| {
+            let url = Self::hashed_url(catalog_url, &entry.crc, MEDIA_RESOURCES);
+
+            DownloadMedia {
+                url,
+                path: entry.path,
+                hash: HashValue::Md5(entry.crc),
+                size: entry.bytes
+            }
         });
 
         entries.collect()
@@ -55,14 +59,23 @@ impl ChinaStrategy {
         catalog: ChinaTableCatalog,
         catalog_url: &str
     ) -> Vec<DownloadTable> {
-        let tables = catalog.table.into_values().map(|entry| DownloadTable {
-            url: format!("{}/{}/{}", catalog_url, TABLE_BUNDLES, entry.name),
-            path: entry.name,
-            hash: HashValue::Md5(entry.crc),
-            size: entry.size,
-            bundle_files: entry.includes.unwrap_or_default()
+        let tables = catalog.table.into_values().map(|entry| {
+            let url = Self::hashed_url(catalog_url, &entry.crc, TABLE_BUNDLES);
+
+            DownloadTable {
+                url,
+                path: entry.name,
+                hash: HashValue::Md5(entry.crc),
+                size: entry.size,
+                bundle_files: entry.includes.unwrap_or_default()
+            }
         });
 
         tables.collect()
+    }
+
+    fn hashed_url(catalog_url: &str, hash: &str, resource: &str) -> String {
+        let shard = hash.get(..2).unwrap_or(hash);
+        format!("{}/pool/{}/{}/{}", catalog_url, resource, shard, hash)
     }
 }
