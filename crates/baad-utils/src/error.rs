@@ -29,7 +29,10 @@ pub enum NetworkError {
     Reqwest(#[from] reqwest::Error),
 
     #[error("Unable to set proxy")]
-    Proxy
+    Proxy,
+
+    #[error("Failed to extract value from response")]
+    ExtractionFailed
 }
 
 #[derive(Error, Debug)]

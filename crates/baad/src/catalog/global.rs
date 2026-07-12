@@ -1,10 +1,17 @@
 use std::path::PathBuf;
 
 use baad_shared::platform::{BuildType, MarketConfig, Platform};
-use baad_shared::{API_FILENAME, ApiData, Downloads, GlobalCatalog as GlobalCatalogData};
+use baad_shared::{
+    API_FILENAME,
+    ApiData,
+    Downloads,
+    GLOBAL_PLAYSTORE_URL,
+    GlobalCatalog as GlobalCatalogData
+};
 use baad_utils::file::get_data_path;
 use baad_utils::info;
 use baad_utils::json::{load, update};
+use baad_utils::network::fetch_version;
 
 use crate::api::NexonClient;
 use crate::catalog::traits::Catalog;
@@ -106,7 +113,7 @@ impl Catalog for GlobalCatalog {
     type Resources = GlobalCatalogData;
 
     async fn fetch_resources(&self) -> Result<(String, Self::Resources, bool), CatalogError> {
-        let version = self.nexon_client.get_version().await?;
+        let version = fetch_version(GLOBAL_PLAYSTORE_URL).await?;
         info!(version = %version, "Version");
 
         let (catalog_url, up_to_date) = self.get_catalog_url(&version).await?;

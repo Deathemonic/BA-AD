@@ -1,12 +1,4 @@
-use baad_shared::{
-    GLOBAL_API_URL,
-    GLOBAL_PLAYSTORE_URL,
-    GlobalAddressable,
-    GlobalCatalog,
-    MarketConfig,
-    REGEX_VERSION,
-    client
-};
+use baad_shared::{GLOBAL_API_URL, GlobalAddressable, GlobalCatalog, MarketConfig, client};
 
 use crate::error::CatalogError;
 
@@ -15,15 +7,6 @@ pub struct NexonClient;
 
 impl NexonClient {
     pub fn new() -> Self { Self }
-
-    pub async fn get_version(&self) -> Result<String, CatalogError> {
-        let response = client().get(GLOBAL_PLAYSTORE_URL).send().await?;
-        let body = response.text().await?;
-        REGEX_VERSION
-            .find(&body)
-            .map(|m| m.as_str().to_string())
-            .ok_or(CatalogError::DeserializationFailed)
-    }
 
     pub async fn get_addressable(
         &self,

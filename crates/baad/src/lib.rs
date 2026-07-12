@@ -17,6 +17,6 @@ pub use baad_shared::{
     set_observer
 };
 pub use baad_utils::config::{LoggingConfig, init_logging};
-pub use baad_utils::file;
+pub use baad_utils::{file, network};
 pub use error::*;
 pub use tracing::{debug, error, info, trace, warn};

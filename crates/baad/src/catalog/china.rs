@@ -1,9 +1,10 @@
 use std::path::PathBuf;
 
-use baad_shared::{API_FILENAME, ApiData, ChinaState, Downloads, Platform};
+use baad_shared::{API_FILENAME, ApiData, ChinaState, Downloads, Platform, ROSTAR_VERSION_URL};
 use baad_utils::file::get_data_path;
 use baad_utils::info;
 use baad_utils::json::{load, update};
+use baad_utils::network::fetch_version;
 
 use crate::api::RoStarClient;
 use crate::catalog::traits::Catalog;
@@ -83,7 +84,7 @@ impl Catalog for ChinaCatalog {
     type Resources = ChinaResources;
 
     async fn fetch_resources(&self) -> Result<(String, Self::Resources, bool), CatalogError> {
-        let version = self.rostar_client.get_version().await?;
+        let version = fetch_version(ROSTAR_VERSION_URL).await?;
         info!(version = %version, "Version");
 
         let state = self.rostar_client.get_state(&version).await?;

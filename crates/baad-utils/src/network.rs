@@ -1,3 +1,4 @@
+use baad_shared::{REGEX_VERSION, client};
 use reqwest::{Proxy, Response};
 
 use crate::error::NetworkError;
@@ -24,4 +25,11 @@ pub fn create_proxy(proxy_url: Option<&str>) -> Result<Option<Proxy>, NetworkErr
         }
         None => Ok(None)
     }
+}
+
+pub async fn fetch_version(url: &str) -> Result<String, NetworkError> {
+    let response = client().get(url).send().await?;
+    let body = response.text().await?;
+
+    REGEX_VERSION.find(&body).map(|m| m.as_str().into()).ok_or(NetworkError::ExtractionFailed)
 }
