@@ -18,9 +18,7 @@ impl ResourceCategory {
         if enabled { self | category } else { self }
     }
 
-    pub fn or_all_if_empty(self) -> Self {
-        if self.is_empty() { Self::ALL } else { self }
-    }
+    pub fn or_all_if_empty(self) -> Self { if self.is_empty() { Self::ALL } else { self } }
 }
 
 impl Default for ResourceCategory {

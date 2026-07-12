@@ -5,6 +5,7 @@ pub mod download;
 pub mod error;
 pub mod strategy;
 
+pub use baad_shared::consts::*;
 pub use baad_shared::{
     BuildType,
     DownloadEvent,

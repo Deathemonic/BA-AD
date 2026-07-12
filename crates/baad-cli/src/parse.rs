@@ -2,7 +2,7 @@ use std::process::exit;
 
 use baad::catalog::{Catalog, ChinaCatalog, GlobalCatalog, JapanCatalog};
 use baad::download::{FilterMethod, ResourceCategory, ResourceDownloader, ResourceFilter};
-use baad::{BuildType, file, info};
+use baad::{ASSET_BUNDLES, BuildType, MEDIA_RESOURCES, TABLE_BUNDLES, file, info};
 use clap::CommandFactory;
 use eyre::{Result, eyre};
 
@@ -87,7 +87,16 @@ impl CommandHandler {
         let filter = self.resource_filter(base)?;
         let output_dir = file::get_output_dir(Some(&base.output)).await?;
 
-        let downloads = catalog.prepare_downloads().await?;
+        let mut downloads = catalog.prepare_downloads().await?;
+        for asset in &mut downloads.assets {
+            Self::categorize_path(ASSET_BUNDLES, &mut asset.path);
+        }
+        for table in &mut downloads.tables {
+            Self::categorize_path(TABLE_BUNDLES, &mut table.path);
+        }
+        for media in &mut downloads.media {
+            Self::categorize_path(MEDIA_RESOURCES, &mut media.path);
+        }
 
         let downloader = ResourceDownloader::builder()
             .output_dir(output_dir)
@@ -98,6 +107,17 @@ impl CommandHandler {
 
         downloader.download(downloads, filter.as_ref()).await?;
         Ok(())
+    }
+
+    fn categorize_path(category_dir: &str, path: &mut String) {
+        if path == category_dir
+            || path.strip_prefix(category_dir).is_some_and(|path| path.starts_with('/'))
+        {
+            return;
+        }
+
+        path.insert(0, '/');
+        path.insert_str(0, category_dir);
     }
 
     fn resource_categories(&self, args: &BaseDownloadArgs) -> ResourceCategory {
