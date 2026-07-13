@@ -9,11 +9,11 @@ static APP_NAME: OnceLock<String> = OnceLock::new();
 static DATA_DIR: OnceLock<PathBuf> = OnceLock::new();
 
 pub fn set_app_name(name: &str) -> Result<(), FileError> {
-    APP_NAME.set(name.to_string()).map_err(|_| FileError::AppNameAlreadySet)
+    APP_NAME.set(name.into()).map_err(|_| FileError::AppNameAlreadySet)
 }
 
 pub fn set_data_dir(path: PathBuf) -> Result<(), FileError> {
-    DATA_DIR.set(path.clone()).map_err(|_| FileError::DataDirAlreadySet)
+    DATA_DIR.set(path).map_err(|_| FileError::DataDirAlreadySet)
 }
 
 fn app_name() -> &'static str { APP_NAME.get().map(|s| s.as_str()).unwrap_or("baad") }

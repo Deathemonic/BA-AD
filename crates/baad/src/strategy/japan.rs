@@ -37,6 +37,7 @@ impl JapanStrategy {
     ) -> Vec<DownloadMedia> {
         let media = catalog.table.into_values().map(|entry| {
             let path = entry.path.replace('\\', "/");
+
             DownloadMedia {
                 url: format!("{}/{}/{}", catalog_url, platform.media_path(), path),
                 path,

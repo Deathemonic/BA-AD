@@ -42,7 +42,7 @@ impl GlobalStrategy {
                         .file_name()
                         .and_then(|f| f.to_str())
                         .unwrap_or(&resource.resource_path)
-                        .to_string();
+                        .into();
 
                     tables.push(DownloadTable {
                         url,
@@ -58,7 +58,7 @@ impl GlobalStrategy {
                         .file_name()
                         .and_then(|f| f.to_str())
                         .unwrap_or(&resource.resource_path)
-                        .to_string();
+                        .into();
 
                     media.push(DownloadMedia {
                         url,

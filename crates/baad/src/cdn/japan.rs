@@ -1,8 +1,10 @@
 use baad_shared::{
     BundlePatchPackInfo,
     JapanAddressable,
+    MEDIA_RESOURCES,
     MediaCatalog,
     Platform,
+    TABLE_BUNDLES,
     TableCatalog,
     client
 };
@@ -69,19 +71,19 @@ impl JapanCdn {
             format!("{}/{}/BundlePackingInfo.bytes", self.catalog_url, self.platform.patch_pack());
         let bytes =
             self.fetch_bytes(&url, &format!("{}/BundlePackingInfo.bytes", platform)).await?;
-        let packing = MemoryPackSerializer::deserialize::<BundlePatchPackInfo>(&bytes)?;
-        Ok(packing)
+        let catalog = MemoryPackSerializer::deserialize::<BundlePatchPackInfo>(&bytes)?;
+        Ok(catalog)
     }
 
     pub async fn fetch_table(&self) -> Result<TableCatalog, CatalogError> {
-        let url = format!("{}/TableBundles/TableCatalog.bytes", self.catalog_url);
+        let url = format!("{}/{}/TableCatalog.bytes", self.catalog_url, TABLE_BUNDLES);
         let bytes = self.fetch_bytes(&url, "TableCatalog.bytes").await?;
         let catalog = MemoryPackSerializer::deserialize::<TableCatalog>(&bytes)?;
         Ok(catalog)
     }
 
     pub async fn fetch_media(&self) -> Result<MediaCatalog, CatalogError> {
-        let url = format!("{}/MediaResources/Catalog/MediaCatalog.bytes", self.catalog_url);
+        let url = format!("{}/{}/Catalog/MediaCatalog.bytes", self.catalog_url, MEDIA_RESOURCES);
         let bytes = self.fetch_bytes(&url, "MediaCatalog.bytes").await?;
         let catalog = MemoryPackSerializer::deserialize::<MediaCatalog>(&bytes)?;
         Ok(catalog)
@@ -89,7 +91,7 @@ impl JapanCdn {
 
     async fn fetch_bytes(&self, url: &str, filename: &str) -> Result<Vec<u8>, CatalogError> {
         let file = CatalogFile {
-            url: url.to_string(),
+            url: url.into(),
             hash_url: Self::hash_url(url),
             path: get_data_path(&format!("catalog/japan/{filename}"))?
         };
@@ -98,6 +100,6 @@ impl JapanCdn {
     }
 
     fn hash_url(url: &str) -> String {
-        url.strip_suffix(".bytes").map_or_else(|| url.to_string(), |stem| format!("{stem}.hash"))
+        url.strip_suffix(".bytes").map_or_else(|| url.into(), |stem| format!("{stem}.hash"))
     }
 }

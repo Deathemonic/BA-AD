@@ -57,7 +57,7 @@ impl ApkFetcher {
         match JAPAN_REGEX_URL.captures(body) {
             Some(caps) if caps.len() >= 3 => caps
                 .get(2)
-                .map(|m| m.as_str().to_string())
+                .map(|m| m.as_str().into())
                 .ok_or(ApkError::DownloadUrlExtractionFailed),
             _ => Err(ApkError::DownloadUrlExtractionFailed),
         }
@@ -68,7 +68,7 @@ impl ApkFetcher {
         let body = response.text().await?;
         REGEX_VERSION
             .find(&body)
-            .map(|m| m.as_str().to_string())
+            .map(|m| m.as_str().into())
             .ok_or(ApkError::VersionExtractionFailed)
     }
 

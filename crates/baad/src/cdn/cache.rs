@@ -52,11 +52,11 @@ pub async fn ensure_cached(file: &CatalogFile) -> Result<bool, CatalogError> {
 pub async fn remote_hash(url: &str) -> Option<String> {
     let response = client().get(url).send().await.ok()?.error_for_status().ok()?;
     let text = response.text().await.ok()?;
-    Some(text.trim().to_string())
+    Some(text.trim().into())
 }
 
 pub async fn local_hash(path: &Path) -> Option<String> {
-    fs::read_to_string(path).await.ok().map(|hash| hash.trim().to_string())
+    fs::read_to_string(path).await.ok().map(|hash| hash.trim().into())
 }
 
 pub async fn read_pack<T: MemoryPackDeserialize>(path: &Path) -> Option<T> {

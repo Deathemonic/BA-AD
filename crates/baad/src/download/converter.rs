@@ -82,7 +82,7 @@ fn convert_path_to_bundle(zip_path: &str, bundle_filename: &str) -> String {
     if let Some(last_slash) = zip_path.rfind('/') {
         format!("{}/{}", &zip_path[..last_slash], bundle_filename)
     } else {
-        bundle_filename.to_string()
+        bundle_filename.into()
     }
 }
 
@@ -96,9 +96,9 @@ fn create_download(
     Some(
         Download::builder()
             .url(parsed_url)
-            .filename(path.to_string())
+            .filename(path.into())
             .hash(hash.as_string())
-            .maybe_target_file(target.map(|s| s.to_string()))
+            .maybe_target_file(target.map(|s| s.into()))
             .build()
     )
 }

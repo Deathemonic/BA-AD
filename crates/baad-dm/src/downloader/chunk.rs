@@ -56,7 +56,7 @@ pub async fn download_chunked(
 
     let chunk_ctx = ChunkCtx {
         client: Arc::new(ctx.client.clone()),
-        resolved_url: resolved_url.to_string(),
+        resolved_url: resolved_url.into(),
         file_path: ctx.file_path.clone()
     };
     let chunk_ctx = Arc::new(chunk_ctx);

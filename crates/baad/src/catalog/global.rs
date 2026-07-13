@@ -119,7 +119,7 @@ impl Catalog for GlobalCatalog {
         let (catalog_url, up_to_date) = self.get_catalog_url(&version).await?;
         let base_url = GlobalCdn::derive_base_url(&catalog_url)
             .ok_or(CatalogError::DeserializationFailed)?
-            .to_string();
+            .into();
 
         let catalog = self.fetch_catalogs(&catalog_url).await?;
         Ok((base_url, catalog, up_to_date))

@@ -48,7 +48,7 @@ impl ChinaCatalog {
             .first()
             .ok_or(CatalogError::DeserializationFailed)?
             .trim_end_matches('/')
-            .to_string();
+            .into();
 
         let platform: &'static str = self.platform.into();
         let api_data = load::<ApiData>(&self.paths.api).await.ok();

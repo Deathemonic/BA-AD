@@ -22,6 +22,21 @@ impl Download {
     }
 }
 
+fn extract_filename(url: &Url) -> Result<String, Error> {
+    let filename = url
+        .path_segments()
+        .and_then(|mut segments| segments.next_back())
+        .filter(|s| !s.is_empty())
+        .ok_or_else(|| Error::InvalidUrl {
+            url: url.as_str().into(),
+            reason: "URL does not contain a filename".into()
+        })?;
+
+    Ok(form_urlencoded::parse(filename.as_bytes())
+        .map(|(key, val)| [key, val].concat())
+        .collect())
+}
+
 impl TryFrom<&str> for Download {
     type Error = Error;
 
@@ -31,20 +46,7 @@ impl TryFrom<&str> for Download {
             reason: e.to_string().into()
         })?;
 
-        let filename = url
-            .path_segments()
-            .and_then(|mut segments| segments.next_back())
-            .filter(|s| !s.is_empty())
-            .ok_or_else(|| Error::InvalidUrl {
-                url: value.into(),
-                reason: "URL does not contain a filename".into()
-            })?;
-
-        let decoded_filename: String = form_urlencoded::parse(filename.as_bytes())
-            .map(|(key, val)| [key, val].concat())
-            .collect();
-
-        Ok(Download::builder().url(url).filename(decoded_filename).build())
+        Download::try_from(&url)
     }
 }
 
@@ -52,19 +54,8 @@ impl TryFrom<&Url> for Download {
     type Error = Error;
 
     fn try_from(url: &Url) -> Result<Self, Self::Error> {
-        let filename = url
-            .path_segments()
-            .and_then(|mut segments| segments.next_back())
-            .filter(|s| !s.is_empty())
-            .ok_or_else(|| Error::InvalidUrl {
-                url: url.as_str().into(),
-                reason: "URL does not contain a filename".into()
-            })?;
+        let filename = extract_filename(url)?;
 
-        let decoded_filename: String = form_urlencoded::parse(filename.as_bytes())
-            .map(|(key, val)| [key, val].concat())
-            .collect();
-
-        Ok(Download::builder().url(url.clone()).filename(decoded_filename).build())
+        Ok(Download::builder().url(url.clone()).filename(filename).build())
     }
 }

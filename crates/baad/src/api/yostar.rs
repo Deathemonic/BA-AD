@@ -54,9 +54,9 @@ impl YoStarClient {
 
     fn create_signature() -> Result<String, CatalogError> {
         let head = YoStarHead {
-            game_tag: YOSTAR_GAME_TAG.to_string(),
+            game_tag: YOSTAR_GAME_TAG.into(),
             time: Self::get_timestamp()?,
-            version: YOSTAR_VERSION.to_string()
+            version: YOSTAR_VERSION.into()
         };
 
         let head_json = serde_json::to_string(&head)?;

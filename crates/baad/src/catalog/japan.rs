@@ -61,12 +61,12 @@ impl JapanCatalog {
         update(&self.paths.api, |data: &mut ApiData| {
             data.japan.version = version;
             data.japan.server_info_url = server_info_url;
-            data.japan.catalog_url = catalog_url.to_string();
+            data.japan.catalog_url = catalog_url.into();
             data.japan.platform = platform.into();
         })
         .await?;
 
-        Ok(catalog_url.to_string())
+        Ok(catalog_url.into())
     }
 
     pub async fn get_catalog_url(&self) -> Result<(String, bool), CatalogError> {
@@ -92,11 +92,11 @@ impl JapanCatalog {
 
         info!("Catalog changed, updating...");
         update(&self.paths.api, |data: &mut ApiData| {
-            data.japan.catalog_url = catalog_url.to_string();
+            data.japan.catalog_url = catalog_url.into();
         })
         .await?;
 
-        Ok((catalog_url.to_string(), false))
+        Ok((catalog_url.into(), false))
     }
 
     async fn download_resources_asset(&self) -> Result<PathBuf, CatalogError> {
