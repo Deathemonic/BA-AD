@@ -42,6 +42,8 @@ pub struct ChinaData {
     #[serde(default)]
     pub catalog_url: String,
     #[serde(default)]
+    pub apk_url: String,
+    #[serde(default)]
     pub resource_version: String,
     #[serde(default)]
     pub table_version: String,
@@ -206,13 +208,13 @@ pub struct ChinaState {
 
 #[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
-pub struct ChinaTableCatalog {
-    pub table: HashMap<String, ChinaTableBundle>
+pub struct TableCatalogCN {
+    pub table: HashMap<String, TableBundleCN>
 }
 
 #[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
-pub struct ChinaTableBundle {
+pub struct TableBundleCN {
     pub name: String,
     pub size: i64,
     pub crc: String,
@@ -227,13 +229,13 @@ pub struct ChinaTableBundle {
 
 #[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
-pub struct ChinaBundleCatalog {
-    pub bundle_files: Vec<ChinaBundleFile>
+pub struct BundleCatalogCN {
+    pub bundle_files: Vec<BundleFileCN>
 }
 
 #[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
-pub struct ChinaBundleFile {
+pub struct BundleFileCN {
     pub name: String,
     pub size: i64,
     pub is_prologue: bool,
@@ -265,7 +267,14 @@ pub enum ChinaMediaType {
 
 #[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
-pub struct ChinaMedia {
+pub struct MediaCatalogCN {
+    pub table: HashMap<String, MediaCN>,
+    pub table_pack: HashMap<String, MediaCN>
+}
+
+#[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "PascalCase")]
+pub struct MediaCN {
     pub path: String,
     pub hash: String,
     pub media_type: ChinaMediaType,

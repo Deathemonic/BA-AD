@@ -25,8 +25,11 @@ pub const YOSTAR_VERSION: &str = "1.7.2";
 
 pub const ROSTAR_VERSION_URL: &str = "https://bluearchive-cn.com/api/meta/setup";
 pub const ROSTAR_STATE_URL: &str = "https://gs-api.bluearchive-cn.com/api/state";
+pub const ROSTAR_BILIBILI_GAME_INFO_URL: &str =
+    "https://line1-h5-pc-api.biligame.com/game/detail/gameinfo?game_base_id=109864";
 pub const ROSTAR_PLATFORM_ID: &str = "1";
 pub const ROSTAR_CHANNEL_ID: &str = "2";
+pub const ROSTAR_PREINSTALLED_MEDIA_MANIFEST: &str = "BlueArchive.apk/assets/media_prein_manifest";
 
 pub const PLATFORM_NAME_ANDROID: &str = "Android";
 pub const PLATFORM_NAME_IOS: &str = "iOS";

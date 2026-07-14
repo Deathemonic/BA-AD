@@ -1,23 +1,23 @@
 use baad_shared::{
     ASSET_BUNDLES,
-    ChinaBundleCatalog,
-    ChinaMedia,
+    BundleCatalogCN,
     ChinaMediaType,
-    ChinaTableCatalog,
     DownloadAsset,
     DownloadMedia,
     DownloadTable,
     HashValue,
     MEDIA_RESOURCES,
+    MediaCatalogCN,
     Platform,
-    TABLE_BUNDLES
+    TABLE_BUNDLES,
+    TableCatalogCN
 };
 
 pub struct ChinaStrategy;
 
 impl ChinaStrategy {
     pub fn build_asset_downloads(
-        catalog: ChinaBundleCatalog,
+        catalog: BundleCatalogCN,
         catalog_url: &str,
         platform: Platform
     ) -> Vec<DownloadAsset> {
@@ -39,37 +39,34 @@ impl ChinaStrategy {
     }
 
     pub fn build_media_downloads(
-        catalog: Vec<ChinaMedia>,
-        catalog_url: &str
+        catalog: MediaCatalogCN,
+        catalog_url: &str,
+        apk_url: &str
     ) -> Vec<DownloadMedia> {
-        let entries = catalog.into_iter().map(|entry| {
-            let url = Self::hashed_url(catalog_url, &entry.hash, MEDIA_RESOURCES);
-
-            DownloadMedia {
-                url,
-                path: Self::media_path(entry.path, entry.media_type),
-                hash: HashValue::Md5(entry.hash),
-                size: entry.size
-            }
+        let media = catalog.table.into_values().map(|entry| DownloadMedia {
+            url: Self::hashed_url(catalog_url, &entry.hash, MEDIA_RESOURCES),
+            path: Self::media_path(entry.path, entry.media_type),
+            hash: HashValue::Md5(entry.hash),
+            size: entry.size
         });
 
-        entries.collect()
+        let packs = catalog.table_pack.into_values().map(|pack| DownloadMedia {
+            url: apk_url.into(),
+            path: Self::media_path(pack.path, pack.media_type),
+            hash: HashValue::Md5(pack.hash),
+            size: pack.size
+        });
+
+        media.chain(packs).collect()
     }
 
-    pub fn build_table_downloads(
-        catalog: ChinaTableCatalog,
-        catalog_url: &str
-    ) -> Vec<DownloadTable> {
-        let tables = catalog.table.into_values().map(|entry| {
-            let url = Self::hashed_url(catalog_url, &entry.crc, TABLE_BUNDLES);
-
-            DownloadTable {
-                url,
-                path: entry.name,
-                hash: HashValue::Md5(entry.crc),
-                size: entry.size,
-                bundle_files: entry.includes.unwrap_or_default()
-            }
+    pub fn build_table_downloads(catalog: TableCatalogCN, catalog_url: &str) -> Vec<DownloadTable> {
+        let tables = catalog.table.into_values().map(|entry| DownloadTable {
+            url: Self::hashed_url(catalog_url, &entry.crc, TABLE_BUNDLES),
+            path: entry.name,
+            hash: HashValue::Md5(entry.crc),
+            size: entry.size,
+            bundle_files: entry.includes.unwrap_or_default()
         });
 
         tables.collect()

@@ -36,6 +36,9 @@ pub enum CatalogError {
     MemoryPack(#[from] memorypack::MemoryPackError),
 
     #[error(transparent)]
+    Download(#[from] baad_dm::Error),
+
+    #[error(transparent)]
     TableEncryption(#[from] bacy::error::TableEncryptionError),
 
     #[error(transparent)]

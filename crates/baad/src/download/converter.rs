@@ -16,11 +16,7 @@ pub fn convert_assets(assets: &[DownloadAsset], filter: Option<&ResourceFilter>)
             && let Some(filename) = Path::new(&asset.path).file_name().and_then(|n| n.to_str())
             && f.matches(filename)
         {
-            if seen.insert(asset.path.as_str())
-                && let Some(dl) = create_download(&asset.url, &asset.path, &asset.hash, None)
-            {
-                downloads.push(dl);
-            }
+            try_add(&mut seen, &mut downloads, asset);
             continue;
         }
 
@@ -38,10 +34,8 @@ pub fn convert_assets(assets: &[DownloadAsset], filter: Option<&ResourceFilter>)
                     downloads.push(dl);
                 }
             }
-        } else if seen.insert(asset.path.as_str())
-            && let Some(dl) = create_download(&asset.url, &asset.path, &asset.hash, None)
-        {
-            downloads.push(dl);
+        } else {
+            try_add(&mut seen, &mut downloads, asset);
         }
     }
 
@@ -66,16 +60,30 @@ pub fn convert_tables(tables: &[DownloadTable], filter: Option<&ResourceFilter>)
 pub fn convert_media(media: &[DownloadMedia], filter: Option<&ResourceFilter>) -> Vec<Download> {
     media
         .iter()
-        .filter(|m| {
-            filter.is_none_or(|f| {
-                Path::new(&m.path)
-                    .file_name()
-                    .and_then(|n| n.to_str())
-                    .is_some_and(|filename| f.matches(filename))
-            })
-        })
-        .filter_map(|m| create_download(&m.url, &m.path, &m.hash, None))
+        .filter(|media| media_matches(&media.path, filter))
+        .filter_map(|media| create_download(&media.url, &media.path, &media.hash, None))
         .collect()
+}
+
+fn media_matches(path: &str, filter: Option<&ResourceFilter>) -> bool {
+    filter.is_none_or(|f| {
+        Path::new(path)
+            .file_name()
+            .and_then(|n| n.to_str())
+            .is_some_and(|filename| f.matches(filename))
+    })
+}
+
+fn try_add<'a>(
+    seen: &mut HashSet<&'a str>,
+    downloads: &mut Vec<Download>,
+    asset: &'a DownloadAsset
+) {
+    if seen.insert(asset.path.as_str())
+        && let Some(dl) = create_download(&asset.url, &asset.path, &asset.hash, None)
+    {
+        downloads.push(dl);
+    }
 }
 
 fn convert_path_to_bundle(zip_path: &str, bundle_filename: &str) -> String {

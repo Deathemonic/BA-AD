@@ -42,7 +42,7 @@ impl ChinaCatalog {
         &self,
         version: String,
         state: &ChinaState
-    ) -> Result<(String, bool), CatalogError> {
+    ) -> Result<(String, String, bool), CatalogError> {
         let catalog_url = state
             .addressables_catalog_url_roots
             .first()
@@ -59,16 +59,21 @@ impl ChinaCatalog {
                 && data.china.table_version == state.table_version
                 && data.china.media_version == state.media_version
                 && data.china.platform == platform
+                && !data.china.apk_url.is_empty()
         });
 
         if up_to_date {
-            return Ok((catalog_url, true));
+            let apk_url = api_data.map(|data| data.china.apk_url).unwrap_or_default();
+            return Ok((catalog_url, apk_url, true));
         }
+
+        let apk_url = self.rostar_client.get_apk_url().await?;
 
         info!("Catalog changed, updating...");
         update(&self.paths.api, |data: &mut ApiData| {
             data.china.version = version;
             data.china.catalog_url = catalog_url.clone();
+            data.china.apk_url = apk_url.clone();
             data.china.resource_version = state.resource_version.clone();
             data.china.table_version = state.table_version.clone();
             data.china.media_version = state.media_version.clone();
@@ -76,7 +81,7 @@ impl ChinaCatalog {
         })
         .await?;
 
-        Ok((catalog_url, false))
+        Ok((catalog_url, apk_url, false))
     }
 }
 
@@ -88,14 +93,15 @@ impl Catalog for ChinaCatalog {
         info!(version = %version, "Version");
 
         let state = self.rostar_client.get_state(&version).await?;
-        let (url, up_to_date) = self.resolve(version, &state).await?;
+        let (url, apk_url, up_to_date) = self.resolve(version, &state).await?;
 
         let cdn = ChinaCdn::new(
             url,
             self.platform,
             state.resource_version,
             state.table_version,
-            state.media_version
+            state.media_version,
+            apk_url
         );
         let resources = cdn.fetch(self.category).await?;
 
@@ -114,7 +120,7 @@ impl Catalog for ChinaCatalog {
                 .unwrap_or_default(),
             media: resources
                 .media
-                .map(|m| ChinaStrategy::build_media_downloads(m, url))
+                .map(|m| ChinaStrategy::build_media_downloads(m.catalog, url, &m.apk_url))
                 .unwrap_or_default()
         }
     }
