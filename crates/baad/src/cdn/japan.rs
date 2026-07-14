@@ -69,8 +69,7 @@ impl JapanCdn {
         let platform = self.platform.as_ref().to_lowercase();
         let url =
             format!("{}/{}/BundlePackingInfo.bytes", self.catalog_url, self.platform.patch_pack());
-        let bytes =
-            self.fetch_bytes(&url, &format!("{}/BundlePackingInfo.bytes", platform)).await?;
+        let bytes = self.fetch_bytes(&url, &format!("{platform}/BundlePackingInfo.bytes")).await?;
         let catalog = MemoryPackSerializer::deserialize::<BundlePatchPackInfo>(&bytes)?;
         Ok(catalog)
     }

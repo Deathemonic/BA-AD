@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 use memorypack::MemoryPackable;
 use serde::{Deserialize, Serialize};
+use strum::{AsRefStr, FromRepr};
 
 fn default_platform() -> Cow<'static, str> { Cow::Borrowed("Android") }
 
@@ -240,13 +241,35 @@ pub struct ChinaBundleFile {
     pub is_split_download: bool
 }
 
+#[derive(
+    MemoryPackable, Deserialize, Serialize, FromRepr, AsRefStr, Debug, Clone, Copy, Default,
+)]
+#[repr(i32)]
+pub enum ChinaMediaType {
+    #[default]
+    #[strum(serialize = "")]
+    None = 0,
+    #[strum(serialize = "ogg")]
+    Ogg = 1,
+    #[strum(serialize = "mp4")]
+    Mp4 = 2,
+    #[strum(serialize = "jpg")]
+    Jpg = 3,
+    #[strum(serialize = "png")]
+    Png = 4,
+    #[strum(serialize = "acb")]
+    Acb = 5,
+    #[strum(serialize = "awb")]
+    Awb = 6
+}
+
 #[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
 pub struct ChinaMedia {
     pub path: String,
-    pub crc: String,
-    pub media_type: i32,
-    pub bytes: i64
+    pub hash: String,
+    pub media_type: ChinaMediaType,
+    pub size: i64
 }
 
 #[derive(Deserialize)]

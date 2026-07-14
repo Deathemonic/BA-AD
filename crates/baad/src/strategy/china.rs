@@ -2,6 +2,7 @@ use baad_shared::{
     ASSET_BUNDLES,
     ChinaBundleCatalog,
     ChinaMedia,
+    ChinaMediaType,
     ChinaTableCatalog,
     DownloadAsset,
     DownloadMedia,
@@ -42,13 +43,13 @@ impl ChinaStrategy {
         catalog_url: &str
     ) -> Vec<DownloadMedia> {
         let entries = catalog.into_iter().map(|entry| {
-            let url = Self::hashed_url(catalog_url, &entry.crc, MEDIA_RESOURCES);
+            let url = Self::hashed_url(catalog_url, &entry.hash, MEDIA_RESOURCES);
 
             DownloadMedia {
                 url,
-                path: entry.path,
-                hash: HashValue::Md5(entry.crc),
-                size: entry.bytes
+                path: Self::media_path(entry.path, entry.media_type),
+                hash: HashValue::Md5(entry.hash),
+                size: entry.size
             }
         });
 
@@ -76,6 +77,11 @@ impl ChinaStrategy {
 
     fn hashed_url(catalog_url: &str, hash: &str, resource: &str) -> String {
         let shard = hash.get(..2).unwrap_or(hash);
-        format!("{}/pool/{}/{}/{}", catalog_url, resource, shard, hash)
+        format!("{catalog_url}/pool/{resource}/{shard}/{hash}")
+    }
+
+    fn media_path(path: String, media_type: ChinaMediaType) -> String {
+        let extension = media_type.as_ref();
+        if extension.is_empty() { path } else { format!("{path}.{extension}") }
     }
 }

@@ -32,9 +32,7 @@ fn extract_filename(url: &Url) -> Result<String, Error> {
             reason: "URL does not contain a filename".into()
         })?;
 
-    Ok(form_urlencoded::parse(filename.as_bytes())
-        .map(|(key, val)| [key, val].concat())
-        .collect())
+    Ok(form_urlencoded::parse(filename.as_bytes()).map(|(key, val)| [key, val].concat()).collect())
 }
 
 impl TryFrom<&str> for Download {

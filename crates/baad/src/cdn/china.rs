@@ -2,6 +2,7 @@ use baad_shared::{
     ASSET_BUNDLES,
     ChinaBundleCatalog,
     ChinaMedia,
+    ChinaMediaType,
     ChinaTableCatalog,
     MEDIA_RESOURCES,
     Platform,
@@ -153,9 +154,9 @@ impl ChinaCdn {
                 let mut parts = line.split(',');
                 Some(ChinaMedia {
                     path: parts.next()?.into(),
-                    crc: parts.next()?.into(),
-                    media_type: parts.next()?.parse().ok()?,
-                    bytes: parts.next()?.parse().ok()?
+                    hash: parts.next()?.into(),
+                    media_type: ChinaMediaType::from_repr(parts.next()?.parse().ok()?)?,
+                    size: parts.next()?.parse().ok()?
                 })
             })
             .collect()
