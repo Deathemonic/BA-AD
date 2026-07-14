@@ -47,14 +47,16 @@ impl ChinaStrategy {
             url: Self::hashed_url(catalog_url, &entry.hash, MEDIA_RESOURCES),
             path: Self::media_path(entry.path, entry.media_type),
             hash: HashValue::Md5(entry.hash),
-            size: entry.size
+            size: entry.size,
+            target: None
         });
 
-        let packs = catalog.table_pack.into_values().map(|pack| DownloadMedia {
+        let packs = catalog.table_pack.into_iter().map(|(file, pack)| DownloadMedia {
             url: apk_url.into(),
-            path: Self::media_path(pack.path, pack.media_type),
+            path: Self::media_path(file, pack.media_type),
             hash: HashValue::Md5(pack.hash),
-            size: pack.size
+            size: pack.size,
+            target: Some(Self::media_path(pack.path, pack.media_type))
         });
 
         media.chain(packs).collect()

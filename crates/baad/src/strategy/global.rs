@@ -64,7 +64,8 @@ impl GlobalStrategy {
                         url,
                         path: filename,
                         hash,
-                        size
+                        size,
+                        target: None
                     });
                 }
             } else if category.contains(ResourceCategory::Assets) {

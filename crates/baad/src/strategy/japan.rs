@@ -42,7 +42,8 @@ impl JapanStrategy {
                 url: format!("{}/{}/{}", catalog_url, platform.media_path(), path),
                 path,
                 hash: HashValue::Crc(entry.crc),
-                size: entry.bytes
+                size: entry.bytes,
+                target: None
             }
         });
 

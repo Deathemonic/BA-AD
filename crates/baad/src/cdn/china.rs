@@ -30,7 +30,7 @@ pub struct ChinaCdn {
     apk_url: String,
     resource_version: String,
     table_version: String,
-    media_version: String,
+    media_version: String
 }
 
 pub struct ChinaResources {
@@ -51,7 +51,7 @@ impl ChinaCdn {
         apk_url: String,
         resource_version: String,
         table_version: String,
-        media_version: String,
+        media_version: String
     ) -> Self {
         Self {
             catalog_url,
@@ -59,7 +59,7 @@ impl ChinaCdn {
             apk_url,
             resource_version,
             table_version,
-            media_version,
+            media_version
         }
     }
 

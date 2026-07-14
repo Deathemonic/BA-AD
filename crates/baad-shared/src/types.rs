@@ -398,7 +398,8 @@ pub struct DownloadMedia {
     pub url: String,
     pub path: String,
     pub hash: HashValue,
-    pub size: i64
+    pub size: i64,
+    pub target: Option<String>
 }
 
 #[derive(Debug, Clone)]
