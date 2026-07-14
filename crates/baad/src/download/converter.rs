@@ -3,6 +3,7 @@ use std::path::Path;
 
 use baad_dm::Download;
 use baad_shared::{DownloadAsset, DownloadMedia, DownloadTable, HashValue};
+use baad_utils::file::filename_matches;
 use reqwest::Url;
 
 use crate::download::ResourceFilter;
@@ -46,12 +47,7 @@ pub fn convert_tables(tables: &[DownloadTable], filter: Option<&ResourceFilter>)
     tables
         .iter()
         .filter(|t| {
-            filter.is_none_or(|f| {
-                Path::new(&t.path)
-                    .file_name()
-                    .and_then(|n| n.to_str())
-                    .is_some_and(|filename| f.matches(filename))
-            })
+            filter.is_none_or(|f| filename_matches(&t.path, |filename| f.matches(filename)))
         })
         .filter_map(|t| create_download(&t.url, &t.path, &t.hash, None))
         .collect()
@@ -69,10 +65,7 @@ pub fn convert_media(media: &[DownloadMedia], filter: Option<&ResourceFilter>) -
 
 fn media_matches(path: &str, filter: Option<&ResourceFilter>) -> bool {
     filter.is_none_or(|f| {
-        Path::new(path)
-            .file_name()
-            .and_then(|n| n.to_str())
-            .is_some_and(|filename| f.matches(filename))
+        filename_matches(path, |filename| f.matches(filename))
     })
 }
 

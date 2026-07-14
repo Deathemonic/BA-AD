@@ -10,6 +10,7 @@ use baad_shared::{
     Resource,
     TABLE_BUNDLES
 };
+use baad_utils::file::filename_or;
 
 use crate::download::ResourceCategory;
 
@@ -38,15 +39,9 @@ impl GlobalStrategy {
 
             if resource.resource_path.contains(TABLE_BUNDLES) {
                 if category.contains(ResourceCategory::Tables) {
-                    let filename = Path::new(&resource.resource_path)
-                        .file_name()
-                        .and_then(|f| f.to_str())
-                        .unwrap_or(&resource.resource_path)
-                        .into();
-
                     tables.push(DownloadTable {
                         url,
-                        path: filename,
+                        path: filename_or(&resource.resource_path).into(),
                         hash,
                         size,
                         bundle_files: Vec::new()
@@ -54,15 +49,9 @@ impl GlobalStrategy {
                 }
             } else if resource.resource_path.contains(MEDIA_RESOURCES) {
                 if category.contains(ResourceCategory::Media) {
-                    let filename = Path::new(&resource.resource_path)
-                        .file_name()
-                        .and_then(|f| f.to_str())
-                        .unwrap_or(&resource.resource_path)
-                        .into();
-
                     media.push(DownloadMedia {
                         url,
-                        path: filename,
+                        path: filename_or(&resource.resource_path).into(),
                         hash,
                         size,
                         target: None

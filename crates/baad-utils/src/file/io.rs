@@ -38,3 +38,11 @@ pub async fn clear_all(dir: &Path) -> Result<(), FileError> {
 
     Ok(())
 }
+
+pub fn filename_or(path: &str) -> &str {
+    Path::new(path).file_name().and_then(|n| n.to_str()).unwrap_or(path)
+}
+
+pub fn filename_matches(path: impl AsRef<Path>, matches: impl Fn(&str) -> bool) -> bool {
+    path.as_ref().file_name().and_then(|n| n.to_str()).is_some_and(matches)
+}
