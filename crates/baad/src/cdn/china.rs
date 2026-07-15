@@ -1,6 +1,3 @@
-use std::collections::HashMap;
-
-use baad_dm::{HttpClientConfig, ZipExtractor, create_http_client};
 use baad_shared::{
     ASSET_BUNDLES,
     BundleCatalogCN,
@@ -9,7 +6,6 @@ use baad_shared::{
     MediaCN,
     MediaCatalogCN,
     Platform,
-    ROSTAR_PREINSTALLED_MEDIA_MANIFEST,
     TABLE_BUNDLES,
     TableCatalogCN
 };
@@ -28,7 +24,6 @@ use crate::error::CatalogError;
 pub struct ChinaCdn {
     pub(crate) catalog_url: String,
     platform: Platform,
-    apk_url: String,
     resource_version: String,
     table_version: String,
     media_version: String
@@ -37,19 +32,13 @@ pub struct ChinaCdn {
 pub struct ChinaResources {
     pub assets: Option<BundleCatalogCN>,
     pub table: Option<TableCatalogCN>,
-    pub media: Option<ChinaMedia>
-}
-
-pub struct ChinaMedia {
-    pub catalog: MediaCatalogCN,
-    pub apk_url: String
+    pub media: Option<MediaCatalogCN>
 }
 
 impl ChinaCdn {
     pub fn new(
         catalog_url: String,
         platform: Platform,
-        apk_url: String,
         resource_version: String,
         table_version: String,
         media_version: String
@@ -57,7 +46,6 @@ impl ChinaCdn {
         Self {
             catalog_url,
             platform,
-            apk_url,
             resource_version,
             table_version,
             media_version
@@ -77,10 +65,7 @@ impl ChinaCdn {
                 None
             },
             media: if category.contains(ResourceCategory::Media) {
-                Some(ChinaMedia {
-                    catalog: self.fetch_media().await?,
-                    apk_url: self.apk_url.clone()
-                })
+                Some(self.fetch_media().await?)
             } else {
                 None
             }
@@ -88,10 +73,12 @@ impl ChinaCdn {
     }
 
     pub async fn fetch_assets(&self) -> Result<BundleCatalogCN, CatalogError> {
+        let platform = self.platform.as_ref();
         let base = fconcat!("/"; self.catalog_url.as_str(), const { ASSET_BUNDLES }, "Catalog", self.resource_version.as_str(), self.platform.display_name());
         let bundle = fconcat!(base.as_str(), "/bundleDownloadInfo.json");
         let hash = fconcat!(base.as_str(), "/bundleDownloadInfo.hash");
-        let file = self.catalog_file(bundle, hash, "bundleDownloadInfo.json")?;
+        let file =
+            self.catalog_file(bundle, hash, &fconcat!(platform, "/bundleDownloadInfo.json"))?;
 
         self.fetch_json(&file).await
     }
@@ -117,28 +104,12 @@ impl ChinaCdn {
 
         let bytes = fs::read(&file.path).await?;
         let text = String::from_utf8_lossy(&bytes);
-        let mut catalog = MediaCatalogCN {
-            table: Self::parse_media(&text).into_iter().map(Self::media_entry).collect(),
-            table_pack: HashMap::new()
+        let catalog = MediaCatalogCN {
+            table: Self::parse_media(&text).into_iter().map(Self::media_entry).collect()
         };
-
-        catalog.table_pack = self.fetch_apk_media(&self.apk_url).await?;
 
         cache::write_pack(&file.pack_path(), &catalog).await?;
         Ok(catalog)
-    }
-
-    async fn fetch_apk_media(
-        &self,
-        apk_url: &str
-    ) -> Result<HashMap<String, MediaCN>, CatalogError> {
-        let client = create_http_client(HttpClientConfig::builder().build())?;
-        let url = apk_url.parse().map_err(|_| CatalogError::DeserializationFailed)?;
-        let extractor = ZipExtractor::new(&client, &url).await?;
-        let bytes = extractor.extract_file(ROSTAR_PREINSTALLED_MEDIA_MANIFEST).await?;
-        let text = String::from_utf8_lossy(&bytes);
-
-        Ok(Self::parse_media(&text).into_iter().map(Self::apk_media_entry).collect())
     }
 
     async fn fetch_json<T>(&self, file: &CatalogFile) -> Result<T, CatalogError>
@@ -162,7 +133,7 @@ impl ChinaCdn {
         hash_url: String,
         filename: &str
     ) -> Result<CatalogFile, CatalogError> {
-        let key = fconcat!("/"; "catalog", "china", self.platform.as_ref(), filename);
+        let key = fconcat!("/"; "catalog", "china", filename);
         Ok(CatalogFile {
             url,
             hash_url,
@@ -171,15 +142,6 @@ impl ChinaCdn {
     }
 
     fn media_entry(entry: MediaCN) -> (String, MediaCN) { (entry.path.clone(), entry) }
-
-    fn apk_media_entry(mut entry: MediaCN) -> (String, MediaCN) {
-        entry.path = if entry.path.starts_with("assets/") {
-            entry.path
-        } else {
-            fconcat!("assets/", entry.path.as_str())
-        };
-        Self::media_entry(entry)
-    }
 
     fn parse_media(text: &str) -> Vec<MediaCN> {
         text.lines()

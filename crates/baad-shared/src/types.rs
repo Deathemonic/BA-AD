@@ -42,8 +42,6 @@ pub struct ChinaData {
     #[serde(default)]
     pub catalog_url: String,
     #[serde(default)]
-    pub apk_url: String,
-    #[serde(default)]
     pub resource_version: String,
     #[serde(default)]
     pub table_version: String,
@@ -268,8 +266,7 @@ pub enum ChinaMediaType {
 #[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
 pub struct MediaCatalogCN {
-    pub table: HashMap<String, MediaCN>,
-    pub table_pack: HashMap<String, MediaCN>
+    pub table: HashMap<String, MediaCN>
 }
 
 #[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
@@ -398,8 +395,7 @@ pub struct DownloadMedia {
     pub url: String,
     pub path: String,
     pub hash: HashValue,
-    pub size: i64,
-    pub target: Option<String>
+    pub size: i64
 }
 
 #[derive(Debug, Clone)]

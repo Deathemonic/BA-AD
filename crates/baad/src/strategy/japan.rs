@@ -43,8 +43,7 @@ impl JapanStrategy {
                 url: fconcat!("/"; catalog_url, platform.media_path(), path.as_str()),
                 path,
                 hash: HashValue::Crc(entry.crc),
-                size: entry.bytes,
-                target: None
+                size: entry.bytes
             }
         });
 

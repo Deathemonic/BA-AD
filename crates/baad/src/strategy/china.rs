@@ -35,26 +35,16 @@ impl ChinaStrategy {
 
     pub fn build_media_downloads(
         catalog: MediaCatalogCN,
-        catalog_url: &str,
-        apk_url: &str
+        catalog_url: &str
     ) -> Vec<DownloadMedia> {
         let media = catalog.table.into_values().map(|entry| DownloadMedia {
             url: Self::hashed_url(catalog_url, &entry.hash, MEDIA_RESOURCES),
             path: Self::media_path(entry.path, entry.media_type),
             hash: HashValue::Md5(entry.hash),
-            size: entry.size,
-            target: None
+            size: entry.size
         });
 
-        let packs = catalog.table_pack.into_iter().map(|(file, pack)| DownloadMedia {
-            url: apk_url.into(),
-            path: Self::media_path(file, pack.media_type),
-            hash: HashValue::Md5(pack.hash),
-            size: pack.size,
-            target: Some(Self::media_path(pack.path, pack.media_type))
-        });
-
-        media.chain(packs).collect()
+        media.collect()
     }
 
     pub fn build_table_downloads(catalog: TableCatalogCN, catalog_url: &str) -> Vec<DownloadTable> {

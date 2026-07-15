@@ -58,9 +58,7 @@ pub fn convert_media(media: &[DownloadMedia], filter: Option<&ResourceFilter>) -
     media
         .iter()
         .filter(|media| media_matches(&media.path, filter))
-        .filter_map(|media| {
-            create_download(&media.url, &media.path, &media.hash, media.target.as_deref())
-        })
+        .filter_map(|media| create_download(&media.url, &media.path, &media.hash, None))
         .collect()
 }
 
