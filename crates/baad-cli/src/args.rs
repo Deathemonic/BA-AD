@@ -51,7 +51,7 @@ pub enum RegionCommands {
     /// Download from Japan server
     Japan(JapanDownloadArgs),
 
-    /// Download from China server (beta)
+    /// Download from China server
     China(ChinaDownloadArgs)
 }
 
