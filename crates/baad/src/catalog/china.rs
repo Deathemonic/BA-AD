@@ -98,10 +98,10 @@ impl Catalog for ChinaCatalog {
         let cdn = ChinaCdn::new(
             url,
             self.platform,
+            apk_url,
             state.resource_version,
             state.table_version,
             state.media_version,
-            apk_url
         );
         let resources = cdn.fetch(self.category).await?;
 

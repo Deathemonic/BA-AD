@@ -12,7 +12,6 @@ use baad_utils::file::get_data_path;
 use fastcat::fconcat;
 use memorypack::MemoryPackSerializer;
 use tokio::fs;
-use tracing::trace;
 use crate::cdn::cache;
 use crate::cdn::cache::CatalogFile;
 use crate::download::ResourceCategory;
