@@ -12,7 +12,7 @@ use baad_utils::file::get_data_path;
 use fastcat::fconcat;
 use memorypack::MemoryPackSerializer;
 use tokio::fs;
-
+use tracing::trace;
 use crate::cdn::cache;
 use crate::cdn::cache::CatalogFile;
 use crate::download::ResourceCategory;
@@ -68,7 +68,7 @@ impl JapanCdn {
 
     pub async fn fetch_assets(&self) -> Result<BundlePatchPackInfo, CatalogError> {
         let platform = self.platform.as_ref().to_lowercase();
-        let url = fconcat!("/"; self.catalog_url.as_str(), self.platform.patch_pack(), "BundlePatchPackInfo.bytes");
+        let url = fconcat!("/"; self.catalog_url.as_str(), self.platform.patch_pack(), "BundlePackingInfo.bytes");
         let bytes = self
             .fetch_bytes(&url, &fconcat!(platform.as_str(), "/BundlePackingInfo.bytes"))
             .await?;
