@@ -169,10 +169,7 @@ impl<'a> Downloader<'a> {
             .map_err(|e| FetchOutcome::failed(e, StatusCode::BAD_REQUEST))?;
 
         let info = index.get(target).ok_or_else(|| {
-            FetchOutcome::failed(
-                format!("File '{}' not found in ZIP", target),
-                StatusCode::NOT_FOUND
-            )
+            FetchOutcome::failed(format!("File '{target}' not found in ZIP"), StatusCode::NOT_FOUND)
         })?;
 
         let data = ZipExtractor::extract_member(ctx.client, &ctx.download.url, info)

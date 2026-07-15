@@ -78,7 +78,7 @@ impl LineFormatter {
         message: &str
     ) -> fmt::Result {
         self.write_level_prefix(writer, level, is_success)?;
-        write!(writer, " {}", message)
+        write!(writer, " {message}")
     }
 
     pub fn write_line(
@@ -97,7 +97,7 @@ impl LineFormatter {
         self.write_level_prefix(writer, level, is_success)?;
         write!(writer, " ")?;
 
-        write!(writer, "{}", message)?;
+        write!(writer, "{message}")?;
 
         let non_meta_fields: Vec<_> =
             fields.iter().filter(|(name, _)| *name != "success" && *name != "cause").collect();
@@ -108,7 +108,7 @@ impl LineFormatter {
                 write_colored_value(writer, level, is_success, value)?;
             } else {
                 let separator = if i == 0 { ": " } else { ", " };
-                write!(writer, "{}", separator)?;
+                write!(writer, "{separator}")?;
                 write_colored_field(writer, level, is_success, field_name, value)?;
             }
         }
@@ -143,22 +143,19 @@ impl LineFormatter {
             let formatted = format_urls(
                 cause_value,
                 |text| {
-                    format!(
-                        "{}",
-                        text.if_supports_color(Stream::Stdout, |t| t.style(CAUSE_VALUE_STYLE))
-                    )
+                    text.if_supports_color(Stream::Stdout, |t| t.style(CAUSE_VALUE_STYLE))
+                        .to_string()
                 },
                 |url| {
-                    format!(
-                        "{}",
-                        url.if_supports_color(Stream::Stdout, |t| t
-                            .style(CAUSE_VALUE_STYLE.underline()))
-                    )
+                    url.if_supports_color(Stream::Stdout, |t| {
+                        t.style(CAUSE_VALUE_STYLE.underline())
+                    })
+                    .to_string()
                 }
             );
-            write!(writer, "{}", formatted)?;
+            write!(writer, "{formatted}")?;
         } else {
-            write!(writer, "{}", cause_value)?;
+            write!(writer, "{cause_value}")?;
         }
 
         writeln!(writer)
@@ -193,7 +190,7 @@ fn write_colored_value(
                 format!("{}", url.if_supports_color(Stream::Stdout, |t| t.style(style.underline())))
             }
         );
-        write!(writer, "{}", formatted)
+        write!(writer, "{formatted}")
     }
 }
 

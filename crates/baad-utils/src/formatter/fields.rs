@@ -45,6 +45,6 @@ impl Visit for FieldCollector {
     }
 
     fn record_debug(&mut self, field: &Field, value: &dyn fmt::Debug) {
-        self.fields.push((field.name(), Cow::Owned(format!("{:?}", value))));
+        self.fields.push((field.name(), Cow::Owned(format!("{value:?}"))));
     }
 }

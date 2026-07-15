@@ -8,6 +8,7 @@ use baad_shared::{
     Platform,
     TableCatalog
 };
+use fastcat::fconcat;
 
 pub struct JapanStrategy;
 
@@ -19,7 +20,7 @@ impl JapanStrategy {
     ) -> Vec<DownloadAsset> {
         let packs = packing.full_patch_packs.into_iter().chain(packing.update_packs).map(|pack| {
             DownloadAsset {
-                url: format!("{}/{}/{}", catalog_url, platform.patch_pack(), pack.pack_name),
+                url: fconcat!("/"; catalog_url, platform.patch_pack(), pack.pack_name.as_str()),
                 path: pack.pack_name,
                 hash: HashValue::Crc(pack.crc),
                 size: pack.pack_size,
@@ -39,7 +40,7 @@ impl JapanStrategy {
             let path = entry.path.replace('\\', "/");
 
             DownloadMedia {
-                url: format!("{}/{}/{}", catalog_url, platform.media_path(), path),
+                url: fconcat!("/"; catalog_url, platform.media_path(), path.as_str()),
                 path,
                 hash: HashValue::Crc(entry.crc),
                 size: entry.bytes,
@@ -52,7 +53,7 @@ impl JapanStrategy {
 
     pub fn build_table_downloads(catalog: TableCatalog, catalog_url: &str) -> Vec<DownloadTable> {
         let base = catalog.table.into_values().map(|entry| DownloadTable {
-            url: format!("{}/TableBundles/{}", catalog_url, entry.name),
+            url: fconcat!("/"; catalog_url, "TableBundles", entry.name.as_str()),
             path: entry.name,
             hash: HashValue::Crc(entry.crc),
             size: entry.size,
@@ -60,7 +61,7 @@ impl JapanStrategy {
         });
 
         let packs = catalog.table_pack.into_values().map(|pack| DownloadTable {
-            url: format!("{}/TableBundles/{}", catalog_url, pack.name),
+            url: fconcat!("/"; catalog_url, "TableBundles", pack.name.as_str()),
             path: pack.name,
             hash: HashValue::Crc(pack.crc),
             size: pack.size,

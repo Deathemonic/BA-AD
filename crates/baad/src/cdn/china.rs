@@ -15,6 +15,7 @@ use baad_shared::{
 };
 use baad_utils::file::get_data_path;
 use baad_utils::json::load;
+use fastcat::fconcat;
 use memorypack::{MemoryPackDeserialize, MemoryPackSerialize};
 use serde::de::DeserializeOwned;
 use tokio::fs;
@@ -87,37 +88,24 @@ impl ChinaCdn {
     }
 
     pub async fn fetch_assets(&self) -> Result<BundleCatalogCN, CatalogError> {
-        let base = format!(
-            "{}/{}/Catalog/{}/{}",
-            self.catalog_url,
-            ASSET_BUNDLES,
-            self.resource_version,
-            self.platform.display_name()
-        );
-        let file = self.catalog_file(
-            format!("{base}/bundleDownloadInfo.json"),
-            format!("{base}/bundleDownloadInfo.hash"),
-            "bundleDownloadInfo.json"
-        )?;
+        let base = fconcat!("/"; self.catalog_url.as_str(), const { ASSET_BUNDLES }, "Catalog", self.resource_version.as_str(), self.platform.display_name());
+        let bundle = fconcat!(base.as_str(), "/bundleDownloadInfo.json");
+        let hash = fconcat!(base.as_str(), "/bundleDownloadInfo.hash");
+        let file = self.catalog_file(bundle, hash, "bundleDownloadInfo.json")?;
+
         self.fetch_json(&file).await
     }
 
     pub async fn fetch_table(&self) -> Result<TableCatalogCN, CatalogError> {
-        let url = format!(
-            "{}/Manifest/{}/{}/TableManifest",
-            self.catalog_url, TABLE_BUNDLES, self.table_version
-        );
-        let hash_url = format!("{url}Hash");
+        let url = fconcat!("/"; self.catalog_url.as_str(), "Manifest", const { TABLE_BUNDLES }, self.table_version.as_str(), "TableManifest");
+        let hash_url = fconcat!(url.as_str(), "Hash");
         let file = self.catalog_file(url, hash_url, "TableManifest.json")?;
         self.fetch_json(&file).await
     }
 
     pub async fn fetch_media(&self) -> Result<MediaCatalogCN, CatalogError> {
-        let url = format!(
-            "{}/Manifest/{}/{}/MediaManifest",
-            self.catalog_url, MEDIA_RESOURCES, self.media_version
-        );
-        let hash_url = format!("{url}Hash");
+        let url = fconcat!("/"; self.catalog_url.as_str(), "Manifest", const { MEDIA_RESOURCES }, self.media_version.as_str(), "MediaManifest");
+        let hash_url = fconcat!(url.as_str(), "Hash");
         let file = self.catalog_file(url, hash_url, "MediaManifest.txt")?;
         let downloaded = cache::ensure_cached(&file).await?;
 
@@ -174,7 +162,7 @@ impl ChinaCdn {
         hash_url: String,
         filename: &str
     ) -> Result<CatalogFile, CatalogError> {
-        let key = format!("catalog/china/{}/{}", self.platform.as_ref(), filename);
+        let key = fconcat!("/"; "catalog", "china", self.platform.as_ref(), filename);
         Ok(CatalogFile {
             url,
             hash_url,
@@ -188,7 +176,7 @@ impl ChinaCdn {
         entry.path = if entry.path.starts_with("assets/") {
             entry.path
         } else {
-            format!("assets/{}", entry.path)
+            fconcat!("assets/", entry.path.as_str())
         };
         Self::media_entry(entry)
     }

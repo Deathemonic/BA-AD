@@ -133,8 +133,7 @@ impl CommandHandler {
             if !matches!(args.filter_method, FilterMethod::Contains) {
                 let filter_method_name = format!("{:?}", args.filter_method).to_lowercase();
                 return Err(eyre!(
-                    "Filter method '{}' specified but no filter pattern provided. Use --filter to specify a pattern.",
-                    filter_method_name
+                    "Filter method '{filter_method_name}' specified but no filter pattern provided. Use --filter to specify a pattern.",
                 ));
             }
             return Ok(None);

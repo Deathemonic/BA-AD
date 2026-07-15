@@ -2,10 +2,10 @@
 resolver = "3"
 members = [
     "crates/baad",
-    "crates/baad-utils",
-    "crates/baad-dm",
     "crates/baad-cli",
+    "crates/baad-dm",
     "crates/baad-shared",
+    "crates/baad-utils",
 ]
 
 [workspace.package]
@@ -14,22 +14,23 @@ edition = "2024"
 authors = ["Zinth"]
 
 [workspace.dependencies]
-tokio = { version = "1.52", features = ["full"] }
-eyre = "0.6"
-thiserror = "2"
-serde = { version = "1", features = ["derive"] }
-serde_json = { version = "1", features = ["preserve_order"] }
-reqwest = "0.13"
-lazy-regex = "3.6"
-derive_more = { version = "2", default-features = false, features = ["debug"] }
-strum = { version = "0.28", features = ["derive"] }
-bon = "3"
-memorypack = "1.2.2"
-tracing = "0.1"
-bitflags = "2"
-bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "3.3.0" }
-
 baad = { path = "crates/baad" }
+baad-dm = { path = "crates/baad-dm" }
 baad-shared = { path = "crates/baad-shared" }
 baad-utils = { path = "crates/baad-utils" }
-baad-dm = { path = "crates/baad-dm" }
+bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "3.3.0" }
+
+bitflags = "2"
+bon = "3"
+derive_more = { version = "2", default-features = false, features = ["debug"] }
+eyre = "0.6"
+fastcat = "1.1"
+lazy-regex = "3.6"
+memorypack = "1.2.2"
+reqwest = "0.13"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+strum = { version = "0.28", features = ["derive"] }
+thiserror = "2"
+tokio = { version = "1.52", features = ["full"] }
+tracing = "0.1"

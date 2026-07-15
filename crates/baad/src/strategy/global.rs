@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use baad_shared::{
     DownloadAsset,
     DownloadMedia,
@@ -11,6 +9,7 @@ use baad_shared::{
     TABLE_BUNDLES
 };
 use baad_utils::file::filename_or;
+use fastcat::fconcat;
 
 use crate::download::ResourceCategory;
 
@@ -33,7 +32,7 @@ impl GlobalStrategy {
                 continue;
             }
 
-            let url = format!("{}{}", base_url, resource.resource_path);
+            let url = fconcat!(base_url, resource.resource_path.as_str());
             let hash = HashValue::Md5(resource.resource_hash);
             let size = resource.resource_size;
 

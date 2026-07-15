@@ -12,6 +12,7 @@ use baad_shared::{
     TABLE_BUNDLES,
     TableCatalogCN
 };
+use fastcat::fconcat;
 
 pub struct ChinaStrategy;
 
@@ -22,13 +23,7 @@ impl ChinaStrategy {
         platform: Platform
     ) -> Vec<DownloadAsset> {
         let assets = catalog.bundle_files.into_iter().map(|file| DownloadAsset {
-            url: format!(
-                "{}/{}/{}/{}",
-                catalog_url,
-                ASSET_BUNDLES,
-                platform.display_name(),
-                file.name
-            ),
+            url: fconcat!("/"; catalog_url, const { ASSET_BUNDLES }, platform.display_name(), file.name.as_str()),
             path: file.name,
             hash: HashValue::Md5(file.crc),
             size: file.size,
@@ -76,11 +71,12 @@ impl ChinaStrategy {
 
     fn hashed_url(catalog_url: &str, hash: &str, resource: &str) -> String {
         let shard = hash.get(..2).unwrap_or(hash);
-        format!("{catalog_url}/pool/{resource}/{shard}/{hash}")
+        let url = fconcat!("/"; catalog_url, "pool" ,resource, shard, hash);
+        url
     }
 
     fn media_path(path: String, media_type: ChinaMediaType) -> String {
         let extension = media_type.as_ref();
-        if extension.is_empty() { path } else { format!("{path}.{extension}") }
+        if extension.is_empty() { path } else { fconcat!(path.as_str(), ".", extension) }
     }
 }

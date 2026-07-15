@@ -46,8 +46,8 @@ pub fn get_content_length(response: &Response) -> Option<u64> {
 
 pub fn create_range_header(start: u64, end: Option<u64>) -> String {
     match end {
-        Some(e) => format!("bytes={}-{}", start, e),
-        None => format!("bytes={}-", start)
+        Some(e) => format!("bytes={start}-{e}"),
+        None => format!("bytes={start}-")
     }
 }
 

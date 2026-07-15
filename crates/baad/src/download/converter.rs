@@ -4,6 +4,7 @@ use std::path::Path;
 use baad_dm::Download;
 use baad_shared::{DownloadAsset, DownloadMedia, DownloadTable, HashValue};
 use baad_utils::file::filename_matches;
+use fastcat::fconcat;
 use reqwest::Url;
 
 use crate::download::ResourceFilter;
@@ -64,9 +65,7 @@ pub fn convert_media(media: &[DownloadMedia], filter: Option<&ResourceFilter>) -
 }
 
 fn media_matches(path: &str, filter: Option<&ResourceFilter>) -> bool {
-    filter.is_none_or(|f| {
-        filename_matches(path, |filename| f.matches(filename))
-    })
+    filter.is_none_or(|f| filename_matches(path, |filename| f.matches(filename)))
 }
 
 fn try_add<'a>(
@@ -83,7 +82,7 @@ fn try_add<'a>(
 
 fn convert_path_to_bundle(zip_path: &str, bundle_filename: &str) -> String {
     if let Some(last_slash) = zip_path.rfind('/') {
-        format!("{}/{}", &zip_path[..last_slash], bundle_filename)
+        fconcat!(&zip_path[..last_slash], "/", bundle_filename)
     } else {
         bundle_filename.into()
     }

@@ -29,7 +29,7 @@ impl ZipCache {
                 Some(cell) => cell.clone(),
                 None => {
                     let cell = Arc::new(OnceCell::new());
-                    map.insert(url.as_str().to_string(), cell.clone());
+                    map.insert(url.as_str().into(), cell.clone());
                     cell
                 }
             }

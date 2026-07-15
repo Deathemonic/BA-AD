@@ -9,6 +9,7 @@ use baad_shared::{
     client
 };
 use baad_utils::file::get_data_path;
+use fastcat::fconcat;
 use memorypack::MemoryPackSerializer;
 use tokio::fs;
 
@@ -67,22 +68,24 @@ impl JapanCdn {
 
     pub async fn fetch_assets(&self) -> Result<BundlePatchPackInfo, CatalogError> {
         let platform = self.platform.as_ref().to_lowercase();
-        let url =
-            format!("{}/{}/BundlePackingInfo.bytes", self.catalog_url, self.platform.patch_pack());
-        let bytes = self.fetch_bytes(&url, &format!("{platform}/BundlePackingInfo.bytes")).await?;
+        let url = fconcat!("/"; self.catalog_url.as_str(), self.platform.patch_pack(), "BundlePatchPackInfo.bytes");
+        let bytes = self
+            .fetch_bytes(&url, &fconcat!(platform.as_str(), "/BundlePackingInfo.bytes"))
+            .await?;
         let catalog = MemoryPackSerializer::deserialize::<BundlePatchPackInfo>(&bytes)?;
         Ok(catalog)
     }
 
     pub async fn fetch_table(&self) -> Result<TableCatalog, CatalogError> {
-        let url = format!("{}/{}/TableCatalog.bytes", self.catalog_url, TABLE_BUNDLES);
+        let url =
+            fconcat!("/"; self.catalog_url.as_str(), const { TABLE_BUNDLES }, "TableCatalog.bytes");
         let bytes = self.fetch_bytes(&url, "TableCatalog.bytes").await?;
         let catalog = MemoryPackSerializer::deserialize::<TableCatalog>(&bytes)?;
         Ok(catalog)
     }
 
     pub async fn fetch_media(&self) -> Result<MediaCatalog, CatalogError> {
-        let url = format!("{}/{}/Catalog/MediaCatalog.bytes", self.catalog_url, MEDIA_RESOURCES);
+        let url = fconcat!("/"; self.catalog_url.as_str(), const { MEDIA_RESOURCES }, "Catalog", "MediaCatalog.bytes");
         let bytes = self.fetch_bytes(&url, "MediaCatalog.bytes").await?;
         let catalog = MemoryPackSerializer::deserialize::<MediaCatalog>(&bytes)?;
         Ok(catalog)
@@ -92,13 +95,13 @@ impl JapanCdn {
         let file = CatalogFile {
             url: url.into(),
             hash_url: Self::hash_url(url),
-            path: get_data_path(&format!("catalog/japan/{filename}"))?
+            path: get_data_path(&fconcat!("/"; "catalog", "japan", filename))?
         };
         cache::ensure_cached(&file).await?;
         Ok(fs::read(&file.path).await?)
     }
 
     fn hash_url(url: &str) -> String {
-        url.strip_suffix(".bytes").map_or_else(|| url.into(), |stem| format!("{stem}.hash"))
+        url.strip_suffix(".bytes").map_or_else(|| url.into(), |stem| fconcat!(stem, ".hash"))
     }
 }

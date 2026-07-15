@@ -16,6 +16,7 @@ use baad_shared::{
     client
 };
 use bacy::crypto::md5::compute_hash_str;
+use fastcat::fconcat;
 use serde::{Deserialize, Serialize};
 
 use crate::error::CatalogError;
@@ -60,7 +61,7 @@ impl YoStarClient {
         };
 
         let head_json = serde_json::to_string(&head)?;
-        let sign_data = format!("{}{}", head_json, YOSTAR_SIGNATURE_DATA);
+        let sign_data = fconcat!(head_json.as_str(), const { YOSTAR_SIGNATURE_DATA });
         let sign = compute_hash_str(&sign_data);
 
         let signature = YoStarSignature { head, sign };
@@ -71,7 +72,7 @@ impl YoStarClient {
         &self,
         endpoint: &str
     ) -> Result<T, CatalogError> {
-        let url = format!("{}{}", YOSTAR_BASE_URL, endpoint);
+        let url = fconcat!(const { YOSTAR_BASE_URL }, endpoint);
         let signature = Self::create_signature()?;
 
         let response = client().get(&url).header("Authorization", signature).send().await?;
@@ -99,9 +100,12 @@ impl YoStarClient {
         file_path: &str
     ) -> Result<GameJsonConfig, CatalogError> {
         let encoded_path = urlencoding::encode(file_path);
-        let endpoint = format!(
-            "{}?version={}&file_path={}",
-            YOSTAR_GAME_JSON_CONFIG_PATH, version, encoded_path
+        let endpoint = fconcat!(
+            const { YOSTAR_GAME_JSON_CONFIG_PATH },
+            "?version=",
+            version,
+            "&file_path=",
+            encoded_path.as_ref()
         );
         self.request(&endpoint).await
     }
@@ -126,8 +130,11 @@ impl YoStarClient {
             .find(|f| f.path.ends_with("/resources.assets"))
             .ok_or(CatalogError::DeserializationFailed)?;
 
-        let download_url =
-            format!("{}{}{}", domain.primary_cdn, json_data.source, resources_file.path);
+        let download_url = fconcat!(
+            domain.primary_cdn.as_str(),
+            json_data.source.as_str(),
+            resources_file.path.as_str()
+        );
 
         Ok((download_url, resources_file))
     }

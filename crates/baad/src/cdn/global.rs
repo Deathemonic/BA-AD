@@ -3,6 +3,7 @@ use baad_shared::platform::Platform;
 use baad_utils::file::get_data_path;
 use baad_utils::json::load;
 use baad_utils::{debug, warn};
+use fastcat::fconcat;
 use tokio::fs;
 
 use crate::cdn::cache;
@@ -20,7 +21,7 @@ impl GlobalCdn {
     pub async fn fetch(&self) -> Result<GlobalCatalogData, CatalogError> {
         let filename = Self::catalog_filename(&self.catalog_url)?;
         let path =
-            get_data_path(&format!("catalog/global/{}/{}", self.platform.as_ref(), filename))?;
+            get_data_path(&fconcat!("/"; "catalog", "global", self.platform.as_ref(), filename))?;
         let marker = path.with_extension("url");
         let pack = path.with_extension("bytes");
 

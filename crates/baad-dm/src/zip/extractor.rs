@@ -57,7 +57,7 @@ impl<'a> ZipExtractor<'a> {
         let index = self.build_index().await?;
         let info = index
             .get(target)
-            .ok_or_else(|| Error::Archive(format!("File '{}' not found in ZIP", target).into()))?;
+            .ok_or_else(|| Error::Archive(format!("File '{target}' not found in ZIP").into()))?;
         Self::extract_member(self.client, self.url, info).await
     }
 
@@ -179,7 +179,7 @@ impl<'a> ZipExtractor<'a> {
             COMPRESSION_DEFLATE => {
                 let mut output = Vec::with_capacity(data.len() * 2);
                 DeflateDecoder::new(data).read_to_end(&mut output).map_err(|e| {
-                    Error::Archive(format!("Deflate decompression failed: {}", e).into())
+                    Error::Archive(format!("Deflate decompression failed: {e}").into())
                 })?;
                 Ok(output)
             }
