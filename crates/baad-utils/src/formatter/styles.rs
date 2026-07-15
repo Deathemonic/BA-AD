@@ -1,3 +1,5 @@
+use std::fmt;
+
 use lazy_regex::regex;
 use owo_colors::Style;
 use tracing::Level;
@@ -76,38 +78,34 @@ pub fn contains_url(value: &str) -> bool {
 }
 
 #[inline]
-pub fn format_urls<F1, F2>(content: &str, format_text: F1, format_url: F2) -> String
+pub fn format_urls<W, F1, F2>(
+    content: &str,
+    writer: &mut W,
+    format_text: F1,
+    format_url: F2
+) -> fmt::Result
 where
-    F1: Fn(&str) -> String,
-    F2: Fn(&str) -> String
+    W: fmt::Write,
+    F1: Fn(&mut W, &str) -> fmt::Result,
+    F2: Fn(&mut W, &str) -> fmt::Result
 {
     if !content.contains("://") {
-        return format_text(content);
+        return format_text(writer, content);
     }
-
     let url_regex = regex!(r"https?://[^\s]+|ftp://[^\s]+");
-
     if !url_regex.is_match(content) {
-        return format_text(content);
+        return format_text(writer, content);
     }
-
-    let mut result = String::new();
     let mut last_end = 0;
-
     for mat in url_regex.find_iter(content) {
         if mat.start() > last_end {
-            let before_url = &content[last_end..mat.start()];
-            result.push_str(&format_text(before_url));
+            format_text(writer, &content[last_end..mat.start()])?;
         }
-
-        result.push_str(&format_url(mat.as_str()));
+        format_url(writer, mat.as_str())?;
         last_end = mat.end();
     }
-
     if last_end < content.len() {
-        let after_url = &content[last_end..];
-        result.push_str(&format_text(after_url));
+        format_text(writer, &content[last_end..])?;
     }
-
-    result
+    Ok(())
 }

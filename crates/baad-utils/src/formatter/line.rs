@@ -2,7 +2,7 @@ use std::fmt;
 
 use better_default::Default;
 use chrono::{DateTime, Local};
-use owo_colors::{OwoColorize, Stream};
+use owo_colors::{OwoColorize, Stream, Style};
 use tracing::Level;
 
 use crate::formatter::styles::{
@@ -14,7 +14,6 @@ use crate::formatter::styles::{
     SUCCESS_STYLE,
     SUCCESS_VALUE_STYLE,
     TIMESTAMP_STYLE,
-    contains_url,
     format_urls,
     level_style,
     level_to_index,
@@ -139,24 +138,7 @@ impl LineFormatter {
             width = padding
         )?;
 
-        if contains_url(cause_value) {
-            let formatted = format_urls(
-                cause_value,
-                |text| {
-                    text.if_supports_color(Stream::Stdout, |t| t.style(CAUSE_VALUE_STYLE))
-                        .to_string()
-                },
-                |url| {
-                    url.if_supports_color(Stream::Stdout, |t| {
-                        t.style(CAUSE_VALUE_STYLE.underline())
-                    })
-                    .to_string()
-                }
-            );
-            write!(writer, "{formatted}")?;
-        } else {
-            write!(writer, "{cause_value}")?;
-        }
+        write_styled_value(writer, cause_value, CAUSE_VALUE_STYLE)?;
 
         writeln!(writer)
     }
@@ -178,20 +160,8 @@ fn write_colored_value(
         );
     }
 
-    if !contains_url(value) {
-        let style = value_style(level);
-        write!(writer, "{}", value.if_supports_color(Stream::Stdout, |t| t.style(style)))
-    } else {
-        let style = value_style(level);
-        let formatted = format_urls(
-            value,
-            |text| format!("{}", text.if_supports_color(Stream::Stdout, |t| t.style(style))),
-            |url| {
-                format!("{}", url.if_supports_color(Stream::Stdout, |t| t.style(style.underline())))
-            }
-        );
-        write!(writer, "{formatted}")
-    }
+    let style = value_style(level);
+    write_styled_value(writer, value, style)
 }
 
 fn write_colored_field(
@@ -205,4 +175,15 @@ fn write_colored_field(
 
     write!(writer, "{}=", field_name.if_supports_color(Stream::Stdout, |t| t.style(style)))?;
     write_colored_value(writer, level, is_success, value)
+}
+
+fn write_styled_value(writer: &mut impl fmt::Write, value: &str, style: Style) -> fmt::Result {
+    format_urls(
+        value,
+        writer,
+        |w, text| write!(w, "{}", text.if_supports_color(Stream::Stdout, |t| t.style(style))),
+        |w, url| {
+            write!(w, "{}", url.if_supports_color(Stream::Stdout, |t| t.style(style.underline())))
+        }
+    )
 }

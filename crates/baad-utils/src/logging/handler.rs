@@ -25,12 +25,12 @@ impl EyreHandler for TracingHandler {
         }
 
         let mut prev_msg = error.to_string();
-        error!("{}", error);
+        error!("{error}");
 
         for cause in successors(error.source(), |e| (*e).source()) {
             let cause_msg = cause.to_string();
             if cause_msg != prev_msg {
-                error!("{}", cause);
+                error!("{cause}");
             }
             prev_msg = cause_msg;
         }

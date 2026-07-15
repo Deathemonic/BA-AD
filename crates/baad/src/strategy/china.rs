@@ -33,10 +33,7 @@ impl ChinaStrategy {
         assets.collect()
     }
 
-    pub fn build_media_downloads(
-        catalog: MediaCatalogCN,
-        catalog_url: &str
-    ) -> Vec<DownloadMedia> {
+    pub fn build_media_downloads(catalog: MediaCatalogCN, catalog_url: &str) -> Vec<DownloadMedia> {
         let media = catalog.table.into_values().map(|entry| DownloadMedia {
             url: Self::hashed_url(catalog_url, &entry.hash, MEDIA_RESOURCES),
             path: Self::media_path(entry.path, entry.media_type),
