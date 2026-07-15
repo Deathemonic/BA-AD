@@ -3,10 +3,14 @@ name = "baad"
 version.workspace = true
 edition.workspace = true
 
+[features]
+default = ["logs"]
+logs = ["baad-utils/logs"]
+
 [dependencies]
 baad-dm = { workspace = true }
 baad-shared = { workspace = true }
-baad-utils = { workspace = true }
+baad-utils = { workspace = true, default-features = false }
 bacy = { workspace = true }
 
 bitflags = { workspace = true }

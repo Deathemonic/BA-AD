@@ -17,6 +17,7 @@ pub use baad_shared::{
     set_client,
     set_observer
 };
+#[cfg(feature = "logs")]
 pub use baad_utils::config::{LoggingConfig, init_logging};
 pub use baad_utils::{file, network};
 pub use error::*;

@@ -10,13 +10,13 @@ use baad_shared::{
 };
 use baad_utils::file::get_data_path;
 use baad_utils::json::{load, update};
-use baad_utils::{debug, info};
 use bacy::crypto::table::{create_key, decrypt_string, encrypt_string};
 use base64::Engine;
 use base64::engine::general_purpose;
 use memchr::memmem::Finder;
 use serde_json::Value;
 use tokio::fs;
+use tracing::{debug, info};
 
 use crate::api::YoStarClient;
 use crate::catalog::traits::Catalog;

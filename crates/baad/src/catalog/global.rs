@@ -9,9 +9,9 @@ use baad_shared::{
     GlobalCatalog as GlobalCatalogData
 };
 use baad_utils::file::get_data_path;
-use baad_utils::info;
 use baad_utils::json::{load, update};
 use baad_utils::network::fetch_version;
+use tracing::info;
 
 use crate::api::NexonClient;
 use crate::catalog::traits::Catalog;

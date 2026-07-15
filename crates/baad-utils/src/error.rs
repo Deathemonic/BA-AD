@@ -1,8 +1,11 @@
-use std::iter::successors;
-use std::{error, io};
+use std::io;
+#[cfg(feature = "logs")]
+use std::{error, iter::successors};
 
+#[cfg(feature = "logs")]
 use eyre::Report;
 use thiserror::Error;
+#[cfg(feature = "logs")]
 use tracing::warn;
 
 #[derive(Error, Debug)]
@@ -77,10 +80,12 @@ pub enum ProgressError {
     InvalidUtf8
 }
 
+#[cfg(feature = "logs")]
 pub trait IntoEyreReport {
     fn into_eyre_report(self) -> Report;
 }
 
+#[cfg(feature = "logs")]
 impl<E: error::Error + Send + Sync + 'static> IntoEyreReport for E {
     fn into_eyre_report(self) -> Report {
         let mut report = Report::msg(self.to_string());
@@ -93,6 +98,7 @@ impl<E: error::Error + Send + Sync + 'static> IntoEyreReport for E {
     }
 }
 
+#[cfg(feature = "logs")]
 pub fn log_recoverable_error(error: &Report, recovery_action: &str) {
     if let Some(cause) = error.source() {
         if cause.to_string() == error.to_string() {

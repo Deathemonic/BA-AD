@@ -2,9 +2,9 @@ use baad_shared::GlobalCatalog as GlobalCatalogData;
 use baad_shared::platform::Platform;
 use baad_utils::file::get_data_path;
 use baad_utils::json::load;
-use baad_utils::{debug, warn};
 use fastcat::fconcat;
 use tokio::fs;
+use tracing::{debug, warn};
 
 use crate::cdn::cache;
 use crate::download::download_file;

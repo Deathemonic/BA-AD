@@ -1,5 +1,5 @@
 use baad_shared::Downloads;
-use baad_utils::info;
+use tracing::info;
 
 use crate::error::CatalogError;
 

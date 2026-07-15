@@ -1,9 +1,9 @@
 use std::path::{Path, PathBuf};
 
 use baad_shared::client;
-use baad_utils::debug;
 use memorypack::{MemoryPackDeserialize, MemoryPackSerialize, MemoryPackSerializer};
 use tokio::fs;
+use tracing::debug;
 
 use crate::download::download_file;
 use crate::error::CatalogError;

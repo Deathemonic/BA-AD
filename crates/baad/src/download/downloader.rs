@@ -2,9 +2,9 @@ use std::path::{Path, PathBuf};
 
 use baad_dm::{Download, Downloader, DownloaderConfig};
 use baad_shared::{DownloadStatus, Downloads};
-use baad_utils::{error, info, warn};
 use bon::Builder;
 use reqwest::{Proxy, Url};
+use tracing::{error, info, warn};
 
 use crate::download::{ResourceFilter, converter};
 use crate::error::CatalogError;
