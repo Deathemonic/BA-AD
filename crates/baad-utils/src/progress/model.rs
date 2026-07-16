@@ -6,7 +6,7 @@ use baad_shared::{DownloadEvent, DownloadObserver, DownloadStatus};
 use better_default::Default;
 use tracing::Level;
 
-use crate::formatter::LineFormatter;
+use crate::formatter::{LineFormatter, format_bytes};
 use crate::progress::view::{ProgressModel, ProgressView};
 
 pub trait DownloadProgressHandler: ProgressModel {
@@ -59,15 +59,34 @@ impl DownloadProgressHandler for DownloadProgressModel {
 }
 
 impl ProgressModel for DownloadProgressModel {
-    fn render(&mut self, _width: usize, output: &mut String) {
-        for filename in self.active.keys() {
+    fn render(&mut self, width: usize, output: &mut String) {
+        for (filename, state) in &self.active {
             let name = Path::new(filename.as_ref())
                 .file_name()
                 .and_then(|n| n.to_str())
                 .unwrap_or(filename);
-            let _ = self
-                .formatter
-                .write_line(output, &Level::INFO, false, "Downloading", &[("file", name)]);
+
+            let size = if state.total_bytes > 0 {
+                format!(
+                    "{} / {}",
+                    format_bytes(state.downloaded_bytes),
+                    format_bytes(state.total_bytes)
+                )
+            } else if state.downloaded_bytes > 0 {
+                format_bytes(state.downloaded_bytes)
+            } else {
+                String::new()
+            };
+
+            let _ = self.formatter.write_line_aligned(
+                output,
+                &Level::INFO,
+                false,
+                "Downloading",
+                name,
+                &size,
+                width
+            );
         }
     }
 

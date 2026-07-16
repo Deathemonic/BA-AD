@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fmt;
 
 use better_default::Default;
@@ -121,6 +122,53 @@ impl LineFormatter {
         Ok(())
     }
 
+    pub fn write_line_aligned(
+        &self,
+        writer: &mut impl fmt::Write,
+        level: &Level,
+        is_success: bool,
+        message: &str,
+        value: &str,
+        right: &str,
+        width: usize
+    ) -> fmt::Result {
+        const LEVEL_COLUMNS: usize = 10;
+        const TIMESTAMP_COLUMNS: usize = 9;
+        const MIN_GAP: usize = 2;
+        const MIN_VALUE_COLUMNS: usize = 8;
+
+        if self.include_timestamps {
+            self.write_timestamp(writer)?;
+            write!(writer, " ")?;
+        }
+
+        self.write_level_prefix(writer, level, is_success)?;
+        write!(writer, " {message}: ")?;
+
+        let timestamp_columns = if self.include_timestamps { TIMESTAMP_COLUMNS } else { 0 };
+        let left_columns = timestamp_columns + LEVEL_COLUMNS + message.chars().count() + 2;
+        let right_columns = right.chars().count();
+
+        let reserved = if right_columns > 0 { right_columns + MIN_GAP } else { 0 };
+        let value_budget = width.saturating_sub(left_columns + reserved).max(MIN_VALUE_COLUMNS);
+
+        let truncated = truncate_middle(value, value_budget);
+        write_colored_value(writer, level, is_success, &truncated)?;
+
+        if right_columns > 0 {
+            let used = left_columns + truncated.chars().count() + right_columns;
+            let gap = width.saturating_sub(used).max(MIN_GAP);
+            write!(
+                writer,
+                "{:gap$}{}",
+                "",
+                right.if_supports_color(Stream::Stdout, |t| t.style(TIMESTAMP_STYLE))
+            )?;
+        }
+
+        writeln!(writer)
+    }
+
     fn write_cause_line(&self, writer: &mut impl fmt::Write, cause_value: &str) -> fmt::Result {
         if self.include_timestamps {
             self.write_timestamp(writer)?;
@@ -175,6 +223,24 @@ fn write_colored_field(
 
     write!(writer, "{}=", field_name.if_supports_color(Stream::Stdout, |t| t.style(style)))?;
     write_colored_value(writer, level, is_success, value)
+}
+
+fn truncate_middle(value: &str, max_chars: usize) -> Cow<'_, str> {
+    let count = value.chars().count();
+    if count <= max_chars {
+        return Cow::Borrowed(value);
+    }
+
+    let keep = max_chars.saturating_sub(1);
+    let front = keep.div_ceil(2);
+    let back = keep / 2;
+
+    let mut truncated = String::with_capacity(max_chars * 4);
+    truncated.extend(value.chars().take(front));
+    truncated.push('…');
+    truncated.extend(value.chars().skip(count - back));
+
+    Cow::Owned(truncated)
 }
 
 fn write_styled_value(writer: &mut impl fmt::Write, value: &str, style: Style) -> fmt::Result {
