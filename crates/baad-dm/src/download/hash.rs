@@ -7,6 +7,8 @@ use bacy::hash::crc;
 
 use crate::error::Error;
 
+const HASH_BUFFER_SIZE: usize = 256 * 1024;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HashType {
     Md5,
@@ -41,9 +43,9 @@ pub fn verify_hash(file_path: &Path, expected: Option<&String>) -> Result<bool, 
             let Ok(expected_crc) = expected.parse::<u32>() else {
                 return Ok(false);
             };
-            match crc::compare(file_path, expected_crc) {
-                Ok(()) => Ok(true),
-                Err(HashError::Mismatch { .. }) | Err(HashError::InvalidPath) => Ok(false),
+            match crc::compute_streaming(file_path, HASH_BUFFER_SIZE, None) {
+                Ok(actual_crc) => Ok(actual_crc == expected_crc),
+                Err(HashError::InvalidPath) => Ok(false),
                 Err(e) => Err(e.into())
             }
         }

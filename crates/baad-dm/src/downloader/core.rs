@@ -83,19 +83,17 @@ impl<'a> Downloader<'a> {
         ctx: &FetchCtx<'_>,
         filename: &Arc<str>
     ) -> Result<FetchOutcome, FetchOutcome> {
-        if !self.config.overwrite
-            && ctx.file_path.exists()
-            && let Ok(true) = ctx.download.verify_hash(&ctx.file_path)
-        {
-            let size = fs::metadata(&ctx.file_path).await.map(|m| m.len()).unwrap_or(0);
-            return Ok(FetchOutcome::skipped("File exists with matching hash", size));
-        }
-
-        if !self.config.overwrite
-            && ctx.file_path.exists()
-            && let Ok(false) = ctx.download.verify_hash(&ctx.file_path)
-        {
-            let _ = fs::remove_file(&ctx.file_path).await;
+        if !self.config.overwrite && ctx.file_path.exists() {
+            match ctx.download.verify_hash(&ctx.file_path) {
+                Ok(true) => {
+                    let size = fs::metadata(&ctx.file_path).await.map(|m| m.len()).unwrap_or(0);
+                    return Ok(FetchOutcome::skipped("File exists with matching hash", size));
+                }
+                Ok(false) => {
+                    let _ = fs::remove_file(&ctx.file_path).await;
+                }
+                Err(_) => {}
+            }
         }
 
         if ctx.download.is_extraction() {
