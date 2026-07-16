@@ -18,7 +18,9 @@ pub use baad_shared::{
     set_observer
 };
 #[cfg(feature = "logs")]
-pub use baad_utils::config::{LoggingConfig, init_logging};
+pub use baad_utils::config::{LoggingConfig, init_logging, init_logging_with_model};
+#[cfg(feature = "logs")]
+pub use baad_utils::progress::{DownloadProgressHandler, ProgressModel};
 pub use baad_utils::{file, network};
 pub use error::*;
 pub use tracing::{debug, error, info, trace, warn};

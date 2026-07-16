@@ -15,9 +15,10 @@ use crate::formatter::ConsoleFormatter;
 use crate::logging::handler;
 use crate::logging::writer::{AsyncMakeWriter, store_guard};
 use crate::progress::{
+    DownloadProgressHandler,
     DownloadProgressModel,
-    DownloadProgressObserver,
     ProgressMakeWriter,
+    ProgressObserver,
     ProgressView,
     terminal
 };
@@ -109,10 +110,12 @@ fn should_use_progress(config: &LoggingConfig) -> bool {
         && !config.enable_json
 }
 
-fn init_with_progress(config: &LoggingConfig) -> Result<(), ConfigError> {
-    let model = DownloadProgressModel::new();
+fn init_with_progress<M>(config: &LoggingConfig, model: M) -> Result<(), ConfigError>
+where
+    M: DownloadProgressHandler + Send + Sync + 'static
+{
     let view = Arc::new(ProgressView::new(model, PROGRESS_UPDATE_INTERVAL));
-    let observer = DownloadProgressObserver::new(Arc::clone(&view));
+    let observer = ProgressObserver::new(Arc::clone(&view));
     let writer = ProgressMakeWriter::new(Arc::clone(&view));
 
     set_observer(Arc::new(observer));
@@ -159,12 +162,19 @@ fn init_without_progress(config: &LoggingConfig) -> Result<(), ConfigError> {
     result.map_err(|_| ConfigError::LoggingInitFailed)
 }
 
-pub fn init_logging(config: LoggingConfig) -> Result<(), ConfigError> {
+pub fn init_logging_with_model<M>(config: LoggingConfig, model: M) -> Result<(), ConfigError>
+where
+    M: DownloadProgressHandler + Send + Sync + 'static
+{
     install_error_handler(&config)?;
 
     if should_use_progress(&config) {
-        init_with_progress(&config)
+        init_with_progress(&config, model)
     } else {
         init_without_progress(&config)
     }
+}
+
+pub fn init_logging(config: LoggingConfig) -> Result<(), ConfigError> {
+    init_logging_with_model(config, DownloadProgressModel::new())
 }

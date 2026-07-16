@@ -9,6 +9,10 @@ use tracing::Level;
 use crate::formatter::LineFormatter;
 use crate::progress::view::{ProgressModel, ProgressView};
 
+pub trait DownloadProgressHandler: ProgressModel {
+    fn handle_event(&mut self, event: DownloadEvent);
+}
+
 struct FileState {
     downloaded_bytes: u64,
     total_bytes: u64
@@ -23,8 +27,10 @@ pub struct DownloadProgressModel {
 
 impl DownloadProgressModel {
     pub fn new() -> Self { Self::default() }
+}
 
-    pub fn handle_event(&mut self, event: DownloadEvent) {
+impl DownloadProgressHandler for DownloadProgressModel {
+    fn handle_event(&mut self, event: DownloadEvent) {
         match event {
             DownloadEvent::Started { filename, total_bytes } => {
                 self.active.insert(filename, FileState {
@@ -74,15 +80,15 @@ impl ProgressModel for DownloadProgressModel {
     }
 }
 
-pub struct DownloadProgressObserver {
-    view: Arc<ProgressView<DownloadProgressModel>>
+pub struct ProgressObserver<M: DownloadProgressHandler> {
+    view: Arc<ProgressView<M>>
 }
 
-impl DownloadProgressObserver {
-    pub const fn new(view: Arc<ProgressView<DownloadProgressModel>>) -> Self { Self { view } }
+impl<M: DownloadProgressHandler> ProgressObserver<M> {
+    pub const fn new(view: Arc<ProgressView<M>>) -> Self { Self { view } }
 }
 
-impl DownloadObserver for DownloadProgressObserver {
+impl<M: DownloadProgressHandler + Sync> DownloadObserver for ProgressObserver<M> {
     fn on_event(&self, event: DownloadEvent) {
         let _ = self.view.update(|model| model.handle_event(event));
     }

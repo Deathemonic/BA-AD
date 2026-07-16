@@ -245,10 +245,95 @@ init_logging(LoggingConfig {
 })?;
 ```
 
+When running in an interactive terminal, `init_logging` also renders a live progress display
+for active downloads. To turn that off while keeping normal log output, set `enable_progress: false`:
+
+```rust
+init_logging(LoggingConfig {
+    enable_progress: false,
+    ..LoggingConfig::default()
+})?;
+```
+
+The progress display is automatically disabled when output is not a terminal, when
+`enable_json` is set, or when `enable_console` is off.
+
+## Custom Progress Display
+
+To replace the built-in `Downloading` lines with your own rendering (e.g., progress bars),
+implement [`ProgressModel`](../../crates/baad-utils/src/progress/view.rs) and
+[`DownloadProgressHandler`](../../crates/baad-utils/src/progress/model.rs), then initialize
+logging with `init_logging_with_model` instead of `init_logging`:
+
+```rust
+use std::collections::HashMap;
+use std::fmt::Write;
+use std::sync::Arc;
+
+use baad::{
+    init_logging_with_model, DownloadEvent, DownloadProgressHandler, LoggingConfig, ProgressModel,
+};
+
+#[derive(Default)]
+struct BarModel {
+    active: HashMap<Arc<str>, (u64, u64)>, // filename -> (downloaded, total)
+}
+
+impl ProgressModel for BarModel {
+    // Called on repaint. Write one line per active download; `width` is the terminal width.
+    fn render(&mut self, width: usize, out: &mut String) {
+        for (name, (downloaded, total)) in &self.active {
+            let pct = *downloaded as f64 / (*total).max(1) as f64;
+            let bar_width = width.saturating_sub(40).max(10);
+            let filled = (bar_width as f64 * pct) as usize;
+            let _ = writeln!(
+                out,
+                "{name} [{}{}] {:.0}%",
+                "█".repeat(filled),
+                "░".repeat(bar_width - filled),
+                pct * 100.0
+            );
+        }
+    }
+
+    // Called once when the display finishes. Optional summary output.
+    fn final_message(&mut self, out: &mut String) {
+        let _ = writeln!(out, "done");
+    }
+}
+
+impl DownloadProgressHandler for BarModel {
+    // Called for every download event. Update your state here.
+    fn handle_event(&mut self, event: DownloadEvent) {
+        match event {
+            DownloadEvent::Started { filename, total_bytes } => {
+                self.active.insert(filename, (0, total_bytes));
+            }
+            DownloadEvent::Progress { filename, downloaded_bytes, total_bytes } => {
+                self.active.insert(filename, (downloaded_bytes, total_bytes));
+            }
+            DownloadEvent::Completed { filename, .. } => {
+                self.active.remove(&filename);
+            }
+        }
+    }
+}
+
+init_logging_with_model(LoggingConfig::default(), BarModel::default())?;
+```
+
+The rendering machinery (repainting, cursor handling, interleaving log lines with the
+progress area) is handled for you. If the progress display cannot be used (non-terminal
+output, `enable_json`, `enable_progress: false`), the model is ignored and logging falls
+back to plain output.
+
 ## Progress (Observers)
 
-To react to download progress, implement [`DownloadObserver`](../../crates/baad-shared/src/observer.rs) and register it globally with
-`set_observer` before downloading. Useful for progress bars or custom UIs.
+For full control — routing events to a GUI, a channel, or your own rendering loop —
+implement [`DownloadObserver`](../../crates/baad-shared/src/observer.rs) and register it
+globally with `set_observer` before downloading. This is the low-level hook underneath
+the progress display; if you use it, disable the built-in progress with
+`enable_progress: false` so the two don't compete for the observer slot.
 
 ```rust
 use std::sync::Arc;
@@ -275,7 +360,8 @@ impl DownloadObserver for MyObserver {
 set_observer(Arc::new(MyObserver));
 ```
 
-If no observer is set, a `NoopObserver` is used.
+`set_observer` can only be called once per process; the first caller wins. If no observer
+is set, a `NoopObserver` is used and events are discarded.
 
 ---
 
