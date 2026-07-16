@@ -59,14 +59,11 @@ pub const fn level_to_index(level: &Level) -> usize {
 }
 
 #[inline]
-pub fn level_visual_length(level: &Level, is_success: bool) -> usize {
+pub const fn level_visual_length(level: &Level, is_success: bool) -> usize {
     if is_success {
-        return 9;
+        return SUCCESS_PREFIX.len();
     }
-    match *level {
-        Level::ERROR | Level::DEBUG | Level::TRACE => 7,
-        Level::WARN | Level::INFO => 6
-    }
+    LEVEL_PREFIXES[level_to_index(level)].len()
 }
 
 #[inline]

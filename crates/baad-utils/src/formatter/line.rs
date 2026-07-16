@@ -175,7 +175,7 @@ impl LineFormatter {
             write!(writer, " ")?;
         }
 
-        let visual_length = 7;
+        let visual_length = CAUSE_PREFIX.len();
         let padding = 9_usize.saturating_sub(visual_length);
 
         write!(
