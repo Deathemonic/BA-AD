@@ -143,7 +143,7 @@ impl LineFormatter {
         writeln!(writer)
     }
 
-    pub fn includes_timestamps(&self) -> bool { self.include_timestamps }
+    pub const fn includes_timestamps(&self) -> bool { self.include_timestamps }
 }
 
 fn write_colored_value(

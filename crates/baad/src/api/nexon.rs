@@ -6,7 +6,7 @@ use crate::error::CatalogError;
 pub struct NexonClient;
 
 impl NexonClient {
-    pub fn new() -> Self { Self }
+    pub const fn new() -> Self { Self }
 
     pub async fn get_addressable(
         &self,

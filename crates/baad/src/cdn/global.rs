@@ -16,7 +16,9 @@ pub struct GlobalCdn {
 }
 
 impl GlobalCdn {
-    pub fn new(catalog_url: String, platform: Platform) -> Self { Self { catalog_url, platform } }
+    pub const fn new(catalog_url: String, platform: Platform) -> Self {
+        Self { catalog_url, platform }
+    }
 
     pub async fn fetch(&self) -> Result<GlobalCatalogData, CatalogError> {
         let filename = Self::catalog_filename(&self.catalog_url)?;

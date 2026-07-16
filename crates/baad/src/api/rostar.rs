@@ -6,7 +6,7 @@ use crate::error::CatalogError;
 pub struct RoStarClient;
 
 impl RoStarClient {
-    pub fn new() -> Self { Self }
+    pub const fn new() -> Self { Self }
 
     pub async fn get_state(&self, version: &str) -> Result<ChinaState, CatalogError> {
         let response = client()

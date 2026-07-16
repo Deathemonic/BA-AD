@@ -11,7 +11,7 @@ pub use crate::error::ConfigError;
 pub struct TracingHandler;
 
 impl TracingHandler {
-    fn new() -> Self { Self }
+    const fn new() -> Self { Self }
 }
 
 impl EyreHandler for TracingHandler {

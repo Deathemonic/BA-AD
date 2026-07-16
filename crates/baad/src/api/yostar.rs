@@ -44,7 +44,7 @@ struct YoStarResponse<T> {
 pub struct YoStarClient;
 
 impl YoStarClient {
-    pub fn new() -> Self { Self }
+    pub const fn new() -> Self { Self }
 
     fn get_timestamp() -> Result<u64, CatalogError> {
         let duration = SystemTime::now()

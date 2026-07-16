@@ -79,7 +79,7 @@ pub struct DownloadProgressObserver {
 }
 
 impl DownloadProgressObserver {
-    pub fn new(view: Arc<ProgressView<DownloadProgressModel>>) -> Self { Self { view } }
+    pub const fn new(view: Arc<ProgressView<DownloadProgressModel>>) -> Self { Self { view } }
 }
 
 impl DownloadObserver for DownloadProgressObserver {

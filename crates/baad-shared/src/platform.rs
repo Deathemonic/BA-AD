@@ -35,7 +35,7 @@ impl Platform {
         }
     }
 
-    pub fn ensure_supported(self) -> Result<(), ServerConfigError> {
+    pub const fn ensure_supported(self) -> Result<(), ServerConfigError> {
         match self {
             Self::Windows => Err(ServerConfigError::WindowsNotSupported),
             _ => Ok(())
@@ -55,7 +55,7 @@ pub struct MarketConfig {
 }
 
 impl MarketConfig {
-    pub fn for_global(
+    pub const fn for_global(
         platform: Platform,
         build_type: BuildType
     ) -> Result<Self, ServerConfigError> {

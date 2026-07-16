@@ -36,7 +36,7 @@ pub struct ChinaResources {
 }
 
 impl ChinaCdn {
-    pub fn new(
+    pub const fn new(
         catalog_url: String,
         platform: Platform,
         resource_version: String,

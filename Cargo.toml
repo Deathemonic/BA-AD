@@ -24,7 +24,6 @@ bitflags = "2"
 bon = "3"
 derive_more = { version = "2", default-features = false, features = ["debug"] }
 eyre = "0.6"
-fastcat = "1.1"
 lazy-regex = "3.6"
 memorypack = "1.2.2"
 reqwest = "0.13"

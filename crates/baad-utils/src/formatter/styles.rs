@@ -26,7 +26,7 @@ pub const SUCCESS_VALUE_STYLE: Style = Style::new().green().italic();
 pub const CAUSE_VALUE_STYLE: Style = Style::new().truecolor(255, 165, 0).italic();
 
 #[inline]
-pub fn level_style(level: &Level) -> Style {
+pub const fn level_style(level: &Level) -> Style {
     match *level {
         Level::ERROR => ERROR_STYLE,
         Level::WARN => WARN_STYLE,
@@ -37,7 +37,7 @@ pub fn level_style(level: &Level) -> Style {
 }
 
 #[inline]
-pub fn value_style(level: &Level) -> Style {
+pub const fn value_style(level: &Level) -> Style {
     match *level {
         Level::ERROR => ERROR_VALUE_STYLE,
         Level::WARN => WARN_VALUE_STYLE,
@@ -48,7 +48,7 @@ pub fn value_style(level: &Level) -> Style {
 }
 
 #[inline]
-pub fn level_to_index(level: &Level) -> usize {
+pub const fn level_to_index(level: &Level) -> usize {
     match *level {
         Level::ERROR => 0,
         Level::WARN => 1,

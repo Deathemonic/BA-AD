@@ -15,9 +15,11 @@ pub(crate) enum FetchOutcome {
 }
 
 impl FetchOutcome {
-    pub(crate) fn success(size: u64, resumable: bool) -> Self { Self::Success { size, resumable } }
+    pub(crate) const fn success(size: u64, resumable: bool) -> Self {
+        Self::Success { size, resumable }
+    }
 
-    pub(crate) fn skipped(reason: &'static str, size: u64) -> Self {
+    pub(crate) const fn skipped(reason: &'static str, size: u64) -> Self {
         Self::Skipped { reason, size }
     }
 
@@ -50,7 +52,7 @@ pub struct Summary {
 }
 
 impl Summary {
-    pub fn is_success(&self) -> bool { matches!(self.status, DownloadStatus::Success) }
+    pub const fn is_success(&self) -> bool { matches!(self.status, DownloadStatus::Success) }
 
     pub fn for_download(download: Download) -> Self {
         Self::builder().download(Arc::new(download)).build()

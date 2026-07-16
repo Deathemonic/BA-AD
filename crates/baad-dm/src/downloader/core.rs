@@ -23,7 +23,7 @@ pub struct Downloader<'a> {
 }
 
 impl<'a> Downloader<'a> {
-    pub fn new(config: DownloaderConfig<'a>) -> Self { Self { config } }
+    pub const fn new(config: DownloaderConfig<'a>) -> Self { Self { config } }
 
     pub async fn download(&self, downloads: &[Download]) -> Vec<Summary> {
         let client_config = HttpClientConfig::builder()

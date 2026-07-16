@@ -30,7 +30,9 @@ pub struct JapanResources {
 }
 
 impl JapanCdn {
-    pub fn new(catalog_url: String, platform: Platform) -> Self { Self { catalog_url, platform } }
+    pub const fn new(catalog_url: String, platform: Platform) -> Self {
+        Self { catalog_url, platform }
+    }
 
     pub async fn fetch_addressable(url: &str) -> Result<JapanAddressable, CatalogError> {
         let response = client().get(url).send().await?.json::<JapanAddressable>().await?;

@@ -5,11 +5,11 @@ use memorypack::MemoryPackable;
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, FromRepr};
 
-fn default_platform() -> Cow<'static, str> { Cow::Borrowed("Android") }
+const fn default_platform() -> Cow<'static, str> { Cow::Borrowed("Android") }
 
-fn default_build_type() -> Cow<'static, str> { Cow::Borrowed("Standard") }
+const fn default_build_type() -> Cow<'static, str> { Cow::Borrowed("Standard") }
 
-fn default_group() -> Cow<'static, str> { Cow::Borrowed("GameData") }
+const fn default_group() -> Cow<'static, str> { Cow::Borrowed("GameData") }
 
 #[derive(Serialize, Deserialize, Clone, Default)]
 pub struct JapanData {
