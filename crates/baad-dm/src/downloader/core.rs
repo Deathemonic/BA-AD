@@ -32,7 +32,7 @@ impl<'a> Downloader<'a> {
             .maybe_headers(self.config.headers.clone())
             .build();
 
-        let Ok(client) = create_http_client(client_config) else {
+        let Ok(client) = create_http_client(client_config).map(Arc::new) else {
             return downloads
                 .iter()
                 .map(|d| {
@@ -52,7 +52,7 @@ impl<'a> Downloader<'a> {
         stream::iter(downloads)
             .map(|d| {
                 let ctx = FetchCtx {
-                    client: &client,
+                    client: Arc::clone(&client),
                     download: d,
                     file_path: self.config.directory.join(&d.filename),
                     cache: &zip_cache
@@ -102,7 +102,7 @@ impl<'a> Downloader<'a> {
             return self.extract_zip(ctx).await;
         }
 
-        let (resumable, content_length, resolved_url) = check_server(ctx.client, ctx.download)
+        let (resumable, content_length, resolved_url) = check_server(&ctx.client, ctx.download)
             .await
             .map_err(|e| FetchOutcome::failed(e, StatusCode::BAD_REQUEST))?;
 
@@ -164,7 +164,7 @@ impl<'a> Downloader<'a> {
 
         let index = ctx
             .cache
-            .get_index(ctx.client, &ctx.download.url)
+            .get_index(&ctx.client, &ctx.download.url)
             .await
             .map_err(|e| FetchOutcome::failed(e, StatusCode::BAD_REQUEST))?;
 
@@ -172,7 +172,7 @@ impl<'a> Downloader<'a> {
             FetchOutcome::failed(format!("File '{target}' not found in ZIP"), StatusCode::NOT_FOUND)
         })?;
 
-        let data = ZipExtractor::extract_member(ctx.client, &ctx.download.url, info)
+        let data = ZipExtractor::extract_member(&ctx.client, &ctx.download.url, info)
             .await
             .map_err(|e| FetchOutcome::failed(e, StatusCode::NOT_FOUND))?;
 

@@ -55,7 +55,7 @@ pub async fn download_chunked(
     let concurrent_chunks = chunk_count.min(max_concurrent_chunks);
 
     let chunk_ctx = ChunkCtx {
-        client: Arc::new(ctx.client.clone()),
+        client: Arc::clone(&ctx.client),
         resolved_url: resolved_url.into(),
         file_path: ctx.file_path.clone()
     };

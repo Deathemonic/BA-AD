@@ -1,4 +1,5 @@
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use reqwest_middleware::ClientWithMiddleware;
 use tokio::fs;
@@ -10,7 +11,7 @@ use crate::zip::ZipCache;
 
 #[derive(Debug)]
 pub struct FetchCtx<'a> {
-    pub client: &'a ClientWithMiddleware,
+    pub client: Arc<ClientWithMiddleware>,
     pub download: &'a Download,
     pub file_path: PathBuf,
     pub cache: &'a ZipCache
