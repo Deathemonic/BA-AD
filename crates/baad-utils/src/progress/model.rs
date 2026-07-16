@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::Write;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -6,7 +7,7 @@ use baad_shared::{DownloadEvent, DownloadObserver, DownloadStatus};
 use better_default::Default;
 use tracing::Level;
 
-use crate::formatter::{LineFormatter, format_bytes};
+use crate::formatter::{HumanBytes, LineFormatter};
 use crate::progress::view::{ProgressModel, ProgressView};
 
 pub trait DownloadProgressHandler: ProgressModel {
@@ -22,7 +23,8 @@ struct FileState {
 pub struct DownloadProgressModel {
     active: HashMap<Arc<str>, FileState>,
     completed: Vec<Arc<str>>,
-    formatter: LineFormatter
+    formatter: LineFormatter,
+    scratch: String
 }
 
 impl DownloadProgressModel {
@@ -59,24 +61,27 @@ impl DownloadProgressHandler for DownloadProgressModel {
 }
 
 impl ProgressModel for DownloadProgressModel {
-    fn render(&mut self, width: usize, output: &mut String) {
-        for (filename, state) in &self.active {
+    fn render(&mut self, width: usize, height: usize, output: &mut String) {
+        let reserved = (height / 3).max(5);
+        let max_visible = height.saturating_sub(reserved).max(1);
+
+        for (filename, state) in self.active.iter().take(max_visible) {
             let name = Path::new(filename.as_ref())
                 .file_name()
                 .and_then(|n| n.to_str())
                 .unwrap_or(filename);
 
-            let size = if state.total_bytes > 0 {
-                format!(
+            self.scratch.clear();
+            if state.total_bytes > 0 {
+                let _ = write!(
+                    self.scratch,
                     "{} / {}",
-                    format_bytes(state.downloaded_bytes),
-                    format_bytes(state.total_bytes)
-                )
+                    HumanBytes(state.downloaded_bytes),
+                    HumanBytes(state.total_bytes)
+                );
             } else if state.downloaded_bytes > 0 {
-                format_bytes(state.downloaded_bytes)
-            } else {
-                String::new()
-            };
+                let _ = write!(self.scratch, "{}", HumanBytes(state.downloaded_bytes));
+            }
 
             let _ = self.formatter.write_line_aligned(
                 output,
@@ -84,9 +89,16 @@ impl ProgressModel for DownloadProgressModel {
                 false,
                 "Downloading",
                 name,
-                &size,
+                &self.scratch,
                 width
             );
+        }
+
+        let hidden = self.active.len().saturating_sub(max_visible);
+        if hidden > 0 {
+            self.scratch.clear();
+            let _ = write!(self.scratch, "…and {hidden} more");
+            let _ = self.formatter.write_line(output, &Level::INFO, false, &self.scratch, &[]);
         }
     }
 

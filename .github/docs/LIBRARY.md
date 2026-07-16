@@ -280,8 +280,10 @@ struct BarModel {
 }
 
 impl ProgressModel for BarModel {
-    // Called on repaint. Write one line per active download; `width` is the terminal width.
-    fn render(&mut self, width: usize, out: &mut String) {
+    // Called on repaint. Write one line per active download; `width` and `height` are
+    // the terminal dimensions. Keep line count under `height - 1` — drawing more lines
+    // than the terminal has rows corrupts the repaint.
+    fn render(&mut self, width: usize, height: usize, out: &mut String) {
         for (name, (downloaded, total)) in &self.active {
             let pct = *downloaded as f64 / (*total).max(1) as f64;
             let bar_width = width.saturating_sub(40).max(10);

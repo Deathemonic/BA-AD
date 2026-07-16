@@ -9,7 +9,7 @@ use crate::error::ProgressError;
 use crate::progress::{ansi, terminal};
 
 pub trait ProgressModel: Send + 'static {
-    fn render(&mut self, width: usize, buffer: &mut String);
+    fn render(&mut self, width: usize, height: usize, buffer: &mut String);
 
     fn final_message(&mut self, _buffer: &mut String) {}
 }
@@ -27,12 +27,12 @@ struct InnerView<M: ProgressModel> {
     last_paint: Option<Instant>,
     update_interval: Duration,
     is_terminal: bool,
-    cached_width: usize,
-    last_width_check: Option<Instant>
+    cached_size: (usize, usize),
+    last_size_check: Option<Instant>
 }
 
-const WIDTH_CACHE_DURATION: Duration = Duration::from_secs(1);
-const DEFAULT_WIDTH: usize = 80;
+const SIZE_CACHE_DURATION: Duration = Duration::from_secs(1);
+const DEFAULT_SIZE: (usize, usize) = (80, 24);
 
 impl<M: ProgressModel> ProgressView<M> {
     pub fn new(model: M, update_interval: Duration) -> Self {
@@ -48,8 +48,8 @@ impl<M: ProgressModel> ProgressView<M> {
                 last_paint: None,
                 update_interval,
                 is_terminal,
-                cached_width: terminal::width().unwrap_or(DEFAULT_WIDTH),
-                last_width_check: Some(Instant::now())
+                cached_size: terminal::size().unwrap_or(DEFAULT_SIZE),
+                last_size_check: Some(Instant::now())
             }))
         }
     }
@@ -127,16 +127,16 @@ impl<M: ProgressModel> io::Write for &ProgressView<M> {
 }
 
 impl<M: ProgressModel> InnerView<M> {
-    fn terminal_width(&mut self) -> usize {
+    fn terminal_size(&mut self) -> (usize, usize) {
         let should_refresh =
-            self.last_width_check.is_none_or(|last| last.elapsed() >= WIDTH_CACHE_DURATION);
+            self.last_size_check.is_none_or(|last| last.elapsed() >= SIZE_CACHE_DURATION);
 
         if should_refresh {
-            self.cached_width = terminal::width().unwrap_or(DEFAULT_WIDTH);
-            self.last_width_check = Some(Instant::now());
+            self.cached_size = terminal::size().unwrap_or(DEFAULT_SIZE);
+            self.last_size_check = Some(Instant::now());
         }
 
-        self.cached_width
+        self.cached_size
     }
 
     fn should_paint(&self) -> bool {
@@ -148,9 +148,9 @@ impl<M: ProgressModel> InnerView<M> {
     }
 
     fn render_to_buffer(&mut self) {
-        let width = self.terminal_width();
+        let (width, height) = self.terminal_size();
         self.render_buffer.clear();
-        self.model.render(width, &mut self.render_buffer);
+        self.model.render(width, height, &mut self.render_buffer);
     }
 
     fn write_rendered_lines(&mut self) {

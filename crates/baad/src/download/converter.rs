@@ -30,6 +30,7 @@ pub fn convert_assets(assets: &[DownloadAsset], filter: Option<&ResourceFilter>)
                         &asset.url,
                         &convert_path_to_bundle(&asset.path, bundle_name),
                         &asset.hash,
+                        0,
                         Some(bundle_name)
                     )
                 {
@@ -50,7 +51,7 @@ pub fn convert_tables(tables: &[DownloadTable], filter: Option<&ResourceFilter>)
         .filter(|t| {
             filter.is_none_or(|f| filename_matches(&t.path, |filename| f.matches(filename)))
         })
-        .filter_map(|t| create_download(&t.url, &t.path, &t.hash, None))
+        .filter_map(|t| create_download(&t.url, &t.path, &t.hash, t.size, None))
         .collect()
 }
 
@@ -58,7 +59,7 @@ pub fn convert_media(media: &[DownloadMedia], filter: Option<&ResourceFilter>) -
     media
         .iter()
         .filter(|media| media_matches(&media.path, filter))
-        .filter_map(|media| create_download(&media.url, &media.path, &media.hash, None))
+        .filter_map(|media| create_download(&media.url, &media.path, &media.hash, media.size, None))
         .collect()
 }
 
@@ -72,7 +73,7 @@ fn try_add<'a>(
     asset: &'a DownloadAsset
 ) {
     if seen.insert(asset.path.as_str())
-        && let Some(dl) = create_download(&asset.url, &asset.path, &asset.hash, None)
+        && let Some(dl) = create_download(&asset.url, &asset.path, &asset.hash, asset.size, None)
     {
         downloads.push(dl);
     }
@@ -90,6 +91,7 @@ fn create_download(
     url: &str,
     path: &str,
     hash: &HashValue,
+    size: i64,
     target: Option<&str>
 ) -> Option<Download> {
     let parsed_url = Url::parse(url).ok()?;
@@ -99,6 +101,7 @@ fn create_download(
             .filename(path.into())
             .hash(hash.as_string())
             .maybe_target_file(target.map(|s| s.into()))
+            .maybe_size(u64::try_from(size).ok().filter(|s| *s > 0))
             .build()
     )
 }

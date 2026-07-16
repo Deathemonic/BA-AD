@@ -70,7 +70,7 @@ impl<'a> Downloader<'a> {
 
         self.config.observer.on_event(DownloadEvent::Started {
             filename: Arc::clone(&filename),
-            total_bytes: 0
+            total_bytes: ctx.download.size.unwrap_or(0)
         });
 
         let outcome = self.fetch_inner(&ctx, &filename).await.unwrap_or_else(|e| e);
@@ -129,10 +129,11 @@ impl<'a> Downloader<'a> {
             1
         };
 
-        let progress_tracker = if total_size > 0 {
+        let tracker_total = content_length.or(ctx.download.size).unwrap_or(0);
+        let progress_tracker = if tracker_total > 0 {
             Some(Arc::new(ProgressTracker::new(
                 Arc::clone(filename),
-                total_size,
+                tracker_total,
                 Arc::clone(&self.config.observer)
             )))
         } else {

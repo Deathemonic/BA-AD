@@ -11,7 +11,8 @@ pub struct Download {
     pub url: Url,
     pub filename: String,
     pub hash: Option<String>,
-    pub target_file: Option<String>
+    pub target_file: Option<String>,
+    pub size: Option<u64>
 }
 
 impl Download {
