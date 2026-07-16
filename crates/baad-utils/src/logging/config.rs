@@ -31,7 +31,8 @@ const PROGRESS_UPDATE_INTERVAL: Duration = Duration::from_millis(100);
     enable_trace: false,
     include_timestamps: true,
     enable_async_writer: true,
-    enable_error_handler: true
+    enable_error_handler: true,
+    enable_progress: true
 )]
 pub struct LoggingConfig {
     pub enable_console: bool,
@@ -40,7 +41,8 @@ pub struct LoggingConfig {
     pub enable_trace: bool,
     pub include_timestamps: bool,
     pub enable_async_writer: bool,
-    pub enable_error_handler: bool
+    pub enable_error_handler: bool,
+    pub enable_progress: bool
 }
 
 fn install_error_handler(config: &LoggingConfig) -> Result<(), ConfigError> {
@@ -101,7 +103,10 @@ macro_rules! setup_logging {
 }
 
 fn should_use_progress(config: &LoggingConfig) -> bool {
-    terminal::is_terminal() && config.enable_console && !config.enable_json
+    config.enable_progress
+        && terminal::is_terminal()
+        && config.enable_console
+        && !config.enable_json
 }
 
 fn init_with_progress(config: &LoggingConfig) -> Result<(), ConfigError> {
