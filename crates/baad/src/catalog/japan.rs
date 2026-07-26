@@ -71,6 +71,7 @@ impl JapanCatalog {
 
     pub async fn get_catalog_url(&self) -> Result<(String, bool), CatalogError> {
         let api_data = load::<ApiData>(&self.paths.api).await.ok();
+        let platform: &'static str = self.platform.into();
 
         let base_config = self.yostar_client.get_base_config().await?;
         let latest_version = base_config.game_latest_version;
@@ -86,13 +87,14 @@ impl JapanCatalog {
         let addressable = self.fetch_addressable(&api_data.japan.server_info_url).await?;
         let catalog_url = JapanCdn::extract_catalog_url(&addressable)?;
 
-        if api_data.japan.catalog_url == catalog_url {
+        if api_data.japan.catalog_url == catalog_url && api_data.japan.platform == platform {
             return Ok((api_data.japan.catalog_url, true));
         }
 
         info!("Catalog changed, updating...");
         update(&self.paths.api, |data: &mut ApiData| {
             data.japan.catalog_url = catalog_url.into();
+            data.japan.platform = platform.into();
         })
         .await?;
 
