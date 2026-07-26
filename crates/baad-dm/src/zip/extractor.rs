@@ -22,6 +22,8 @@ pub struct ZipIndex {
 
 impl ZipIndex {
     pub fn get(&self, name: &str) -> Option<&ZipFileInfo> { self.entries.get(name) }
+
+    pub fn names(&self) -> impl Iterator<Item = &str> { self.entries.keys().map(String::as_str) }
 }
 
 pub struct ZipExtractor<'a> {
