@@ -1,0 +1,31 @@
+[package]
+name = "baad-shared-ffi"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[lib]
+name = "baad_shared"
+crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
+
+[features]
+default = ["c-api"]
+c-api = []
+uniffi = ["dep:uniffi"]
+uniffi_cli = ["uniffi/cli"]
+
+[dependencies]
+baad-shared = { workspace = true }
+uniffi = { workspace = true, optional = true }
+reqwest = { workspace = true }
+thiserror = { workspace = true }
+
+[build-dependencies]
+uniffi = { workspace = true, features = ["build"] }
+baad-ffi-build = { workspace = true }
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "bindgen.rs"
+required-features = ["uniffi/cli"]

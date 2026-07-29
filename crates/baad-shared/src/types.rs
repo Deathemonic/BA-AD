@@ -157,7 +157,7 @@ pub struct Resource {
     pub resource_hash: String
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct GameBaseConfig {
     pub game_lowest_version: String,
     pub game_latest_version: String,
@@ -174,19 +174,19 @@ pub struct GameBaseConfig {
     pub game_start_params: Vec<String>
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct GameJsonConfig {
     pub url: String
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct GameFile {
     pub path: String,
     pub hash: String,
     pub size: String
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct GameJsonData {
     pub source: String,
     pub file: Vec<GameFile>
@@ -278,7 +278,7 @@ pub struct MediaCN {
     pub size: i64
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct Domain {
     pub primary_cdn: String,
     pub back_up_cdn: String

@@ -4,6 +4,11 @@ members = [
     "crates/baad",
     "crates/baad-cli",
     "crates/baad-dm",
+    "crates/baad-ffi/baad",
+    "crates/baad-ffi/baad-shared",
+    "crates/baad-ffi/baad-dm",
+    "crates/baad-ffi/baad-utils",
+    "crates/baad-ffi/build-support",
     "crates/baad-shared",
     "crates/baad-utils",
 ]
@@ -12,12 +17,15 @@ members = [
 version = "3.0.0"
 edition = "2024"
 authors = ["Zinth"]
+rust-version = "1.85"
+license = "MIT"
 
 [workspace.dependencies]
 baad = { path = "crates/baad" }
 baad-dm = { path = "crates/baad-dm" }
 baad-shared = { path = "crates/baad-shared" }
 baad-utils = { path = "crates/baad-utils", default-features = false }
+baad-ffi-build = { path = "crates/baad-ffi/build-support" }
 bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "3.3.0" }
 
 bitflags = "2"
@@ -33,3 +41,4 @@ strum = { version = "0.28", features = ["derive"] }
 thiserror = "2"
 tokio = { version = "1.52", features = ["full"] }
 tracing = "0.1"
+uniffi = "0.32"
