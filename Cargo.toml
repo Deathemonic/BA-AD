@@ -12,6 +12,13 @@ members = [
     "crates/baad-shared",
     "crates/baad-utils",
 ]
+default-members = [
+    "crates/baad",
+    "crates/baad-cli",
+    "crates/baad-dm",
+    "crates/baad-shared",
+    "crates/baad-utils",
+]
 
 [workspace.package]
 version = "3.0.0"
