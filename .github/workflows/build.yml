@@ -88,7 +88,8 @@ jobs:
         run: |
           for target in ${{ matrix.config.targets }}; do
             cargo build --release --target "$target" \
-              -p baad-ffi -p baad-dm-ffi -p baad-shared-ffi -p baad-utils-ffi
+              -p baad-ffi -p baad-dm-ffi -p baad-shared-ffi -p baad-utils-ffi \
+              --features baad-ffi/uniffi,baad-dm-ffi/uniffi,baad-shared-ffi/uniffi,baad-utils-ffi/uniffi
           done
 
       - name: Collect
