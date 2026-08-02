@@ -1,4 +1,4 @@
-use baad_ffi_build::{COW_STR, Config, Reexport, RemoteKind, Rename, Sanitized, Source};
+use baad_ffi_build::{COW_STR, Config, Handle, Reexport, RemoteKind, Rename, Sanitized, Source};
 
 fn main() {
     baad_ffi_build::generate(&Config {
@@ -8,6 +8,40 @@ fn main() {
         observer: true,
         c_runtime: true,
         blocking_runtime: true,
+        handles: &[
+            Handle {
+                name: "ResourceFilter",
+                native: "std::sync::Mutex<baad::download::ResourceFilter>"
+            },
+            Handle {
+                name: "Downloads",
+                native: "baad_shared::Downloads"
+            },
+            Handle {
+                name: "JapanCatalog",
+                native: "baad::catalog::JapanCatalog"
+            },
+            Handle {
+                name: "GlobalCatalog",
+                native: "baad::catalog::GlobalCatalog"
+            },
+            Handle {
+                name: "ChinaCatalog",
+                native: "baad::catalog::ChinaCatalog"
+            },
+            Handle {
+                name: "JapanCdn",
+                native: "baad::cdn::JapanCdn"
+            },
+            Handle {
+                name: "GlobalCdn",
+                native: "baad::cdn::GlobalCdn"
+            },
+            Handle {
+                name: "ChinaCdn",
+                native: "baad::cdn::ChinaCdn"
+            }
+        ],
         sources: &[
             Source {
                 crate_path: "baad",

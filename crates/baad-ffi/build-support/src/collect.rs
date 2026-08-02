@@ -2,9 +2,16 @@ use syn::Item;
 
 use crate::config::{Config, RemoteKind, Source};
 use crate::consts::{ConstField, GeneratedConst};
-use crate::context::{Context, DataMirror, ErrorCode, ErrorMirror, Remote, RemoteItem};
+use crate::context::{
+    Context,
+    DataMirror,
+    ErrorCode,
+    ErrorMirror,
+    Remote,
+    RemoteItem,
+    SanitizedStruct
+};
 use crate::mirror::enum_is_mirrorable;
-use crate::sanitize::render_sanitized;
 use crate::syntax::{
     enum_is_ffi_safe,
     fields_are_named,
@@ -18,7 +25,7 @@ use crate::syntax::{
     struct_is_ffi_safe
 };
 
-pub(crate) fn collect_source(config: &Config, source: &Source, context: &mut Context) {
+pub(crate) fn collect_source(config: &Config, source: &'static Source, context: &mut Context) {
     let base = source_dir(source.dir);
 
     for (file, kind) in source.type_files {
@@ -54,7 +61,7 @@ pub(crate) fn collect_source(config: &Config, source: &Source, context: &mut Con
                 _ => None
             })
             .unwrap_or_else(|| panic!("sanitized struct {} not found in {}", spec.name, spec.file));
-        context.sanitized.push(render_sanitized(&item, spec));
+        context.sanitized.push(SanitizedStruct { item, spec });
     }
 }
 

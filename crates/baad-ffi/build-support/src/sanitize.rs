@@ -1,9 +1,9 @@
 use proc_macro2::TokenStream;
-use quote::quote;
+use quote::{format_ident, quote};
 use syn::{Expr, ItemStruct, Lit, Type};
 
-use crate::config::Sanitized;
-use crate::syntax::normalized;
+use crate::config::{Config, Sanitized};
+use crate::syntax::{crate_path, normalized, snake_case, type_is_c_primitive};
 
 pub(crate) fn render_sanitized(item: &ItemStruct, spec: &Sanitized) -> TokenStream {
     let name = &item.ident;
@@ -29,6 +29,44 @@ pub(crate) fn render_sanitized(item: &ItemStruct, spec: &Sanitized) -> TokenStre
 
         #conversion
     }
+}
+
+pub(crate) fn render_sanitized_c(
+    config: &Config,
+    item: &ItemStruct,
+    spec: &Sanitized
+) -> Option<TokenStream> {
+    let native = spec.native?;
+    if !item.fields.iter().all(|field| type_is_c_primitive(&field.ty)) {
+        return None;
+    }
+
+    let name = format_ident!("{}{}", config.c_types_prefix, item.ident);
+    let default_function =
+        format_ident!("{}_{}_default", config.c_prefix, snake_case(&item.ident.to_string()));
+    let native = crate_path(native);
+    let field_names: Vec<_> = item.fields.iter().filter_map(|field| field.ident.as_ref()).collect();
+    let field_types: Vec<_> = item.fields.iter().map(|field| &field.ty).collect();
+
+    Some(quote! {
+        #[repr(C)]
+        pub struct #name {
+            #(pub #field_names: #field_types,)*
+        }
+
+        #[allow(dead_code)]
+        impl #name {
+            pub(crate) fn to_native(&self) -> #native {
+                #native { #(#field_names: self.#field_names,)* }
+            }
+        }
+
+        #[unsafe(no_mangle)]
+        pub extern "C" fn #default_function() -> #name {
+            let native = #native::default();
+            #name { #(#field_names: native.#field_names,)* }
+        }
+    })
 }
 
 fn render_sanitized_conversion(item: &ItemStruct, spec: &Sanitized, native: &str) -> TokenStream {

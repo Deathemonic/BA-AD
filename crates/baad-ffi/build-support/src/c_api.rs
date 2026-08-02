@@ -2,11 +2,12 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use syn::{Fields, ItemEnum};
 
-use crate::config::Config;
+use crate::config::{Config, Handle};
 use crate::consts::{ConstType, GeneratedConst};
 use crate::context::{Context, ErrorCode, Remote, RemoteItem};
 use crate::observer::render_observer_c;
-use crate::syntax::{crate_path, enum_is_fieldless};
+use crate::sanitize::render_sanitized_c;
+use crate::syntax::{crate_path, enum_is_fieldless, snake_case};
 
 pub(crate) fn render_c(config: &Config, context: &Context) -> TokenStream {
     let plumbing = render_c_plumbing(config);
@@ -23,6 +24,11 @@ pub(crate) fn render_c(config: &Config, context: &Context) -> TokenStream {
 
     let error_codes = context.error_codes.iter().map(|error| render_c_error_code(config, error));
     let const_getters = context.consts.iter().map(|generated| render_c_const(config, generated));
+    let handles = config.handles.iter().map(|handle| render_c_handle(config, handle));
+    let sanitized = context
+        .sanitized
+        .iter()
+        .filter_map(|entry| render_sanitized_c(config, &entry.item, entry.spec));
     let observer = config.observer.then(|| render_observer_c(config));
 
     quote! {
@@ -30,7 +36,31 @@ pub(crate) fn render_c(config: &Config, context: &Context) -> TokenStream {
         #(#enums)*
         #(#error_codes)*
         #(#const_getters)*
+        #(#handles)*
+        #(#sanitized)*
         #observer
+    }
+}
+
+fn render_c_handle(config: &Config, handle: &Handle) -> TokenStream {
+    let name = format_ident!("{}{}", config.c_types_prefix, handle.name);
+    let free = format_ident!("{}_{}_free", config.c_prefix, snake_case(handle.name));
+    let native: syn::Type = syn::parse_str(handle.native)
+        .unwrap_or_else(|error| panic!("handle native type {}: {error}", handle.native));
+
+    quote! {
+        pub struct #name {
+            pub(crate) inner: #native
+        }
+
+        /// # Safety
+        /// `value` must have been returned by this library, or be null.
+        #[unsafe(no_mangle)]
+        pub unsafe extern "C" fn #free(value: *mut #name) {
+            if !value.is_null() {
+                drop(unsafe { Box::from_raw(value) });
+            }
+        }
     }
 }
 

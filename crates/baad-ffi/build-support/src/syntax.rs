@@ -124,3 +124,20 @@ pub(crate) fn rename(source: &Source, ident: &mut syn::Ident) {
 pub(crate) fn crate_path(text: &str) -> syn::Path {
     syn::parse_str(text).unwrap_or_else(|error| panic!("crate path {text}: {error}"))
 }
+
+pub(crate) fn snake_case(name: &str) -> String {
+    let mut result = String::with_capacity(name.len() + 4);
+    for (index, character) in name.char_indices() {
+        if character.is_uppercase() && index > 0 {
+            result.push('_');
+        }
+        result.extend(character.to_lowercase());
+    }
+    result
+}
+
+pub(crate) fn type_is_c_primitive(ty: &Type) -> bool {
+    const PRIMITIVES: &[&str] =
+        &["bool", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f32", "f64"];
+    PRIMITIVES.contains(&normalized(ty).as_str())
+}

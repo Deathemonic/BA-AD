@@ -11,47 +11,6 @@ use std::ptr;
 
 use super::core;
 
-#[repr(C)]
-pub struct BaadUtilsLoggingConfig {
-    pub enable_console: bool,
-    pub enable_json: bool,
-    pub enable_debug: bool,
-    pub enable_trace: bool,
-    pub include_timestamps: bool,
-    pub enable_async_writer: bool,
-    pub enable_error_handler: bool,
-    pub enable_progress: bool
-}
-
-impl BaadUtilsLoggingConfig {
-    fn to_native(&self) -> baad_utils::config::LoggingConfig {
-        baad_utils::config::LoggingConfig {
-            enable_console: self.enable_console,
-            enable_json: self.enable_json,
-            enable_debug: self.enable_debug,
-            enable_trace: self.enable_trace,
-            include_timestamps: self.include_timestamps,
-            enable_async_writer: self.enable_async_writer,
-            enable_error_handler: self.enable_error_handler,
-            enable_progress: self.enable_progress
-        }
-    }
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn baad_utils_logging_config_default() -> BaadUtilsLoggingConfig {
-    BaadUtilsLoggingConfig {
-        enable_console: true,
-        enable_json: false,
-        enable_debug: false,
-        enable_trace: false,
-        include_timestamps: true,
-        enable_async_writer: true,
-        enable_error_handler: true,
-        enable_progress: true
-    }
-}
-
 /// # Safety
 /// `config` must be null (defaults) or point to a valid config struct.
 #[unsafe(no_mangle)]

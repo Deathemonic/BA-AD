@@ -6,7 +6,13 @@ pub struct Config {
     pub c_runtime: bool,
     pub blocking_runtime: bool,
     pub sources: &'static [Source],
-    pub reexports: &'static [Reexport]
+    pub reexports: &'static [Reexport],
+    pub handles: &'static [Handle]
+}
+
+pub struct Handle {
+    pub name: &'static str,
+    pub native: &'static str
 }
 
 pub struct Reexport {

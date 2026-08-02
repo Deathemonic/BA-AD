@@ -22,6 +22,7 @@ fn main() {
             sanitized: &[],
             skip_types: &["MarketConfig"]
         }],
-        reexports: &[]
+        reexports: &[],
+        handles: &[]
     });
 }

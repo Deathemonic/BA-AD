@@ -7,6 +7,7 @@ use crate::consts::render_consts;
 use crate::context::{Context, RemoteItem, remote_name};
 use crate::mirror::render_enum_mirror;
 use crate::observer::render_observer_uniffi;
+use crate::sanitize::render_sanitized;
 use crate::syntax::{crate_path, strip_enum, strip_struct};
 
 pub(crate) fn render_uniffi(config: &Config, context: &Context) -> TokenStream {
@@ -64,7 +65,7 @@ pub(crate) fn render_uniffi(config: &Config, context: &Context) -> TokenStream {
     let error_mirrors = context.error_mirrors.iter().map(|mirror| {
         render_enum_mirror(&mirror.crate_path, &mirror.item, &context.mirrored_names, true)
     });
-    let sanitized = context.sanitized.iter();
+    let sanitized = context.sanitized.iter().map(|entry| render_sanitized(&entry.item, entry.spec));
     let const_record = (!context.consts.is_empty()).then(|| render_consts(&context.consts));
     let observer = config.observer.then(render_observer_uniffi);
     let run_blocking = config.blocking_runtime.then(render_run_blocking);

@@ -22,6 +22,7 @@ fn main() {
             }],
             skip_types: &[]
         }],
-        reexports: &[]
+        reexports: &[],
+        handles: &[]
     });
 }

@@ -24,6 +24,9 @@ pub const BAAD_DOWNLOAD_KIND_MEDIA: i32 = 2;
 pub const BAAD_HASH_KIND_CRC: i32 = 0;
 pub const BAAD_HASH_KIND_MD5: i32 = 1;
 
+const DEFAULT_DOWNLOAD_LIMIT: u32 = 32;
+const DEFAULT_DOWNLOAD_RETRIES: u32 = 3;
+
 unsafe fn catalog_failure(out: *mut *mut c_char, error: &baad::CatalogError) -> i32 {
     write_error(out, &error.to_string());
     BaadCatalogErrorCode::from(error) as i32
@@ -66,10 +69,6 @@ pub extern "C" fn baad_category(assets: bool, tables: bool, media: bool) -> u8 {
     core::category_bits(assets, tables, media)
 }
 
-pub struct BaadResourceFilter {
-    matcher: Mutex<baad::download::ResourceFilter>
-}
-
 /// # Safety
 /// `pattern` must be a valid NUL-terminated string, `method` a
 /// `BaadFilterMethod` value, and `out_filter` a valid slot. On success the
@@ -96,20 +95,11 @@ pub unsafe extern "C" fn baad_resource_filter_new(
     match baad::download::ResourceFilter::new(pattern, method) {
         Ok(matcher) => {
             *out_filter = Box::into_raw(Box::new(BaadResourceFilter {
-                matcher: Mutex::new(matcher)
+                inner: Mutex::new(matcher)
             }));
             0
         }
         Err(error) => BaadFilterErrorCode::from(&error) as i32
-    }
-}
-
-/// # Safety
-/// `filter` must have been returned by `baad_resource_filter_new`, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn baad_resource_filter_free(filter: *mut BaadResourceFilter) {
-    if !filter.is_null() {
-        drop(Box::from_raw(filter));
     }
 }
 
@@ -130,22 +120,9 @@ pub unsafe extern "C" fn baad_resource_filter_matches(
         return NULL_POINTER;
     }
 
-    let matcher = (*filter).matcher.lock().unwrap_or_else(PoisonError::into_inner);
+    let matcher = (*filter).inner.lock().unwrap_or_else(PoisonError::into_inner);
     *out_matches = matcher.matches(path);
     0
-}
-
-pub struct BaadDownloads {
-    inner: Downloads
-}
-
-/// # Safety
-/// `downloads` must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn baad_downloads_free(downloads: *mut BaadDownloads) {
-    if !downloads.is_null() {
-        drop(Box::from_raw(downloads));
-    }
 }
 
 /// `kind` is one of `BAAD_DOWNLOAD_KIND_*`.
@@ -260,18 +237,6 @@ pub unsafe extern "C" fn baad_download_entry_free(entry: BaadDownloadEntry) {
     baad_string_array_free(entry.bundle_files);
 }
 
-pub struct BaadJapanCatalog {
-    inner: baad::catalog::JapanCatalog
-}
-
-pub struct BaadGlobalCatalog {
-    inner: baad::catalog::GlobalCatalog
-}
-
-pub struct BaadChinaCatalog {
-    inner: baad::catalog::ChinaCatalog
-}
-
 unsafe fn write_downloads(
     out_downloads: *mut *mut BaadDownloads,
     out_error: *mut *mut c_char,
@@ -330,15 +295,6 @@ pub unsafe extern "C" fn baad_japan_catalog_new(
             0
         }
         Err(error) => catalog_failure(out_error, &error)
-    }
-}
-
-/// # Safety
-/// `catalog` must have been returned by `baad_japan_catalog_new`, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn baad_japan_catalog_free(catalog: *mut BaadJapanCatalog) {
-    if !catalog.is_null() {
-        drop(Box::from_raw(catalog));
     }
 }
 
@@ -420,15 +376,6 @@ pub unsafe extern "C" fn baad_global_catalog_new(
             0
         }
         Err(error) => catalog_failure(out_error, &error)
-    }
-}
-
-/// # Safety
-/// `catalog` must have been returned by `baad_global_catalog_new`, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn baad_global_catalog_free(catalog: *mut BaadGlobalCatalog) {
-    if !catalog.is_null() {
-        drop(Box::from_raw(catalog));
     }
 }
 
@@ -542,15 +489,6 @@ pub unsafe extern "C" fn baad_china_catalog_new(
     }
 }
 
-/// # Safety
-/// `catalog` must have been returned by `baad_china_catalog_new`, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn baad_china_catalog_free(catalog: *mut BaadChinaCatalog) {
-    if !catalog.is_null() {
-        drop(Box::from_raw(catalog));
-    }
-}
-
 /// Blocks the calling thread.
 ///
 /// # Safety
@@ -573,10 +511,6 @@ pub unsafe extern "C" fn baad_china_catalog_prepare_downloads(
 
     let result = runtime.block_on((*catalog).inner.prepare_downloads());
     write_downloads(out_downloads, out_error, result)
-}
-
-pub struct BaadJapanCdn {
-    inner: baad::cdn::JapanCdn
 }
 
 /// # Safety
@@ -604,15 +538,6 @@ pub unsafe extern "C" fn baad_japan_cdn_new(
         inner: baad::cdn::JapanCdn::new(String::from(catalog_url), platform)
     }));
     0
-}
-
-/// # Safety
-/// `cdn` must have been returned by `baad_japan_cdn_new`, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn baad_japan_cdn_free(cdn: *mut BaadJapanCdn) {
-    if !cdn.is_null() {
-        drop(Box::from_raw(cdn));
-    }
 }
 
 unsafe fn cdn_fetch_json<T, F>(
@@ -755,10 +680,6 @@ pub unsafe extern "C" fn baad_japan_cdn_extract_catalog_url(
     }
 }
 
-pub struct BaadGlobalCdn {
-    inner: baad::cdn::GlobalCdn
-}
-
 /// # Safety
 /// `catalog_url` must be a valid NUL-terminated string, `platform` a
 /// `BaadPlatform` value and `out_cdn` a valid slot. On success the caller owns
@@ -784,15 +705,6 @@ pub unsafe extern "C" fn baad_global_cdn_new(
         inner: baad::cdn::GlobalCdn::new(String::from(catalog_url), platform)
     }));
     0
-}
-
-/// # Safety
-/// `cdn` must have been returned by `baad_global_cdn_new`, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn baad_global_cdn_free(cdn: *mut BaadGlobalCdn) {
-    if !cdn.is_null() {
-        drop(Box::from_raw(cdn));
-    }
 }
 
 /// Blocks the calling thread and returns `GlobalCatalogData` as JSON.
@@ -831,10 +743,6 @@ pub unsafe extern "C" fn baad_global_cdn_derive_base_url(
         None => ptr::null_mut()
     };
     0
-}
-
-pub struct BaadChinaCdn {
-    inner: baad::cdn::ChinaCdn
 }
 
 /// # Safety
@@ -880,15 +788,6 @@ pub unsafe extern "C" fn baad_china_cdn_new(
         )
     }));
     0
-}
-
-/// # Safety
-/// `cdn` must have been returned by `baad_china_cdn_new`, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn baad_china_cdn_free(cdn: *mut BaadChinaCdn) {
-    if !cdn.is_null() {
-        drop(Box::from_raw(cdn));
-    }
 }
 
 /// Blocks the calling thread and returns `ChinaResources` as JSON. Build
@@ -1455,8 +1354,8 @@ pub extern "C" fn baad_downloader_options_default(
 ) -> BaadDownloaderOptions {
     BaadDownloaderOptions {
         output_dir,
-        limit: 32,
-        retries: 3,
+        limit: DEFAULT_DOWNLOAD_LIMIT,
+        retries: DEFAULT_DOWNLOAD_RETRIES,
         proxy: ptr::null()
     }
 }
@@ -1497,7 +1396,7 @@ pub unsafe extern "C" fn baad_resource_downloader_download(
             proxy: proxy.map(String::from)
         },
         (*downloads).inner.clone(),
-        filter.as_ref().map(|filter| &filter.matcher)
+        filter.as_ref().map(|filter| &filter.inner)
     ));
 
     match result {

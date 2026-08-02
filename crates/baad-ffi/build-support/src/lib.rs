@@ -13,7 +13,17 @@ mod uniffi;
 use std::env;
 use std::path::PathBuf;
 
-pub use config::{COW_STR, Config, CustomType, Reexport, RemoteKind, Rename, Sanitized, Source};
+pub use config::{
+    COW_STR,
+    Config,
+    CustomType,
+    Handle,
+    Reexport,
+    RemoteKind,
+    Rename,
+    Sanitized,
+    Source
+};
 
 use crate::c_api::render_c;
 use crate::collect::collect_source;
