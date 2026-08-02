@@ -1,0 +1,12 @@
+[package]
+name = "baad-shared"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+reqwest = { workspace = true }
+lazy-regex = { workspace = true }
+strum = { workspace = true }
+memorypack = { workspace = true }

@@ -1,0 +1,36 @@
+[package]
+name = "baad-ffi"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[lib]
+name = "baad"
+crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
+
+[features]
+default = ["c-api"]
+c-api = []
+uniffi = ["dep:uniffi", "uniffi/tokio"]
+uniffi_cli = ["uniffi/cli"]
+
+[dependencies]
+baad = { workspace = true }
+baad-shared = { workspace = true }
+baad-utils = { workspace = true, features = ["logs"] }
+uniffi = { workspace = true, optional = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+
+[build-dependencies]
+uniffi = { workspace = true, features = ["build"] }
+baad-ffi-build = { workspace = true }
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "bindgen.rs"
+required-features = ["uniffi/cli"]

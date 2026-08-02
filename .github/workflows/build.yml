@@ -7,19 +7,34 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+      prerelease:
+        type: boolean
+        default: false
 
 jobs:
-  build-linux:
-    name: Build for Linux (x86_64)
-    runs-on: ubuntu-latest
+  build:
+    name: Build for ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    strategy:
+      matrix:
+        config:
+          - { name: linux-x86_64, os: ubuntu-latest, target: x86_64-unknown-linux-gnu, binary: baad }
+          - { name: windows-x86_64, os: windows-latest, target: x86_64-pc-windows-msvc, binary: baad.exe }
+          - { name: macos-x86_64, os: macos-latest, target: x86_64-apple-darwin, binary: baad }
+          - { name: macos-aarch64, os: macos-latest, target: aarch64-apple-darwin, binary: baad }
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: x86_64-unknown-linux-gnu
+          targets: ${{ matrix.config.target }}
 
       - name: Cache Cargo dependencies
         uses: actions/cache@v4
@@ -28,28 +43,36 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-x86_64-unknown-linux-gnu-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ matrix.config.target }}-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build release binary
-        run: cargo build --release --target x86_64-unknown-linux-gnu
+      - name: Build
+        run: cargo build --release --target ${{ matrix.config.target }}
 
-      - name: Upload build artifacts
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: baad-linux-x86_64
-          path: target/x86_64-unknown-linux-gnu/release/baad
+          name: baad-${{ matrix.config.name }}
+          path: target/${{ matrix.config.target }}/release/${{ matrix.config.binary }}
 
-  build-windows:
-    name: Build for Windows (x86_64)
-    runs-on: windows-latest
+  build-ffi:
+    name: Build FFI for ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    strategy:
+      matrix:
+        config:
+          - { name: linux, os: ubuntu-latest, targets: "x86_64-unknown-linux-gnu", rust_targets: "x86_64-unknown-linux-gnu" }
+          - { name: windows, os: windows-latest, targets: "x86_64-pc-windows-msvc", rust_targets: "x86_64-pc-windows-msvc" }
+          - { name: mac, os: macos-latest, targets: "x86_64-apple-darwin aarch64-apple-darwin", rust_targets: "x86_64-apple-darwin, aarch64-apple-darwin" }
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: x86_64-pc-windows-msvc
+          targets: ${{ matrix.config.rust_targets }}
 
       - name: Cache Cargo dependencies
         uses: actions/cache@v4
@@ -58,115 +81,94 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-x86_64-pc-windows-msvc-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-ffi-${{ matrix.config.name }}-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build release binary
-        run: cargo build --release --target x86_64-pc-windows-msvc
+      - name: Build
+        shell: bash
+        run: |
+          for target in ${{ matrix.config.targets }}; do
+            cargo build --release --target "$target" \
+              -p baad-ffi -p baad-dm-ffi -p baad-shared-ffi -p baad-utils-ffi \
+              --features baad-ffi/uniffi,baad-dm-ffi/uniffi,baad-shared-ffi/uniffi,baad-utils-ffi/uniffi
+          done
 
-      - name: Upload build artifacts
+      - name: Collect
+        shell: bash
+        run: |
+          mkdir sdk
+          case "${{ matrix.config.name }}" in
+            linux)
+              cp target/x86_64-unknown-linux-gnu/release/lib{baad,baad_dm,baad_shared,baad_utils}.so sdk/
+              ;;
+            windows)
+              cp target/x86_64-pc-windows-msvc/release/{baad,baad_dm,baad_shared,baad_utils}.dll sdk/
+              cp target/x86_64-pc-windows-msvc/release/{baad,baad_dm,baad_shared,baad_utils}.dll.lib sdk/
+              ;;
+            mac)
+              for lib in baad baad_dm baad_shared baad_utils; do
+                lipo -create \
+                  "target/x86_64-apple-darwin/release/lib${lib}.dylib" \
+                  "target/aarch64-apple-darwin/release/lib${lib}.dylib" \
+                  -output "sdk/lib${lib}.dylib"
+              done
+              ;;
+          esac
+
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: baad-windows-x86_64
-          path: target/x86_64-pc-windows-msvc/release/baad.exe
-          
-  build-macos-x86:
-    name: Build for macOS (x86_64)
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: x86_64-apple-darwin
-
-      - name: Cache Cargo dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-x86_64-apple-darwin-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Build release binary
-        run: cargo build --release --target x86_64-apple-darwin
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: baad-macos-x86_64
-          path: target/x86_64-apple-darwin/release/baad
-
-  build-macos-aarch64:
-    name: Build for macOS (aarch64)
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-apple-darwin
-
-      - name: Cache Cargo dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-aarch64-apple-darwin-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Build release binary
-        run: cargo build --release --target aarch64-apple-darwin
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: baad-macos-aarch64
-          path: target/aarch64-apple-darwin/release/baad
+          name: ffi-${{ matrix.config.name }}
+          path: sdk/
 
   deploy:
-    name: Deploy to Release
-    needs: [build-linux, build-windows, build-macos-x86, build-macos-aarch64]
+    name: Release
+    needs: [build, build-ffi]
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/')
+    if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/') || inputs.tag != ''
     permissions:
       contents: write
-      actions: read 
+      actions: read
 
     steps:
-      - name: Download all artifacts
+      - name: Checkout
+        if: inputs.tag != ''
+        uses: actions/checkout@v4
+
+      - name: Create tag
+        if: inputs.tag != ''
+        run: |
+          git tag ${{ inputs.tag }}
+          git push origin ${{ inputs.tag }}
+
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
-          run-id: ${{ github.run_id }}
 
-      - name: Create release assets
+      - name: Package
         run: |
-          if [ ! -d "artifacts" ] || [ -z "$(ls -A artifacts)" ]; then
-            echo "Error: No artifacts were found to package. Aborting."
-            exit 1
-          fi
-          
           cd artifacts
+
+          mkdir baad-ffi-sdk
+          mv ffi-windows baad-ffi-sdk/windows
+          mv ffi-linux baad-ffi-sdk/linux
+          mv ffi-mac baad-ffi-sdk/mac
+          (cd baad-ffi-sdk && zip -r ../baad-ffi-sdk.zip windows linux mac)
+          rm -rf baad-ffi-sdk
+
           for dir in */; do
-            if [ -d "$dir" ]; then
-              local_dir_name=${dir%/}
-              cd "$dir"
-              zip "../${local_dir_name}.zip" ./*
-              cd ..
-            fi
+            dir_name=${dir%/}
+            cd "$dir"
+            zip "../${dir_name}.zip" ./*
+            cd ..
           done
 
-      - name: Upload release assets
+      - name: Release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
         with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
           files: artifacts/*.zip
           generate_release_notes: true
+          prerelease: ${{ inputs.prerelease || false }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

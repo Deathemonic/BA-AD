@@ -1,0 +1,21 @@
+[bindings.python]
+cdylib_name = "baad_shared"
+
+[bindings.kotlin]
+cdylib_name = "baad_shared"
+package_name = "baad_shared"
+
+[bindings.swift]
+cdylib_name = "baad_shared"
+
+[bindings.ruby]
+cdylib_name = "baad_shared"
+
+[bindings.csharp]
+cdylib_name = "baad_shared"
+namespace = "BAAD.Shared"
+access_modifier = "public"
+
+[bindings.go]
+cdylib_name = "baad_shared"
+package_name = "baad_shared"

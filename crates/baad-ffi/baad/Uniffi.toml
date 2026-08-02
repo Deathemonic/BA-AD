@@ -1,0 +1,21 @@
+[bindings.python]
+cdylib_name = "baad"
+
+[bindings.kotlin]
+cdylib_name = "baad"
+package_name = "baad"
+
+[bindings.swift]
+cdylib_name = "baad"
+
+[bindings.ruby]
+cdylib_name = "baad"
+
+[bindings.csharp]
+cdylib_name = "baad"
+namespace = "BAAD"
+access_modifier = "public"
+
+[bindings.go]
+cdylib_name = "baad"
+package_name = "baad"

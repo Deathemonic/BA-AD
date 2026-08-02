@@ -1,0 +1,34 @@
+[package]
+name = "baad-dm-ffi"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[lib]
+name = "baad_dm"
+crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
+
+[features]
+default = ["c-api"]
+c-api = []
+uniffi = ["dep:uniffi", "uniffi/tokio"]
+uniffi_cli = ["uniffi/cli"]
+
+[dependencies]
+baad-dm = { workspace = true }
+baad-shared = { workspace = true }
+uniffi = { workspace = true, optional = true }
+reqwest = { workspace = true }
+reqwest-middleware = "0.5"
+thiserror = { workspace = true }
+tokio = { workspace = true }
+
+[build-dependencies]
+uniffi = { workspace = true, features = ["build"] }
+baad-ffi-build = { workspace = true }
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "bindgen.rs"
+required-features = ["uniffi/cli"]

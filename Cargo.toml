@@ -1,35 +1,51 @@
-[package]
-name = "baad"
-version = "2.9.3"
+[workspace]
+resolver = "3"
+members = [
+    "crates/baad",
+    "crates/baad-cli",
+    "crates/baad-dm",
+    "crates/baad-ffi/baad",
+    "crates/baad-ffi/baad-shared",
+    "crates/baad-ffi/baad-dm",
+    "crates/baad-ffi/baad-utils",
+    "crates/baad-ffi/build-support",
+    "crates/baad-shared",
+    "crates/baad-utils",
+]
+default-members = [
+    "crates/baad",
+    "crates/baad-cli",
+    "crates/baad-dm",
+    "crates/baad-shared",
+    "crates/baad-utils",
+]
+
+[workspace.package]
+version = "3.0.0"
 edition = "2024"
+authors = ["Zinth"]
+rust-version = "1.85"
+license = "MIT"
 
-[lib]
-name = "baad"
-path = "src/lib.rs"
+[workspace.dependencies]
+baad = { path = "crates/baad" }
+baad-dm = { path = "crates/baad-dm" }
+baad-shared = { path = "crates/baad-shared" }
+baad-utils = { path = "crates/baad-utils", default-features = false }
+baad-ffi-build = { path = "crates/baad-ffi/build-support" }
+bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "3.3.0" }
 
-[[bin]]
-name = "baad"
-path = "src/main.rs"
-
-[dependencies]
-reqwest = { version = "0.12.23", features = ["json"] }
-serde_json = { version = "1.0.145", features = ["preserve_order"] }
-serde = { version = "1.0.226", features = ["derive"] }
-tokio = { version = "1.47.1", features = ["full"] }
-thiserror = "2.0.16"
-walkdir = "2.5.0"
-eyre = "0.6.12"
-zip = "5.1.1"
-base64 = "0.22.1"
-lazy-regex = "3.4.1"
-glob = "0.3.3"
-nucleo = "0.5.0"
-url = "2.5.7"
-clap = { version = "4.5.48", features = ["derive"] }
-hashbrown = "0.16.0"
-rayon = "1.11.0"
-memchr = "2.7.6"
-
-bacy = { git = "https://github.com/Deathemonic/BA-CY", tag = "v2.6.1" }
-trauma = { git = "https://github.com/RZinth/trauma", version = "3.3.1", features = ["rustls"] }  # Using a custom trauma
-baad-core = { git = "https://github.com/RZinth/BA-AD-Core", version = "2.7.1" }
+bitflags = "2"
+bon = "3"
+derive_more = { version = "2", default-features = false, features = ["debug"] }
+eyre = "0.6"
+lazy-regex = "3.6"
+memorypack = "1.2.2"
+reqwest = "0.13"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+strum = { version = "0.28", features = ["derive"] }
+thiserror = "2"
+tokio = { version = "1.52", features = ["full"] }
+tracing = "0.1"
+uniffi = "0.32"

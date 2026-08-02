@@ -1,5 +1,58 @@
 # Changelogs
 
+## 3.0.0
+
+### Features
+
+- No more APK dependencies, now uses the `resources.assets` assetbundle from the Yostar launcher api (reduced fetch size from 200MB down to 60MB)
+- Added **China** assets downloading support
+  - AssetBundle, TableBundle, and MediaResources downloading
+  - Uses a `.hash` file to detect changes similar to the game
+- Added back **Global** downloading
+- Added Windows variant of MediaResources for Japan
+- Added support to download TablePatchPacks
+- Added FFI support, both C-ABI and UniFFI
+- Output now categorizes what type of resource you are downloading
+- Download logs now display the size progress and file name instead of the file path
+- Added `--platform` to replace `--ios`, can now switch between `ios`, `android`, and `windows`
+- Added two verbose options: minimal and full
+- Improved zip extraction with CD caching
+- Improved the catalog update and cache detection
+- Improved allocations and overall performance across the codebase
+
+### API Changes
+
+- Merged `BA-AD-Core` and `Trauma` (fork) into one repository
+- `baad-core` has been renamed to `baad-shared`
+- `config.rs` has been split into `consts.rs` and `platform.rs`
+- Combined the two `fetch_version` functions into `baad_utils::network`
+- `ResourceCategory` no longer uses `vec!()`, now uses `ResourceCategory::from()` or `ResourceCategory::new()`
+- Moved handling of categories to the catalog instead of the downloader
+- Moved Windows-not-available handling from CLI level to library level
+- Changed `WARN` to `WARNING` in logs
+- Changed Global version check URL from PlayStore to Apptopia
+- Progress log can now be disabled via API and via feature
+- Allow injecting a custom progress model on the API
+- Some functions are now const evaluated
+- Some public API functions changed from borrowed to move to reduce cloning
+- Bumped crate dependencies
+- General codebase cleanup
+
+### Fixes
+
+- Fixed both CN TableBundles and MediaResources not downloading
+- Fixed Global returning an error when fetching a catalog ([#16](https://github.com/Deathemonic/BA-AD/issues/16))
+- Fixed Global always re-fetching catalogs on just a platform change
+- Fixed switching platforms not reflecting on the next run
+- Fixed the platform value on `api_data.json` not updating
+- Fixed download logs using the file path instead of just the file name
+- Fixed download logs going over the terminal height
+- Fixed the `WARNING` log tag being misaligned
+- Fixed CRC checking doing more allocations than needed
+- Fixed the Arc increment hotspot
+- Fixed URL format logging doing more allocations than needed
+- Fixed logging messages not correctly displaying the message based on the action
+
 ## 2.9.2
 
 ### Fixes
@@ -70,13 +123,13 @@
 ### Fixes
 
 - Fix colors on certain terminals
-  - Added a color detecting logic on `baad_core` to prevent weird characters on `ansi` terminals (e.g command prompt)
+  - Added a color detecting logic on `baad_utils` to prevent weird characters on `ansi` terminals (e.g command prompt)
 
 ## 2.7.5
 
 ### API Changes
 
-- Fix `baad_core::utils::file` exports redirecting to `baad::utils::json`
+- Fix `baad_utils::utils::file` exports redirecting to `baad::utils::json`
 - Export `debug, error, file, info, warn, trace`
 
 
@@ -118,7 +171,7 @@
 
 ### Fixes
 
-- Changed the cache path from `baad_core` to `baad`
+- Changed the cache path from `baad_utils` to `baad`
 
 ## v2.4.0
 

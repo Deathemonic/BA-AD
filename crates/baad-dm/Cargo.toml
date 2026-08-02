@@ -1,0 +1,22 @@
+[package]
+name = "baad-dm"
+license = "MIT"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+baad-shared = { workspace = true }
+bacy = { workspace = true }
+
+bon = { workspace = true }
+derive_more = { workspace = true }
+reqwest = { workspace = true, features = ["http2", "stream", "socks", "gzip", "deflate", "brotli", "zstd", "rustls"] }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+
+flate2 = "1.1"
+form_urlencoded = "1.2"
+futures = "0.3"
+reqwest-middleware = "0.5"
+reqwest-retry = "0.9"
+tracing = "0.1"

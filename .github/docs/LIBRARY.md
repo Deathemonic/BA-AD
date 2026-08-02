@@ -2,261 +2,369 @@
 
 ## Getting Started
 
-Add `baad` to your project's dependencies in `Cargo.toml`:
+Add `baad` to your `Cargo.toml`. You also need an async runtime (`tokio`) and an error type
+(`eyre` is used here, but anything that `?` works with is fine):
 
 ```toml
 [dependencies]
 baad = { git = "https://github.com/Deathemonic/BA-AD" }
+tokio = { version = "1", features = ["full"] }
+eyre = "0.6"
 ```
 
-## Basic Usage
+## Quick Start
 
-Below are examples of common operations using the library:
+Download all asset bundles from the `JP` server into `./output`:
 
 ```rust
-use baad::apk::{ApkFetcher, ApkExtractor};
-use baad::catalog::{CatalogFetcher, CatalogParser};
-use baad::download::{ResourceDownloader, ResourceCategory, ResourceFilter};
-use baad::helpers::{ServerConfig, ServerRegion, Platform, BuildType};
+use baad::catalog::{Catalog, JapanCatalog};
+use baad::download::{ResourceCategory, ResourceDownloader};
+use baad::Platform;
 
-use eyre::Result;
-use std::path::PathBuf;
-use std::rc::Rc;
+#[tokio::main]
+async fn main() -> eyre::Result<()> {
+    // Pick what to download and from which platform
+    let catalog = JapanCatalog::new(ResourceCategory::Assets, Platform::Android)?;
 
-async fn example() -> Result<()> {
-    // Configure for Japan server with default Android/Standard build
-    let config = ServerConfig::new(ServerRegion::Japan, None, None)?;
+    // Fetch the catalog and turn it into a list of downloads
+    let downloads = catalog.prepare_downloads().await?;
 
-    // Configure for Global server with iOS and Teen build
-    let global_config = ServerConfig::new(
-        ServerRegion::Global,
-        Some(Platform::Ios),
-        Some(BuildType::Teen)
-    )?;
-
-    // Check for APK updates and download if needed
-    let apk_fetcher = ApkFetcher::new(config.clone())?;
-    apk_fetcher.download_apk(false).await?;
-
-    // Extract data from APK (Japan only)
-    if config.region == ServerRegion::Japan {
-        let extractor = ApkExtractor::new(config.clone())?;
-        extractor.extract_data()?;
-    }
-
-    // Fetch game catalogs
-    let catalog_fetcher = CatalogFetcher::new(config.clone(), apk_fetcher)?;
-    catalog_fetcher.get_addressable().await?;
-    catalog_fetcher.get_catalogs().await?;
-
-    // Process catalogs into downloadable resources
-    let catalog_parser = CatalogParser::new(config.clone())?;
-    catalog_parser.process_catalogs().await?;
-
-    // Download resources
-    let downloader = ResourceDownloader::new(
-        Some(PathBuf::from("./output")),
-        config.clone()
-    ).await?;
-
-    // Download all asset bundles
-    downloader.download(ResourceCategory::Assets, None).await?;
-
-    // Download specific resources using a filter
-    let filter = ResourceFilter::contains("CH0230")?;
-    downloader.download(ResourceCategory::Assets, Some(filter)).await?;
+    // Download into ./output
+    let downloader = ResourceDownloader::builder()
+        .output_dir("./output".into())
+        .limit(10)
+        .retries(10)
+        .build();
+    downloader.download(downloads, None).await?;
 
     Ok(())
 }
 ```
 
-## Core Components
+The flow is always the same: **build a catalog → `prepare_downloads()` → feed it to a `ResourceDownloader`**.
 
-### Logging
+## Data Directory
 
-You can initialize logging using `init_logging`.
+BA-AD stores cached API and catalog data in the platform data directory by default. To use a custom directory, set it once at startup before creating any catalogs:
 
 ```rust
-use baad::helpers::{LoggingConfig, init_logging};
+use baad::file;
 
-// Custom logging configuration
-let config = LoggingConfig {
-    verbose_mode: true,
-    enable_console: true,
-    colored_output: true,
-    ..LoggingConfig::default ()
-};
+file::set_data_dir("./my-cache".into())?;
 
-init_logging(config)?;
-
+let catalog = JapanCatalog::new(ResourceCategory::Assets, Platform::Android)?;
 ```
 
-### ServerConfig
+`set_data_dir` is process-global and can only be called once. Use it for app-level cache configuration before constructing catalogs.
 
-Configure which server, platform, and build type you want to download:
+## Catalogs
+
+Each server has its own catalog type, all implementing the [`Catalog`](../../crates/baad/src/catalog/traits.rs) trait (which provides
+`prepare_downloads()`).
 
 ```rust
-use baad::helpers::{ServerConfig, ServerRegion, Platform, BuildType};
+use baad::catalog::{ChinaCatalog, GlobalCatalog, JapanCatalog};
+use baad::download::ResourceCategory;
+use baad::{BuildType, Platform};
 
-// Japan server with default Android/Standard build
-let japan_config = ServerConfig::new(ServerRegion::Japan, None, None)?;
+let categories = ResourceCategory::from([ResourceCategory::Assets, ResourceCategory::Media]);
 
-// Japan server with iOS build
-let japan_ios_config = ServerConfig::new(
-    ServerRegion::Japan,
-    Some(Platform::Ios),
-    None
-)?;
+// Japan
+let japan = JapanCatalog::new(categories, Platform::Android)?;
 
-// Global server with default Android/Standard build
-let global_config = ServerConfig::new(ServerRegion::Global, None, None)?;
+// China
+let china = ChinaCatalog::new(categories, Platform::Android)?;
 
-// Global server with iOS build
-let global_ios_config = ServerConfig::new(
-    ServerRegion::Global,
-    Some(Platform::Ios),
-    None
-)?;
-
-// Global server with Teen build (Android)
-let global_teen_config = ServerConfig::new(
-    ServerRegion::Global,
-    None,
-    Some(BuildType::Teen)
-)?;
-
-// Global server with iOS Teen build
-let global_ios_teen_config = ServerConfig::new(
-    ServerRegion::Global,
-    Some(Platform::Ios),
-    Some(BuildType::Teen)
-)?;
-
-// Get market configuration (Global only)
-if let Some(market_config) = global_config.get_market_config() {
-    println ! ("Market ID: {}", market_config.market_game_id);
-    println ! ("Market Code: {}", market_config.market_code);
-}
+// Global also takes a BuildType (Standard or Teen)
+let global = GlobalCatalog::new(categories, Platform::Ios, BuildType::Teen)?;
 ```
 
-**Note**: The `--teen` build type is only available for the Global server. Attempting to use `BuildType::Teen` with
-`ServerRegion::Japan` will return an error.
+> **Note:** `BuildType::Teen` is only valid for the Global server.
 
-### ApkFetcher
+### ResourceCategory
 
-Check for updates and download the APK:
-
-```rust
-use baad::apk::ApkFetcher;
-
-// Initialize fetcher
-let apk_fetcher = ApkFetcher::new(config.clone())?;
-
-// Check for updates
-let new_version = apk_fetcher.check_version().await?;
-if let Some(version) = new_version {
-    println!("New version available: {}", version);
-}
-
-// Download APK (with force flag to override existing files)
-apk_fetcher.download_apk(true).await?;
-```
-
-### CatalogFetcher & CatalogParser
-
-Fetch and process game catalogs containing asset information:
+What kind of files to pull:
 
 ```rust
-use baad::catalog::{CatalogFetcher, CatalogParser};
 use baad::download::ResourceCategory;
 
-let catalog_fetcher = CatalogFetcher::new(config.clone(), apk_fetcher)?;
-
-// Get addressable data first
-let addressable_json = catalog_fetcher.get_addressable().await?;
-
-// Get catalog data
-let catalog_json = catalog_fetcher.get_catalogs().await?;
-
-// Process catalogs into downloadable resources
-let catalog_parser = CatalogParser::new(config.clone())?;
-catalog_parser.process_catalogs().await?;
-
-// List all the assets 
-catalog_parser.list_assets(ResourceCategory::Assets).await?;
-
+ResourceCategory::Assets   // asset bundles
+ResourceCategory::Tables   // table bundles
+ResourceCategory::Media    // media resources (audio, video, etc.)
+ResourceCategory::ALL      // everything
 ```
 
-### ResourceDownloader
-
-Download game resources:
+Pass a single category directly:
 
 ```rust
-use baad::download::{ResourceDownloader, ResourceDownloadBuilder, ResourceCategory, ResourceFilter};
+let catalog = JapanCatalog::new(ResourceCategory::Assets, Platform::Android)?;
+```
 
-// Basic downloader
-let downloader = ResourceDownloader::new(
-    Some(PathBuf::from("./output")),
-    config.clone()
-).await?;
+Or combine categories with `ResourceCategory::from`:
 
-// Or use the builder pattern for more options
-let downloader = ResourceDownloadBuilder::new(config.clone())?
-    .output(Some(PathBuf::from("./output")))
-    .retries(5)
-    .limit(10)
-    .build()
-    .await?;
-
-// Download different resource categories
-downloader.download(ResourceCategory::Assets, None).await?; // All assets
-downloader.download(ResourceCategory::Tables, None).await?; // Game tables
-downloader.download(ResourceCategory::Media, None).await?;  // Media files
-downloader.download(ResourceCategory::All, None).await?;    // Everything
-
-// Using multiple categories
-let categories = ResourceCategory::multiple(vec![
+```rust
+let categories = ResourceCategory::from([
     ResourceCategory::Assets,
-    ResourceCategory::Tables
+    ResourceCategory::Media,
 ]);
-downloader.download(categories, None).await?;
 
-// Apply filters
-use baad::download::FilterMethod;
-
-let exact_filter = ResourceFilter::new("CharacterData", FilterMethod::Exact) ?;
-let contains_filter = ResourceFilter::new("sprite", FilterMethod::Contains) ?;
-let regex_filter = ResourceFilter::new(r"character_\d+\.bundle", FilterMethod::Regex) ?;
-
-// Download with filter
-downloader.download(ResourceCategory::Assets, Some(contains_filter)).await?;
+let catalog = JapanCatalog::new(categories, Platform::Android)?;
 ```
 
-### APKExtractor
-
-Extract specific files from APKs:
+You can also build categories conditionally:
 
 ```rust
-use baad::apk::{ApkExtractor, ExtractionRule};
-use std::path::PathBuf;
-
-let extractor = ApkExtractor::new(config.clone())?;
-
-// Extract data files
-extractor.extract_data()?;
-
-// Extract libil2cpp.so and metadata.dat
-extractor.extract_il2cpp()?;
-
-// Custom extraction
-let rule = ExtractionRule {
-    apk: "com.YostarJP.BlueArchive.apk",
-    path: & ["assets", "bin", "Data"],
-    pattern: "globalgamemanagers",
-    output: PathBuf::from("./extracted").into_boxed_path(),
-};
-extractor.extract(rule) ?;
+let categories = ResourceCategory::new()
+    .include_if(include_assets, ResourceCategory::Assets)
+    .include_if(include_tables, ResourceCategory::Tables)
+    .include_if(include_media, ResourceCategory::Media)
+    .or_all_if_empty();
 ```
 
+`ResourceCategory` is `Copy`, so you can reuse it across catalog constructors without cloning.
 
-See [parse.rs](../../src/cli/parse.rs) as a guide or reference on how to use the API.
+### Platform
+
+```rust
+use baad::Platform;
+
+Platform::Android
+Platform::Ios
+Platform::Windows
+```
+
+## ResourceDownloader
+
+Built with a builder. Only `output_dir`, `limit`, and `retries` are required; `proxy` is optional.
+
+```rust
+use baad::download::ResourceDownloader;
+
+let downloader = ResourceDownloader::builder()
+    .output_dir("./output".into())   // PathBuf
+    .limit(10)                       // concurrent downloads
+    .retries(10)                     // retry attempts per file
+    .maybe_proxy(Some("http://127.0.0.1:8080".into())) // optional
+    .build();
+
+// Second arg is an optional filter (see below)
+downloader.download(downloads, None).await?;
+```
+
+The `download` method takes the [`Downloads`](../../crates/baad-shared/src/types.rs) returned by `prepare_downloads()` and downloads
+every category present in it.
+
+## Filtering
+
+To download only files whose path matches a pattern, pass a `ResourceFilter`:
+
+```rust
+use baad::download::{FilterMethod, ResourceFilter};
+
+// Via constructor
+let filter = ResourceFilter::new("ch0230", FilterMethod::Contains)?;
+
+// Or the shorthand helpers
+let filter = ResourceFilter::contains("ch0230")?;
+let filter = ResourceFilter::regex(r"(ch0230|ch0255|hoshino).*battle")?;
+let filter = ResourceFilter::fuzzy("ch0069")?;
+let filter = ResourceFilter::glob("audio/voc_jp/**")?;
+
+downloader.download(downloads, Some(&filter)).await?;
+```
+
+Available [`FilterMethod`](../../crates/baad/src/download/filter.rs) variants:
+
+| Method                 | Matches when the path…                   |
+|------------------------|------------------------------------------|
+| `Exact`                | equals the pattern                       |
+| `Contains`             | contains the pattern                     |
+| `ContainsIgnoreCase`   | contains the pattern, case-insensitive   |
+| `StartsWith`           | starts with the pattern                  |
+| `EndsWith`             | ends with the pattern                    |
+| `Regex`                | matches the regular expression           |
+| `Fuzzy`                | fuzzy-matches the pattern                |
+| `Glob`                 | matches the glob pattern                 |
+
+Each method has a matching helper constructor (`ResourceFilter::exact`, `::starts_with`,
+`::ends_with`, `::contains_ignore_case`, etc.).
+
+## Downloads
+
+`prepare_downloads()` returns a [`Downloads`](../../crates/baad-shared/src/types.rs) struct you can inspect before downloading:
+
+```rust
+let downloads = catalog.prepare_downloads().await?;
+
+println!("assets: {}", downloads.assets.len());
+println!("tables: {}", downloads.tables.len());
+println!("media:  {}", downloads.media.len());
+```
+
+To list files without downloading them, iterate over the returned vectors:
+
+```rust
+use baad::catalog::{Catalog, JapanCatalog};
+use baad::download::ResourceCategory;
+use baad::Platform;
+
+#[tokio::main]
+async fn main() -> eyre::Result<()> {
+    let catalog = JapanCatalog::new(
+        ResourceCategory::from([ResourceCategory::Assets, ResourceCategory::Tables]),
+        Platform::Android,
+    )?;
+
+    let downloads = catalog.prepare_downloads().await?;
+
+    for asset in &downloads.assets {
+        println!("asset: {} ({} bytes)", asset.path, asset.size);
+    }
+
+    for table in &downloads.tables {
+        println!("table: {} ({} bytes)", table.path, table.size);
+    }
+
+    Ok(())
+}
+```
+
+Each entry also includes the source `url`, expected `hash`, and, for assets/tables, any `bundle_files` listed by the catalog.
+
+## Logging
+
+Logging is off by default. Initialize it once at startup with `init_logging`:
+
+```rust
+use baad::{init_logging, LoggingConfig};
+
+init_logging(LoggingConfig {
+    enable_console: true,
+    enable_debug: true,
+    ..LoggingConfig::default()
+})?;
+```
+
+When running in an interactive terminal, `init_logging` also renders a live progress display
+for active downloads. To turn that off while keeping normal log output, set `enable_progress: false`:
+
+```rust
+init_logging(LoggingConfig {
+    enable_progress: false,
+    ..LoggingConfig::default()
+})?;
+```
+
+The progress display is automatically disabled when output is not a terminal, when
+`enable_json` is set, or when `enable_console` is off.
+
+## Custom Progress Display
+
+To replace the built-in `Downloading` lines with your own rendering (e.g., progress bars),
+implement [`ProgressModel`](../../crates/baad-utils/src/progress/view.rs) and
+[`DownloadProgressHandler`](../../crates/baad-utils/src/progress/model.rs), then initialize
+logging with `init_logging_with_model` instead of `init_logging`:
+
+```rust
+use std::collections::HashMap;
+use std::fmt::Write;
+use std::sync::Arc;
+
+use baad::{
+    init_logging_with_model, DownloadEvent, DownloadProgressHandler, LoggingConfig, ProgressModel,
+};
+
+#[derive(Default)]
+struct BarModel {
+    active: HashMap<Arc<str>, (u64, u64)>, // filename -> (downloaded, total)
+}
+
+impl ProgressModel for BarModel {
+    // Called on repaint. Write one line per active download; `width` and `height` are
+    // the terminal dimensions. Keep line count under `height - 1` — drawing more lines
+    // than the terminal has rows corrupts the repaint.
+    fn render(&mut self, width: usize, height: usize, out: &mut String) {
+        for (name, (downloaded, total)) in &self.active {
+            let pct = *downloaded as f64 / (*total).max(1) as f64;
+            let bar_width = width.saturating_sub(40).max(10);
+            let filled = (bar_width as f64 * pct) as usize;
+            let _ = writeln!(
+                out,
+                "{name} [{}{}] {:.0}%",
+                "█".repeat(filled),
+                "░".repeat(bar_width - filled),
+                pct * 100.0
+            );
+        }
+    }
+
+    // Called once when the display finishes. Optional summary output.
+    fn final_message(&mut self, out: &mut String) {
+        let _ = writeln!(out, "done");
+    }
+}
+
+impl DownloadProgressHandler for BarModel {
+    // Called for every download event. Update your state here.
+    fn handle_event(&mut self, event: DownloadEvent) {
+        match event {
+            DownloadEvent::Started { filename, total_bytes } => {
+                self.active.insert(filename, (0, total_bytes));
+            }
+            DownloadEvent::Progress { filename, downloaded_bytes, total_bytes } => {
+                self.active.insert(filename, (downloaded_bytes, total_bytes));
+            }
+            DownloadEvent::Completed { filename, .. } => {
+                self.active.remove(&filename);
+            }
+        }
+    }
+}
+
+init_logging_with_model(LoggingConfig::default(), BarModel::default())?;
+```
+
+The rendering machinery (repainting, cursor handling, interleaving log lines with the
+progress area) is handled for you. If the progress display cannot be used (non-terminal
+output, `enable_json`, `enable_progress: false`), the model is ignored and logging falls
+back to plain output.
+
+## Progress (Observers)
+
+For full control — routing events to a GUI, a channel, or your own rendering loop —
+implement [`DownloadObserver`](../../crates/baad-shared/src/observer.rs) and register it
+globally with `set_observer` before downloading. This is the low-level hook underneath
+the progress display; if you use it, disable the built-in progress with
+`enable_progress: false` so the two don't compete for the observer slot.
+
+```rust
+use std::sync::Arc;
+use baad::{set_observer, DownloadEvent, DownloadObserver};
+
+struct MyObserver;
+
+impl DownloadObserver for MyObserver {
+    fn on_event(&self, event: DownloadEvent) {
+        match event {
+            DownloadEvent::Started { filename, total_bytes } => {
+                println!("start {filename} ({total_bytes} bytes)");
+            }
+            DownloadEvent::Progress { filename, downloaded_bytes, total_bytes } => {
+                println!("{filename}: {downloaded_bytes}/{total_bytes}");
+            }
+            DownloadEvent::Completed { filename, status, .. } => {
+                println!("done {filename}: {status:?}");
+            }
+        }
+    }
+}
+
+set_observer(Arc::new(MyObserver));
+```
+
+`set_observer` can only be called once per process; the first caller wins. If no observer
+is set, a `NoopObserver` is used and events are discarded.
+
+---
+
+See [parse.rs](../../crates/baad-cli/src/parse.rs) for a complete reference on how the CLI uses the API.
