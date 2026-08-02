@@ -7,7 +7,7 @@ use baad_shared::{DownloadEvent, DownloadObserver, DownloadStatus};
 use better_default::Default;
 use tracing::Level;
 
-use crate::formatter::{HumanBytes, LineFormatter};
+use crate::formatter::{AlignedLine, HumanBytes, LineFormatter};
 use crate::progress::view::{ProgressModel, ProgressView};
 
 pub trait DownloadProgressHandler: ProgressModel {
@@ -83,15 +83,14 @@ impl ProgressModel for DownloadProgressModel {
                 let _ = write!(self.scratch, "{}", HumanBytes(state.downloaded_bytes));
             }
 
-            let _ = self.formatter.write_line_aligned(
-                output,
-                &Level::INFO,
-                false,
-                "Downloading",
-                name,
-                &self.scratch,
+            let _ = self.formatter.write_line_aligned(output, &AlignedLine {
+                level: &Level::INFO,
+                is_success: false,
+                message: "Downloading",
+                value: name,
+                right: &self.scratch,
                 width
-            );
+            });
         }
 
         let hidden = self.active.len().saturating_sub(max_visible);

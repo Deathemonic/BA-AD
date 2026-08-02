@@ -22,6 +22,15 @@ use crate::formatter::styles::{
     value_style
 };
 
+pub struct AlignedLine<'a> {
+    pub level: &'a Level,
+    pub is_success: bool,
+    pub message: &'a str,
+    pub value: &'a str,
+    pub right: &'a str,
+    pub width: usize
+}
+
 #[derive(Clone, Default)]
 #[default(include_timestamps: true)]
 pub struct LineFormatter {
@@ -125,12 +134,7 @@ impl LineFormatter {
     pub fn write_line_aligned(
         &self,
         writer: &mut impl fmt::Write,
-        level: &Level,
-        is_success: bool,
-        message: &str,
-        value: &str,
-        right: &str,
-        width: usize
+        line: &AlignedLine<'_>
     ) -> fmt::Result {
         const LEVEL_COLUMNS: usize = 10;
         const TIMESTAMP_COLUMNS: usize = 9;
@@ -142,27 +146,28 @@ impl LineFormatter {
             write!(writer, " ")?;
         }
 
-        self.write_level_prefix(writer, level, is_success)?;
-        write!(writer, " {message}: ")?;
+        self.write_level_prefix(writer, line.level, line.is_success)?;
+        write!(writer, " {}: ", line.message)?;
 
         let timestamp_columns = if self.include_timestamps { TIMESTAMP_COLUMNS } else { 0 };
-        let left_columns = timestamp_columns + LEVEL_COLUMNS + message.chars().count() + 2;
-        let right_columns = right.chars().count();
+        let left_columns = timestamp_columns + LEVEL_COLUMNS + line.message.chars().count() + 2;
+        let right_columns = line.right.chars().count();
 
         let reserved = if right_columns > 0 { right_columns + MIN_GAP } else { 0 };
-        let value_budget = width.saturating_sub(left_columns + reserved).max(MIN_VALUE_COLUMNS);
+        let value_budget =
+            line.width.saturating_sub(left_columns + reserved).max(MIN_VALUE_COLUMNS);
 
-        let truncated = truncate_middle(value, value_budget);
-        write_colored_value(writer, level, is_success, &truncated)?;
+        let truncated = truncate_middle(line.value, value_budget);
+        write_colored_value(writer, line.level, line.is_success, &truncated)?;
 
         if right_columns > 0 {
             let used = left_columns + truncated.chars().count() + right_columns;
-            let gap = width.saturating_sub(used).max(MIN_GAP);
+            let gap = line.width.saturating_sub(used).max(MIN_GAP);
             write!(
                 writer,
                 "{:gap$}{}",
                 "",
-                right.if_supports_color(Stream::Stdout, |t| t.style(TIMESTAMP_STYLE))
+                line.right.if_supports_color(Stream::Stdout, |t| t.style(TIMESTAMP_STYLE))
             )?;
         }
 

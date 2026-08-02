@@ -5,5 +5,5 @@ pub mod styles;
 mod tracing;
 
 pub use self::bytes::HumanBytes;
-pub use self::line::LineFormatter;
+pub use self::line::{AlignedLine, LineFormatter};
 pub use self::tracing::ConsoleFormatter;
