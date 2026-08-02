@@ -54,9 +54,74 @@ jobs:
           name: baad-${{ matrix.config.name }}
           path: target/${{ matrix.config.target }}/release/${{ matrix.config.binary }}
 
+  build-ffi:
+    name: Build FFI for ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    strategy:
+      matrix:
+        config:
+          - { name: linux, os: ubuntu-latest, targets: "x86_64-unknown-linux-gnu", rust_targets: "x86_64-unknown-linux-gnu" }
+          - { name: windows, os: windows-latest, targets: "x86_64-pc-windows-msvc", rust_targets: "x86_64-pc-windows-msvc" }
+          - { name: mac, os: macos-latest, targets: "x86_64-apple-darwin aarch64-apple-darwin", rust_targets: "x86_64-apple-darwin, aarch64-apple-darwin" }
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.config.rust_targets }}
+
+      - name: Cache Cargo dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-ffi-${{ matrix.config.name }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build
+        shell: bash
+        run: |
+          for target in ${{ matrix.config.targets }}; do
+            cargo build --release --target "$target" \
+              -p baad-ffi -p baad-dm-ffi -p baad-shared-ffi -p baad-utils-ffi
+          done
+
+      - name: Collect
+        shell: bash
+        run: |
+          mkdir sdk
+          case "${{ matrix.config.name }}" in
+            linux)
+              cp target/x86_64-unknown-linux-gnu/release/lib{baad,baad_dm,baad_shared,baad_utils}.so sdk/
+              ;;
+            windows)
+              cp target/x86_64-pc-windows-msvc/release/{baad,baad_dm,baad_shared,baad_utils}.dll sdk/
+              cp target/x86_64-pc-windows-msvc/release/{baad,baad_dm,baad_shared,baad_utils}.dll.lib sdk/
+              ;;
+            mac)
+              for lib in baad baad_dm baad_shared baad_utils; do
+                lipo -create \
+                  "target/x86_64-apple-darwin/release/lib${lib}.dylib" \
+                  "target/aarch64-apple-darwin/release/lib${lib}.dylib" \
+                  -output "sdk/lib${lib}.dylib"
+              done
+              ;;
+          esac
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffi-${{ matrix.config.name }}
+          path: sdk/
+
   deploy:
     name: Release
-    needs: [build]
+    needs: [build, build-ffi]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/') || inputs.tag != ''
     permissions:
@@ -82,6 +147,14 @@ jobs:
       - name: Package
         run: |
           cd artifacts
+
+          mkdir baad-ffi-sdk
+          mv ffi-windows baad-ffi-sdk/windows
+          mv ffi-linux baad-ffi-sdk/linux
+          mv ffi-mac baad-ffi-sdk/mac
+          (cd baad-ffi-sdk && zip -r ../baad-ffi-sdk.zip windows linux mac)
+          rm -rf baad-ffi-sdk
+
           for dir in */; do
             dir_name=${dir%/}
             cd "$dir"
