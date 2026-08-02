@@ -19,18 +19,6 @@ cargo install --git "https://github.com/Deathemonic/BA-AD" --locked --release
 
 ## Usage
 
-Download all assets from `JP` server
-```shell
-baad download japan
-```
-
-Download all assets from `Global` server
-```shell
-baad download global
-```
-
-### Examples
-
 ```shell
 # Force update the APK and fetches the latest catalogs
 baad --update
