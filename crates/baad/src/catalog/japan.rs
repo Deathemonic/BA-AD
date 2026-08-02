@@ -55,18 +55,18 @@ impl JapanCatalog {
         let game_main_data = self.extract_game_main(&resources_path).await?;
         let server_info_url = self.decrypt_game_main(&game_main_data)?;
         let addressable = self.fetch_addressable(&server_info_url).await?;
-        let catalog_url = JapanCdn::extract_catalog_url(&addressable)?;
+        let catalog_url: String = JapanCdn::extract_catalog_url(&addressable)?.into();
         let platform: &'static str = self.platform.into();
 
         update(&self.paths.api, |data: &mut ApiData| {
             data.japan.version = version;
             data.japan.server_info_url = server_info_url;
-            data.japan.catalog_url = catalog_url.into();
+            data.japan.catalog_url = catalog_url.clone();
             data.japan.platform = platform.into();
         })
         .await?;
 
-        Ok(catalog_url.into())
+        Ok(catalog_url)
     }
 
     pub async fn get_catalog_url(&self) -> Result<(String, bool), CatalogError> {
@@ -85,7 +85,7 @@ impl JapanCatalog {
 
         let api_data = api_data.ok_or(CatalogError::DeserializationFailed)?;
         let addressable = self.fetch_addressable(&api_data.japan.server_info_url).await?;
-        let catalog_url = JapanCdn::extract_catalog_url(&addressable)?;
+        let catalog_url: String = JapanCdn::extract_catalog_url(&addressable)?.into();
 
         if api_data.japan.catalog_url == catalog_url && api_data.japan.platform == platform {
             return Ok((api_data.japan.catalog_url, true));
@@ -93,12 +93,12 @@ impl JapanCatalog {
 
         info!("Catalog changed, updating...");
         update(&self.paths.api, |data: &mut ApiData| {
-            data.japan.catalog_url = catalog_url.into();
+            data.japan.catalog_url = catalog_url.clone();
             data.japan.platform = platform.into();
         })
         .await?;
 
-        Ok((catalog_url.into(), false))
+        Ok((catalog_url, false))
     }
 
     async fn download_resources_asset(&self) -> Result<PathBuf, CatalogError> {
