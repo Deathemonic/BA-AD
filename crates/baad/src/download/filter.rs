@@ -7,7 +7,7 @@ use strum::{AsRefStr, EnumString};
 
 use crate::error::FilterError;
 
-#[derive(Debug, Clone, EnumString, AsRefStr)]
+#[derive(Debug, Clone, Copy, EnumString, AsRefStr)]
 #[strum(serialize_all = "kebab-case")]
 pub enum FilterMethod {
     Exact,

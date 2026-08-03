@@ -139,7 +139,7 @@ impl CommandHandler {
             return Ok(None);
         };
 
-        let filter = ResourceFilter::new(filter_pattern, args.filter_method.clone())?;
+        let filter = ResourceFilter::new(filter_pattern, args.filter_method)?;
         Ok(Some(filter))
     }
 }
