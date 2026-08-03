@@ -83,10 +83,10 @@ fn filter_resources(downloads: Vec<baad::download::ResourceDownload>) -> baad::R
 
 ## Related Crates
 
-- `baad-cli`: command-line interface built on top of this crate.
-- `baad-dm`: lower-level download manager used by the resource downloader.
-- `baad-shared`: shared types, constants, clients, and observer traits.
-- `baad-utils`: utility helpers for files, JSON, networking, logging, and progress.
+- [`baad-cli`](../baad-cli): command-line interface built on top of this crate.
+- [`baad-dm`](../baad-dm): lower-level download manager used by the resource downloader.
+- [`baad-shared`](../baad-shared): shared types, constants, clients, and observer traits.
+- [`baad-utils`](../baad-utils): utility helpers for files, JSON, networking, logging, and progress.
 
 ---
 
