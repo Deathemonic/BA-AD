@@ -3,16 +3,19 @@
 </div>
 
 # Blue Archive - Asset Downloader
+
 A tool and library that downloads the latest **Blue Archive** assets.
 
 ## Install
 
 ### Release
+
 You can download the latest pre-build binaries at [Releases](https://github.com/Deathemonic/BA-AD/releases)
 
-[Windows](https://github.com/Deathemonic/BA-AD/releases/latest/download/baad-windows-x86_64.zip) | [Linux](https://github.com/Deathemonic/BA-AD/releases/latest/download/baad-linux-x86_64.zip) | [MacOS](https://github.com/Deathemonic/BA-AD/releases/latest/download/baad-macos-aarch64.zip) 
+[Windows](https://github.com/Deathemonic/BA-AD/releases/latest/download/baad-windows-x86_64.zip) | [Linux](https://github.com/Deathemonic/BA-AD/releases/latest/download/baad-linux-x86_64.zip) | [MacOS](https://github.com/Deathemonic/BA-AD/releases/latest/download/baad-macos-aarch64.zip)
 
 ### Cargo
+
 ```shell
 cargo install --git "https://github.com/Deathemonic/BA-AD" --locked baad-cli
 ```
@@ -59,15 +62,15 @@ baad download japan --assets --platform windows
 
 ### `baad --help`
 
-| Command/Option        | Short | Description                                               |
-|-----------------------|-------|-----------------------------------------------------------|
-| `download`            |       | Download game files                                       |
-| `help`                |       | Print this message or the help of the given subcommand(s) |
-| `--update`            | `-u`  | Force update                                              |
-| `--clean`             | `-c`  | Cleans the cache                                          |
-| `--verbose=<LEVEL>`   | `-v`  | Enable verbose output (`minimal`, `full`)                 |
-| `--help`              | `-h`  | Print help                                                |
-| `--version`           | `-V`  | Print version                                             |
+| Command/Option      | Short | Description                                               |
+|---------------------|-------|-----------------------------------------------------------|
+| `download`          |       | Download game files                                       |
+| `help`              |       | Print this message or the help of the given subcommand(s) |
+| `--update`          | `-u`  | Force update                                              |
+| `--clean`           | `-c`  | Cleans the cache                                          |
+| `--verbose=<LEVEL>` | `-v`  | Enable verbose output (`minimal`, `full`)                 |
+| `--help`            | `-h`  | Print help                                                |
+| `--version`         | `-V`  | Print version                                             |
 
 ---
 
@@ -99,18 +102,20 @@ baad download japan --assets --platform windows
 | `--teen`                          | Download Teen assets (Global only)            |            |                                                                                                   | 
 | `--help`                          | Print help                                    |            |                                                                                                   |
 
-
 </details>
 
 ## Building
 
 1. Install [rustup](https://rustup.rs)
 2. Clone this repository
+
 ```sh
 git clone https://github.com/Deathemonic/BA-AD
 cd BA-AD
 ```
+
 3. Build using `cargo`
+
 ```sh
 cargo build
 ```
@@ -155,14 +160,15 @@ async fn main() -> eyre::Result<()> {
 - [BA-MU](https://github.com/Deathemonic/BA-MU): A tool that re-dump AssetBundle for **Blue Archive**.
 - [BA-FB](https://github.com/Deathemonic/BA-FB): A tool for dumping and generating **Blue Archive** flatbuffers.
 - [BA-CY](https://github.com/Deathemonic/BA-CY): A library for handling **Blue Archive** Cryptography.
-- [BA-BR](https://github.com/Deathemonic/BA-BR): A tool that repacks AssetBundle for **Blue Archive**. 
-
+- [BA-BR](https://github.com/Deathemonic/BA-BR): A tool that repacks AssetBundle for **Blue Archive**.
 
 ### Contributing
-Don't like my [shitty code](https://www.reddit.com/r/programminghorror) and what to change it? Feel free to contribute by submitting a **pull request** or **issue**. Always appreciate the help.
 
+Don't like my [shitty code](https://www.reddit.com/r/programminghorror) and what to change it? Feel free to contribute
+by submitting a **pull request** or **issue**. Always appreciate the help.
 
 ### Acknowledgement
+
 - [hdk5/MoeXCOM](https://github.com/hdk5/MoeXCOM)
 - [respectZ/blue-archive-viewer](https://github.com/respectZ/blue-archive-viewer)
 - [fiseleo/Blue-Archive-JP-Downloader](https://github.com/fiseleo/Blue-Archive-JP-Downloader)
