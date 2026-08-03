@@ -62,3 +62,5 @@ pub const MEDIA_RESOURCES_WINDOWS: &str = "MediaResources-Windows";
 pub const PATCH_PACK_ANDROID: &str = "Android_PatchPack";
 pub const PATCH_PACK_IOS: &str = "iOS_PatchPack";
 pub const PATCH_PACK_WINDOWS: &str = "Windows_PatchPack";
+
+pub const CATALOG_PREFIX: &str = "Catalog/";

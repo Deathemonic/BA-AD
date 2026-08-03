@@ -1,4 +1,5 @@
 use baad_shared::{
+    CATALOG_PREFIX,
     DownloadAsset,
     DownloadMedia,
     DownloadTable,
@@ -12,8 +13,6 @@ use baad_utils::file::filename_or;
 use fastcat::fconcat;
 
 use crate::download::ResourceCategory;
-
-const CATALOG_PREFIX: &str = "Catalog/";
 
 pub struct GlobalStrategy;
 
