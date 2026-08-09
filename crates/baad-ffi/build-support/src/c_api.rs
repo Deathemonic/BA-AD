@@ -71,7 +71,7 @@ fn render_c_plumbing(config: &Config) -> TokenStream {
     let bytes_free = format_ident!("{}_bytes_free", config.c_prefix);
     let string_array_free = format_ident!("{}_string_array_free", config.c_prefix);
     let string_free_doc =
-        format!(" On success the caller owns each string and must free it with `{string_free}`.");
+        format!("On success the caller owns each string and must free it with `{string_free}`.");
     let runtime = config.c_runtime.then(|| {
         quote! {
             #[allow(dead_code)]

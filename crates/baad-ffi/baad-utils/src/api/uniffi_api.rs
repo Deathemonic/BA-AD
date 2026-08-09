@@ -5,8 +5,8 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-pub use super::core::LogLevel;
 use super::core;
+pub use super::core::LogLevel;
 
 #[uniffi::export]
 pub fn init_logging(config: LoggingConfig) -> Result<(), ConfigError> {

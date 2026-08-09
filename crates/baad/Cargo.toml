@@ -15,6 +15,7 @@ bacy = { workspace = true }
 
 bitflags = { workspace = true }
 bon = { workspace = true }
+fastcat = { workspace = true }
 lazy-regex = { workspace = true }
 memorypack = { workspace = true }
 reqwest = { workspace = true, features = ["json"] }
@@ -27,7 +28,6 @@ tracing = { workspace = true }
 
 ada-url = "3.4"
 base64 = "0.22"
-fastcat = "1.1"
 glob = "0.3"
 memchr = "2.7.6"
 nucleo = "0.5"

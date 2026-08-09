@@ -61,7 +61,7 @@ pub unsafe extern "C" fn baad_utils_log_with_field(
     let (message, name, value) =
         match (import_string(message), import_string(name), import_string(value)) {
             (Ok(message), Ok(name), Ok(value)) => (message, name, value),
-            (Err(code), _, _) | (_, Err(code), _) | (_, _, Err(code)) => return code
+            (Err(code), ..) | (_, Err(code), _) | (_, _, Err(code)) => return code
         };
     core::log_message(level, success, message, Some(&core::join_fields(&[(name, value)])));
     0

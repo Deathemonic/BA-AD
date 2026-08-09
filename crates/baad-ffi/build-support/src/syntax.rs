@@ -14,7 +14,10 @@ pub(crate) fn parse_file(path: &Path) -> syn::File {
 }
 
 pub(crate) fn source_dir(relative: &str) -> PathBuf {
-    let manifest = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+    let manifest = PathBuf::from(
+        env::var("CARGO_MANIFEST_DIR")
+            .unwrap_or_else(|error| panic!("CARGO_MANIFEST_DIR: {error}"))
+    );
     manifest.join(relative)
 }
 

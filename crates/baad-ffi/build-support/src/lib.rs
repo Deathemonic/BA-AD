@@ -48,7 +48,8 @@ pub fn generate(config: &Config) {
         c_stream.extend(render_reexport(config, reexport, "c_api.rs"));
     }
 
-    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let out_dir =
+        PathBuf::from(env::var("OUT_DIR").unwrap_or_else(|error| panic!("OUT_DIR: {error}")));
     write_rust(&out_dir.join("shadow.rs"), uniffi_stream);
     write_rust(&out_dir.join("c_shadow.rs"), c_stream);
 

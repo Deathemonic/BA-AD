@@ -74,16 +74,16 @@ pub(crate) fn render_enum_mirror(
 ) -> TokenStream {
     let crate_path = crate_path(crate_path_text);
     let source = &item.ident;
-    let name = source.clone();
+    let name = source;
 
     let variants = item.variants.iter().map(|variant| {
         let mut variant = variant.clone();
         for field in &mut variant.fields {
             field.attrs.clear();
         }
-        let ident = variant.ident.clone();
         let display = error.then(|| display_attribute(&variant));
         let variant = &variant;
+        let ident = &variant.ident;
         match &variant.fields {
             Fields::Unit => quote! { #display #ident },
             Fields::Unnamed(fields) => {

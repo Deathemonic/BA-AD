@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use fastcat::fconcat;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use syn::{Item, Type};
@@ -98,7 +99,7 @@ fn rename_symbols(config: &Config, reexport: &Reexport, tokens: TokenStream) -> 
         .replace("pub use core ::", "pub use self :: core ::")
         .replace("use core ::", "use self :: core ::")
         .replace("super :: core ::", "core ::")
-        .replace(&format!("{}_", reexport.c_prefix), &format!("{}_", config.c_prefix))
+        .replace(&fconcat!(reexport.c_prefix, "_"), &fconcat!(config.c_prefix, "_"))
         .replace(reexport.c_types_prefix, config.c_types_prefix);
     text.parse().unwrap_or_else(|error| panic!("reexport rename ({}): {error}", reexport.name))
 }

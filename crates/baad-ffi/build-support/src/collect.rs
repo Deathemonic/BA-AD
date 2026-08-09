@@ -55,9 +55,9 @@ pub(crate) fn collect_source(config: &Config, source: &'static Source, context: 
         println!("cargo:rerun-if-changed={}", path.display());
         let item = parse_file(&path)
             .items
-            .iter()
+            .into_iter()
             .find_map(|item| match item {
-                Item::Struct(item) if item.ident == spec.name => Some(item.clone()),
+                Item::Struct(item) if item.ident == spec.name => Some(item),
                 _ => None
             })
             .unwrap_or_else(|| panic!("sanitized struct {} not found in {}", spec.name, spec.file));

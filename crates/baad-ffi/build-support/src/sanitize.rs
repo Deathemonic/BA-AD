@@ -118,7 +118,7 @@ fn struct_level_defaults(item: &ItemStruct) -> Vec<(String, Expr)> {
         .filter_map(|entry| {
             let (field, value) = entry.split_once(':')?;
             let expression = syn::parse_str::<Expr>(value.trim()).ok()?;
-            Some((field.trim().to_string(), expression))
+            Some((field.trim().into(), expression))
         })
         .collect()
 }
@@ -144,21 +144,24 @@ fn sanitized_default(field: &syn::Field, struct_defaults: &[(String, Expr)]) -> 
     let struct_default = struct_defaults
         .iter()
         .find(|(name, _)| *name == field_name)
-        .map(|(_, expression)| expression.clone());
+        .and_then(|(_, expression)| evaluate_literal(expression));
 
-    let builder_default = field.attrs.iter().find_map(|attr| {
-        if !attr.path().is_ident("builder") {
-            return None;
-        }
-        let syn::Meta::List(list) = &attr.meta else {
-            return None;
-        };
-        let text = list.tokens.to_string();
-        let expression = text.strip_prefix("default")?.trim().strip_prefix('=')?.trim();
-        syn::parse_str::<Expr>(expression).ok()
+    let value = struct_default.or_else(|| {
+        let builder_default = field.attrs.iter().find_map(|attr| {
+            if !attr.path().is_ident("builder") {
+                return None;
+            }
+            let syn::Meta::List(list) = &attr.meta else {
+                return None;
+            };
+            let text = list.tokens.to_string();
+            let expression = text.strip_prefix("default")?.trim().strip_prefix('=')?.trim();
+            syn::parse_str::<Expr>(expression).ok()
+        });
+        builder_default.as_ref().and_then(evaluate_literal)
     });
 
-    match struct_default.or(builder_default).as_ref().and_then(evaluate_literal) {
+    match value {
         Some(value) => quote! { #[uniffi(default = #value)] },
         None if is_option => quote! { #[uniffi(default = None)] },
         None => quote! {}
