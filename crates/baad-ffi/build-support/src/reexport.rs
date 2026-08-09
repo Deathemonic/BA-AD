@@ -2,17 +2,22 @@ use std::path::Path;
 
 use fastcat::fconcat;
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::{ToTokens, format_ident, quote};
 use syn::{Item, Type};
 
 use crate::config::{Config, Reexport};
 use crate::syntax::{parse_file, source_dir};
 
-pub(crate) fn render_reexport(config: &Config, reexport: &Reexport, file: &str) -> TokenStream {
-    let items = reexport_items(config, reexport, &source_dir(reexport.dir).join(file));
+pub(crate) fn render_reexport(
+    config: &Config,
+    reexport: &Reexport,
+    file: &str,
+    uniffi_derives: bool
+) -> TokenStream {
+    let items = reexport_items(config, reexport, &source_dir(reexport.dir).join(file), uniffi_derives);
     let core_path = source_dir(reexport.dir).join("core.rs");
     let core_module = core_path.exists().then(|| {
-        let items = reexport_items(config, reexport, &core_path);
+        let items = reexport_items(config, reexport, &core_path, uniffi_derives);
         quote! {
             mod core {
                 #(#items)*
@@ -38,14 +43,48 @@ pub(crate) fn render_reexport(config: &Config, reexport: &Reexport, file: &str) 
     }
 }
 
-fn reexport_items(config: &Config, reexport: &Reexport, path: &Path) -> Vec<TokenStream> {
+fn reexport_items(
+    config: &Config,
+    reexport: &Reexport,
+    path: &Path,
+    uniffi_derives: bool
+) -> Vec<TokenStream> {
     println!("cargo:rerun-if-changed={}", path.display());
     parse_file(path)
         .items
         .iter()
         .filter(|item| reexported(reexport, item))
-        .map(|item| rename_symbols(config, reexport, quote! { #item }))
+        .map(|item| rename_symbols(config, reexport, reexport_tokens(item, uniffi_derives)))
         .collect()
+}
+
+fn reexport_tokens(item: &Item, uniffi_derives: bool) -> TokenStream {
+    if uniffi_derives {
+        return quote! { #item };
+    }
+
+    let mut item = item.clone();
+    match &mut item {
+        Item::Const(item) => strip_uniffi_derive_attrs(&mut item.attrs),
+        Item::Enum(item) => strip_uniffi_derive_attrs(&mut item.attrs),
+        Item::Fn(item) => strip_uniffi_derive_attrs(&mut item.attrs),
+        Item::Impl(item) => strip_uniffi_derive_attrs(&mut item.attrs),
+        Item::Struct(item) => strip_uniffi_derive_attrs(&mut item.attrs),
+        Item::Use(item) => strip_uniffi_derive_attrs(&mut item.attrs),
+        _ => {}
+    }
+    quote! { #item }
+}
+
+fn strip_uniffi_derive_attrs(attrs: &mut Vec<syn::Attribute>) {
+    attrs.retain(|attr| !is_uniffi_derive_attr(attr));
+}
+
+fn is_uniffi_derive_attr(attr: &syn::Attribute) -> bool {
+    attr.path().is_ident("cfg_attr") && {
+        let text = attr.meta.to_token_stream().to_string();
+        text.contains("feature = \"uniffi\"") && text.contains("derive (uniffi ::")
+    }
 }
 
 fn reexported(reexport: &Reexport, item: &Item) -> bool {

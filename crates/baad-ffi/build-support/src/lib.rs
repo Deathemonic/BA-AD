@@ -44,8 +44,8 @@ pub fn generate(config: &Config) {
     let mut c_stream = render_c(config, &context);
 
     for reexport in config.reexports {
-        uniffi_stream.extend(render_reexport(config, reexport, "uniffi_api.rs"));
-        c_stream.extend(render_reexport(config, reexport, "c_api.rs"));
+        uniffi_stream.extend(render_reexport(config, reexport, "uniffi_api.rs", true));
+        c_stream.extend(render_reexport(config, reexport, "c_api.rs", false));
     }
 
     let out_dir =
