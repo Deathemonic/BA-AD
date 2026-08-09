@@ -24,8 +24,6 @@ default-members = [
 version = "3.0.0"
 edition = "2024"
 authors = ["Zinth"]
-rust-version = "1.85"
-license = "MIT"
 
 [workspace.dependencies]
 baad = { path = "crates/baad" }
