@@ -23,7 +23,9 @@ jobs:
       matrix:
         config:
           - { name: linux-x86_64, os: ubuntu-latest, target: x86_64-unknown-linux-gnu, binary: baad }
+          - { name: linux-aarch64, os: ubuntu-24.04-arm, target: aarch64-unknown-linux-gnu, binary: baad }
           - { name: windows-x86_64, os: windows-latest, target: x86_64-pc-windows-msvc, binary: baad.exe }
+          - { name: windows-aarch64, os: windows-latest, target: aarch64-pc-windows-msvc, binary: baad.exe }
           - { name: macos-x86_64, os: macos-latest, target: x86_64-apple-darwin, binary: baad }
           - { name: macos-aarch64, os: macos-latest, target: aarch64-apple-darwin, binary: baad }
 
@@ -55,15 +57,18 @@ jobs:
           path: target/${{ matrix.config.target }}/release/${{ matrix.config.binary }}
 
   build-ffi:
-    name: Build FFI for ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    name: Build FFI for ${{ matrix.config.os_name }} ${{ matrix.config.arch_name }}
+    runs-on: ${{ matrix.config.runner }}
 
     strategy:
       matrix:
         config:
-          - { name: linux, os: ubuntu-latest, targets: "x86_64-unknown-linux-gnu", rust_targets: "x86_64-unknown-linux-gnu" }
-          - { name: windows, os: windows-latest, targets: "x86_64-pc-windows-msvc", rust_targets: "x86_64-pc-windows-msvc" }
-          - { name: mac, os: macos-latest, targets: "x86_64-apple-darwin aarch64-apple-darwin", rust_targets: "x86_64-apple-darwin, aarch64-apple-darwin" }
+          - { os_name: windows, arch_name: x64, runner: windows-latest, rust_target: x86_64-pc-windows-msvc, ext: dll, lib_prefix: "", lib_suffix: ".dll" }
+          - { os_name: windows, arch_name: arm64, runner: windows-latest, rust_target: aarch64-pc-windows-msvc, ext: dll, lib_prefix: "", lib_suffix: ".dll" }
+          - { os_name: linux, arch_name: x64, runner: ubuntu-latest, rust_target: x86_64-unknown-linux-gnu, ext: so, lib_prefix: "lib", lib_suffix: ".so" }
+          - { os_name: linux, arch_name: arm64, runner: ubuntu-24.04-arm, rust_target: aarch64-unknown-linux-gnu, ext: so, lib_prefix: "lib", lib_suffix: ".so" }
+          - { os_name: mac, arch_name: x64, runner: macos-latest, rust_target: x86_64-apple-darwin, ext: dylib, lib_prefix: "lib", lib_suffix: ".dylib" }
+          - { os_name: mac, arch_name: arm64, runner: macos-latest, rust_target: aarch64-apple-darwin, ext: dylib, lib_prefix: "lib", lib_suffix: ".dylib" }
 
     steps:
       - name: Checkout
@@ -72,7 +77,14 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.config.rust_targets }}
+          targets: ${{ matrix.config.rust_target }}
+
+      - name: Install cross linker (linux aarch64)
+        if: matrix.config.rust_target == 'aarch64-unknown-linux-gnu' && matrix.config.runner == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> "$GITHUB_ENV"
 
       - name: Cache Cargo dependencies
         uses: actions/cache@v4
@@ -81,44 +93,88 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-ffi-${{ matrix.config.name }}-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-ffi-${{ matrix.config.rust_target }}-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build
+      - name: Build (C API)
         shell: bash
         run: |
-          for target in ${{ matrix.config.targets }}; do
-            cargo build --release --target "$target" \
-              -p baad-ffi -p baad-dm-ffi -p baad-shared-ffi -p baad-utils-ffi \
-              --features baad-ffi/uniffi,baad-dm-ffi/uniffi,baad-shared-ffi/uniffi,baad-utils-ffi/uniffi
+          cargo build --release --target ${{ matrix.config.rust_target }} \
+            -p baad-ffi -p baad-dm-ffi -p baad-shared-ffi -p baad-utils-ffi
+
+      - name: Prepare C API artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          target_dir="target/${{ matrix.config.rust_target }}/release"
+          out_dir="sdk/c_ffi/${{ matrix.config.os_name }}/${{ matrix.config.arch_name }}"
+          mkdir -p "$out_dir"
+          for lib in baad baad_dm baad_shared baad_utils; do
+            cp "${target_dir}/${{ matrix.config.lib_prefix }}${lib}${{ matrix.config.lib_suffix }}" "$out_dir/"
+            if [ "${{ matrix.config.os_name }}" = "windows" ]; then
+              cp "${target_dir}/${{ matrix.config.lib_prefix }}${lib}${{ matrix.config.lib_suffix }}.lib" "$out_dir/" || true
+            fi
           done
 
-      - name: Collect
+      - name: Build (uniffi)
         shell: bash
         run: |
-          mkdir sdk
-          case "${{ matrix.config.name }}" in
-            linux)
-              cp target/x86_64-unknown-linux-gnu/release/lib{baad,baad_dm,baad_shared,baad_utils}.so sdk/
-              ;;
-            windows)
-              cp target/x86_64-pc-windows-msvc/release/{baad,baad_dm,baad_shared,baad_utils}.dll sdk/
-              cp target/x86_64-pc-windows-msvc/release/{baad,baad_dm,baad_shared,baad_utils}.dll.lib sdk/
-              ;;
-            mac)
-              for lib in baad baad_dm baad_shared baad_utils; do
-                lipo -create \
-                  "target/x86_64-apple-darwin/release/lib${lib}.dylib" \
-                  "target/aarch64-apple-darwin/release/lib${lib}.dylib" \
-                  -output "sdk/lib${lib}.dylib"
-              done
-              ;;
-          esac
+          cargo build --release --target ${{ matrix.config.rust_target }} \
+            -p baad-ffi -p baad-dm-ffi -p baad-shared-ffi -p baad-utils-ffi \
+            --features baad-ffi/uniffi,baad-dm-ffi/uniffi,baad-shared-ffi/uniffi,baad-utils-ffi/uniffi
 
-      - name: Upload Artifacts
+      - name: Prepare uniffi artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          target_dir="target/${{ matrix.config.rust_target }}/release"
+          out_dir="sdk/uniffi/${{ matrix.config.os_name }}/${{ matrix.config.arch_name }}"
+          mkdir -p "$out_dir"
+          for lib in baad baad_dm baad_shared baad_utils; do
+            cp "${target_dir}/${{ matrix.config.lib_prefix }}${lib}${{ matrix.config.lib_suffix }}" "$out_dir/"
+            if [ "${{ matrix.config.os_name }}" = "windows" ]; then
+              cp "${target_dir}/${{ matrix.config.lib_prefix }}${lib}${{ matrix.config.lib_suffix }}.lib" "$out_dir/" || true
+            fi
+          done
+
+      - name: Generate uniffi bindings
+        shell: bash
+        run: |
+          set -euo pipefail
+          target_dir="target/${{ matrix.config.rust_target }}/release"
+          bindings_dir="sdk/uniffi/${{ matrix.config.os_name }}/${{ matrix.config.arch_name }}/bindings"
+
+          declare -A crate_lib=(
+            [baad-ffi]=baad
+            [baad-dm-ffi]=baad_dm
+            [baad-shared-ffi]=baad_shared
+            [baad-utils-ffi]=baad_utils
+          )
+
+          for crate in "${!crate_lib[@]}"; do
+            lib_name="${{ matrix.config.lib_prefix }}${crate_lib[$crate]}${{ matrix.config.lib_suffix }}"
+            for lang in kotlin swift python ruby csharp go; do
+              out="${bindings_dir}/${crate_lib[$crate]}/${lang}"
+              mkdir -p "$out"
+              cargo run --release --target ${{ matrix.config.rust_target }} \
+                -p "$crate" --bin uniffi-bindgen --features uniffi,uniffi_cli -- \
+                generate \
+                --library "${target_dir}/${lib_name}" \
+                --language "$lang" \
+                --out-dir "$out"
+            done
+          done
+
+      - name: Upload C API Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ffi-${{ matrix.config.name }}
-          path: sdk/
+          name: c_ffi-${{ matrix.config.os_name }}-${{ matrix.config.arch_name }}
+          path: sdk/c_ffi/${{ matrix.config.os_name }}/${{ matrix.config.arch_name }}/
+
+      - name: Upload uniffi Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: uniffi-${{ matrix.config.os_name }}-${{ matrix.config.arch_name }}
+          path: sdk/uniffi/${{ matrix.config.os_name }}/${{ matrix.config.arch_name }}/
 
   deploy:
     name: Release
@@ -147,20 +203,26 @@ jobs:
 
       - name: Package
         run: |
+          set -euo pipefail
           cd artifacts
 
-          mkdir baad-ffi-sdk
-          mv ffi-windows baad-ffi-sdk/windows
-          mv ffi-linux baad-ffi-sdk/linux
-          mv ffi-mac baad-ffi-sdk/mac
-          (cd baad-ffi-sdk && zip -r ../baad-ffi-sdk.zip windows linux mac)
-          rm -rf baad-ffi-sdk
-
-          for dir in */; do
+          mkdir -p sdk
+          for dir in c_ffi-*/ uniffi-*/; do
             dir_name=${dir%/}
-            cd "$dir"
-            zip "../${dir_name}.zip" ./*
-            cd ..
+            abi=${dir_name%%-*}
+            rest=${dir_name#*-}
+            os_name=${rest%-*}
+            arch_name=${rest##*-}
+            mkdir -p "sdk/${abi}/${os_name}/${arch_name}"
+            cp -r "${dir_name}/." "sdk/${abi}/${os_name}/${arch_name}/"
+          done
+
+          (cd sdk && zip -r ../baad-ffi-sdk.zip uniffi c_ffi)
+          rm -rf sdk
+
+          for dir in baad-*/; do
+            dir_name=${dir%/}
+            (cd "$dir_name" && zip "../${dir_name}.zip" ./*)
           done
 
       - name: Release

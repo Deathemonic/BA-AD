@@ -337,6 +337,7 @@ dependencies = [
 name = "baad-ffi-build"
 version = "3.0.0"
 dependencies = [
+ "fastcat",
  "prettyplease",
  "proc-macro2",
  "quote",
