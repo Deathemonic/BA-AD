@@ -105,8 +105,7 @@ fn main() {
                     "format_bytes",
                     "terminal_is_terminal",
                     "terminal_size",
-                    "TerminalSize",
-                    "flush_logs"
+                    "TerminalSize"
                 ]
             },
             Reexport {

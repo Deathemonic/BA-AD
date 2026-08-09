@@ -30,6 +30,89 @@ pub unsafe extern "C" fn baad_utils_init_logging(config: *const BaadUtilsLogging
 pub extern "C" fn baad_utils_flush_logs() { baad_utils::flush_logs(); }
 
 /// # Safety
+/// `level` must be `0` trace, `1` debug, `2` info, `3` warn or `4` error;
+/// `message` must be a valid NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn baad_utils_log(level: i32, success: bool, message: *const c_char) -> i32 {
+    let Some(level) = core::LogLevel::from_repr(level) else {
+        return INVALID_ARGUMENT;
+    };
+    let message = match import_string(message) {
+        Ok(message) => message,
+        Err(code) => return code
+    };
+    core::log_message(level, success, message, None);
+    0
+}
+
+/// # Safety
+/// `message`, `name` and `value` must be valid NUL-terminated strings.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn baad_utils_log_with_field(
+    level: i32,
+    success: bool,
+    message: *const c_char,
+    name: *const c_char,
+    value: *const c_char
+) -> i32 {
+    let Some(level) = core::LogLevel::from_repr(level) else {
+        return INVALID_ARGUMENT;
+    };
+    let (message, name, value) =
+        match (import_string(message), import_string(name), import_string(value)) {
+            (Ok(message), Ok(name), Ok(value)) => (message, name, value),
+            (Err(code), _, _) | (_, Err(code), _) | (_, _, Err(code)) => return code
+        };
+    core::log_message(level, success, message, Some(&core::join_fields(&[(name, value)])));
+    0
+}
+
+/// # Safety
+/// `message` must be a valid NUL-terminated string. When `len` is non-zero,
+/// `names` and `values` must each point to `len` readable NUL-terminated
+/// string pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn baad_utils_log_with_fields(
+    level: i32,
+    success: bool,
+    message: *const c_char,
+    names: *const *const c_char,
+    values: *const *const c_char,
+    len: usize
+) -> i32 {
+    let Some(level) = core::LogLevel::from_repr(level) else {
+        return INVALID_ARGUMENT;
+    };
+    let message = match import_string(message) {
+        Ok(message) => message,
+        Err(code) => return code
+    };
+    if len > 0 && (names.is_null() || values.is_null()) {
+        return NULL_POINTER;
+    }
+
+    let mut fields = Vec::new();
+    for index in 0..len {
+        let name = match import_string(*names.add(index)) {
+            Ok(name) => name,
+            Err(code) => return code
+        };
+        let value = match import_string(*values.add(index)) {
+            Ok(value) => value,
+            Err(code) => return code
+        };
+        fields.push((name, value));
+    }
+
+    let rendered = match fields.is_empty() {
+        true => None,
+        false => Some(core::join_fields(&fields))
+    };
+    core::log_message(level, success, message, rendered.as_deref());
+    0
+}
+
+/// # Safety
 /// `name` must be a valid NUL-terminated string.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn baad_utils_set_app_name(name: *const c_char) -> i32 {

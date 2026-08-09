@@ -2,8 +2,10 @@
 //! tracing plumbing and generic progress types; error enums and
 //! `LoggingConfig` are generated into `shadow.rs`.
 
+use std::collections::HashMap;
 use std::path::PathBuf;
 
+pub use super::core::LogLevel;
 use super::core;
 
 #[uniffi::export]
@@ -13,6 +15,34 @@ pub fn init_logging(config: LoggingConfig) -> Result<(), ConfigError> {
 
 #[uniffi::export]
 pub fn flush_logs() { baad_utils::flush_logs(); }
+
+#[uniffi::export]
+pub fn log(level: LogLevel, success: bool, message: &str) {
+    core::log_message(level, success, message, None);
+}
+
+#[uniffi::export]
+pub fn log_with_field(level: LogLevel, success: bool, message: &str, name: &str, value: &str) {
+    core::log_message(level, success, message, Some(&core::join_fields(&[(name, value)])));
+}
+
+#[uniffi::export]
+pub fn log_with_fields(
+    level: LogLevel,
+    success: bool,
+    message: &str,
+    fields: HashMap<String, String>
+) {
+    let mut pairs: Vec<(&str, &str)> =
+        fields.iter().map(|(name, value)| (name.as_str(), value.as_str())).collect();
+    pairs.sort_unstable_by_key(|(name, _)| *name);
+
+    let rendered = match pairs.is_empty() {
+        true => None,
+        false => Some(core::join_fields(&pairs))
+    };
+    core::log_message(level, success, message, rendered.as_deref());
+}
 
 #[uniffi::export]
 pub fn set_app_name(name: &str) -> Result<(), FileError> {
