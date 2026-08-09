@@ -144,10 +144,10 @@ jobs:
           bindings_dir="sdk/uniffi/${{ matrix.config.os_name }}/${{ matrix.config.arch_name }}/bindings"
 
           declare -A crate_lib=(
-            [baad-ffi]=baad
-            [baad-dm-ffi]=baad_dm
-            [baad-shared-ffi]=baad_shared
-            [baad-utils-ffi]=baad_utils
+            ["baad-ffi"]=baad
+            ["baad-dm-ffi"]=baad_dm
+            ["baad-shared-ffi"]=baad_shared
+            ["baad-utils-ffi"]=baad_utils
           )
 
           for crate in "${!crate_lib[@]}"; do
