@@ -23,7 +23,8 @@ pub fn log(level: LogLevel, success: bool, message: &str) {
 
 #[uniffi::export]
 pub fn log_with_field(level: LogLevel, success: bool, message: &str, name: &str, value: &str) {
-    core::log_message(level, success, message, Some(&core::join_fields(&[(name, value)])));
+    let rendered = core::render_fields(&[(name, value)]);
+    core::log_message(level, success, message, rendered.as_deref());
 }
 
 #[uniffi::export]
@@ -37,10 +38,7 @@ pub fn log_with_fields(
         fields.iter().map(|(name, value)| (name.as_str(), value.as_str())).collect();
     pairs.sort_unstable_by_key(|(name, _)| *name);
 
-    let rendered = match pairs.is_empty() {
-        true => None,
-        false => Some(core::join_fields(&pairs))
-    };
+    let rendered = core::render_fields(&pairs);
     core::log_message(level, success, message, rendered.as_deref());
 }
 

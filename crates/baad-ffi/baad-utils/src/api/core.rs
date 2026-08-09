@@ -53,6 +53,14 @@ pub(crate) fn join_fields(fields: &[(&str, &str)]) -> String {
     joined
 }
 
+pub(crate) fn render_fields(fields: &[(&str, &str)]) -> Option<String> {
+    match fields {
+        [] => None,
+        [(_, value)] => Some((*value).to_owned()),
+        fields => Some(join_fields(fields))
+    }
+}
+
 pub(crate) fn log_message(level: LogLevel, success: bool, message: &str, value: Option<&str>) {
     match (level, value) {
         (LogLevel::Trace, None) => baad_utils::trace!(message),

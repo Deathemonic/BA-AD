@@ -63,7 +63,8 @@ pub unsafe extern "C" fn baad_utils_log_with_field(
             (Ok(message), Ok(name), Ok(value)) => (message, name, value),
             (Err(code), ..) | (_, Err(code), _) | (_, _, Err(code)) => return code
         };
-    core::log_message(level, success, message, Some(&core::join_fields(&[(name, value)])));
+    let rendered = core::render_fields(&[(name, value)]);
+    core::log_message(level, success, message, rendered.as_deref());
     0
 }
 
@@ -104,10 +105,7 @@ pub unsafe extern "C" fn baad_utils_log_with_fields(
         fields.push((name, value));
     }
 
-    let rendered = match fields.is_empty() {
-        true => None,
-        false => Some(core::join_fields(&fields))
-    };
+    let rendered = core::render_fields(&fields);
     core::log_message(level, success, message, rendered.as_deref());
     0
 }
