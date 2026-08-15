@@ -21,7 +21,7 @@ pub struct CommandHandler {
 }
 
 impl CommandHandler {
-    fn new(args: Args) -> Self { Self { args } }
+    const fn new(args: Args) -> Self { Self { args } }
 
     async fn handle(&self) -> Result<()> {
         if self.args.clean {
