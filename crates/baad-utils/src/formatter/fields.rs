@@ -20,8 +20,7 @@ impl FieldCollector {
 
     #[inline]
     pub fn is_simple_message(&self) -> bool {
-        self.fields.len() == 1
-            && self.fields.first().is_some_and(|(name, _)| *name == "message")
+        self.fields.len() == 1 && self.fields.first().is_some_and(|(name, _)| *name == "message")
     }
 }
 

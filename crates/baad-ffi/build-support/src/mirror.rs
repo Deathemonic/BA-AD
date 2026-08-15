@@ -39,8 +39,7 @@ impl FieldConversion {
     fn convert(&self, binding: &syn::Ident) -> TokenStream {
         match self {
             FieldConversion::Keep => quote! { #binding },
-            FieldConversion::Mirrored => quote! { #binding.into() },
-            FieldConversion::BoxStr => quote! { #binding.into() },
+            FieldConversion::Mirrored | FieldConversion::BoxStr => quote! { #binding.into() },
             FieldConversion::ArcStr => quote! { String::from(#binding.as_ref()) },
             FieldConversion::Message => quote! { #binding.to_string() }
         }
@@ -126,10 +125,7 @@ pub(crate) fn render_enum_mirror(
                     let target = mirror_field_name(binding);
                     let conversion_kind = FieldConversion::classify(&field.ty, mirrored_names);
                     let conversion = conversion_kind.convert(binding);
-                    match matches!(conversion_kind, FieldConversion::Keep) && target == *binding {
-                        true => quote! { #binding },
-                        false => quote! { #target: #conversion }
-                    }
+                    if matches!(conversion_kind, FieldConversion::Keep) && target == *binding { quote! { #binding } } else { quote! { #target: #conversion } }
                 });
                 quote! {
                     #crate_path::#source::#ident { #(#bindings),* } => Self::#ident { #(#conversions),* }

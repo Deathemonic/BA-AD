@@ -14,7 +14,8 @@ pub(crate) fn render_reexport(
     file: &str,
     uniffi_derives: bool
 ) -> TokenStream {
-    let items = reexport_items(config, reexport, &source_dir(reexport.dir).join(file), uniffi_derives);
+    let items =
+        reexport_items(config, reexport, &source_dir(reexport.dir).join(file), uniffi_derives);
     let core_path = source_dir(reexport.dir).join("core.rs");
     let core_module = core_path.exists().then(|| {
         let items = reexport_items(config, reexport, &core_path, uniffi_derives);
@@ -54,7 +55,7 @@ fn reexport_items(
         .items
         .iter()
         .filter(|item| reexported(reexport, item))
-        .map(|item| rename_symbols(config, reexport, reexport_tokens(item, uniffi_derives)))
+        .map(|item| rename_symbols(config, reexport, &reexport_tokens(item, uniffi_derives)))
         .collect()
 }
 
@@ -89,14 +90,13 @@ fn is_uniffi_derive_attr(attr: &syn::Attribute) -> bool {
 
 fn reexported(reexport: &Reexport, item: &Item) -> bool {
     match item {
-        Item::Macro(_) => false,
         Item::Use(item) => reexport_use(item),
         Item::Fn(item) => !reexport_skipped(reexport, &item.sig.ident),
         Item::Struct(item) => !reexport_skipped(reexport, &item.ident),
         Item::Enum(item) => !reexport_skipped(reexport, &item.ident),
         Item::Const(item) => !reexport_skipped(reexport, &item.ident),
         Item::Impl(item) => {
-            impl_target(item).map(|ident| !reexport_skipped(reexport, &ident)).unwrap_or(false)
+            impl_target(item).is_some_and(|ident| !reexport_skipped(reexport, &ident))
         }
         _ => false
     }
@@ -131,7 +131,7 @@ fn reexport_skipped(reexport: &Reexport, ident: &syn::Ident) -> bool {
         .any(|skip| name == *skip || bare_fn == Some(skip) || bare_type == Some(*skip))
 }
 
-fn rename_symbols(config: &Config, reexport: &Reexport, tokens: TokenStream) -> TokenStream {
+fn rename_symbols(config: &Config, reexport: &Reexport, tokens: &TokenStream) -> TokenStream {
     let text = tokens
         .to_string()
         .replace("pub use super :: core ::", "pub use self :: core ::")

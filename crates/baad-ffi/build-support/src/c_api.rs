@@ -12,9 +12,8 @@ use crate::syntax::{crate_path, enum_is_fieldless, snake_case};
 pub(crate) fn render_c(config: &Config, context: &Context) -> TokenStream {
     let plumbing = render_c_plumbing(config);
     let enums = context.remotes.iter().filter_map(|remote| {
-        let item = match &remote.item {
-            RemoteItem::Enum(item) => item,
-            _ => return None
+        let RemoteItem::Enum(item) = &remote.item else {
+            return None;
         };
         if !enum_is_fieldless(item) {
             return None;

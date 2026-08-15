@@ -109,9 +109,11 @@ pub(crate) fn type_is_ffi_safe(ty: &Type) -> bool {
     HOSTILE.iter().all(|marker| !text.contains(marker))
 }
 
-pub(crate) fn fields_are_named(fields: &Fields) -> bool { matches!(fields, Fields::Named(_)) }
+pub(crate) const fn fields_are_named(fields: &Fields) -> bool { matches!(fields, Fields::Named(_)) }
 
-pub(crate) fn is_public(vis: &syn::Visibility) -> bool { matches!(vis, syn::Visibility::Public(_)) }
+pub(crate) const fn is_public(vis: &syn::Visibility) -> bool {
+    matches!(vis, syn::Visibility::Public(_))
+}
 
 pub(crate) fn skipped(source: &Source, ident: &syn::Ident) -> bool {
     source.skip_types.contains(&ident.to_string().as_str())
