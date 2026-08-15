@@ -68,11 +68,9 @@ impl ResourceFilter {
     fn match_contains(&self, path: &str) -> bool { path.contains(&self.pattern) }
 
     fn match_contains_ignore_case(&self, path: &str) -> bool {
-        if let Some(ref lower_pattern) = self.lowercase_pattern {
-            path.to_lowercase().contains(lower_pattern)
-        } else {
-            false
-        }
+        self.lowercase_pattern
+            .as_ref()
+            .is_some_and(|lower_pattern| path.to_lowercase().contains(lower_pattern))
     }
 
     fn match_starts_with(&self, path: &str) -> bool { path.starts_with(&self.pattern) }
@@ -80,26 +78,27 @@ impl ResourceFilter {
     fn match_ends_with(&self, path: &str) -> bool { path.ends_with(&self.pattern) }
 
     fn match_regex(&self, path: &str) -> bool {
-        self.compiled_regex.as_ref().map(|r| r.is_match(path)).unwrap_or(false)
+        self.compiled_regex.as_ref().is_some_and(|r| r.is_match(path))
     }
 
     fn match_fuzzy(&self, path: &str) -> bool {
-        if let Some(matcher) = &self.fuzzy_matcher {
-            let mut matcher = matcher.borrow_mut();
-            let mut pattern_buf = Vec::new();
-            let mut haystack_buf = Vec::new();
+        self.fuzzy_matcher.as_ref().map_or_else(
+            || path.contains(&self.pattern),
+            |matcher| {
+                let mut matcher = matcher.borrow_mut();
+                let mut pattern_buf = Vec::new();
+                let mut haystack_buf = Vec::new();
 
-            let pattern = Utf32Str::new(&self.pattern, &mut pattern_buf);
-            let haystack = Utf32Str::new(path, &mut haystack_buf);
+                let pattern = Utf32Str::new(&self.pattern, &mut pattern_buf);
+                let haystack = Utf32Str::new(path, &mut haystack_buf);
 
-            matcher.fuzzy_match(haystack, pattern).is_some()
-        } else {
-            path.contains(&self.pattern)
-        }
+                matcher.fuzzy_match(haystack, pattern).is_some()
+            }
+        )
     }
 
     fn match_glob(&self, path: &str) -> bool {
-        GlobPattern::new(&self.pattern).map(|pattern| pattern.matches(path)).unwrap_or(false)
+        GlobPattern::new(&self.pattern).is_ok_and(|pattern| pattern.matches(path))
     }
 
     pub fn matches(&self, path: &str) -> bool {

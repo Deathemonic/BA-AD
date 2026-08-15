@@ -36,13 +36,12 @@ impl GlobalCdn {
                 return Ok(catalog);
             }
 
-            match load::<GlobalCatalogData>(&path).await {
-                Ok(catalog) => {
-                    debug!("Catalog up to date, rebuilding cache");
-                    cache::write_pack(&pack, &catalog).await?;
-                    return Ok(catalog);
-                }
-                Err(_) => warn!("Catalog invalid, refetching...")
+            if let Ok(catalog) = load::<GlobalCatalogData>(&path).await {
+                debug!("Catalog up to date, rebuilding cache");
+                cache::write_pack(&pack, &catalog).await?;
+                return Ok(catalog);
+            } else {
+                warn!("Catalog invalid, refetching...")
             }
         }
 

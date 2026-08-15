@@ -61,7 +61,7 @@ impl JapanCatalog {
         update(&self.paths.api, |data: &mut ApiData| {
             data.japan.version = version;
             data.japan.server_info_url = server_info_url;
-            data.japan.catalog_url = catalog_url.clone();
+            data.japan.catalog_url.clone_from(&catalog_url);
             data.japan.platform = platform.into();
         })
         .await?;
@@ -93,7 +93,7 @@ impl JapanCatalog {
 
         info!("Catalog changed, updating...");
         update(&self.paths.api, |data: &mut ApiData| {
-            data.japan.catalog_url = catalog_url.clone();
+            data.japan.catalog_url.clone_from(&catalog_url);
             data.japan.platform = platform.into();
         })
         .await?;

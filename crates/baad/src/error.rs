@@ -1,6 +1,7 @@
 use std::io;
 
 use baad_utils::{FileError, JsonError, NetworkError};
+use bacy::error::TableEncryptionError;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -39,7 +40,7 @@ pub enum CatalogError {
     Download(#[from] baad_dm::Error),
 
     #[error(transparent)]
-    TableEncryption(#[from] bacy::error::TableEncryptionError),
+    TableEncryption(#[from] TableEncryptionError),
 
     #[error(transparent)]
     ServerConfig(#[from] baad_shared::ServerConfigError),
