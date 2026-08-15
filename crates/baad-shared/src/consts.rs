@@ -1,5 +1,8 @@
-use lazy_regex::{Lazy, Regex, lazy_regex};
-pub static REGEX_VERSION: Lazy<Regex> = lazy_regex!(r"\d+\.\d+\.\d+");
+use std::sync::LazyLock;
+
+use lazy_regex::{Regex, regex};
+
+pub static REGEX_VERSION: LazyLock<&'static Regex> = LazyLock::new(|| regex!(r"\d+\.\d+\.\d+"));
 
 pub const GLOBAL_API_URL: &str = "https://api-pub.nexon.com/patch/v1.1/version-check";
 
