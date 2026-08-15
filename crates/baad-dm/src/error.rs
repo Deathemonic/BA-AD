@@ -1,23 +1,25 @@
 use std::io;
 
+use bacy::error::HashError;
+use reqwest_middleware::reqwest::{Error as ReqwestError, StatusCode};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
     #[error(transparent)]
-    Hash(#[from] bacy::error::HashError),
+    Hash(#[from] HashError),
 
     #[error("Invalid URL '{url}': {reason}")]
     InvalidUrl { url: Box<str>, reason: Box<str> },
 
     #[error(transparent)]
-    Http(#[from] reqwest_middleware::reqwest::Error),
+    Http(#[from] ReqwestError),
 
     #[error(transparent)]
     HttpMiddleware(#[from] reqwest_middleware::Error),
 
     #[error("HTTP error: {0}")]
-    HttpStatus(reqwest_middleware::reqwest::StatusCode),
+    HttpStatus(StatusCode),
 
     #[error(transparent)]
     Io(#[from] io::Error),

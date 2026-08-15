@@ -25,14 +25,8 @@ impl ZipCache {
     ) -> Result<Arc<ZipIndex>, Error> {
         let cell = {
             let mut map = self.inner.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
-            match map.get(url.as_str()) {
-                Some(cell) => cell.clone(),
-                None => {
-                    let cell = Arc::new(OnceCell::new());
-                    map.insert(url.as_str().into(), cell.clone());
-                    cell
-                }
-            }
+
+            Arc::clone(map.entry(url.as_str().into()).or_default())
         };
 
         cell.get_or_try_init(|| async {

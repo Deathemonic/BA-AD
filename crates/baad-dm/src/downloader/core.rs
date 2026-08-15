@@ -39,7 +39,7 @@ impl<'a> Downloader<'a> {
                     self.create_summary(
                         d.clone(),
                         FetchOutcome::failed(
-                            "Failed to create HTTP client",
+                            &"Failed to create HTTP client",
                             StatusCode::INTERNAL_SERVER_ERROR
                         )
                     )
@@ -86,7 +86,7 @@ impl<'a> Downloader<'a> {
         if !self.config.overwrite && ctx.file_path.exists() {
             match ctx.download.verify_hash(&ctx.file_path) {
                 Ok(true) => {
-                    let size = fs::metadata(&ctx.file_path).await.map(|m| m.len()).unwrap_or(0);
+                    let size = fs::metadata(&ctx.file_path).await.map_or(0, |m| m.len());
                     return Ok(FetchOutcome::skipped("File exists with matching hash", size));
                 }
                 Ok(false) => {
@@ -102,11 +102,12 @@ impl<'a> Downloader<'a> {
 
         let (resumable, content_length, resolved_url) = check_server(&ctx.client, ctx.download)
             .await
-            .map_err(|e| FetchOutcome::failed(e, StatusCode::BAD_REQUEST))?;
+            .map_err(|e| FetchOutcome::failed(&e, StatusCode::BAD_REQUEST))?;
 
-        let size_on_disk = match resumable && ctx.file_path.exists() {
-            true => fs::metadata(&ctx.file_path).await.map(|m| m.len()).unwrap_or(0),
-            false => 0
+        let size_on_disk = if resumable && ctx.file_path.exists() {
+            fs::metadata(&ctx.file_path).await.map_or(0, |m| m.len())
+        } else {
+            0
         };
 
         if let Some(len) = content_length
@@ -158,32 +159,35 @@ impl<'a> Downloader<'a> {
 
     async fn extract_zip(&self, ctx: &FetchCtx<'_>) -> Result<FetchOutcome, FetchOutcome> {
         let target = ctx.download.target_file.as_ref().ok_or_else(|| {
-            FetchOutcome::failed("No target file for ZIP extraction", StatusCode::BAD_REQUEST)
+            FetchOutcome::failed(&"No target file for ZIP extraction", StatusCode::BAD_REQUEST)
         })?;
 
         let index = ctx
             .cache
             .get_index(&ctx.client, &ctx.download.url)
             .await
-            .map_err(|e| FetchOutcome::failed(e, StatusCode::BAD_REQUEST))?;
+            .map_err(|e| FetchOutcome::failed(&e, StatusCode::BAD_REQUEST))?;
 
         let info = index.get(target).ok_or_else(|| {
-            FetchOutcome::failed(format!("File '{target}' not found in ZIP"), StatusCode::NOT_FOUND)
+            FetchOutcome::failed(
+                &format!("File '{target}' not found in ZIP"),
+                StatusCode::NOT_FOUND
+            )
         })?;
 
         let data = ZipExtractor::extract_member(&ctx.client, &ctx.download.url, info)
             .await
-            .map_err(|e| FetchOutcome::failed(e, StatusCode::NOT_FOUND))?;
+            .map_err(|e| FetchOutcome::failed(&e, StatusCode::NOT_FOUND))?;
 
         let size = data.len() as u64;
 
         ensure_parent_dir(&ctx.file_path)
             .await
-            .map_err(|e| FetchOutcome::failed(e, StatusCode::INTERNAL_SERVER_ERROR))?;
+            .map_err(|e| FetchOutcome::failed(&e, StatusCode::INTERNAL_SERVER_ERROR))?;
 
         fs::write(&ctx.file_path, &data)
             .await
-            .map_err(|e| FetchOutcome::failed(e, StatusCode::INTERNAL_SERVER_ERROR))?;
+            .map_err(|e| FetchOutcome::failed(&e, StatusCode::INTERNAL_SERVER_ERROR))?;
 
         Ok(FetchOutcome::success(size, false))
     }

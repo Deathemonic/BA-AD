@@ -20,3 +20,6 @@ futures = "0.3"
 reqwest-middleware = "0.5"
 reqwest-retry = "0.9"
 tracing = "0.1"
+
+[lints]
+workspace = true

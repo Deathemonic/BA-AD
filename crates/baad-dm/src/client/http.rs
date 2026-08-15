@@ -17,7 +17,7 @@ pub fn create_http_client(config: HttpClientConfig) -> Result<ClientWithMiddlewa
         .pool_idle_timeout(Duration::from_secs(90))
         .tcp_nodelay(config.tcp_nodelay)
         .connect_timeout(Duration::from_secs(30))
-        .timeout(Duration::from_secs(300));
+        .timeout(Duration::from_mins(5));
 
     if let Some(proxy) = config.proxy {
         builder = builder.proxy(proxy);
@@ -33,22 +33,20 @@ pub fn create_http_client(config: HttpClientConfig) -> Result<ClientWithMiddlewa
 }
 
 pub fn get_content_length(response: &Response) -> Option<u64> {
-    if let Some(content_range) = response.headers().get("content-range") {
-        content_range
-            .to_str()
-            .ok()
-            .and_then(|range| range.split('/').next_back())
-            .and_then(|size| size.trim().parse::<u64>().ok())
-    } else {
-        response.content_length()
-    }
+    response.headers().get("content-range").map_or_else(
+        || response.content_length(),
+        |content_range| {
+            content_range
+                .to_str()
+                .ok()
+                .and_then(|range| range.split('/').next_back())
+                .and_then(|size| size.trim().parse::<u64>().ok())
+        }
+    )
 }
 
 pub fn create_range_header(start: u64, end: Option<u64>) -> String {
-    match end {
-        Some(e) => format!("bytes={start}-{e}"),
-        None => format!("bytes={start}-")
-    }
+    end.map_or_else(|| format!("bytes={start}-"), |e| format!("bytes={start}-{e}"))
 }
 
 pub fn parse_accept_ranges(headers: &HeaderMap) -> bool {

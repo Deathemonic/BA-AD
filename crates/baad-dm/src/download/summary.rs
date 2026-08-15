@@ -23,7 +23,7 @@ impl FetchOutcome {
         Self::Skipped { reason, size }
     }
 
-    pub(crate) fn failed(error: impl ToString, status_code: StatusCode) -> Self {
+    pub(crate) fn failed(error: &impl ToString, status_code: StatusCode) -> Self {
         Self::Failed {
             error: error.to_string(),
             status_code
@@ -33,7 +33,7 @@ impl FetchOutcome {
     pub(crate) fn from_result(result: Result<u64, Error>, resumable: bool) -> Self {
         match result {
             Ok(size) => Self::success(size, resumable),
-            Err(e) => Self::failed(e, StatusCode::PARTIAL_CONTENT)
+            Err(e) => Self::failed(&e, StatusCode::PARTIAL_CONTENT)
         }
     }
 }
