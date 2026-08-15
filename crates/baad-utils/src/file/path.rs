@@ -16,7 +16,7 @@ pub fn set_data_dir(path: PathBuf) -> Result<(), FileError> {
     DATA_DIR.set(path).map_err(|_| FileError::DataDirAlreadySet)
 }
 
-fn app_name() -> &'static str { APP_NAME.get().map(|s| s.as_str()).unwrap_or("baad") }
+fn app_name() -> &'static str { APP_NAME.get().map_or("baad", |s| s.as_str()) }
 
 static APP_DIRS: LazyLock<Result<AppDirs, FileError>> = LazyLock::new(|| {
     AppDirs::new(Some(app_name()), true).ok_or(FileError::AppDirectoryCreationFailed)

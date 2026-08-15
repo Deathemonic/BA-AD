@@ -40,7 +40,7 @@ pub struct LineFormatter {
 impl LineFormatter {
     pub fn new() -> Self { Self::default() }
 
-    pub fn with_timestamps(mut self, include_timestamps: bool) -> Self {
+    pub const fn with_timestamps(mut self, include_timestamps: bool) -> Self {
         self.include_timestamps = include_timestamps;
         self
     }

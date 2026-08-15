@@ -25,7 +25,7 @@ use crate::progress::{
 
 const PROGRESS_UPDATE_INTERVAL: Duration = Duration::from_millis(100);
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Copy, Default)]
 #[default(
     enable_console: true,
     enable_debug: false,

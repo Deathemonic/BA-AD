@@ -42,3 +42,6 @@ smallvec = { version = "1.15", optional = true }
 terminal_size = { version = "0.4", optional = true }
 tracing-appender = { version = "0.2.4", features = ["parking_lot"], optional = true }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"], optional = true }
+
+[lints]
+workspace = true

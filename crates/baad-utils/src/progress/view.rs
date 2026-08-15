@@ -233,13 +233,13 @@ impl<M: ProgressModel> InnerView<M> {
         self.write_rendered_lines();
     }
 
-    fn write_raw(&mut self, bytes: &[u8]) {
+    fn write_raw(&self, bytes: &[u8]) {
         let mut stderr = io::stderr().lock();
         let _ = stderr.write_all(bytes);
         let _ = stderr.flush();
     }
 
-    fn flush_buffer(&mut self) {
+    fn flush_buffer(&self) {
         let mut stderr = io::stderr().lock();
         let _ = stderr.write_all(&self.write_buffer);
         let _ = stderr.flush();
@@ -267,7 +267,7 @@ pub struct ProgressMakeWriter<M: ProgressModel> {
 }
 
 impl<M: ProgressModel> ProgressMakeWriter<M> {
-    pub fn new(view: Arc<ProgressView<M>>) -> Self { Self { view } }
+    pub const fn new(view: Arc<ProgressView<M>>) -> Self { Self { view } }
 }
 
 impl<M: ProgressModel> Clone for ProgressMakeWriter<M> {

@@ -1,6 +1,5 @@
+use std::error::Error as StdError;
 use std::io;
-#[cfg(feature = "logs")]
-use std::{error, iter::successors};
 
 #[cfg(feature = "logs")]
 use eyre::Report;
@@ -14,7 +13,7 @@ pub enum FileError {
     Io(#[from] io::Error),
 
     #[error(transparent)]
-    External(Box<dyn std::error::Error + Send + Sync>),
+    External(Box<dyn StdError + Send + Sync>),
 
     #[error("Failed to create app directories")]
     AppDirectoryCreationFailed,
@@ -59,7 +58,7 @@ pub enum JsonError {
 #[derive(Error, Debug)]
 pub enum ConfigError {
     #[error(transparent)]
-    External(Box<dyn std::error::Error + Send + Sync>),
+    External(Box<dyn StdError + Send + Sync>),
 
     #[error("Failed to initialize logging")]
     LoggingInitFailed
@@ -86,12 +85,14 @@ pub trait IntoEyreReport {
 }
 
 #[cfg(feature = "logs")]
-impl<E: error::Error + Send + Sync + 'static> IntoEyreReport for E {
+impl<E: StdError + Send + Sync + 'static> IntoEyreReport for E {
     fn into_eyre_report(self) -> Report {
         let mut report = Report::msg(self.to_string());
+        let mut current = self.source();
 
-        for source in successors(self.source(), |e| e.source()) {
+        while let Some(source) = current {
             report = report.wrap_err(source.to_string());
+            current = source.source();
         }
 
         report
