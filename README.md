@@ -87,20 +87,21 @@ baad download japan --assets --platform windows
 
 ### `baad download {japan|global} --help`
 
-| Option                            | Description                                   | Default    | Possible Values                                                                                   |
-|-----------------------------------|-----------------------------------------------|------------|---------------------------------------------------------------------------------------------------|
-| `--assets`                        | Download the assetbundles                     |            |                                                                                                   |
-| `--tables`                        | Download the tablebundles                     |            |                                                                                                   |
-| `--media`                         | Download the mediaresources                   |            |                                                                                                   |
-| `--output <OUTPUT>`               | Output directory for the downloaded files     | `./output` |                                                                                                   |
-| `--limit <LIMIT>`                 | Set a limit on the concurrent downloads       | `10`       |                                                                                                   |
-| `--retries <RETRIES>`             | Number of retry attempts for failed downloads | `10`       |                                                                                                   |
-| `--filter <FILTER>`               | Filter by name                                |            |                                                                                                   |
-| `--filter-method <FILTER_METHOD>` | Filter method to use                          | `contains` | `exact`, `contains`, `regex`, `fuzzy`, `glob`, `contains-ignore-case`, `starts-with`, `ends-with` |
-| `--proxy <PROXY>`                 | Proxy URL for downloads                       |            |                                                                                                   |
-| `--platform <PLATFORM>`           | Platform to download                          | `android`  | `android`, `ios`, `windows`                                                                       |
-| `--teen`                          | Download Teen assets (Global only)            |            |                                                                                                   | 
-| `--help`                          | Print help                                    |            |                                                                                                   |
+| Option                            | Description                                                | Default    | Possible Values                                                                                   |
+|-----------------------------------|------------------------------------------------------------|------------|---------------------------------------------------------------------------------------------------|
+| `--assets`                        | Download the assetbundles                                  |            |                                                                                                   |
+| `--tables`                        | Download the tablebundles                                  |            |                                                                                                   |
+| `--media`                         | Download the mediaresources                                |            |                                                                                                   |
+| `--output <OUTPUT>`               | Output directory for the downloaded files                  | `./output` |                                                                                                   |
+| `--limit <LIMIT>`                 | Set a limit on the concurrent downloads                    | `10`       |                                                                                                   |
+| `--retries <RETRIES>`             | Number of retry attempts for failed downloads              | `10`       |                                                                                                   |
+| `--filter <FILTER>`               | Filter by name                                             |            |                                                                                                   |
+| `--filter-method <FILTER_METHOD>` | Filter method to use                                       | `contains` | `exact`, `contains`, `regex`, `fuzzy`, `glob`, `contains-ignore-case`, `starts-with`, `ends-with` |
+| `--proxy <PROXY>`                 | Proxy URL for downloads                                    |            |                                                                                                   |
+| `--boost`                         | Aggressive downloading, this can trigger CDN rate limiting |            |                                                                                                   |
+| `--platform <PLATFORM>`           | Platform to download                                       | `android`  | `android`, `ios`, `windows`                                                                       |
+| `--teen`                          | Download Teen assets (Global only)                         |            |                                                                                                   | 
+| `--help`                          | Print help                                                 |            |                                                                                                   |
 
 </details>
 
