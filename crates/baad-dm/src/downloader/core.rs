@@ -105,7 +105,7 @@ impl<'a> Downloader<'a> {
             .await
             .map_err(|e| FetchOutcome::failed(&e, StatusCode::BAD_REQUEST))?;
 
-        let size_on_disk = if resumable && ctx.file_path.exists() {
+        let size_on_disk = if !self.config.overwrite && resumable && ctx.file_path.exists() {
             fs::metadata(&ctx.file_path).await.map_or(0, |m| m.len())
         } else {
             0

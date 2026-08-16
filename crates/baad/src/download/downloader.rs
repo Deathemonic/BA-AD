@@ -105,6 +105,8 @@ pub async fn download_file(
         .ok_or(CatalogError::DeserializationFailed)?;
     let output_dir = output_path.parent().ok_or(CatalogError::DeserializationFailed)?;
 
+    let overwrite = hash.is_none();
+
     let download =
         Download::builder().url(parsed_url).filename(filename.into()).maybe_hash(hash).build();
 
@@ -112,6 +114,7 @@ pub async fn download_file(
         .directory(output_dir)
         .concurrent_downloads(1)
         .retries(retries)
+        .overwrite(overwrite)
         .build();
 
     let summaries = Downloader::new(config).download(&[download]).await;
