@@ -1,12 +1,16 @@
+#[cfg(any(feature = "logs", feature = "utils"))]
 use std::error::Error as StdError;
+#[cfg(any(feature = "logs", feature = "utils"))]
 use std::io;
 
 #[cfg(feature = "logs")]
 use eyre::Report;
+#[cfg(any(feature = "logs", feature = "utils"))]
 use thiserror::Error;
 #[cfg(feature = "logs")]
 use tracing::warn;
 
+#[cfg(feature = "utils")]
 #[derive(Error, Debug)]
 pub enum FileError {
     #[error(transparent)]
@@ -25,6 +29,7 @@ pub enum FileError {
     DataDirAlreadySet
 }
 
+#[cfg(feature = "utils")]
 #[derive(Error, Debug)]
 pub enum NetworkError {
     #[error(transparent)]
@@ -37,6 +42,7 @@ pub enum NetworkError {
     ExtractionFailed
 }
 
+#[cfg(feature = "utils")]
 #[derive(Error, Debug)]
 pub enum JsonError {
     #[error(transparent)]
@@ -55,6 +61,7 @@ pub enum JsonError {
     PathError
 }
 
+#[cfg(feature = "logs")]
 #[derive(Error, Debug)]
 pub enum ConfigError {
     #[error(transparent)]
@@ -64,6 +71,7 @@ pub enum ConfigError {
     LoggingInitFailed
 }
 
+#[cfg(feature = "logs")]
 #[derive(Error, Debug)]
 pub enum ProgressError {
     #[error(transparent)]

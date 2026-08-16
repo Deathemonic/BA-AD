@@ -1,7 +1,7 @@
 /target
-/output
 /.idea
 /.vscode
+/.cargo
 
 /inspiration
 /output

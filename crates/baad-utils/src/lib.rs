@@ -1,10 +1,13 @@
 pub mod error;
+#[cfg(feature = "utils")]
 pub mod file;
 #[cfg(feature = "logs")]
 pub mod formatter;
+#[cfg(feature = "utils")]
 pub mod json;
 #[cfg(feature = "logs")]
 pub mod logging;
+#[cfg(feature = "utils")]
 pub mod network;
 #[cfg(feature = "logs")]
 pub mod progress;
@@ -17,6 +20,7 @@ pub mod config {
     pub use crate::logging::sink::LoggingSink;
 }
 
+#[cfg(any(feature = "logs", feature = "utils"))]
 pub use error::*;
 #[cfg(feature = "logs")]
 pub use logging::{AsyncMakeWriter, flush_logs};

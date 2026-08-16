@@ -50,7 +50,7 @@ impl DownloadProgressHandler for DownloadProgressModel {
                     state.total_bytes = total_bytes;
                 }
             }
-            DownloadEvent::Completed { filename, size: _, status } => {
+            DownloadEvent::Completed { filename, status, .. } => {
                 self.active.remove(&filename);
                 if matches!(status, DownloadStatus::Success) {
                     self.completed.push(filename);

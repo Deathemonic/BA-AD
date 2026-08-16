@@ -293,8 +293,8 @@ pub enum HashValue {
 impl HashValue {
     pub fn as_string(&self) -> String {
         match self {
-            HashValue::Crc(crc) => crc.to_string(),
-            HashValue::Md5(md5) => md5.clone()
+            Self::Crc(crc) => crc.to_string(),
+            Self::Md5(md5) => md5.clone()
         }
     }
 }
