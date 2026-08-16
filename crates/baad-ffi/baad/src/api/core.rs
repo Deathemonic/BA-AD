@@ -12,7 +12,11 @@ pub struct DownloadOptions {
     pub output_dir: PathBuf,
     pub limit: usize,
     pub retries: u32,
-    pub proxy: Option<String>
+    pub proxy: Option<String>,
+    pub http1_only: bool,
+    pub max_chunks_per_file: usize,
+    pub max_concurrent_chunks: usize,
+    pub chunk_threshold: u64
 }
 
 pub fn category_bits(assets: bool, tables: bool, media: bool) -> u8 {
@@ -40,6 +44,10 @@ pub async fn run_download(
         .limit(options.limit)
         .retries(options.retries)
         .maybe_proxy(options.proxy)
+        .http1_only(options.http1_only)
+        .max_chunks_per_file(options.max_chunks_per_file)
+        .max_concurrent_chunks(options.max_concurrent_chunks)
+        .chunk_threshold(options.chunk_threshold)
         .build();
 
     let matcher = filter.map(|filter| filter.lock().unwrap_or_else(PoisonError::into_inner));

@@ -596,7 +596,15 @@ pub struct DownloaderOptions {
     #[uniffi(default = 3)]
     pub retries: u32,
     #[uniffi(default = None)]
-    pub proxy: Option<String>
+    pub proxy: Option<String>,
+    #[uniffi(default = false)]
+    pub http1_only: bool,
+    #[uniffi(default = 16)]
+    pub max_chunks_per_file: u32,
+    #[uniffi(default = 8)]
+    pub max_concurrent_chunks: u32,
+    #[uniffi(default = 10485760)]
+    pub chunk_threshold: u64
 }
 
 impl DownloaderOptions {
@@ -605,7 +613,11 @@ impl DownloaderOptions {
             output_dir: PathBuf::from(&self.output_dir),
             limit: self.limit as usize,
             retries: self.retries,
-            proxy: self.proxy.clone()
+            proxy: self.proxy.clone(),
+            http1_only: self.http1_only,
+            max_chunks_per_file: self.max_chunks_per_file as usize,
+            max_concurrent_chunks: self.max_concurrent_chunks as usize,
+            chunk_threshold: self.chunk_threshold
         }
     }
 }

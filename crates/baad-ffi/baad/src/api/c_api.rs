@@ -32,6 +32,9 @@ pub const BAAD_HASH_KIND_MD5: i32 = 1;
 
 const DEFAULT_DOWNLOAD_LIMIT: u32 = 32;
 const DEFAULT_DOWNLOAD_RETRIES: u32 = 3;
+const DEFAULT_MAX_CHUNKS_PER_FILE: u32 = 16;
+const DEFAULT_MAX_CONCURRENT_CHUNKS: u32 = 8;
+const DEFAULT_CHUNK_THRESHOLD: u64 = 10 * 1024 * 1024;
 
 unsafe fn catalog_failure(out: *mut *mut c_char, error: &baad::CatalogError) -> i32 {
     write_error(out, &error.to_string());
@@ -1334,7 +1337,11 @@ pub struct BaadDownloaderOptions {
     pub output_dir: *const c_char,
     pub limit: u32,
     pub retries: u32,
-    pub proxy: *const c_char
+    pub proxy: *const c_char,
+    pub http1_only: bool,
+    pub max_chunks_per_file: u32,
+    pub max_concurrent_chunks: u32,
+    pub chunk_threshold: u64
 }
 
 #[unsafe(no_mangle)]
@@ -1345,7 +1352,11 @@ pub const extern "C" fn baad_downloader_options_default(
         output_dir,
         limit: DEFAULT_DOWNLOAD_LIMIT,
         retries: DEFAULT_DOWNLOAD_RETRIES,
-        proxy: ptr::null()
+        proxy: ptr::null(),
+        http1_only: false,
+        max_chunks_per_file: DEFAULT_MAX_CHUNKS_PER_FILE,
+        max_concurrent_chunks: DEFAULT_MAX_CONCURRENT_CHUNKS,
+        chunk_threshold: DEFAULT_CHUNK_THRESHOLD
     }
 }
 
@@ -1382,7 +1393,11 @@ pub unsafe extern "C" fn baad_resource_downloader_download(
             output_dir: PathBuf::from(output_dir),
             limit: options.limit as usize,
             retries: options.retries,
-            proxy: proxy.map(String::from)
+            proxy: proxy.map(String::from),
+            http1_only: options.http1_only,
+            max_chunks_per_file: options.max_chunks_per_file as usize,
+            max_concurrent_chunks: options.max_concurrent_chunks as usize,
+            chunk_threshold: options.chunk_threshold
         },
         (*downloads).inner.clone(),
         filter.as_ref().map(|filter| &filter.inner)

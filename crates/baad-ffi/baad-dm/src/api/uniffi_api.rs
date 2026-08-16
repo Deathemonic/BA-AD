@@ -113,6 +113,7 @@ impl Downloader {
                 retries: config.retries,
                 resumable: config.resumable,
                 overwrite: config.overwrite,
+                http1_only: config.http1_only,
                 proxy: core::create_proxy(config.proxy.as_deref())?
             }
         })

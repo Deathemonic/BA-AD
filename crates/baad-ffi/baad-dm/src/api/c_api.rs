@@ -195,6 +195,7 @@ pub struct BaadDmDownloaderConfig {
     pub retries: u32,
     pub resumable: bool,
     pub overwrite: bool,
+    pub http1_only: bool,
     pub proxy: *const c_char
 }
 
@@ -211,6 +212,7 @@ pub const extern "C" fn baad_dm_downloader_config_default(
         retries: 3,
         resumable: true,
         overwrite: false,
+        http1_only: false,
         proxy: ptr::null()
     }
 }
@@ -228,6 +230,7 @@ unsafe fn import_options(config: &BaadDmDownloaderConfig) -> Result<core::Downlo
         retries: config.retries,
         resumable: config.resumable,
         overwrite: config.overwrite,
+        http1_only: config.http1_only,
         proxy: core::create_proxy(proxy).map_err(|error| BaadDmErrorCode::from(&error) as i32)?
     })
 }

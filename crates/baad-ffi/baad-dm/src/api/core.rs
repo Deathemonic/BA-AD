@@ -13,6 +13,7 @@ pub struct DownloadOptions {
     pub retries: u32,
     pub resumable: bool,
     pub overwrite: bool,
+    pub http1_only: bool,
     pub proxy: Option<reqwest::Proxy>
 }
 
@@ -51,6 +52,7 @@ pub async fn run_download(
         .retries(options.retries)
         .resumable(options.resumable)
         .overwrite(options.overwrite)
+        .http1_only(options.http1_only)
         .maybe_proxy(options.proxy)
         .build();
 
