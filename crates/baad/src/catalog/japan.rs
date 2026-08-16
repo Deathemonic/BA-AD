@@ -107,7 +107,7 @@ impl JapanCatalog {
         debug!(url = %download_url, "Downloading resources.assets");
         debug!(hash = %file_info.hash, size = %file_info.size, "Expected file info");
 
-        download_file(&download_url, &self.paths.resources, Some(file_info.hash), 3).await?;
+        download_file(&download_url, &self.paths.resources, Some(file_info.hash), 5).await?;
 
         Ok(self.paths.resources.clone())
     }

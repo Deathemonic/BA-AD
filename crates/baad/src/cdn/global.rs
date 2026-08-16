@@ -46,7 +46,7 @@ impl GlobalCdn {
         }
 
         debug!("Catalog changed, downloading");
-        download_file(&self.catalog_url, &path, None, 3).await?;
+        download_file(&self.catalog_url, &path, None, 5).await?;
         fs::write(&marker, &self.catalog_url).await?;
         let catalog = load::<GlobalCatalogData>(&path).await?;
         cache::write_pack(&pack, &catalog).await?;
