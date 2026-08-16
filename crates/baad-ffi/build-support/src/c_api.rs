@@ -251,9 +251,13 @@ fn render_c_enum(config: &Config, remote: &Remote, item: &ItemEnum) -> TokenStre
         .variants
         .iter()
         .enumerate()
-        .map(|(index, variant)| if let Some((_, expression)) = &variant.discriminant { quote! { #expression } } else {
-            let index = index as i32;
-            quote! { #index }
+        .map(|(index, variant)| {
+            if let Some((_, expression)) = &variant.discriminant {
+                quote! { #expression }
+            } else {
+                let index = index as i32;
+                quote! { #index }
+            }
         })
         .collect();
     let from_arms = variants.iter().map(|variant| {

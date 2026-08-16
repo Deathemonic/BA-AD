@@ -12,8 +12,14 @@ use std::path::PathBuf;
 use std::ptr;
 use std::sync::{Mutex, PoisonError};
 
-use baad::catalog::Catalog;
+use baad::api::{NexonClient, RoStarClient, YoStarClient};
+use baad::catalog::{Catalog, ChinaCatalog, GlobalCatalog, JapanCatalog};
+use baad::cdn::{ChinaCdn, GlobalCdn, JapanCdn};
+use baad::download::{ResourceFilter, download_file};
+use baad::strategy::{ChinaStrategy, GlobalStrategy, JapanStrategy};
 use baad_shared::{DownloadAsset, DownloadMedia, DownloadTable, Downloads};
+use serde::de::DeserializeOwned;
+use tokio::runtime::Runtime;
 
 use super::core;
 
@@ -32,7 +38,7 @@ unsafe fn catalog_failure(out: *mut *mut c_char, error: &baad::CatalogError) -> 
     BaadCatalogErrorCode::from(error) as i32
 }
 
-unsafe fn import_json<T: serde::de::DeserializeOwned>(
+unsafe fn import_json<T: DeserializeOwned>(
     value: *const c_char,
     out_error: *mut *mut c_char
 ) -> Result<T, i32> {
@@ -92,7 +98,7 @@ pub unsafe extern "C" fn baad_resource_filter_new(
         return INVALID_ARGUMENT;
     };
 
-    match baad::download::ResourceFilter::new(pattern, method) {
+    match ResourceFilter::new(pattern, method) {
         Ok(matcher) => {
             *out_filter = Box::into_raw(Box::new(BaadResourceFilter {
                 inner: Mutex::new(matcher)
@@ -172,7 +178,7 @@ impl BaadDownloadEntry {
             baad_shared::HashValue::Md5(_) => BAAD_HASH_KIND_MD5
         };
 
-        BaadDownloadEntry {
+        Self {
             url: export_string(url),
             path: export_string(path),
             hash: export_string(&hash.as_string()),
@@ -217,13 +223,10 @@ pub unsafe extern "C" fn baad_downloads_entry(
         _ => return INVALID_ARGUMENT
     };
 
-    match entry {
-        Some(entry) => {
-            *out_entry = entry;
-            0
-        }
-        None => INVALID_ARGUMENT
-    }
+    entry.map_or(INVALID_ARGUMENT, |entry| {
+        *out_entry = entry;
+        0
+    })
 }
 
 /// # Safety
@@ -289,7 +292,7 @@ pub unsafe extern "C" fn baad_japan_catalog_new(
         return INVALID_ARGUMENT;
     };
 
-    match baad::catalog::JapanCatalog::new(core::resource_category(category), platform) {
+    match JapanCatalog::new(core::resource_category(category), platform) {
         Ok(inner) => {
             *out_catalog = Box::into_raw(Box::new(BaadJapanCatalog { inner }));
             0
@@ -369,8 +372,7 @@ pub unsafe extern "C" fn baad_global_catalog_new(
         return INVALID_ARGUMENT;
     };
 
-    match baad::catalog::GlobalCatalog::new(core::resource_category(category), platform, build_type)
-    {
+    match GlobalCatalog::new(core::resource_category(category), platform, build_type) {
         Ok(inner) => {
             *out_catalog = Box::into_raw(Box::new(BaadGlobalCatalog { inner }));
             0
@@ -480,7 +482,7 @@ pub unsafe extern "C" fn baad_china_catalog_new(
         return INVALID_ARGUMENT;
     };
 
-    match baad::catalog::ChinaCatalog::new(core::resource_category(category), platform) {
+    match ChinaCatalog::new(core::resource_category(category), platform) {
         Ok(inner) => {
             *out_catalog = Box::into_raw(Box::new(BaadChinaCatalog { inner }));
             0
@@ -535,7 +537,7 @@ pub unsafe extern "C" fn baad_japan_cdn_new(
     };
 
     *out_cdn = Box::into_raw(Box::new(BaadJapanCdn {
-        inner: baad::cdn::JapanCdn::new(String::from(catalog_url), platform)
+        inner: JapanCdn::new(String::from(catalog_url), platform)
     }));
     0
 }
@@ -548,7 +550,7 @@ unsafe fn cdn_fetch_json<T, F>(
 ) -> i32
 where
     T: serde::Serialize,
-    F: FnOnce(&'static tokio::runtime::Runtime) -> Result<T, baad::CatalogError>
+    F: FnOnce(&'static Runtime) -> Result<T, baad::CatalogError>
 {
     if cdn_is_null || out_json.is_null() {
         return NULL_POINTER;
@@ -647,7 +649,7 @@ pub unsafe extern "C" fn baad_japan_cdn_fetch_addressable_json(
         return RUNTIME_UNAVAILABLE;
     };
 
-    let result = runtime.block_on(baad::cdn::JapanCdn::fetch_addressable(url));
+    let result = runtime.block_on(JapanCdn::fetch_addressable(url));
     write_json(out_json, out_error, result)
 }
 
@@ -671,7 +673,7 @@ pub unsafe extern "C" fn baad_japan_cdn_extract_catalog_url(
         Err(code) => return code
     };
 
-    match baad::cdn::JapanCdn::extract_catalog_url(&addressable) {
+    match JapanCdn::extract_catalog_url(&addressable) {
         Ok(url) => {
             *out_url = export_string(url);
             0
@@ -702,7 +704,7 @@ pub unsafe extern "C" fn baad_global_cdn_new(
     };
 
     *out_cdn = Box::into_raw(Box::new(BaadGlobalCdn {
-        inner: baad::cdn::GlobalCdn::new(String::from(catalog_url), platform)
+        inner: GlobalCdn::new(String::from(catalog_url), platform)
     }));
     0
 }
@@ -738,10 +740,7 @@ pub unsafe extern "C" fn baad_global_cdn_derive_base_url(
         return NULL_POINTER;
     }
 
-    *out = match baad::cdn::GlobalCdn::derive_base_url(resource_path) {
-        Some(base_url) => export_string(base_url),
-        None => ptr::null_mut()
-    };
+    *out = GlobalCdn::derive_base_url(resource_path).map_or(ptr::null_mut(), export_string);
     0
 }
 
@@ -779,7 +778,7 @@ pub unsafe extern "C" fn baad_china_cdn_new(
     };
 
     *out_cdn = Box::into_raw(Box::new(BaadChinaCdn {
-        inner: baad::cdn::ChinaCdn::new(
+        inner: ChinaCdn::new(
             String::from(catalog_url),
             platform,
             String::from(resource_version),
@@ -894,11 +893,8 @@ pub unsafe extern "C" fn baad_nexon_client_get_addressable_json(
         return RUNTIME_UNAVAILABLE;
     };
 
-    let result = runtime.block_on(baad::api::NexonClient::new().get_addressable(
-        &market_config,
-        version,
-        build_number
-    ));
+    let result =
+        runtime.block_on(NexonClient::new().get_addressable(&market_config, version, build_number));
     write_json(out_json, out_error, result)
 }
 
@@ -925,7 +921,7 @@ pub unsafe extern "C" fn baad_nexon_client_get_catalog_json(
         return RUNTIME_UNAVAILABLE;
     };
 
-    let result = runtime.block_on(baad::api::NexonClient::new().get_catalog(resource_path));
+    let result = runtime.block_on(NexonClient::new().get_catalog(resource_path));
     write_json(out_json, out_error, result)
 }
 
@@ -945,7 +941,7 @@ pub unsafe extern "C" fn baad_yostar_client_get_base_config_json(
         return RUNTIME_UNAVAILABLE;
     };
 
-    let result = runtime.block_on(baad::api::YoStarClient::new().get_base_config());
+    let result = runtime.block_on(YoStarClient::new().get_base_config());
     write_json(out_json, out_error, result)
 }
 
@@ -965,7 +961,7 @@ pub unsafe extern "C" fn baad_yostar_client_get_domain_json(
         return RUNTIME_UNAVAILABLE;
     };
 
-    let result = runtime.block_on(baad::api::YoStarClient::new().get_domain());
+    let result = runtime.block_on(YoStarClient::new().get_domain());
     write_json(out_json, out_error, result)
 }
 
@@ -992,8 +988,7 @@ pub unsafe extern "C" fn baad_yostar_client_get_json_config_json(
         return RUNTIME_UNAVAILABLE;
     };
 
-    let result =
-        runtime.block_on(baad::api::YoStarClient::new().get_json_config(version, file_path));
+    let result = runtime.block_on(YoStarClient::new().get_json_config(version, file_path));
     write_json(out_json, out_error, result)
 }
 
@@ -1018,7 +1013,7 @@ pub unsafe extern "C" fn baad_yostar_client_get_json_data_json(
         return RUNTIME_UNAVAILABLE;
     };
 
-    let result = runtime.block_on(baad::api::YoStarClient::new().get_json_data(url));
+    let result = runtime.block_on(YoStarClient::new().get_json_data(url));
     write_json(out_json, out_error, result)
 }
 
@@ -1042,7 +1037,7 @@ pub unsafe extern "C" fn baad_yostar_client_get_resources_asset(
         return RUNTIME_UNAVAILABLE;
     };
 
-    match runtime.block_on(baad::api::YoStarClient::new().get_resources_asset()) {
+    match runtime.block_on(YoStarClient::new().get_resources_asset()) {
         Ok((url, file)) => {
             *out_url = export_string(&url);
             *out_path = export_string(&file.path);
@@ -1075,7 +1070,7 @@ pub unsafe extern "C" fn baad_rostar_client_get_state_json(
         return RUNTIME_UNAVAILABLE;
     };
 
-    let result = runtime.block_on(baad::api::RoStarClient::new().get_state(version));
+    let result = runtime.block_on(RoStarClient::new().get_state(version));
     write_json(out_json, out_error, result)
 }
 
@@ -1115,8 +1110,7 @@ pub unsafe extern "C" fn baad_japan_strategy_build_asset_downloads(
         Err(code) => return code
     };
 
-    let assets =
-        baad::strategy::JapanStrategy::build_asset_downloads(packing, catalog_url, platform);
+    let assets = JapanStrategy::build_asset_downloads(packing, catalog_url, platform);
     export_downloads(out_downloads, Downloads {
         assets,
         tables: Vec::new(),
@@ -1154,8 +1148,7 @@ pub unsafe extern "C" fn baad_japan_strategy_build_media_downloads(
         Err(code) => return code
     };
 
-    let media =
-        baad::strategy::JapanStrategy::build_media_downloads(catalog, catalog_url, platform);
+    let media = JapanStrategy::build_media_downloads(catalog, catalog_url, platform);
     export_downloads(out_downloads, Downloads {
         assets: Vec::new(),
         tables: Vec::new(),
@@ -1189,7 +1182,7 @@ pub unsafe extern "C" fn baad_japan_strategy_build_table_downloads(
         Err(code) => return code
     };
 
-    let tables = baad::strategy::JapanStrategy::build_table_downloads(catalog, catalog_url);
+    let tables = JapanStrategy::build_table_downloads(catalog, catalog_url);
     export_downloads(out_downloads, Downloads {
         assets: Vec::new(),
         tables,
@@ -1225,11 +1218,8 @@ pub unsafe extern "C" fn baad_global_strategy_build_downloads(
         Err(code) => return code
     };
 
-    let downloads = baad::strategy::GlobalStrategy::build_downloads(
-        resources,
-        base_url,
-        core::resource_category(category)
-    );
+    let downloads =
+        GlobalStrategy::build_downloads(resources, base_url, core::resource_category(category));
     export_downloads(out_downloads, downloads)
 }
 
@@ -1263,8 +1253,7 @@ pub unsafe extern "C" fn baad_china_strategy_build_asset_downloads(
         Err(code) => return code
     };
 
-    let assets =
-        baad::strategy::ChinaStrategy::build_asset_downloads(catalog, catalog_url, platform);
+    let assets = ChinaStrategy::build_asset_downloads(catalog, catalog_url, platform);
     export_downloads(out_downloads, Downloads {
         assets,
         tables: Vec::new(),
@@ -1298,7 +1287,7 @@ pub unsafe extern "C" fn baad_china_strategy_build_media_downloads(
         Err(code) => return code
     };
 
-    let media = baad::strategy::ChinaStrategy::build_media_downloads(catalog, catalog_url);
+    let media = ChinaStrategy::build_media_downloads(catalog, catalog_url);
     export_downloads(out_downloads, Downloads {
         assets: Vec::new(),
         tables: Vec::new(),
@@ -1332,7 +1321,7 @@ pub unsafe extern "C" fn baad_china_strategy_build_table_downloads(
         Err(code) => return code
     };
 
-    let tables = baad::strategy::ChinaStrategy::build_table_downloads(catalog, catalog_url);
+    let tables = ChinaStrategy::build_table_downloads(catalog, catalog_url);
     export_downloads(out_downloads, Downloads {
         assets: Vec::new(),
         tables,
@@ -1349,7 +1338,7 @@ pub struct BaadDownloaderOptions {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn baad_downloader_options_default(
+pub const extern "C" fn baad_downloader_options_default(
     output_dir: *const c_char
 ) -> BaadDownloaderOptions {
     BaadDownloaderOptions {
@@ -1428,7 +1417,7 @@ pub unsafe extern "C" fn baad_download_file(
         return RUNTIME_UNAVAILABLE;
     };
 
-    let result = runtime.block_on(baad::download::download_file(
+    let result = runtime.block_on(download_file(
         url,
         PathBuf::from(output_path).as_path(),
         hash.map(String::from),

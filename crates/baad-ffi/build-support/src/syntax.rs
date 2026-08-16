@@ -22,10 +22,42 @@ pub fn source_dir(relative: &str) -> PathBuf {
 }
 
 pub fn write_rust(path: &Path, tokens: TokenStream) {
-    let file: syn::File = syn::parse2(tokens)
+    let mut file: syn::File = syn::parse2(tokens)
         .unwrap_or_else(|error| panic!("generated tokens parse ({}): {error}", path.display()));
+    allow_generated_lints(&mut file);
     fs::write(path, prettyplease::unparse(&file))
         .unwrap_or_else(|error| panic!("write {}: {error}", path.display()));
+}
+
+fn allow_generated_lints(file: &mut syn::File) {
+    let allow: syn::Attribute = syn::parse_quote! {
+        #[allow(clippy::all, clippy::pedantic, clippy::nursery, clippy::restriction)]
+    };
+
+    for item in &mut file.items {
+        if let Some(attrs) = item_attrs(item) {
+            attrs.push(allow.clone());
+        }
+    }
+}
+
+const fn item_attrs(item: &mut syn::Item) -> Option<&mut Vec<syn::Attribute>> {
+    match item {
+        syn::Item::Const(item) => Some(&mut item.attrs),
+        syn::Item::Enum(item) => Some(&mut item.attrs),
+        syn::Item::ExternCrate(item) => Some(&mut item.attrs),
+        syn::Item::Fn(item) => Some(&mut item.attrs),
+        syn::Item::Impl(item) => Some(&mut item.attrs),
+        syn::Item::Mod(item) => Some(&mut item.attrs),
+        syn::Item::Static(item) => Some(&mut item.attrs),
+        syn::Item::Struct(item) => Some(&mut item.attrs),
+        syn::Item::Trait(item) => Some(&mut item.attrs),
+        syn::Item::TraitAlias(item) => Some(&mut item.attrs),
+        syn::Item::Type(item) => Some(&mut item.attrs),
+        syn::Item::Union(item) => Some(&mut item.attrs),
+        syn::Item::Use(item) => Some(&mut item.attrs),
+        _ => None
+    }
 }
 
 pub fn normalized(ty: &Type) -> String { quote!(#ty).to_string().replace(' ', "") }
@@ -111,9 +143,7 @@ pub fn type_is_ffi_safe(ty: &Type) -> bool {
 
 pub const fn fields_are_named(fields: &Fields) -> bool { matches!(fields, Fields::Named(_)) }
 
-pub const fn is_public(vis: &syn::Visibility) -> bool {
-    matches!(vis, syn::Visibility::Public(_))
-}
+pub const fn is_public(vis: &syn::Visibility) -> bool { matches!(vis, syn::Visibility::Public(_)) }
 
 pub fn skipped(source: &Source, ident: &syn::Ident) -> bool {
     source.skip_types.contains(&ident.to_string().as_str())

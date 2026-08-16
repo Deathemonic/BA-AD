@@ -31,3 +31,6 @@ baad-ffi-build = { workspace = true }
 name = "uniffi-bindgen"
 path = "bindgen.rs"
 required-features = ["uniffi/cli"]
+
+[lints]
+workspace = true

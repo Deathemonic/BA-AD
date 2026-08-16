@@ -5,12 +5,14 @@ use crate::config::Config;
 
 pub fn render_observer_uniffi() -> TokenStream {
     quote! {
+        type ObserverArc<T> = std::sync::Arc<T>;
+
         #[uniffi::export(with_foreign)]
         pub trait DownloadObserver: Send + Sync {
             fn on_event(&self, event: DownloadEvent);
         }
 
-        struct ForeignObserverAdapter(std::sync::Arc<dyn DownloadObserver>);
+        struct ForeignObserverAdapter(ObserverArc<dyn DownloadObserver>);
 
         impl baad_shared::DownloadObserver for ForeignObserverAdapter {
             fn on_event(&self, event: baad_shared::DownloadEvent) {
@@ -19,8 +21,8 @@ pub fn render_observer_uniffi() -> TokenStream {
         }
 
         #[uniffi::export]
-        pub fn set_observer(observer: std::sync::Arc<dyn DownloadObserver>) {
-            crate::api::observer::register_observer(std::sync::Arc::new(ForeignObserverAdapter(
+        pub fn set_observer(observer: ObserverArc<dyn DownloadObserver>) {
+            crate::api::observer::register_observer(ObserverArc::new(ForeignObserverAdapter(
                 observer
             )));
         }

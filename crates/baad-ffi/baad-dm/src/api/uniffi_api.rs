@@ -1,9 +1,14 @@
-//! UniFFI bindings for `baad-dm`. Borrowed lifetimes become owning objects,
+//! `UniFFI` bindings for `baad-dm`. Borrowed lifetimes become owning objects,
 //! `bon` builders become records, `reqwest` types become strings; generated
 //! mirrors live in `shadow.rs`.
 
+//! `UniFFI` arguments cross the boundary by value, so exported functions cannot
+//! take records or optional strings by reference.
+#![allow(clippy::needless_pass_by_value)]
+
 use std::path::PathBuf;
 
+use baad_dm::client::{create_range_header as create_range_header_native, resolve_url as resolve};
 use reqwest_middleware::ClientWithMiddleware;
 use reqwest_middleware::reqwest::Url;
 
@@ -35,7 +40,7 @@ impl TryFrom<Download> for baad_dm::Download {
     type Error = Error;
 
     fn try_from(download: Download) -> Result<Self, Error> {
-        Ok(baad_dm::Download::builder()
+        Ok(Self::builder()
             .url(parse_url(&download.url)?)
             .filename(download.filename)
             .maybe_hash(download.hash)
@@ -47,7 +52,7 @@ impl TryFrom<Download> for baad_dm::Download {
 
 impl From<&baad_dm::Download> for Download {
     fn from(download: &baad_dm::Download) -> Self {
-        Download {
+        Self {
             url: String::from(download.url.as_str()),
             filename: download.filename.clone(),
             hash: download.hash.clone(),
@@ -74,7 +79,7 @@ pub struct Summary {
 
 impl From<&baad_dm::Summary> for Summary {
     fn from(summary: &baad_dm::Summary) -> Self {
-        Summary {
+        Self {
             download: Download::from(summary.download.as_ref()),
             status_code: summary.status_code.as_u16(),
             size: summary.size,
@@ -85,7 +90,7 @@ impl From<&baad_dm::Summary> for Summary {
 }
 
 #[uniffi::export]
-pub fn summary_is_success(summary: &Summary) -> bool {
+pub const fn summary_is_success(summary: &Summary) -> bool {
     matches!(summary.status, DownloadStatus::Success)
 }
 
@@ -98,7 +103,7 @@ pub struct Downloader {
 impl Downloader {
     #[uniffi::constructor]
     pub fn new(config: DownloaderConfig) -> Result<Self, Error> {
-        Ok(Downloader {
+        Ok(Self {
             options: core::DownloadOptions {
                 directory: PathBuf::from(&config.directory),
                 concurrent_downloads: config.concurrent_downloads as usize,
@@ -137,7 +142,7 @@ pub struct ZipExtractor {
 impl ZipExtractor {
     #[uniffi::constructor]
     pub fn new(url: &str) -> Result<Self, Error> {
-        Ok(ZipExtractor {
+        Ok(Self {
             client: core::default_client().map_err(Error::from)?,
             url: parse_url(url)?
         })
@@ -174,7 +179,7 @@ pub struct ZipCache {
 impl ZipCache {
     #[uniffi::constructor]
     pub fn new() -> Result<Self, Error> {
-        Ok(ZipCache {
+        Ok(Self {
             client: core::default_client().map_err(Error::from)?,
             inner: baad_dm::ZipCache::new()
         })
@@ -194,13 +199,13 @@ impl ZipCache {
 
 #[uniffi::export]
 pub fn create_range_header(start: u64, end: Option<u64>) -> String {
-    baad_dm::client::create_range_header(start, end)
+    create_range_header_native(start, end)
 }
 
 #[uniffi::export(async_runtime = "tokio")]
 pub async fn resolve_url(url: &str) -> Result<String, Error> {
     let client = core::default_client().map_err(Error::from)?;
-    baad_dm::client::resolve_url(&client, url).await.map_err(Into::into)
+    resolve(&client, url).await.map_err(Into::into)
 }
 
 include!(concat!(env!("OUT_DIR"), "/shadow.rs"));

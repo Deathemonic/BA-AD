@@ -1,4 +1,4 @@
-//! UniFFI bindings for `baad`, mirroring its Rust API. Generated records,
+//! `UniFFI` bindings for `baad`, mirroring its Rust API. Generated records,
 //! mirrors and re-exported `baad-utils`/`baad-shared` wrappers live in
 //! `shadow.rs`. Async exports run on a tokio blocking worker (`baad`'s
 //! futures are not `Send`); register observers before `init_logging`.
@@ -6,7 +6,30 @@
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, PoisonError};
 
-use baad::catalog::Catalog;
+use baad::api::{
+    NexonClient as NativeNexonClient,
+    RoStarClient as NativeRoStarClient,
+    YoStarClient as NativeYoStarClient
+};
+use baad::catalog::{
+    Catalog,
+    ChinaCatalog as NativeChinaCatalog,
+    GlobalCatalog as NativeGlobalCatalog,
+    JapanCatalog as NativeJapanCatalog
+};
+use baad::cdn::{
+    ChinaCdn as NativeChinaCdn,
+    ChinaResources as NativeChinaResources,
+    GlobalCdn as NativeGlobalCdn,
+    JapanCdn as NativeJapanCdn,
+    JapanResources as NativeJapanResources
+};
+use baad::download::{
+    ResourceCategory as NativeResourceCategory,
+    ResourceFilter as NativeResourceFilter,
+    download_file as download_file_native
+};
+use baad::strategy::{ChinaStrategy, GlobalStrategy, JapanStrategy};
 
 use super::core;
 
@@ -21,7 +44,7 @@ pub struct ResourceCategory {
 }
 
 impl ResourceCategory {
-    fn to_native(&self) -> baad::download::ResourceCategory {
+    fn into_native(self) -> NativeResourceCategory {
         core::resource_category(core::category_bits(self.assets, self.tables, self.media))
     }
 }
@@ -34,14 +57,12 @@ pub struct CatalogUrl {
 
 #[derive(uniffi::Object)]
 pub struct ResourceFilter {
-    matcher: Mutex<baad::download::ResourceFilter>
+    matcher: Mutex<NativeResourceFilter>
 }
 
 impl ResourceFilter {
-    fn wrap(
-        result: Result<baad::download::ResourceFilter, baad::FilterError>
-    ) -> Result<Self, FilterError> {
-        Ok(ResourceFilter {
+    fn wrap(result: Result<NativeResourceFilter, baad::FilterError>) -> Result<Self, FilterError> {
+        Ok(Self {
             matcher: Mutex::new(result?)
         })
     }
@@ -51,47 +72,47 @@ impl ResourceFilter {
 impl ResourceFilter {
     #[uniffi::constructor]
     pub fn new(pattern: &str, method: FilterMethod) -> Result<Self, FilterError> {
-        Self::wrap(baad::download::ResourceFilter::new(pattern, method))
+        Self::wrap(NativeResourceFilter::new(pattern, method))
     }
 
     #[uniffi::constructor]
     pub fn glob(pattern: &str) -> Result<Self, FilterError> {
-        Self::wrap(baad::download::ResourceFilter::glob(pattern))
+        Self::wrap(NativeResourceFilter::glob(pattern))
     }
 
     #[uniffi::constructor]
     pub fn regex(pattern: &str) -> Result<Self, FilterError> {
-        Self::wrap(baad::download::ResourceFilter::regex(pattern))
+        Self::wrap(NativeResourceFilter::regex(pattern))
     }
 
     #[uniffi::constructor]
     pub fn contains(pattern: &str) -> Result<Self, FilterError> {
-        Self::wrap(baad::download::ResourceFilter::contains(pattern))
+        Self::wrap(NativeResourceFilter::contains(pattern))
     }
 
     #[uniffi::constructor]
     pub fn exact(pattern: &str) -> Result<Self, FilterError> {
-        Self::wrap(baad::download::ResourceFilter::exact(pattern))
+        Self::wrap(NativeResourceFilter::exact(pattern))
     }
 
     #[uniffi::constructor]
     pub fn starts_with(pattern: &str) -> Result<Self, FilterError> {
-        Self::wrap(baad::download::ResourceFilter::starts_with(pattern))
+        Self::wrap(NativeResourceFilter::starts_with(pattern))
     }
 
     #[uniffi::constructor]
     pub fn ends_with(pattern: &str) -> Result<Self, FilterError> {
-        Self::wrap(baad::download::ResourceFilter::ends_with(pattern))
+        Self::wrap(NativeResourceFilter::ends_with(pattern))
     }
 
     #[uniffi::constructor]
     pub fn contains_ignore_case(pattern: &str) -> Result<Self, FilterError> {
-        Self::wrap(baad::download::ResourceFilter::contains_ignore_case(pattern))
+        Self::wrap(NativeResourceFilter::contains_ignore_case(pattern))
     }
 
     #[uniffi::constructor]
     pub fn fuzzy(pattern: &str) -> Result<Self, FilterError> {
-        Self::wrap(baad::download::ResourceFilter::fuzzy(pattern))
+        Self::wrap(NativeResourceFilter::fuzzy(pattern))
     }
 
     pub fn matches(&self, path: &str) -> bool {
@@ -101,15 +122,15 @@ impl ResourceFilter {
 
 #[derive(uniffi::Object)]
 pub struct JapanCatalog {
-    inner: baad::catalog::JapanCatalog
+    inner: NativeJapanCatalog
 }
 
 #[uniffi::export]
 impl JapanCatalog {
     #[uniffi::constructor]
     pub fn new(category: ResourceCategory, platform: Platform) -> Result<Self, CatalogError> {
-        Ok(JapanCatalog {
-            inner: baad::catalog::JapanCatalog::new(category.to_native(), platform)?
+        Ok(Self {
+            inner: NativeJapanCatalog::new(category.into_native(), platform)?
         })
     }
 
@@ -130,7 +151,7 @@ impl JapanCatalog {
 
 #[derive(uniffi::Object)]
 pub struct GlobalCatalog {
-    inner: baad::catalog::GlobalCatalog
+    inner: NativeGlobalCatalog
 }
 
 #[uniffi::export]
@@ -141,8 +162,8 @@ impl GlobalCatalog {
         platform: Platform,
         build_type: BuildType
     ) -> Result<Self, CatalogError> {
-        Ok(GlobalCatalog {
-            inner: baad::catalog::GlobalCatalog::new(category.to_native(), platform, build_type)?
+        Ok(Self {
+            inner: NativeGlobalCatalog::new(category.into_native(), platform, build_type)?
         })
     }
 
@@ -177,15 +198,15 @@ impl GlobalCatalog {
 
 #[derive(uniffi::Object)]
 pub struct ChinaCatalog {
-    inner: baad::catalog::ChinaCatalog
+    inner: NativeChinaCatalog
 }
 
 #[uniffi::export]
 impl ChinaCatalog {
     #[uniffi::constructor]
     pub fn new(category: ResourceCategory, platform: Platform) -> Result<Self, CatalogError> {
-        Ok(ChinaCatalog {
-            inner: baad::catalog::ChinaCatalog::new(category.to_native(), platform)?
+        Ok(Self {
+            inner: NativeChinaCatalog::new(category.into_native(), platform)?
         })
     }
 
@@ -204,9 +225,9 @@ pub struct JapanResources {
     pub media: Option<MediaCatalog>
 }
 
-impl From<baad::cdn::JapanResources> for JapanResources {
-    fn from(resources: baad::cdn::JapanResources) -> Self {
-        JapanResources {
+impl From<NativeJapanResources> for JapanResources {
+    fn from(resources: NativeJapanResources) -> Self {
+        Self {
             assets: resources.assets,
             table: resources.table,
             media: resources.media
@@ -221,9 +242,9 @@ pub struct ChinaResources {
     pub media: Option<MediaCatalogCN>
 }
 
-impl From<baad::cdn::ChinaResources> for ChinaResources {
-    fn from(resources: baad::cdn::ChinaResources) -> Self {
-        ChinaResources {
+impl From<NativeChinaResources> for ChinaResources {
+    fn from(resources: NativeChinaResources) -> Self {
+        Self {
             assets: resources.assets,
             table: resources.table,
             media: resources.media
@@ -233,15 +254,15 @@ impl From<baad::cdn::ChinaResources> for ChinaResources {
 
 #[derive(uniffi::Object)]
 pub struct JapanCdn {
-    inner: baad::cdn::JapanCdn
+    inner: NativeJapanCdn
 }
 
 #[uniffi::export]
 impl JapanCdn {
     #[uniffi::constructor]
-    pub fn new(catalog_url: String, platform: Platform) -> Self {
-        JapanCdn {
-            inner: baad::cdn::JapanCdn::new(catalog_url, platform)
+    pub const fn new(catalog_url: String, platform: Platform) -> Self {
+        Self {
+            inner: NativeJapanCdn::new(catalog_url, platform)
         }
     }
 
@@ -250,7 +271,7 @@ impl JapanCdn {
         self: Arc<Self>,
         category: ResourceCategory
     ) -> Result<JapanResources, CatalogError> {
-        let category = category.to_native();
+        let category = category.into_native();
         let resources =
             run_blocking(move |handle| handle.block_on(self.inner.fetch(category))).await?;
         Ok(resources.into())
@@ -280,29 +301,30 @@ impl JapanCdn {
 
 #[uniffi::export(async_runtime = "tokio")]
 pub async fn japan_cdn_fetch_addressable(url: String) -> Result<JapanAddressable, CatalogError> {
-    run_blocking(move |handle| handle.block_on(baad::cdn::JapanCdn::fetch_addressable(&url)))
+    run_blocking(move |handle| handle.block_on(NativeJapanCdn::fetch_addressable(&url)))
         .await
         .map_err(Into::into)
 }
 
+#[allow(clippy::needless_pass_by_value)]
 #[uniffi::export]
 pub fn japan_cdn_extract_catalog_url(
     addressable: JapanAddressable
 ) -> Result<String, CatalogError> {
-    Ok(String::from(baad::cdn::JapanCdn::extract_catalog_url(&addressable)?))
+    Ok(String::from(NativeJapanCdn::extract_catalog_url(&addressable)?))
 }
 
 #[derive(uniffi::Object)]
 pub struct GlobalCdn {
-    inner: baad::cdn::GlobalCdn
+    inner: NativeGlobalCdn
 }
 
 #[uniffi::export]
 impl GlobalCdn {
     #[uniffi::constructor]
-    pub fn new(catalog_url: String, platform: Platform) -> Self {
-        GlobalCdn {
-            inner: baad::cdn::GlobalCdn::new(catalog_url, platform)
+    pub const fn new(catalog_url: String, platform: Platform) -> Self {
+        Self {
+            inner: NativeGlobalCdn::new(catalog_url, platform)
         }
     }
 
@@ -314,26 +336,26 @@ impl GlobalCdn {
 
 #[uniffi::export]
 pub fn global_cdn_derive_base_url(resource_path: &str) -> Option<String> {
-    baad::cdn::GlobalCdn::derive_base_url(resource_path).map(String::from)
+    NativeGlobalCdn::derive_base_url(resource_path).map(String::from)
 }
 
 #[derive(uniffi::Object)]
 pub struct ChinaCdn {
-    inner: baad::cdn::ChinaCdn
+    inner: NativeChinaCdn
 }
 
 #[uniffi::export]
 impl ChinaCdn {
     #[uniffi::constructor]
-    pub fn new(
+    pub const fn new(
         catalog_url: String,
         platform: Platform,
         resource_version: String,
         table_version: String,
         media_version: String
     ) -> Self {
-        ChinaCdn {
-            inner: baad::cdn::ChinaCdn::new(
+        Self {
+            inner: NativeChinaCdn::new(
                 catalog_url,
                 platform,
                 resource_version,
@@ -348,7 +370,7 @@ impl ChinaCdn {
         self: Arc<Self>,
         category: ResourceCategory
     ) -> Result<ChinaResources, CatalogError> {
-        let category = category.to_native();
+        let category = category.into_native();
         let resources =
             run_blocking(move |handle| handle.block_on(self.inner.fetch(category))).await?;
         Ok(resources.into())
@@ -378,16 +400,16 @@ impl ChinaCdn {
 
 #[derive(uniffi::Object)]
 pub struct NexonClient {
-    inner: baad::api::NexonClient
+    inner: NativeNexonClient
 }
 
 #[uniffi::export]
 impl NexonClient {
     #[allow(clippy::new_without_default)]
     #[uniffi::constructor]
-    pub fn new() -> Self {
-        NexonClient {
-            inner: baad::api::NexonClient::new()
+    pub const fn new() -> Self {
+        Self {
+            inner: NativeNexonClient::new()
         }
     }
 
@@ -428,16 +450,16 @@ pub struct ResourcesAsset {
 
 #[derive(uniffi::Object)]
 pub struct YoStarClient {
-    inner: baad::api::YoStarClient
+    inner: NativeYoStarClient
 }
 
 #[uniffi::export]
 impl YoStarClient {
     #[allow(clippy::new_without_default)]
     #[uniffi::constructor]
-    pub fn new() -> Self {
-        YoStarClient {
-            inner: baad::api::YoStarClient::new()
+    pub const fn new() -> Self {
+        Self {
+            inner: NativeYoStarClient::new()
         }
     }
 
@@ -485,16 +507,16 @@ impl YoStarClient {
 
 #[derive(uniffi::Object)]
 pub struct RoStarClient {
-    inner: baad::api::RoStarClient
+    inner: NativeRoStarClient
 }
 
 #[uniffi::export]
 impl RoStarClient {
     #[allow(clippy::new_without_default)]
     #[uniffi::constructor]
-    pub fn new() -> Self {
-        RoStarClient {
-            inner: baad::api::RoStarClient::new()
+    pub const fn new() -> Self {
+        Self {
+            inner: NativeRoStarClient::new()
         }
     }
 
@@ -512,7 +534,7 @@ pub fn japan_strategy_build_asset_downloads(
     catalog_url: &str,
     platform: Platform
 ) -> Vec<DownloadAsset> {
-    baad::strategy::JapanStrategy::build_asset_downloads(packing, catalog_url, platform)
+    JapanStrategy::build_asset_downloads(packing, catalog_url, platform)
 }
 
 #[uniffi::export]
@@ -521,7 +543,7 @@ pub fn japan_strategy_build_media_downloads(
     catalog_url: &str,
     platform: Platform
 ) -> Vec<DownloadMedia> {
-    baad::strategy::JapanStrategy::build_media_downloads(catalog, catalog_url, platform)
+    JapanStrategy::build_media_downloads(catalog, catalog_url, platform)
 }
 
 #[uniffi::export]
@@ -529,7 +551,7 @@ pub fn japan_strategy_build_table_downloads(
     catalog: TableCatalog,
     catalog_url: &str
 ) -> Vec<DownloadTable> {
-    baad::strategy::JapanStrategy::build_table_downloads(catalog, catalog_url)
+    JapanStrategy::build_table_downloads(catalog, catalog_url)
 }
 
 #[uniffi::export]
@@ -538,7 +560,7 @@ pub fn global_strategy_build_downloads(
     base_url: &str,
     category: ResourceCategory
 ) -> Downloads {
-    baad::strategy::GlobalStrategy::build_downloads(resources, base_url, category.to_native())
+    GlobalStrategy::build_downloads(resources, base_url, category.into_native())
 }
 
 #[uniffi::export]
@@ -547,7 +569,7 @@ pub fn china_strategy_build_asset_downloads(
     catalog_url: &str,
     platform: Platform
 ) -> Vec<DownloadAsset> {
-    baad::strategy::ChinaStrategy::build_asset_downloads(catalog, catalog_url, platform)
+    ChinaStrategy::build_asset_downloads(catalog, catalog_url, platform)
 }
 
 #[uniffi::export]
@@ -555,7 +577,7 @@ pub fn china_strategy_build_media_downloads(
     catalog: MediaCatalogCN,
     catalog_url: &str
 ) -> Vec<DownloadMedia> {
-    baad::strategy::ChinaStrategy::build_media_downloads(catalog, catalog_url)
+    ChinaStrategy::build_media_downloads(catalog, catalog_url)
 }
 
 #[uniffi::export]
@@ -563,7 +585,7 @@ pub fn china_strategy_build_table_downloads(
     catalog: TableCatalogCN,
     catalog_url: &str
 ) -> Vec<DownloadTable> {
-    baad::strategy::ChinaStrategy::build_table_downloads(catalog, catalog_url)
+    ChinaStrategy::build_table_downloads(catalog, catalog_url)
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
@@ -596,7 +618,7 @@ pub struct ResourceDownloader {
 #[uniffi::export]
 impl ResourceDownloader {
     #[uniffi::constructor]
-    pub fn new(options: DownloaderOptions) -> Self { ResourceDownloader { options } }
+    pub const fn new(options: DownloaderOptions) -> Self { Self { options } }
 
     #[uniffi::method(async_runtime = "tokio")]
     pub async fn download(
@@ -623,7 +645,7 @@ pub async fn download_file(
     retries: u32
 ) -> Result<(), CatalogError> {
     run_blocking(move |handle| {
-        handle.block_on(baad::download::download_file(
+        handle.block_on(download_file_native(
             &url,
             PathBuf::from(output_path).as_path(),
             hash,

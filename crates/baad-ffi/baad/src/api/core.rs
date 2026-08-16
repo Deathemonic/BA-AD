@@ -4,25 +4,25 @@ use std::sync::{Mutex, PoisonError};
 use baad::download::{ResourceCategory, ResourceDownloader, ResourceFilter};
 use baad_shared::Downloads;
 
-pub(crate) const CATEGORY_ASSETS: u8 = 1;
-pub(crate) const CATEGORY_TABLES: u8 = 2;
-pub(crate) const CATEGORY_MEDIA: u8 = 4;
+pub const CATEGORY_ASSETS: u8 = 1;
+pub const CATEGORY_TABLES: u8 = 2;
+pub const CATEGORY_MEDIA: u8 = 4;
 
-pub(crate) struct DownloadOptions {
+pub struct DownloadOptions {
     pub output_dir: PathBuf,
     pub limit: usize,
     pub retries: u32,
     pub proxy: Option<String>
 }
 
-pub(crate) fn category_bits(assets: bool, tables: bool, media: bool) -> u8 {
+pub fn category_bits(assets: bool, tables: bool, media: bool) -> u8 {
     [(assets, CATEGORY_ASSETS), (tables, CATEGORY_TABLES), (media, CATEGORY_MEDIA)]
         .into_iter()
         .filter_map(|(selected, bit)| selected.then_some(bit))
         .fold(0, |bits, bit| bits | bit)
 }
 
-pub(crate) fn resource_category(bits: u8) -> ResourceCategory {
+pub fn resource_category(bits: u8) -> ResourceCategory {
     ResourceCategory::new()
         .include_if(bits & CATEGORY_ASSETS != 0, ResourceCategory::Assets)
         .include_if(bits & CATEGORY_TABLES != 0, ResourceCategory::Tables)
@@ -30,7 +30,7 @@ pub(crate) fn resource_category(bits: u8) -> ResourceCategory {
         .or_all_if_empty()
 }
 
-pub(crate) async fn run_download(
+pub async fn run_download(
     options: DownloadOptions,
     downloads: Downloads,
     filter: Option<&Mutex<ResourceFilter>>

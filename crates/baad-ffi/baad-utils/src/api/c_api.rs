@@ -7,7 +7,25 @@
 
 use std::ffi::c_char;
 use std::path::PathBuf;
-use std::ptr;
+use std::{ptr, slice};
+
+use baad_utils::config::init_logging;
+use baad_utils::file::{
+    clear_all,
+    create_parent_dir,
+    data_dir,
+    filename_or,
+    get_data_path,
+    get_output_dir,
+    is_dir_empty,
+    load_file,
+    save_file,
+    set_app_name,
+    set_data_dir
+};
+use baad_utils::formatter::HumanBytes;
+use baad_utils::network::fetch_version;
+use baad_utils::progress::terminal;
 
 use super::core;
 
@@ -15,12 +33,10 @@ use super::core;
 /// `config` must be null (defaults) or point to a valid config struct.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn baad_utils_init_logging(config: *const BaadUtilsLoggingConfig) -> i32 {
-    let values = match config.is_null() {
-        true => baad_utils_logging_config_default(),
-        false => ptr::read(config)
-    };
+    let values =
+        if config.is_null() { baad_utils_logging_config_default() } else { ptr::read(config) };
 
-    match baad_utils::config::init_logging(values.to_native()) {
+    match init_logging(values.to_native()) {
         Ok(()) => 0,
         Err(error) => BaadUtilsConfigErrorCode::from(&error) as i32
     }
@@ -118,7 +134,7 @@ pub unsafe extern "C" fn baad_utils_set_app_name(name: *const c_char) -> i32 {
         Ok(name) => name,
         Err(code) => return code
     };
-    match baad_utils::file::set_app_name(name) {
+    match set_app_name(name) {
         Ok(()) => 0,
         Err(error) => BaadUtilsFileErrorCode::from(&error) as i32
     }
@@ -132,7 +148,7 @@ pub unsafe extern "C" fn baad_utils_set_data_dir(path: *const c_char) -> i32 {
         Ok(path) => path,
         Err(code) => return code
     };
-    match baad_utils::file::set_data_dir(PathBuf::from(path)) {
+    match set_data_dir(PathBuf::from(path)) {
         Ok(()) => 0,
         Err(error) => BaadUtilsFileErrorCode::from(&error) as i32
     }
@@ -145,7 +161,7 @@ pub unsafe extern "C" fn baad_utils_data_dir(out: *mut *mut c_char) -> i32 {
     if out.is_null() {
         return NULL_POINTER;
     }
-    match baad_utils::file::data_dir() {
+    match data_dir() {
         Ok(path) => {
             *out = export_string(&path.to_string_lossy());
             0
@@ -169,7 +185,7 @@ pub unsafe extern "C" fn baad_utils_get_data_path(
     if out.is_null() {
         return NULL_POINTER;
     }
-    match baad_utils::file::get_data_path(filename) {
+    match get_data_path(filename) {
         Ok(path) => {
             *out = export_string(&path.to_string_lossy());
             0
@@ -190,7 +206,7 @@ pub unsafe extern "C" fn baad_utils_filename_or(path: *const c_char, out: *mut *
     if out.is_null() {
         return NULL_POINTER;
     }
-    *out = export_string(baad_utils::file::filename_or(path));
+    *out = export_string(filename_or(path));
     0
 }
 
@@ -216,7 +232,7 @@ pub unsafe extern "C" fn baad_utils_load_file(
         return RUNTIME_UNAVAILABLE;
     };
 
-    match runtime.block_on(baad_utils::file::load_file(PathBuf::from(path).as_path())) {
+    match runtime.block_on(load_file(PathBuf::from(path).as_path())) {
         Ok(data) => {
             *out_data = BaadUtilsBytes::from_vec(data);
             0
@@ -243,14 +259,14 @@ pub unsafe extern "C" fn baad_utils_save_file(
     }
     let content = match len {
         0 => &[][..],
-        _ => std::slice::from_raw_parts(data, len)
+        _ => slice::from_raw_parts(data, len)
     };
 
     let Some(runtime) = runtime() else {
         return RUNTIME_UNAVAILABLE;
     };
 
-    match runtime.block_on(baad_utils::file::save_file(PathBuf::from(path).as_path(), content)) {
+    match runtime.block_on(save_file(PathBuf::from(path).as_path(), content)) {
         Ok(()) => 0,
         Err(error) => BaadUtilsFileErrorCode::from(&error) as i32
     }
@@ -267,7 +283,7 @@ pub unsafe extern "C" fn baad_utils_create_parent_dir(path: *const c_char) -> i3
     let Some(runtime) = runtime() else {
         return RUNTIME_UNAVAILABLE;
     };
-    match runtime.block_on(baad_utils::file::create_parent_dir(PathBuf::from(path).as_path())) {
+    match runtime.block_on(create_parent_dir(PathBuf::from(path).as_path())) {
         Ok(()) => 0,
         Err(error) => BaadUtilsFileErrorCode::from(&error) as i32
     }
@@ -291,8 +307,7 @@ pub unsafe extern "C" fn baad_utils_get_output_dir(
     let Some(runtime) = runtime() else {
         return RUNTIME_UNAVAILABLE;
     };
-    let result =
-        runtime.block_on(baad_utils::file::get_output_dir(path.map(PathBuf::from).as_deref()));
+    let result = runtime.block_on(get_output_dir(path.map(PathBuf::from).as_deref()));
     match result {
         Ok(dir) => {
             *out = export_string(&dir.to_string_lossy());
@@ -317,7 +332,7 @@ pub unsafe extern "C" fn baad_utils_is_dir_empty(path: *const c_char, out_empty:
     let Some(runtime) = runtime() else {
         return RUNTIME_UNAVAILABLE;
     };
-    match runtime.block_on(baad_utils::file::is_dir_empty(PathBuf::from(path).as_path())) {
+    match runtime.block_on(is_dir_empty(PathBuf::from(path).as_path())) {
         Ok(empty) => {
             *out_empty = empty;
             0
@@ -337,7 +352,7 @@ pub unsafe extern "C" fn baad_utils_clear_all(path: *const c_char) -> i32 {
     let Some(runtime) = runtime() else {
         return RUNTIME_UNAVAILABLE;
     };
-    match runtime.block_on(baad_utils::file::clear_all(PathBuf::from(path).as_path())) {
+    match runtime.block_on(clear_all(PathBuf::from(path).as_path())) {
         Ok(()) => 0,
         Err(error) => BaadUtilsFileErrorCode::from(&error) as i32
     }
@@ -403,7 +418,7 @@ pub unsafe extern "C" fn baad_utils_fetch_version(
     let Some(runtime) = runtime() else {
         return RUNTIME_UNAVAILABLE;
     };
-    match runtime.block_on(baad_utils::network::fetch_version(url)) {
+    match runtime.block_on(fetch_version(url)) {
         Ok(version) => {
             *out = export_string(&version);
             0
@@ -414,13 +429,11 @@ pub unsafe extern "C" fn baad_utils_fetch_version(
 
 #[unsafe(no_mangle)]
 pub extern "C" fn baad_utils_format_bytes(value: u64) -> *mut c_char {
-    export_string(&baad_utils::formatter::HumanBytes(value).to_string())
+    export_string(&HumanBytes(value).to_string())
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn baad_utils_terminal_is_terminal() -> bool {
-    baad_utils::progress::terminal::is_terminal()
-}
+pub extern "C" fn baad_utils_terminal_is_terminal() -> bool { terminal::is_terminal() }
 
 /// # Safety
 /// `out_width` and `out_height` must be valid pointers. Returns false when no
@@ -433,7 +446,7 @@ pub unsafe extern "C" fn baad_utils_terminal_size(
     if out_width.is_null() || out_height.is_null() {
         return false;
     }
-    match baad_utils::progress::terminal::size() {
+    match terminal::size() {
         Some((width, height)) => {
             *out_width = width as u64;
             *out_height = height as u64;
