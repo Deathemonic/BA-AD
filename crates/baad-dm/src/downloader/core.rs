@@ -30,13 +30,14 @@ impl<'a> Downloader<'a> {
             .retries(self.config.retries)
             .maybe_proxy(self.config.proxy.clone())
             .maybe_headers(self.config.headers.clone())
+            .http1_only(self.config.http1_only)
             .build();
 
         let Ok(client) = create_http_client(client_config).map(Arc::new) else {
             return downloads
                 .iter()
                 .map(|d| {
-                    self.create_summary(
+                    Self::create_summary(
                         d.clone(),
                         FetchOutcome::failed(
                             &"Failed to create HTTP client",
@@ -74,7 +75,7 @@ impl<'a> Downloader<'a> {
         });
 
         let outcome = self.fetch_inner(&ctx, &filename).await.unwrap_or_else(|e| e);
-        let summary = self.create_summary(download, outcome);
+        let summary = Self::create_summary(download, outcome);
         self.finalize(summary)
     }
 
@@ -192,7 +193,7 @@ impl<'a> Downloader<'a> {
         Ok(FetchOutcome::success(size, false))
     }
 
-    fn create_summary(&self, download: Download, outcome: FetchOutcome) -> Summary {
+    fn create_summary(download: Download, outcome: FetchOutcome) -> Summary {
         let download = Arc::new(download);
 
         match outcome {

@@ -19,6 +19,10 @@ pub fn create_http_client(config: HttpClientConfig) -> Result<ClientWithMiddlewa
         .connect_timeout(Duration::from_secs(30))
         .timeout(Duration::from_mins(5));
 
+    if config.http1_only {
+        builder = builder.http1_only();
+    }
+
     if let Some(proxy) = config.proxy {
         builder = builder.proxy(proxy);
     }

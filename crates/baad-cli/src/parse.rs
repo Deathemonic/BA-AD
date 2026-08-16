@@ -2,7 +2,7 @@ use std::process::exit;
 
 use baad::catalog::{Catalog, ChinaCatalog, GlobalCatalog, JapanCatalog};
 use baad::download::{FilterMethod, ResourceCategory, ResourceDownloader, ResourceFilter};
-use baad::{ASSET_BUNDLES, BuildType, MEDIA_RESOURCES, TABLE_BUNDLES, file, info};
+use baad::{ASSET_BUNDLES, BuildType, MEDIA_RESOURCES, TABLE_BUNDLES, file, info, warn};
 use clap::CommandFactory;
 use eyre::{Result, eyre};
 
@@ -54,7 +54,7 @@ impl CommandHandler {
 
     async fn japan_download(&self, args: &JapanDownloadArgs) -> Result<()> {
         let platform = args.base.platform;
-        let categories = self.resource_categories(&args.base);
+        let categories = Self::resource_categories(&args.base);
 
         info!(platform = %platform.display_name(), "Starting Japan download");
 
@@ -64,7 +64,7 @@ impl CommandHandler {
 
     async fn global_download(&self, args: &GlobalDownloadArgs) -> Result<()> {
         let platform = args.base.platform;
-        let categories = self.resource_categories(&args.base);
+        let categories = Self::resource_categories(&args.base);
         let build_type = if args.teen { BuildType::Teen } else { BuildType::Standard };
 
         info!(platform = %platform.display_name(), "Starting Global download");
@@ -75,7 +75,7 @@ impl CommandHandler {
 
     async fn china_download(&self, args: &ChinaDownloadArgs) -> Result<()> {
         let platform = args.base.platform;
-        let categories = self.resource_categories(&args.base);
+        let categories = Self::resource_categories(&args.base);
 
         info!(platform = %platform.display_name(), "Starting China download");
 
@@ -84,7 +84,7 @@ impl CommandHandler {
     }
 
     async fn run_download<C: Catalog>(&self, base: &BaseDownloadArgs, catalog: C) -> Result<()> {
-        let filter = self.resource_filter(base)?;
+        let filter = Self::resource_filter(base)?;
         let output_dir = file::get_output_dir(Some(&base.output)).await?;
 
         let mut downloads = catalog.prepare_downloads().await?;
@@ -98,11 +98,19 @@ impl CommandHandler {
             Self::categorize_path(MEDIA_RESOURCES, &mut media.path);
         }
 
+        if base.boost {
+            warn!("Boost is enabled this will trigger CDN rate limiting");
+        }
+
         let downloader = ResourceDownloader::builder()
             .output_dir(output_dir)
             .limit(base.limit as usize)
             .retries(base.retries)
             .maybe_proxy(base.proxy.clone())
+            .http1_only(base.boost)
+            .max_chunks_per_file(if base.boost { 64 } else { 16 })
+            .max_concurrent_chunks(if base.boost { 32 } else { 8 })
+            .chunk_threshold(if base.boost { 2 * 1024 * 1024 } else { 10 * 1024 * 1024 })
             .build();
 
         downloader.download(downloads, filter.as_ref()).await?;
@@ -120,7 +128,7 @@ impl CommandHandler {
         path.insert_str(0, category_dir);
     }
 
-    fn resource_categories(&self, args: &BaseDownloadArgs) -> ResourceCategory {
+    fn resource_categories(args: &BaseDownloadArgs) -> ResourceCategory {
         ResourceCategory::new()
             .include_if(args.assets, ResourceCategory::Assets)
             .include_if(args.tables, ResourceCategory::Tables)
@@ -128,7 +136,7 @@ impl CommandHandler {
             .or_all_if_empty()
     }
 
-    fn resource_filter(&self, args: &BaseDownloadArgs) -> Result<Option<ResourceFilter>> {
+    fn resource_filter(args: &BaseDownloadArgs) -> Result<Option<ResourceFilter>> {
         let Some(filter_pattern) = &args.filter else {
             if !matches!(args.filter_method, FilterMethod::Contains) {
                 let filter_method_name = format!("{:?}", args.filter_method).to_lowercase();

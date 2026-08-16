@@ -40,9 +40,8 @@ impl GlobalCdn {
                 debug!("Catalog up to date, rebuilding cache");
                 cache::write_pack(&pack, &catalog).await?;
                 return Ok(catalog);
-            } else {
-                warn!("Catalog invalid, refetching...")
             }
+            warn!("Catalog invalid, refetching...");
         }
 
         debug!("Catalog changed, downloading");

@@ -8,7 +8,7 @@ use crate::download::Download;
 use crate::error::Error;
 
 #[derive(Debug)]
-pub(crate) enum FetchOutcome {
+pub enum FetchOutcome {
     Success { size: u64, resumable: bool },
     Skipped { reason: &'static str, size: u64 },
     Failed { error: String, status_code: StatusCode }

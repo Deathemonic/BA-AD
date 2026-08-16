@@ -25,10 +25,10 @@ impl Default for ResourceCategory {
     fn default() -> Self { Self::new() }
 }
 
-impl<const N: usize> From<[ResourceCategory; N]> for ResourceCategory {
-    fn from(categories: [ResourceCategory; N]) -> Self { categories.into_iter().collect() }
+impl<const N: usize> From<[Self; N]> for ResourceCategory {
+    fn from(categories: [Self; N]) -> Self { categories.into_iter().collect() }
 }
 
-impl From<Vec<ResourceCategory>> for ResourceCategory {
-    fn from(categories: Vec<ResourceCategory>) -> Self { categories.into_iter().collect() }
+impl From<Vec<Self>> for ResourceCategory {
+    fn from(categories: Vec<Self>) -> Self { categories.into_iter().collect() }
 }

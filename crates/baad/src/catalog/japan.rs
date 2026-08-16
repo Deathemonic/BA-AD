@@ -53,7 +53,7 @@ impl JapanCatalog {
     async fn full_update(&self, version: String) -> Result<String, CatalogError> {
         let resources_path = self.download_resources_asset().await?;
         let game_main_data = self.extract_game_main(&resources_path).await?;
-        let server_info_url = self.decrypt_game_main(&game_main_data)?;
+        let server_info_url = Self::decrypt_game_main(&game_main_data)?;
         let addressable = self.fetch_addressable(&server_info_url).await?;
         let catalog_url: String = JapanCdn::extract_catalog_url(&addressable)?.into();
         let platform: &'static str = self.platform.into();
@@ -136,7 +136,7 @@ impl JapanCatalog {
         Ok(extracted.to_vec())
     }
 
-    fn decrypt_game_main(&self, data: &[u8]) -> Result<String, CatalogError> {
+    fn decrypt_game_main(data: &[u8]) -> Result<String, CatalogError> {
         debug!("Decrypting GameMain config");
 
         let encoded_data = general_purpose::STANDARD.encode(data);

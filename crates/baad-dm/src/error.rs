@@ -43,6 +43,6 @@ pub enum Error {
     Stream {
         downloaded: u64,
         #[source]
-        source: Box<Error>
+        source: Box<Self>
     }
 }

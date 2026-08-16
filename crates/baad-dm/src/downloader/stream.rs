@@ -60,7 +60,7 @@ pub async fn stream_to_file(
         writer.write_all(&chunk).await.map_err(Error::Io)?;
         downloaded += chunk.len() as u64;
 
-        if let Some(ref p) = progress {
+        if let Some(p) = &progress {
             p.add_bytes(chunk.len() as u64);
         }
     }

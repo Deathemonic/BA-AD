@@ -15,5 +15,8 @@ pub struct HttpClientConfig {
     pub pool_max_idle: usize,
 
     #[builder(default = true)]
-    pub tcp_nodelay: bool
+    pub tcp_nodelay: bool,
+
+    #[builder(default = false)]
+    pub http1_only: bool
 }

@@ -45,7 +45,7 @@ impl TryFrom<&str> for Download {
             reason: e.to_string().into()
         })?;
 
-        Download::try_from(&url)
+        Self::try_from(&url)
     }
 }
 
@@ -55,6 +55,6 @@ impl TryFrom<&Url> for Download {
     fn try_from(url: &Url) -> Result<Self, Self::Error> {
         let filename = extract_filename(url)?;
 
-        Ok(Download::builder().url(url.clone()).filename(filename).build())
+        Ok(Self::builder().url(url.clone()).filename(filename).build())
     }
 }

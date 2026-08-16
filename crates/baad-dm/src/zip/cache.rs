@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, PoisonError};
 
 use reqwest_middleware::ClientWithMiddleware;
 use reqwest_middleware::reqwest::Url;
@@ -24,7 +24,7 @@ impl ZipCache {
         url: &Url
     ) -> Result<Arc<ZipIndex>, Error> {
         let cell = {
-            let mut map = self.inner.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+            let mut map = self.inner.lock().unwrap_or_else(PoisonError::into_inner);
 
             Arc::clone(map.entry(url.as_str().into()).or_default())
         };

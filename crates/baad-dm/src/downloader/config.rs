@@ -32,6 +32,9 @@ pub struct DownloaderConfig<'a> {
     #[builder(default = false)]
     pub overwrite: bool,
 
+    #[builder(default = false)]
+    pub http1_only: bool,
+
     #[debug(skip)]
     pub headers: Option<HeaderMap>,
 
