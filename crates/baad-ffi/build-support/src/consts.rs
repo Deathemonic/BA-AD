@@ -4,18 +4,18 @@ use syn::{ItemConst, Type};
 
 use crate::syntax::{crate_path, normalized};
 
-pub(crate) struct GeneratedConst {
+pub struct GeneratedConst {
     pub(crate) crate_path: String,
     pub(crate) field: ConstField
 }
 
-pub(crate) struct ConstField {
+pub struct ConstField {
     pub(crate) source: syn::Ident,
     pub(crate) target: syn::Ident,
     pub(crate) ty: ConstType
 }
 
-pub(crate) enum ConstType {
+pub enum ConstType {
     String,
     Bytes,
     Strings
@@ -43,14 +43,14 @@ impl ConstType {
 
     fn field_type(&self) -> TokenStream {
         match self {
-            ConstType::String => quote! { String },
-            ConstType::Bytes => quote! { Vec<u8> },
-            ConstType::Strings => quote! { Vec<String> }
+            Self::String => quote! { String },
+            Self::Bytes => quote! { Vec<u8> },
+            Self::Strings => quote! { Vec<String> }
         }
     }
 }
 
-pub(crate) fn render_consts(consts: &[GeneratedConst]) -> TokenStream {
+pub fn render_consts(consts: &[GeneratedConst]) -> TokenStream {
     let record_fields = consts.iter().map(|generated| {
         let name = &generated.field.target;
         let ty = generated.field.ty.field_type();

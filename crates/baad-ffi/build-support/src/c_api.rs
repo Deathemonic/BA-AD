@@ -9,7 +9,7 @@ use crate::observer::render_observer_c;
 use crate::sanitize::render_sanitized_c;
 use crate::syntax::{crate_path, enum_is_fieldless, snake_case};
 
-pub(crate) fn render_c(config: &Config, context: &Context) -> TokenStream {
+pub fn render_c(config: &Config, context: &Context) -> TokenStream {
     let plumbing = render_c_plumbing(config);
     let enums = context.remotes.iter().filter_map(|remote| {
         let RemoteItem::Enum(item) = &remote.item else {
@@ -64,13 +64,18 @@ fn render_c_handle(config: &Config, handle: &Handle) -> TokenStream {
 }
 
 fn render_c_plumbing(config: &Config) -> TokenStream {
-    let bytes_type = format_ident!("{}Bytes", config.c_types_prefix);
-    let string_array_type = format_ident!("{}StringArray", config.c_types_prefix);
-    let string_free = format_ident!("{}_string_free", config.c_prefix);
-    let bytes_free = format_ident!("{}_bytes_free", config.c_prefix);
-    let string_array_free = format_ident!("{}_string_array_free", config.c_prefix);
-    let string_free_doc =
-        format!("On success the caller owns each string and must free it with `{string_free}`.");
+    let helpers = render_c_helpers(config);
+    let containers = render_c_containers(config);
+    let frees = render_c_frees(config);
+
+    quote! {
+        #helpers
+        #containers
+        #frees
+    }
+}
+
+fn render_c_helpers(config: &Config) -> TokenStream {
     let runtime = config.c_runtime.then(|| {
         quote! {
             #[allow(dead_code)]
@@ -122,7 +127,14 @@ fn render_c_plumbing(config: &Config) -> TokenStream {
                 unsafe { *out = export_string(message) };
             }
         }
+    }
+}
 
+fn render_c_containers(config: &Config) -> TokenStream {
+    let bytes_type = format_ident!("{}Bytes", config.c_types_prefix);
+    let string_array_type = format_ident!("{}StringArray", config.c_types_prefix);
+
+    quote! {
         #[repr(C)]
         pub struct #bytes_type {
             pub ptr: *mut u8,
@@ -182,7 +194,19 @@ fn render_c_plumbing(config: &Config) -> TokenStream {
                 }
             }
         }
+    }
+}
 
+fn render_c_frees(config: &Config) -> TokenStream {
+    let bytes_type = format_ident!("{}Bytes", config.c_types_prefix);
+    let string_array_type = format_ident!("{}StringArray", config.c_types_prefix);
+    let string_free = format_ident!("{}_string_free", config.c_prefix);
+    let bytes_free = format_ident!("{}_bytes_free", config.c_prefix);
+    let string_array_free = format_ident!("{}_string_array_free", config.c_prefix);
+    let string_free_doc =
+        format!("On success the caller owns each string and must free it with `{string_free}`.");
+
+    quote! {
         /// # Safety
         /// `value` must be a pointer previously returned by this library, or null.
         #[unsafe(no_mangle)]
@@ -227,12 +251,9 @@ fn render_c_enum(config: &Config, remote: &Remote, item: &ItemEnum) -> TokenStre
         .variants
         .iter()
         .enumerate()
-        .map(|(index, variant)| match &variant.discriminant {
-            Some((_, expression)) => quote! { #expression },
-            None => {
-                let index = index as i32;
-                quote! { #index }
-            }
+        .map(|(index, variant)| if let Some((_, expression)) = &variant.discriminant { quote! { #expression } } else {
+            let index = index as i32;
+            quote! { #index }
         })
         .collect();
     let from_arms = variants.iter().map(|variant| {

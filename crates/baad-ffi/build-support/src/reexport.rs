@@ -8,7 +8,7 @@ use syn::{Item, Type};
 use crate::config::{Config, Reexport};
 use crate::syntax::{parse_file, source_dir};
 
-pub(crate) fn render_reexport(
+pub fn render_reexport(
     config: &Config,
     reexport: &Reexport,
     file: &str,

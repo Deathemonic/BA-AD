@@ -3,7 +3,7 @@ use quote::{format_ident, quote};
 
 use crate::config::Config;
 
-pub(crate) fn render_observer_uniffi() -> TokenStream {
+pub fn render_observer_uniffi() -> TokenStream {
     quote! {
         #[uniffi::export(with_foreign)]
         pub trait DownloadObserver: Send + Sync {
@@ -30,7 +30,7 @@ pub(crate) fn render_observer_uniffi() -> TokenStream {
     }
 }
 
-pub(crate) fn render_observer_dispatch() -> TokenStream {
+pub fn render_observer_dispatch() -> TokenStream {
     quote! {
         use std::sync::{Arc, RwLock};
 
@@ -67,13 +67,35 @@ pub(crate) fn render_observer_dispatch() -> TokenStream {
     }
 }
 
-pub(crate) fn render_observer_c(config: &Config) -> TokenStream {
+pub fn render_observer_c(config: &Config) -> TokenStream {
+    let types = render_observer_c_types(config);
+    let dispatch = render_observer_c_dispatch(config);
+    let set_observer = format_ident!("{}_set_observer", config.c_prefix);
+    let clear_observer = format_ident!("{}_clear_observer", config.c_prefix);
+    let callback = format_ident!("{}ObserverCallback", config.c_types_prefix);
+
+    quote! {
+        #types
+        #dispatch
+
+        #[unsafe(no_mangle)]
+        pub extern "C" fn #set_observer(callback: #callback, user_data: *mut std::ffi::c_void) {
+            crate::api::observer::register_observer(std::sync::Arc::new(CallbackObserver {
+                callback,
+                user_data
+            }));
+        }
+
+        #[unsafe(no_mangle)]
+        pub extern "C" fn #clear_observer() { crate::api::observer::unregister_observer(); }
+    }
+}
+
+fn render_observer_c_types(config: &Config) -> TokenStream {
     let event_kind = format_ident!("{}EventKind", config.c_types_prefix);
     let status = format_ident!("{}DownloadStatus", config.c_types_prefix);
     let event = format_ident!("{}DownloadEvent", config.c_types_prefix);
     let callback = format_ident!("{}ObserverCallback", config.c_types_prefix);
-    let set_observer = format_ident!("{}_set_observer", config.c_prefix);
-    let clear_observer = format_ident!("{}_clear_observer", config.c_prefix);
 
     quote! {
         #[repr(i32)]
@@ -116,7 +138,15 @@ pub(crate) fn render_observer_c(config: &Config) -> TokenStream {
         /// callback asserts `callback` and `user_data` are thread-safe.
         unsafe impl Send for CallbackObserver {}
         unsafe impl Sync for CallbackObserver {}
+    }
+}
 
+fn render_observer_c_dispatch(config: &Config) -> TokenStream {
+    let event_kind = format_ident!("{}EventKind", config.c_types_prefix);
+    let status = format_ident!("{}DownloadStatus", config.c_types_prefix);
+    let event = format_ident!("{}DownloadEvent", config.c_types_prefix);
+
+    quote! {
         impl baad_shared::DownloadObserver for CallbackObserver {
             fn on_event(&self, event: baad_shared::DownloadEvent) {
                 let (kind, filename, total_bytes, downloaded_bytes, size, status, reason) =
@@ -180,16 +210,5 @@ pub(crate) fn render_observer_c(config: &Config) -> TokenStream {
                 (self.callback)(self.user_data, &event);
             }
         }
-
-        #[unsafe(no_mangle)]
-        pub extern "C" fn #set_observer(callback: #callback, user_data: *mut std::ffi::c_void) {
-            crate::api::observer::register_observer(std::sync::Arc::new(CallbackObserver {
-                callback,
-                user_data
-            }));
-        }
-
-        #[unsafe(no_mangle)]
-        pub extern "C" fn #clear_observer() { crate::api::observer::unregister_observer(); }
     }
 }
