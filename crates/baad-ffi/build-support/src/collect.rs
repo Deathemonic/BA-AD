@@ -25,7 +25,7 @@ use crate::syntax::{
     struct_is_ffi_safe
 };
 
-pub(crate) fn collect_source(config: &Config, source: &'static Source, context: &mut Context) {
+pub fn collect_source(config: &Config, source: &'static Source, context: &mut Context) {
     let base = source_dir(source.dir);
 
     for (file, kind) in source.type_files {

@@ -1,20 +1,23 @@
+#[cfg(any(feature = "logs", feature = "utils"))]
+use std::error::Error as StdError;
+#[cfg(any(feature = "logs", feature = "utils"))]
 use std::io;
-#[cfg(feature = "logs")]
-use std::{error, iter::successors};
 
 #[cfg(feature = "logs")]
 use eyre::Report;
+#[cfg(any(feature = "logs", feature = "utils"))]
 use thiserror::Error;
 #[cfg(feature = "logs")]
 use tracing::warn;
 
+#[cfg(feature = "utils")]
 #[derive(Error, Debug)]
 pub enum FileError {
     #[error(transparent)]
     Io(#[from] io::Error),
 
     #[error(transparent)]
-    External(Box<dyn std::error::Error + Send + Sync>),
+    External(Box<dyn StdError + Send + Sync>),
 
     #[error("Failed to create app directories")]
     AppDirectoryCreationFailed,
@@ -26,6 +29,7 @@ pub enum FileError {
     DataDirAlreadySet
 }
 
+#[cfg(feature = "utils")]
 #[derive(Error, Debug)]
 pub enum NetworkError {
     #[error(transparent)]
@@ -38,6 +42,7 @@ pub enum NetworkError {
     ExtractionFailed
 }
 
+#[cfg(feature = "utils")]
 #[derive(Error, Debug)]
 pub enum JsonError {
     #[error(transparent)]
@@ -56,15 +61,17 @@ pub enum JsonError {
     PathError
 }
 
+#[cfg(feature = "logs")]
 #[derive(Error, Debug)]
 pub enum ConfigError {
     #[error(transparent)]
-    External(Box<dyn std::error::Error + Send + Sync>),
+    External(Box<dyn StdError + Send + Sync>),
 
     #[error("Failed to initialize logging")]
     LoggingInitFailed
 }
 
+#[cfg(feature = "logs")]
 #[derive(Error, Debug)]
 pub enum ProgressError {
     #[error(transparent)]
@@ -86,12 +93,14 @@ pub trait IntoEyreReport {
 }
 
 #[cfg(feature = "logs")]
-impl<E: error::Error + Send + Sync + 'static> IntoEyreReport for E {
+impl<E: StdError + Send + Sync + 'static> IntoEyreReport for E {
     fn into_eyre_report(self) -> Report {
         let mut report = Report::msg(self.to_string());
+        let mut current = self.source();
 
-        for source in successors(self.source(), |e| e.source()) {
+        while let Some(source) = current {
             report = report.wrap_err(source.to_string());
+            current = source.source();
         }
 
         report

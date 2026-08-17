@@ -60,7 +60,7 @@ pub const COW_STR: CustomType = CustomType {
     over: "String",
     pattern: "Cow<'static,str>",
     lower: "|value| value.into_owned()",
-    try_lift: "|value| Ok(std::borrow::Cow::Owned(value))"
+    try_lift: "|value| Ok(StaticStrCow::Owned(value))"
 };
 
 #[derive(Clone, Copy)]

@@ -80,11 +80,10 @@ fn try_add<'a>(
 }
 
 fn convert_path_to_bundle(zip_path: &str, bundle_filename: &str) -> String {
-    if let Some(last_slash) = zip_path.rfind('/') {
-        fconcat!(&zip_path[..last_slash], "/", bundle_filename)
-    } else {
-        bundle_filename.into()
-    }
+    zip_path.rfind('/').map_or_else(
+        || bundle_filename.into(),
+        |last_slash| fconcat!(&zip_path[..last_slash], "/", bundle_filename)
+    )
 }
 
 fn create_download(
@@ -100,7 +99,7 @@ fn create_download(
             .url(parsed_url)
             .filename(path.into())
             .hash(hash.as_string())
-            .maybe_target_file(target.map(|s| s.into()))
+            .maybe_target_file(target.map(Into::into))
             .maybe_size(u64::try_from(size).ok().filter(|s| *s > 0))
             .build()
     )

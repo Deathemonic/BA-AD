@@ -11,3 +11,6 @@ syn = { version = "3", features = ["full", "extra-traits"] }
 quote = "1"
 proc-macro2 = "1"
 prettyplease = "0.3"
+
+[lints]
+workspace = true

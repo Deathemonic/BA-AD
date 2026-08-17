@@ -71,7 +71,7 @@ pub async fn download_chunked(
         .collect()
         .await;
 
-    if let Some(Err(e)) = results.into_iter().find(|r| r.is_err()) {
+    if let Some(Err(e)) = results.into_iter().find(Result::is_err) {
         return Err(e);
     }
 
@@ -103,7 +103,7 @@ async fn download_chunk(
         let chunk = chunk?;
         writer.write_all(&chunk).await?;
 
-        if let Some(ref p) = progress {
+        if let Some(p) = &progress {
             p.add_bytes(chunk.len() as u64);
         }
     }

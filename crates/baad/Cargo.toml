@@ -5,12 +5,12 @@ edition.workspace = true
 
 [features]
 default = ["logs"]
-logs = ["baad-utils/logs"]
+logs = ["baad-utils/logs", "baad-utils/observer"]
 
 [dependencies]
 baad-dm = { workspace = true }
 baad-shared = { workspace = true }
-baad-utils = { workspace = true, default-features = false }
+baad-utils = { workspace = true, default-features = false, features = ["utils"] }
 bacy = { workspace = true }
 
 bitflags = { workspace = true }
@@ -35,3 +35,6 @@ rayon = "1.11.0"
 urlencoding = "2.1.3"
 walkdir = "2.5.0"
 zip = "8.6"
+
+[lints]
+workspace = true

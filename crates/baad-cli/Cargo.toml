@@ -14,3 +14,6 @@ eyre = { workspace = true }
 tokio = { workspace = true }
 
 clap = { version = "4.6", features = ["derive"] }
+
+[lints]
+workspace = true

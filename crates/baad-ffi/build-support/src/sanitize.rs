@@ -5,7 +5,7 @@ use syn::{Expr, ItemStruct, Lit, Type};
 use crate::config::{Config, Sanitized};
 use crate::syntax::{crate_path, normalized, snake_case, type_is_c_primitive};
 
-pub(crate) fn render_sanitized(item: &ItemStruct, spec: &Sanitized) -> TokenStream {
+pub fn render_sanitized(item: &ItemStruct, spec: &Sanitized) -> TokenStream {
     let name = &item.ident;
     let struct_defaults = struct_level_defaults(item);
 
@@ -31,7 +31,7 @@ pub(crate) fn render_sanitized(item: &ItemStruct, spec: &Sanitized) -> TokenStre
     }
 }
 
-pub(crate) fn render_sanitized_c(
+pub fn render_sanitized_c(
     config: &Config,
     item: &ItemStruct,
     spec: &Sanitized

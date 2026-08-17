@@ -258,6 +258,31 @@ init_logging(LoggingConfig {
 The progress display is automatically disabled when output is not a terminal, when
 `enable_json` is set, or when `enable_console` is off.
 
+### Logging Without BA-AD
+
+If you only want the log formatting and terminal output no catalogs, downloads, or file
+helpers, depend on `baad-utils` directly with the `only_logging` feature. It pulls in the
+tracing stack alone, dropping `baad-shared`, `reqwest`, `tokio`, `serde`, `serde_json`, and
+`platform-dirs`:
+
+```toml
+[dependencies]
+baad-utils = { git = "https://github.com/Deathemonic/BA-AD", default-features = false, features = ["only_logging"] }
+```
+
+```rust
+use baad_utils::config::{init_logging, LoggingConfig};
+use baad_utils::info;
+
+init_logging(LoggingConfig::default())?;
+info!(success = true, "logging ready");
+```
+
+`init_logging`, `flush_logs`, `run`, `run_async`, [`formatter`](../../crates/baad-utils/src/formatter/mod.rs),
+and [`progress`](../../crates/baad-utils/src/progress/mod.rs) remain available. The download
+progress view is not wired up, since that requires the `observer` feature and its
+`baad-shared` dependency; `enable_progress` is ignored and logs render as plain lines.
+
 ## Custom Progress Display
 
 To replace the built-in `Downloading` lines with your own rendering (e.g., progress bars),

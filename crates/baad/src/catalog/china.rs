@@ -68,10 +68,10 @@ impl ChinaCatalog {
         info!("Catalog changed, updating...");
         update(&self.paths.api, |data: &mut ApiData| {
             data.china.version = version;
-            data.china.catalog_url = catalog_url.clone();
-            data.china.resource_version = state.resource_version.clone();
-            data.china.table_version = state.table_version.clone();
-            data.china.media_version = state.media_version.clone();
+            data.china.catalog_url.clone_from(&catalog_url);
+            data.china.resource_version.clone_from(&state.resource_version);
+            data.china.table_version.clone_from(&state.table_version);
+            data.china.media_version.clone_from(&state.media_version);
             data.china.platform = platform.into();
         })
         .await?;

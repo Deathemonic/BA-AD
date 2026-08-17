@@ -78,7 +78,7 @@ impl<M: ProgressModel> ProgressView<M> {
         self.with_inner(|inner| inner.write_message_and_repaint(message))
     }
 
-    pub fn clear(&self) -> Result<(), ProgressError> { self.with_inner(|inner| inner.erase()) }
+    pub fn clear(&self) -> Result<(), ProgressError> { self.with_inner(InnerView::erase) }
 
     pub fn finish(self) -> Result<M, ProgressError> {
         let mut inner = self
@@ -211,7 +211,7 @@ impl<M: ProgressModel> InnerView<M> {
 
     fn write_message_and_repaint(&mut self, message: &str) {
         if !self.is_terminal || !self.drawn {
-            self.write_raw(message.as_bytes());
+            Self::write_raw(message.as_bytes());
             return;
         }
 
@@ -233,13 +233,13 @@ impl<M: ProgressModel> InnerView<M> {
         self.write_rendered_lines();
     }
 
-    fn write_raw(&mut self, bytes: &[u8]) {
+    fn write_raw(bytes: &[u8]) {
         let mut stderr = io::stderr().lock();
         let _ = stderr.write_all(bytes);
         let _ = stderr.flush();
     }
 
-    fn flush_buffer(&mut self) {
+    fn flush_buffer(&self) {
         let mut stderr = io::stderr().lock();
         let _ = stderr.write_all(&self.write_buffer);
         let _ = stderr.flush();
@@ -267,7 +267,7 @@ pub struct ProgressMakeWriter<M: ProgressModel> {
 }
 
 impl<M: ProgressModel> ProgressMakeWriter<M> {
-    pub fn new(view: Arc<ProgressView<M>>) -> Self { Self { view } }
+    pub const fn new(view: Arc<ProgressView<M>>) -> Self { Self { view } }
 }
 
 impl<M: ProgressModel> Clone for ProgressMakeWriter<M> {

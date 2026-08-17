@@ -78,7 +78,7 @@ impl ChinaCdn {
         let bundle = fconcat!(base.as_str(), "/bundleDownloadInfo.json");
         let hash = fconcat!(base.as_str(), "/bundleDownloadInfo.hash");
         let file =
-            self.catalog_file(bundle, hash, &fconcat!(platform, "/bundleDownloadInfo.json"))?;
+            Self::catalog_file(bundle, hash, &fconcat!(platform, "/bundleDownloadInfo.json"))?;
 
         self.fetch_json(&file).await
     }
@@ -86,14 +86,14 @@ impl ChinaCdn {
     pub async fn fetch_table(&self) -> Result<TableCatalogCN, CatalogError> {
         let url = fconcat!("/"; self.catalog_url.as_str(), "Manifest", const { TABLE_BUNDLES }, self.table_version.as_str(), "TableManifest");
         let hash_url = fconcat!(url.as_str(), "Hash");
-        let file = self.catalog_file(url, hash_url, "TableManifest.json")?;
+        let file = Self::catalog_file(url, hash_url, "TableManifest.json")?;
         self.fetch_json(&file).await
     }
 
     pub async fn fetch_media(&self) -> Result<MediaCatalogCN, CatalogError> {
         let url = fconcat!("/"; self.catalog_url.as_str(), "Manifest", const { MEDIA_RESOURCES }, self.media_version.as_str(), "MediaManifest");
         let hash_url = fconcat!(url.as_str(), "Hash");
-        let file = self.catalog_file(url, hash_url, "MediaManifest.txt")?;
+        let file = Self::catalog_file(url, hash_url, "MediaManifest.txt")?;
         let downloaded = cache::ensure_cached(&file).await?;
 
         if !downloaded
@@ -128,7 +128,6 @@ impl ChinaCdn {
     }
 
     fn catalog_file(
-        &self,
         url: String,
         hash_url: String,
         filename: &str

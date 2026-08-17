@@ -94,6 +94,10 @@ pub struct BaseDownloadArgs {
     #[arg(long)]
     pub proxy: Option<String>,
 
+    /// Aggressive downloading, this can trigger CDN rate limiting
+    #[arg(long)]
+    pub boost: bool,
+
     /// Platform to download (android, ios, windows)
     #[arg(long, default_value = "android")]
     pub platform: Platform

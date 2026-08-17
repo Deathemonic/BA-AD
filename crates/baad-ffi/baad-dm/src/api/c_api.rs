@@ -7,7 +7,9 @@
 
 use std::ffi::c_char;
 use std::path::PathBuf;
-use std::ptr;
+use std::{mem, ptr, slice};
+
+use baad_dm::client::{create_range_header, resolve_url};
 
 use super::core;
 
@@ -62,7 +64,7 @@ pub unsafe extern "C" fn baad_dm_verify_hash(
 
 #[unsafe(no_mangle)]
 pub extern "C" fn baad_dm_create_range_header(start: u64, end: u64, has_end: bool) -> *mut c_char {
-    export_string(&baad_dm::client::create_range_header(start, has_end.then_some(end)))
+    export_string(&create_range_header(start, has_end.then_some(end)))
 }
 
 #[repr(C)]
@@ -120,7 +122,7 @@ pub struct BaadDmSummaryArray {
 }
 
 impl BaadDmSummaryArray {
-    fn from_summaries(summaries: Vec<baad_dm::Summary>) -> Self {
+    fn from_summaries(summaries: &[baad_dm::Summary]) -> Self {
         let mut exported: Vec<BaadDmSummary> = summaries
             .iter()
             .map(|summary| {
@@ -156,12 +158,12 @@ impl BaadDmSummaryArray {
         let ptr = exported.as_mut_ptr();
         let len = exported.len();
         let cap = exported.capacity();
-        std::mem::forget(exported);
-        BaadDmSummaryArray { ptr, len, cap }
+        mem::forget(exported);
+        Self { ptr, len, cap }
     }
 
     const fn empty() -> Self {
-        BaadDmSummaryArray {
+        Self {
             ptr: ptr::null_mut(),
             len: 0,
             cap: 0
@@ -193,11 +195,12 @@ pub struct BaadDmDownloaderConfig {
     pub retries: u32,
     pub resumable: bool,
     pub overwrite: bool,
+    pub http1_only: bool,
     pub proxy: *const c_char
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn baad_dm_downloader_config_default(
+pub const extern "C" fn baad_dm_downloader_config_default(
     directory: *const c_char
 ) -> BaadDmDownloaderConfig {
     BaadDmDownloaderConfig {
@@ -209,6 +212,7 @@ pub extern "C" fn baad_dm_downloader_config_default(
         retries: 3,
         resumable: true,
         overwrite: false,
+        http1_only: false,
         proxy: ptr::null()
     }
 }
@@ -226,6 +230,7 @@ unsafe fn import_options(config: &BaadDmDownloaderConfig) -> Result<core::Downlo
         retries: config.retries,
         resumable: config.resumable,
         overwrite: config.overwrite,
+        http1_only: config.http1_only,
         proxy: core::create_proxy(proxy).map_err(|error| BaadDmErrorCode::from(&error) as i32)?
     })
 }
@@ -256,7 +261,7 @@ pub unsafe extern "C" fn baad_dm_download(
     };
 
     let mut items = Vec::with_capacity(count);
-    for download in std::slice::from_raw_parts(downloads, count) {
+    for download in slice::from_raw_parts(downloads, count) {
         match import_download(download) {
             Ok(item) => items.push(item),
             Err(code) => return code
@@ -268,7 +273,7 @@ pub unsafe extern "C" fn baad_dm_download(
     };
 
     let summaries = runtime.block_on(core::run_download(options, items));
-    *out_summaries = BaadDmSummaryArray::from_summaries(summaries);
+    *out_summaries = BaadDmSummaryArray::from_summaries(&summaries);
     0
 }
 
@@ -363,6 +368,18 @@ pub struct BaadDmZipFileInfo {
     pub found: bool
 }
 
+impl BaadDmZipFileInfo {
+    const fn missing() -> Self {
+        Self {
+            compression_method: 0,
+            compressed_size: 0,
+            uncompressed_size: 0,
+            local_header_offset: 0,
+            found: false
+        }
+    }
+}
+
 /// # Safety
 /// `url` and `target` must be valid NUL-terminated strings, `out_info` a
 /// valid slot. `found` is false when the archive lacks the target. `out_error`
@@ -397,22 +414,13 @@ pub unsafe extern "C" fn baad_dm_zip_file_info(
 
     match result {
         Ok(info) => {
-            *out_info = match info {
-                Some(info) => BaadDmZipFileInfo {
-                    compression_method: info.compression_method,
-                    compressed_size: info.compressed_size,
-                    uncompressed_size: info.uncompressed_size,
-                    local_header_offset: info.local_header_offset,
-                    found: true
-                },
-                None => BaadDmZipFileInfo {
-                    compression_method: 0,
-                    compressed_size: 0,
-                    uncompressed_size: 0,
-                    local_header_offset: 0,
-                    found: false
-                }
-            };
+            *out_info = info.map_or_else(BaadDmZipFileInfo::missing, |info| BaadDmZipFileInfo {
+                compression_method: info.compression_method,
+                compressed_size: info.compressed_size,
+                uncompressed_size: info.uncompressed_size,
+                local_header_offset: info.local_header_offset,
+                found: true
+            });
             0
         }
         Err(error) => download_failure(out_error, &error)
@@ -439,7 +447,7 @@ pub unsafe extern "C" fn baad_dm_resolve_url(url: *const c_char, out: *mut *mut 
 
     let result = runtime.block_on(async {
         let client = core::default_client()?;
-        baad_dm::client::resolve_url(&client, url).await
+        resolve_url(&client, url).await
     });
 
     match result {

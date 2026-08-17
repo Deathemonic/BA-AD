@@ -11,10 +11,28 @@ use crate::error::CatalogError;
 
 #[derive(Builder)]
 pub struct ResourceDownloader {
+    #[builder(default = PathBuf::from("./output"))]
     output_dir: PathBuf,
+
+    #[builder(default = 10)]
     limit: usize,
+
+    #[builder(default = 10)]
     retries: u32,
-    proxy: Option<String>
+
+    proxy: Option<String>,
+
+    #[builder(default = false)]
+    http1_only: bool,
+
+    #[builder(default = 16)]
+    max_chunks_per_file: usize,
+
+    #[builder(default = 8)]
+    max_concurrent_chunks: usize,
+
+    #[builder(default = 10 * 1024 * 1024)]
+    chunk_threshold: u64
 }
 
 impl ResourceDownloader {
@@ -53,6 +71,10 @@ impl ResourceDownloader {
             .concurrent_downloads(self.limit)
             .retries(self.retries)
             .maybe_proxy(proxy)
+            .http1_only(self.http1_only)
+            .max_chunks_per_file(self.max_chunks_per_file)
+            .max_concurrent_chunks(self.max_concurrent_chunks)
+            .chunk_threshold(self.chunk_threshold)
             .build();
 
         let downloader = Downloader::new(config);
@@ -83,6 +105,8 @@ pub async fn download_file(
         .ok_or(CatalogError::DeserializationFailed)?;
     let output_dir = output_path.parent().ok_or(CatalogError::DeserializationFailed)?;
 
+    let overwrite = hash.is_none();
+
     let download =
         Download::builder().url(parsed_url).filename(filename.into()).maybe_hash(hash).build();
 
@@ -90,6 +114,7 @@ pub async fn download_file(
         .directory(output_dir)
         .concurrent_downloads(1)
         .retries(retries)
+        .overwrite(overwrite)
         .build();
 
     let summaries = Downloader::new(config).download(&[download]).await;

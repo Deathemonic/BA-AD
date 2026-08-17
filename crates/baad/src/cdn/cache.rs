@@ -38,7 +38,7 @@ pub async fn ensure_cached(file: &CatalogFile) -> Result<bool, CatalogError> {
 
     if outdated {
         debug!(filename, "Catalog outdated, fetching...");
-        download_file(&file.url, &file.path, None, 3).await?;
+        download_file(&file.url, &file.path, None, 5).await?;
         if let Some(remote) = &remote {
             fs::write(&hash_path, remote).await?;
         }

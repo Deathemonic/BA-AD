@@ -27,7 +27,15 @@ pub async fn get_output_dir(path: Option<&Path>) -> Result<PathBuf, FileError> {
 }
 
 pub async fn is_dir_empty(path: &Path) -> Result<bool, FileError> {
-    Ok(!path.exists() || path.read_dir().map_or(true, |mut entries| entries.next().is_none()))
+    if !fs::try_exists(path).await.unwrap_or(false) {
+        return Ok(true);
+    }
+
+    let Ok(mut entries) = fs::read_dir(path).await else {
+        return Ok(true);
+    };
+
+    Ok(entries.next_entry().await.ok().flatten().is_none())
 }
 
 pub async fn clear_all(dir: &Path) -> Result<(), FileError> {

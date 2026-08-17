@@ -53,7 +53,7 @@ impl JapanCatalog {
     async fn full_update(&self, version: String) -> Result<String, CatalogError> {
         let resources_path = self.download_resources_asset().await?;
         let game_main_data = self.extract_game_main(&resources_path).await?;
-        let server_info_url = self.decrypt_game_main(&game_main_data)?;
+        let server_info_url = Self::decrypt_game_main(&game_main_data)?;
         let addressable = self.fetch_addressable(&server_info_url).await?;
         let catalog_url: String = JapanCdn::extract_catalog_url(&addressable)?.into();
         let platform: &'static str = self.platform.into();
@@ -61,7 +61,7 @@ impl JapanCatalog {
         update(&self.paths.api, |data: &mut ApiData| {
             data.japan.version = version;
             data.japan.server_info_url = server_info_url;
-            data.japan.catalog_url = catalog_url.clone();
+            data.japan.catalog_url.clone_from(&catalog_url);
             data.japan.platform = platform.into();
         })
         .await?;
@@ -93,7 +93,7 @@ impl JapanCatalog {
 
         info!("Catalog changed, updating...");
         update(&self.paths.api, |data: &mut ApiData| {
-            data.japan.catalog_url = catalog_url.clone();
+            data.japan.catalog_url.clone_from(&catalog_url);
             data.japan.platform = platform.into();
         })
         .await?;
@@ -107,7 +107,7 @@ impl JapanCatalog {
         debug!(url = %download_url, "Downloading resources.assets");
         debug!(hash = %file_info.hash, size = %file_info.size, "Expected file info");
 
-        download_file(&download_url, &self.paths.resources, Some(file_info.hash), 3).await?;
+        download_file(&download_url, &self.paths.resources, Some(file_info.hash), 5).await?;
 
         Ok(self.paths.resources.clone())
     }
@@ -136,7 +136,7 @@ impl JapanCatalog {
         Ok(extracted.to_vec())
     }
 
-    fn decrypt_game_main(&self, data: &[u8]) -> Result<String, CatalogError> {
+    fn decrypt_game_main(data: &[u8]) -> Result<String, CatalogError> {
         debug!("Decrypting GameMain config");
 
         let encoded_data = general_purpose::STANDARD.encode(data);

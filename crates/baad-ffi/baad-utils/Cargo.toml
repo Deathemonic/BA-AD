@@ -17,7 +17,7 @@ uniffi_cli = ["uniffi/cli"]
 
 [dependencies]
 baad-shared = { workspace = true }
-baad-utils = { workspace = true, features = ["logs"] }
+baad-utils = { workspace = true, features = ["logs", "observer", "utils"] }
 uniffi = { workspace = true, optional = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
@@ -31,3 +31,6 @@ baad-ffi-build = { workspace = true }
 name = "uniffi-bindgen"
 path = "bindgen.rs"
 required-features = ["uniffi/cli"]
+
+[lints]
+workspace = true

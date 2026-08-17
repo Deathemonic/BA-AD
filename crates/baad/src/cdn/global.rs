@@ -36,18 +36,16 @@ impl GlobalCdn {
                 return Ok(catalog);
             }
 
-            match load::<GlobalCatalogData>(&path).await {
-                Ok(catalog) => {
-                    debug!("Catalog up to date, rebuilding cache");
-                    cache::write_pack(&pack, &catalog).await?;
-                    return Ok(catalog);
-                }
-                Err(_) => warn!("Catalog invalid, refetching...")
+            if let Ok(catalog) = load::<GlobalCatalogData>(&path).await {
+                debug!("Catalog up to date, rebuilding cache");
+                cache::write_pack(&pack, &catalog).await?;
+                return Ok(catalog);
             }
+            warn!("Catalog invalid, refetching...");
         }
 
         debug!("Catalog changed, downloading");
-        download_file(&self.catalog_url, &path, None, 3).await?;
+        download_file(&self.catalog_url, &path, None, 5).await?;
         fs::write(&marker, &self.catalog_url).await?;
         let catalog = load::<GlobalCatalogData>(&path).await?;
         cache::write_pack(&pack, &catalog).await?;

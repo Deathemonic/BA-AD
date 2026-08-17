@@ -2,7 +2,7 @@
 pub mod c_api;
 
 #[cfg(any(feature = "c-api", feature = "uniffi"))]
-pub(crate) mod core;
+pub mod core;
 
 #[cfg(feature = "uniffi")]
 pub mod uniffi_api;

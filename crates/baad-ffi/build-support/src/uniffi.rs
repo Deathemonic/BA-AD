@@ -10,7 +10,7 @@ use crate::observer::render_observer_uniffi;
 use crate::sanitize::render_sanitized;
 use crate::syntax::{crate_path, strip_enum, strip_struct};
 
-pub(crate) fn render_uniffi(config: &Config, context: &Context) -> TokenStream {
+pub fn render_uniffi(config: &Config, context: &Context) -> TokenStream {
     let custom_types = config.custom_types.iter().map(|custom| {
         let alias = format_ident!("{}", custom.alias);
         let target: Type = syn::parse_str(custom.target).expect("custom type target");

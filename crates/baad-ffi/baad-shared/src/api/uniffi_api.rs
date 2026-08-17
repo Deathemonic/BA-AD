@@ -1,6 +1,10 @@
-//! UniFFI bindings for `baad-shared`. `init_client` builds the `reqwest`
+//! `UniFFI` bindings for `baad-shared`. `init_client` builds the `reqwest`
 //! client from options since a client cannot cross FFI; constant getters and
 //! mirrors are generated into `shadow.rs`.
+//!
+//! `UniFFI` arguments cross the boundary by value, so exported functions cannot
+//! take records or mirrored enums by reference.
+#![allow(clippy::needless_pass_by_value)]
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
 pub enum ClientError {
@@ -27,14 +31,14 @@ pub fn platform_display_name(platform: baad_shared::Platform) -> String {
 }
 
 #[uniffi::export]
-pub fn platform_ensure_supported(
+pub const fn platform_ensure_supported(
     platform: baad_shared::Platform
 ) -> Result<(), baad_shared::ServerConfigError> {
     platform.ensure_supported()
 }
 
 #[uniffi::export]
-pub fn china_media_type_from_repr(value: i32) -> Option<baad_shared::ChinaMediaType> {
+pub const fn china_media_type_from_repr(value: i32) -> Option<baad_shared::ChinaMediaType> {
     baad_shared::ChinaMediaType::from_repr(value)
 }
 
@@ -53,7 +57,7 @@ impl MarketConfig {
         platform: baad_shared::Platform,
         build_type: baad_shared::BuildType
     ) -> Result<Self, baad_shared::ServerConfigError> {
-        Ok(MarketConfig {
+        Ok(Self {
             inner: baad_shared::MarketConfig::for_global(platform, build_type)?
         })
     }
@@ -65,7 +69,7 @@ impl MarketConfig {
 
 impl MarketConfig {
     #[allow(dead_code)]
-    pub(crate) fn native(&self) -> baad_shared::MarketConfig {
+    pub(crate) const fn native(&self) -> baad_shared::MarketConfig {
         baad_shared::MarketConfig {
             market_game_id: self.inner.market_game_id,
             market_code: self.inner.market_code

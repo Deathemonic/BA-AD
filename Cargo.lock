@@ -245,7 +245,7 @@ dependencies = [
 
 [[package]]
 name = "baad"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "ada-url",
  "baad-dm",
@@ -276,7 +276,7 @@ dependencies = [
 
 [[package]]
 name = "baad-cli"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "baad",
  "clap",
@@ -286,7 +286,7 @@ dependencies = [
 
 [[package]]
 name = "baad-dm"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "baad-shared",
  "bacy",
@@ -305,7 +305,7 @@ dependencies = [
 
 [[package]]
 name = "baad-dm-ffi"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "baad-dm",
  "baad-ffi-build",
@@ -319,7 +319,7 @@ dependencies = [
 
 [[package]]
 name = "baad-ffi"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "baad",
  "baad-ffi-build",
@@ -335,7 +335,7 @@ dependencies = [
 
 [[package]]
 name = "baad-ffi-build"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "fastcat",
  "prettyplease 0.3.0",
@@ -346,7 +346,7 @@ dependencies = [
 
 [[package]]
 name = "baad-shared"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "lazy-regex",
  "memorypack",
@@ -358,7 +358,7 @@ dependencies = [
 
 [[package]]
 name = "baad-shared-ffi"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "baad-ffi-build",
  "baad-shared",
@@ -369,7 +369,7 @@ dependencies = [
 
 [[package]]
 name = "baad-utils"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "baad-shared",
  "better_default",
@@ -394,7 +394,7 @@ dependencies = [
 
 [[package]]
 name = "baad-utils-ffi"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "baad-ffi-build",
  "baad-shared",

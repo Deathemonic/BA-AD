@@ -1,19 +1,22 @@
 use std::io;
+#[cfg(feature = "observer")]
 use std::sync::Arc;
+#[cfg(feature = "observer")]
 use std::time::Duration;
 
+#[cfg(feature = "observer")]
 use baad_shared::set_observer;
 use better_default::Default;
 use tracing_subscriber::fmt::format::FmtSpan;
-use tracing_subscriber::fmt::{self};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::{EnvFilter, registry};
+use tracing_subscriber::{EnvFilter, fmt, registry};
 
 pub use crate::error::ConfigError;
 use crate::formatter::ConsoleFormatter;
 use crate::logging::handler;
 use crate::logging::writer::{AsyncMakeWriter, store_guard};
+#[cfg(feature = "observer")]
 use crate::progress::{
     DownloadProgressHandler,
     DownloadProgressModel,
@@ -23,9 +26,10 @@ use crate::progress::{
     terminal
 };
 
+#[cfg(feature = "observer")]
 const PROGRESS_UPDATE_INTERVAL: Duration = Duration::from_millis(100);
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Copy, Default)]
 #[default(
     enable_console: true,
     enable_debug: false,
@@ -103,6 +107,7 @@ macro_rules! setup_logging {
     };
 }
 
+#[cfg(feature = "observer")]
 fn should_use_progress(config: &LoggingConfig) -> bool {
     config.enable_progress
         && terminal::is_terminal()
@@ -110,6 +115,7 @@ fn should_use_progress(config: &LoggingConfig) -> bool {
         && !config.enable_json
 }
 
+#[cfg(feature = "observer")]
 fn init_with_progress<M>(config: &LoggingConfig, model: M) -> Result<(), ConfigError>
 where
     M: DownloadProgressHandler + Send + Sync + 'static
@@ -162,6 +168,7 @@ fn init_without_progress(config: &LoggingConfig) -> Result<(), ConfigError> {
     result.map_err(|_| ConfigError::LoggingInitFailed)
 }
 
+#[cfg(feature = "observer")]
 pub fn init_logging_with_model<M>(config: LoggingConfig, model: M) -> Result<(), ConfigError>
 where
     M: DownloadProgressHandler + Send + Sync + 'static
@@ -175,6 +182,13 @@ where
     }
 }
 
+#[cfg(feature = "observer")]
 pub fn init_logging(config: LoggingConfig) -> Result<(), ConfigError> {
     init_logging_with_model(config, DownloadProgressModel::new())
+}
+
+#[cfg(not(feature = "observer"))]
+pub fn init_logging(config: LoggingConfig) -> Result<(), ConfigError> {
+    install_error_handler(&config)?;
+    init_without_progress(&config)
 }

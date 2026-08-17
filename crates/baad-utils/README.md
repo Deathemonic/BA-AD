@@ -14,11 +14,18 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 serde = { version = "1", features = ["derive"] }
 ```
 
-By default, `baad-utils` enables the `logs` feature. Disable default features for only file, JSON, and network helpers:
+By default, `baad-utils` enables the `logs`, `observer`, and `utils` features. Disable default features for only file, JSON, and network helpers:
 
 ```toml
 [dependencies]
-baad-utils = { git = "https://github.com/Deathemonic/BA-AD", default-features = false }
+baad-utils = { git = "https://github.com/Deathemonic/BA-AD", default-features = false, features = ["utils"] }
+```
+
+If you only need the logging stack, use `only_logging`. This drops `baad-shared`, `reqwest`, `tokio`, `serde`, `serde_json`, and `platform-dirs`:
+
+```toml
+[dependencies]
+baad-utils = { git = "https://github.com/Deathemonic/BA-AD", default-features = false, features = ["only_logging"] }
 ```
 
 ## Usage
@@ -95,8 +102,12 @@ async fn main() -> baad_utils::Result<()> {
 
 ## Feature Flags
 
-- `logs` (default): enables logging, formatting, progress, and runner modules.
-- `default-features = false`: keeps the crate focused on file, JSON, and network helpers.
+- `logs` (default): tracing setup, console formatting, progress rendering, and the runner helpers.
+- `observer` (default): download progress model wired into the `baad-shared` observer. Implies `logs`.
+- `utils` (default): file I/O, JSON, and network helpers.
+- `only_logging`: alias for `logs` alone. Pair with `default-features = false` to skip `observer` and `utils` and their dependencies.
+
+With `only_logging`, `init_logging` still works but renders without the download progress view, since progress events come from the `observer` feature.
 
 ---
 

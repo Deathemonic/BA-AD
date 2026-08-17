@@ -66,7 +66,7 @@ impl GlobalCatalog {
 
         update(&self.paths.api, |data: &mut ApiData| {
             data.global.version = version;
-            data.global.catalog_url = catalog_url.clone();
+            data.global.catalog_url.clone_from(&catalog_url);
             data.global.platform = platform.into();
             data.global.build_type = build_type.into();
         })

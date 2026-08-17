@@ -10,3 +10,6 @@ reqwest = { workspace = true }
 lazy-regex = { workspace = true }
 strum = { workspace = true }
 memorypack = { workspace = true }
+
+[lints]
+workspace = true

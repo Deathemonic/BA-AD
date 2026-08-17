@@ -78,7 +78,7 @@ pub extern "C" fn baad_shared_platform_ensure_supported(platform: i32) -> i32 {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn baad_shared_china_media_type_is_valid(value: i32) -> bool {
+pub const extern "C" fn baad_shared_china_media_type_is_valid(value: i32) -> bool {
     baad_shared::ChinaMediaType::from_repr(value).is_some()
 }
 
@@ -137,13 +137,11 @@ pub unsafe extern "C" fn baad_shared_init_client(
         builder = builder.user_agent(agent);
     }
 
-    match builder.build() {
-        Ok(client) => {
-            baad_shared::set_client(client);
-            0
-        }
-        Err(_) => BaadSharedClientErrorCode::BuildFailed as i32
-    }
+    let Ok(client) = builder.build() else {
+        return BaadSharedClientErrorCode::BuildFailed as i32;
+    };
+    baad_shared::set_client(client);
+    0
 }
 
 /// # Safety
@@ -162,10 +160,9 @@ pub unsafe extern "C" fn baad_shared_extract_version(
         return NULL_POINTER;
     }
 
-    *out = match baad_shared::REGEX_VERSION.find(text) {
-        Some(found) => export_string(found.as_str()),
-        None => ptr::null_mut()
-    };
+    *out = baad_shared::REGEX_VERSION
+        .find(text)
+        .map_or_else(ptr::null_mut, |found| export_string(found.as_str()));
     0
 }
 

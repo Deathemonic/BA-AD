@@ -22,7 +22,7 @@ impl ConsoleFormatter {
         }
     }
 
-    pub fn with_timestamps(mut self, include_timestamps: bool) -> Self {
+    pub const fn with_timestamps(mut self, include_timestamps: bool) -> Self {
         self.line_formatter = self.line_formatter.with_timestamps(include_timestamps);
         self
     }
@@ -68,8 +68,7 @@ where
             .fields
             .iter()
             .find(|(name, _)| *name == "message")
-            .map(|(_, value)| value.as_ref())
-            .unwrap_or("");
+            .map_or("", |(_, value)| value.as_ref());
 
         self.line_formatter.write_line(&mut writer, level, is_success, message, &fields)
     }
