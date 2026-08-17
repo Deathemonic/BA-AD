@@ -1,5 +1,29 @@
 # Changelogs
 
+## 3.1.0
+
+### Features
+
+- Added `--boost` that accelerates downloading at the risk of cdn rate limiting
+
+### API Changes
+
+- Added `only_logging` feature on `baad-utils`
+    - Adds `observer` and `utils` features
+- More options on `ResourceDownloader`
+    - You can now edit: `max_chunks_per_file`, `max_concurrent_chunks`, and `chunk_threshold`
+    - You can now enable: `http1_only`
+    - Output dir nows default to `./output` if not set
+    - `limit` and `retries` now have 10 as default
+- Increase the catalog and `resources.assets` fetching retries from 3 to 5
+- `baad-dm` now accepts http1 downloads
+    - Can be controlled by passing `http1_only` on `DownloaderConfig`
+- Codebase cleanups
+
+### Fixes
+
+- Fixed catalog not redownloading when there's a hash mismatch
+
 ## 3.0.0
 
 ### Features
