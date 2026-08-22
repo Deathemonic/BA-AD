@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::fmt;
+use core::fmt::NumBuffer;
 
-use itoa::Buffer;
 use smallvec::SmallVec;
 use tracing::field::{Field, Visit};
 
@@ -26,13 +26,13 @@ impl FieldCollector {
 
 impl Visit for FieldCollector {
     fn record_i64(&mut self, field: &Field, value: i64) {
-        let mut buf = Buffer::new();
-        self.fields.push((field.name(), Cow::Owned(buf.format(value).to_owned())));
+        let mut buf = NumBuffer::new();
+        self.fields.push((field.name(), Cow::Owned(value.format_into(&mut buf).to_owned())));
     }
 
     fn record_u64(&mut self, field: &Field, value: u64) {
-        let mut buf = Buffer::new();
-        self.fields.push((field.name(), Cow::Owned(buf.format(value).to_owned())));
+        let mut buf = NumBuffer::new();
+        self.fields.push((field.name(), Cow::Owned(value.format_into(&mut buf).to_owned())));
     }
 
     fn record_bool(&mut self, field: &Field, value: bool) {

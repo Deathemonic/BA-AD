@@ -375,7 +375,6 @@ dependencies = [
  "better_default",
  "chrono",
  "eyre",
- "itoa",
  "lazy-regex",
  "owo-colors",
  "platform-dirs",
