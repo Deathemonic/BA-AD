@@ -14,6 +14,7 @@ reqwest = { workspace = true, features = ["http2", "stream", "socks", "gzip", "d
 thiserror = { workspace = true }
 tokio = { workspace = true }
 
+bytes = "1"
 flate2 = "1.1"
 form_urlencoded = "1.2"
 futures = "0.3"

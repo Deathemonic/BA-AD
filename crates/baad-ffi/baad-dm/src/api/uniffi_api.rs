@@ -152,7 +152,7 @@ impl ZipExtractor {
     #[uniffi::method(async_runtime = "tokio")]
     pub async fn extract_file(&self, target: &str) -> Result<Vec<u8>, Error> {
         let extractor = baad_dm::ZipExtractor::new(&self.client, &self.url).await?;
-        extractor.extract_file(target).await.map_err(Into::into)
+        extractor.extract_file(target).await.map(|b| b.to_vec()).map_err(Into::into)
     }
 
     #[uniffi::method(async_runtime = "tokio")]

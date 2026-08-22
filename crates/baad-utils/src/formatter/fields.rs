@@ -1,6 +1,6 @@
+use core::fmt::NumBuffer;
 use std::borrow::Cow;
 use std::fmt;
-use core::fmt::NumBuffer;
 
 use smallvec::SmallVec;
 use tracing::field::{Field, Visit};

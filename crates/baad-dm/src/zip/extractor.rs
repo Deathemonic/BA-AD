@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::io::Read;
 
+use bytes::Bytes;
 use flate2::read::DeflateDecoder;
 use reqwest_middleware::ClientWithMiddleware;
 use reqwest_middleware::reqwest::Url;
@@ -55,7 +56,7 @@ impl<'a> ZipExtractor<'a> {
         Ok(Self { client, url, zip_size })
     }
 
-    pub async fn extract_file(&self, target: &str) -> Result<Vec<u8>, Error> {
+    pub async fn extract_file(&self, target: &str) -> Result<Bytes, Error> {
         let index = self.build_index().await?;
         let info = index
             .get(target)
@@ -82,7 +83,7 @@ impl<'a> ZipExtractor<'a> {
         client: &ClientWithMiddleware,
         url: &Url,
         info: &ZipFileInfo
-    ) -> Result<Vec<u8>, Error> {
+    ) -> Result<Bytes, Error> {
         let header = Self::fetch_range(
             client,
             url,
@@ -165,25 +166,25 @@ impl<'a> ZipExtractor<'a> {
         url: &Url,
         start: u64,
         end: u64
-    ) -> Result<Vec<u8>, Error> {
+    ) -> Result<Bytes, Error> {
         let res = client
             .get(url.as_str())
             .header(RANGE, create_range_header(start, Some(end)))
             .send()
             .await?;
 
-        Ok(res.bytes().await?.to_vec())
+        Ok(res.bytes().await?)
     }
 
-    fn decompress(data: &[u8], method: u16) -> Result<Vec<u8>, Error> {
+    fn decompress(data: &[u8], method: u16) -> Result<Bytes, Error> {
         match method {
-            COMPRESSION_STORED => Ok(data.to_vec()),
+            COMPRESSION_STORED => Ok(Bytes::copy_from_slice(data)),
             COMPRESSION_DEFLATE => {
                 let mut output = Vec::with_capacity(data.len() * 2);
                 DeflateDecoder::new(data).read_to_end(&mut output).map_err(|e| {
                     Error::Archive(format!("Deflate decompression failed: {e}").into())
                 })?;
-                Ok(output)
+                Ok(Bytes::from(output))
             }
             _ => Err(Error::UnsupportedCompression(method))
         }

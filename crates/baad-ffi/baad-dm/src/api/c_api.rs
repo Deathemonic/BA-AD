@@ -311,7 +311,7 @@ pub unsafe extern "C" fn baad_dm_zip_extract_file(
 
     match result {
         Ok(data) => {
-            *out_data = BaadDmBytes::from_vec(data);
+            *out_data = BaadDmBytes::from_vec(data.to_vec());
             0
         }
         Err(error) => download_failure(out_error, &error)
