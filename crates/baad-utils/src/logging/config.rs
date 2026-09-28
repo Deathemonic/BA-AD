@@ -18,11 +18,11 @@ use crate::logging::handler;
 use crate::logging::writer::{AsyncMakeWriter, store_guard};
 #[cfg(feature = "observer")]
 use crate::progress::{
-    DownloadProgressHandler,
-    DownloadProgressModel,
+    ProgressDisplay,
+    ProgressHandler,
     ProgressMakeWriter,
-    ProgressObserver,
     ProgressView,
+    ViewObserver,
     terminal
 };
 
@@ -118,10 +118,10 @@ fn should_use_progress(config: &LoggingConfig) -> bool {
 #[cfg(feature = "observer")]
 fn init_with_progress<M>(config: &LoggingConfig, model: M) -> Result<(), ConfigError>
 where
-    M: DownloadProgressHandler + Send + Sync + 'static
+    M: ProgressHandler + Send + Sync + 'static
 {
     let view = Arc::new(ProgressView::new(model, PROGRESS_UPDATE_INTERVAL));
-    let observer = ProgressObserver::new(Arc::clone(&view));
+    let observer = ViewObserver::new(Arc::clone(&view));
     let writer = ProgressMakeWriter::new(Arc::clone(&view));
 
     set_observer(Arc::new(observer));
@@ -171,7 +171,7 @@ fn init_without_progress(config: &LoggingConfig) -> Result<(), ConfigError> {
 #[cfg(feature = "observer")]
 pub fn init_logging_with_model<M>(config: LoggingConfig, model: M) -> Result<(), ConfigError>
 where
-    M: DownloadProgressHandler + Send + Sync + 'static
+    M: ProgressHandler + Send + Sync + 'static
 {
     install_error_handler(&config)?;
 
@@ -184,7 +184,7 @@ where
 
 #[cfg(feature = "observer")]
 pub fn init_logging(config: LoggingConfig) -> Result<(), ConfigError> {
-    init_logging_with_model(config, DownloadProgressModel::new())
+    init_logging_with_model(config, ProgressDisplay::new())
 }
 
 #[cfg(not(feature = "observer"))]

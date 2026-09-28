@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use baad_shared::DownloadStatus;
+use baad_shared::ProgressStatus;
 use bon::Builder;
 use reqwest_middleware::reqwest::StatusCode;
 
@@ -46,13 +46,13 @@ pub struct Summary {
     #[builder(default)]
     pub size: u64,
     #[builder(default)]
-    pub status: DownloadStatus,
+    pub status: ProgressStatus,
     #[builder(default)]
     pub resumable: bool
 }
 
 impl Summary {
-    pub const fn is_success(&self) -> bool { matches!(self.status, DownloadStatus::Success) }
+    pub const fn is_success(&self) -> bool { matches!(self.status, ProgressStatus::Success) }
 
     pub fn for_download(download: Download) -> Self {
         Self::builder().download(Arc::new(download)).build()

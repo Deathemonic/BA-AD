@@ -8,6 +8,7 @@ enum FieldConversion {
     Keep,
     BoxStr,
     ArcStr,
+    StaticStr,
     Mirrored,
     Message
 }
@@ -20,9 +21,10 @@ impl FieldConversion {
         }
         match text.as_str() {
             "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" | "f32" | "f64"
-            | "bool" | "String" => Self::Keep,
+            | "bool" | "String" | "ProgressUnit" => Self::Keep,
             "Box<str>" => Self::BoxStr,
             "Arc<str>" => Self::ArcStr,
+            "&'staticstr" | "&str" => Self::StaticStr,
             _ => Self::Message
         }
     }
@@ -30,7 +32,7 @@ impl FieldConversion {
     fn target_type(&self, ty: &Type) -> TokenStream {
         match self {
             Self::Keep | Self::Mirrored => quote! { #ty },
-            Self::BoxStr | Self::ArcStr | Self::Message => {
+            Self::BoxStr | Self::ArcStr | Self::StaticStr | Self::Message => {
                 quote! { String }
             }
         }
@@ -41,6 +43,7 @@ impl FieldConversion {
             Self::Keep => quote! { #binding },
             Self::Mirrored | Self::BoxStr => quote! { #binding.into() },
             Self::ArcStr => quote! { String::from(#binding.as_ref()) },
+            Self::StaticStr => quote! { String::from(#binding) },
             Self::Message => quote! { #binding.to_string() }
         }
     }
@@ -53,7 +56,9 @@ pub fn enum_is_mirrorable(item: &ItemEnum) -> bool {
             type_is_ffi_safe(&field.ty)
                 || text == "Arc<str>"
                 || text == "Box<str>"
-                || text == "DownloadStatus"
+                || text == "&'staticstr"
+                || text == "&str"
+                || text == "ProgressStatus"
         })
     })
 }

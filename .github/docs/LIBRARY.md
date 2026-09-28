@@ -285,9 +285,9 @@ progress view is not wired up, since that requires the `observer` feature and it
 
 ## Custom Progress Display
 
-To replace the built-in `Downloading` lines with your own rendering (e.g., progress bars),
+To replace the built-in progress lines with your own rendering (e.g., progress bars),
 implement [`ProgressModel`](../../crates/baad-utils/src/progress/view.rs) and
-[`DownloadProgressHandler`](../../crates/baad-utils/src/progress/model.rs), then initialize
+[`ProgressHandler`](../../crates/baad-utils/src/progress/model.rs), then initialize
 logging with `init_logging_with_model` instead of `init_logging`:
 
 ```rust
@@ -296,26 +296,26 @@ use std::fmt::Write;
 use std::sync::Arc;
 
 use baad::{
-    init_logging_with_model, DownloadEvent, DownloadProgressHandler, LoggingConfig, ProgressModel,
+    init_logging_with_model, LoggingConfig, ProgressEvent, ProgressHandler, ProgressModel,
 };
 
 #[derive(Default)]
 struct BarModel {
-    active: HashMap<Arc<str>, (u64, u64)>, // filename -> (downloaded, total)
+    active: HashMap<Arc<str>, (u64, u64)>, // id -> (current, total)
 }
 
 impl ProgressModel for BarModel {
-    // Called on repaint. Write one line per active download; `width` and `height` are
+    // Called on repaint. Write one line per active task; `width` and `height` are
     // the terminal dimensions. Keep line count under `height - 1` — drawing more lines
     // than the terminal has rows corrupts the repaint.
     fn render(&mut self, width: usize, height: usize, out: &mut String) {
-        for (name, (downloaded, total)) in &self.active {
-            let pct = *downloaded as f64 / (*total).max(1) as f64;
+        for (id, (current, total)) in &self.active {
+            let pct = *current as f64 / (*total).max(1) as f64;
             let bar_width = width.saturating_sub(40).max(10);
             let filled = (bar_width as f64 * pct) as usize;
             let _ = writeln!(
                 out,
-                "{name} [{}{}] {:.0}%",
+                "{id} [{}{}] {:.0}%",
                 "█".repeat(filled),
                 "░".repeat(bar_width - filled),
                 pct * 100.0
@@ -329,18 +329,18 @@ impl ProgressModel for BarModel {
     }
 }
 
-impl DownloadProgressHandler for BarModel {
-    // Called for every download event. Update your state here.
-    fn handle_event(&mut self, event: DownloadEvent) {
+impl ProgressHandler for BarModel {
+    // Called for every progress event. Update your state here.
+    fn handle_event(&mut self, event: ProgressEvent) {
         match event {
-            DownloadEvent::Started { filename, total_bytes } => {
-                self.active.insert(filename, (0, total_bytes));
+            ProgressEvent::Started { id, total, .. } => {
+                self.active.insert(id, (0, total));
             }
-            DownloadEvent::Progress { filename, downloaded_bytes, total_bytes } => {
-                self.active.insert(filename, (downloaded_bytes, total_bytes));
+            ProgressEvent::Advance { id, current, total } => {
+                self.active.insert(id, (current, total));
             }
-            DownloadEvent::Completed { filename, .. } => {
-                self.active.remove(&filename);
+            ProgressEvent::Completed { id, .. } => {
+                self.active.remove(&id);
             }
         }
     }
@@ -348,6 +348,10 @@ impl DownloadProgressHandler for BarModel {
 
 init_logging_with_model(LoggingConfig::default(), BarModel::default())?;
 ```
+
+Each `Started` event also carries a `label` (`&'static str`, e.g. `"Downloading"`) and a
+`unit` ([`ProgressUnit::Bytes`](../../crates/baad-shared/src/observer.rs) or `Count`) so a
+model can render byte sizes or plain counts and show the active verb per task.
 
 The rendering machinery (repainting, cursor handling, interleaving log lines with the
 progress area) is handled for you. If the progress display cannot be used (non-terminal
@@ -357,28 +361,28 @@ back to plain output.
 ## Progress (Observers)
 
 For full control — routing events to a GUI, a channel, or your own rendering loop —
-implement [`DownloadObserver`](../../crates/baad-shared/src/observer.rs) and register it
+implement [`ProgressObserver`](../../crates/baad-shared/src/observer.rs) and register it
 globally with `set_observer` before downloading. This is the low-level hook underneath
 the progress display; if you use it, disable the built-in progress with
 `enable_progress: false` so the two don't compete for the observer slot.
 
 ```rust
 use std::sync::Arc;
-use baad::{set_observer, DownloadEvent, DownloadObserver};
+use baad::{set_observer, ProgressEvent, ProgressObserver};
 
 struct MyObserver;
 
-impl DownloadObserver for MyObserver {
-    fn on_event(&self, event: DownloadEvent) {
+impl ProgressObserver for MyObserver {
+    fn on_event(&self, event: ProgressEvent) {
         match event {
-            DownloadEvent::Started { filename, total_bytes } => {
-                println!("start {filename} ({total_bytes} bytes)");
+            ProgressEvent::Started { id, label, total, .. } => {
+                println!("{label} {id} ({total} total)");
             }
-            DownloadEvent::Progress { filename, downloaded_bytes, total_bytes } => {
-                println!("{filename}: {downloaded_bytes}/{total_bytes}");
+            ProgressEvent::Advance { id, current, total } => {
+                println!("{id}: {current}/{total}");
             }
-            DownloadEvent::Completed { filename, status, .. } => {
-                println!("done {filename}: {status:?}");
+            ProgressEvent::Completed { id, status } => {
+                println!("done {id}: {status:?}");
             }
         }
     }
@@ -389,6 +393,27 @@ set_observer(Arc::new(MyObserver));
 
 `set_observer` can only be called once per process; the first caller wins. If no observer
 is set, a `NoopObserver` is used and events are discarded.
+
+### Emitting Your Own Progress
+
+The event vocabulary is generic, so you can drive the same display from your own work, not
+just downloads. Use the [`Progress`](../../crates/baad-shared/src/observer.rs) guard:
+it emits `Started` on creation, `Advance` on each `advance`, and exactly one `Completed`
+on `finish`/`fail` or when dropped (defaulting to success).
+
+```rust
+use baad::{Progress, ProgressUnit};
+
+let progress = Progress::start("Excel.zip", "Extracting", ProgressUnit::Bytes, total_bytes);
+for chunk in chunks {
+    write_chunk(chunk)?;
+    progress.advance(chunk.len() as u64);
+}
+progress.finish();
+```
+
+Pass `ProgressUnit::Count` when the numbers are item counts (e.g. tables processed) rather
+than byte sizes, and the display renders `3 / 10` instead of `3 B / 10 B`.
 
 ---
 

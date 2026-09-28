@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use baad_dm::{Download, Downloader, DownloaderConfig};
-use baad_shared::{DownloadStatus, Downloads};
+use baad_shared::{Downloads, ProgressStatus};
 use bon::Builder;
 use reqwest::{Proxy, Url};
 use tracing::{error, info, warn};
@@ -81,7 +81,7 @@ impl ResourceDownloader {
         let summaries = downloader.download(&downloads).await;
 
         let failed_count =
-            summaries.iter().filter(|s| matches!(s.status, DownloadStatus::Failed(_))).count();
+            summaries.iter().filter(|s| matches!(s.status, ProgressStatus::Failed(_))).count();
 
         if failed_count > 0 {
             error!(category = category, failed = failed_count, "Some downloads failed");
@@ -120,7 +120,7 @@ pub async fn download_file(
     let summaries = Downloader::new(config).download(&[download]).await;
 
     if let Some(summary) = summaries.first()
-        && matches!(summary.status, DownloadStatus::Failed(_))
+        && matches!(summary.status, ProgressStatus::Failed(_))
     {
         return Err(CatalogError::DeserializationFailed);
     }

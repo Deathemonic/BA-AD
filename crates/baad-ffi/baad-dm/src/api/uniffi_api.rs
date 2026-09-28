@@ -73,7 +73,7 @@ pub struct Summary {
     pub download: Download,
     pub status_code: u16,
     pub size: u64,
-    pub status: DownloadStatus,
+    pub status: ProgressStatus,
     pub resumable: bool
 }
 
@@ -83,7 +83,7 @@ impl From<&baad_dm::Summary> for Summary {
             download: Download::from(summary.download.as_ref()),
             status_code: summary.status_code.as_u16(),
             size: summary.size,
-            status: DownloadStatus::from(summary.status.clone()),
+            status: ProgressStatus::from(summary.status.clone()),
             resumable: summary.resumable
         }
     }
@@ -91,7 +91,7 @@ impl From<&baad_dm::Summary> for Summary {
 
 #[uniffi::export]
 pub const fn summary_is_success(summary: &Summary) -> bool {
-    matches!(summary.status, DownloadStatus::Success)
+    matches!(summary.status, ProgressStatus::Success)
 }
 
 #[derive(uniffi::Object)]

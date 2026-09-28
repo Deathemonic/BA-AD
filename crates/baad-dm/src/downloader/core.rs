@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::sync::Arc;
 
-use baad_shared::{DownloadEvent, DownloadStatus};
+use baad_shared::{ProgressEvent, ProgressStatus, ProgressUnit};
 use futures::stream::{self, StreamExt};
 use reqwest_middleware::reqwest::StatusCode;
 use tokio::fs;
@@ -69,9 +69,11 @@ impl<'a> Downloader<'a> {
         let download = ctx.download.clone();
         let filename: Arc<str> = ctx.download.filename.as_str().into();
 
-        self.config.observer.on_event(DownloadEvent::Started {
-            filename: Arc::clone(&filename),
-            total_bytes: ctx.download.size.unwrap_or(0)
+        self.config.observer.on_event(ProgressEvent::Started {
+            id: Arc::clone(&filename),
+            label: "Downloading",
+            unit: ProgressUnit::Bytes,
+            total: ctx.download.size.unwrap_or(0)
         });
 
         let outcome = self.fetch_inner(&ctx, &filename).await.unwrap_or_else(|e| e);
@@ -201,21 +203,21 @@ impl<'a> Downloader<'a> {
                 download,
                 status_code: StatusCode::OK,
                 size,
-                status: DownloadStatus::Success,
+                status: ProgressStatus::Success,
                 resumable
             },
             FetchOutcome::Skipped { reason, size } => Summary {
                 download,
                 status_code: StatusCode::OK,
                 size,
-                status: DownloadStatus::Skipped(reason.into()),
+                status: ProgressStatus::Skipped(reason.into()),
                 resumable: false
             },
             FetchOutcome::Failed { error, status_code } => Summary {
                 download,
                 status_code,
                 size: 0,
-                status: DownloadStatus::Failed(error.into()),
+                status: ProgressStatus::Failed(error.into()),
                 resumable: false
             }
         }
@@ -224,9 +226,8 @@ impl<'a> Downloader<'a> {
     fn finalize(&self, summary: Summary) -> Summary {
         let filename: Arc<str> = summary.download.filename.as_str().into();
 
-        self.config.observer.on_event(DownloadEvent::Completed {
-            filename,
-            size: summary.size,
+        self.config.observer.on_event(ProgressEvent::Completed {
+            id: filename,
             status: summary.status.clone()
         });
 
@@ -236,19 +237,19 @@ impl<'a> Downloader<'a> {
             .unwrap_or(&summary.download.filename);
 
         match &summary.status {
-            DownloadStatus::Success => {
+            ProgressStatus::Success => {
                 info!(file = name, success = true, "Downloaded");
             }
-            DownloadStatus::Failed(error) => {
+            ProgressStatus::Failed(error) => {
                 error!(file = name, cause = %error, "Failed");
             }
-            DownloadStatus::Skipped(reason) => {
+            ProgressStatus::Skipped(reason) => {
                 warn!(file = name, cause = %reason, "Skipped");
             }
-            DownloadStatus::HashMismatch(reason) => {
+            ProgressStatus::HashMismatch(reason) => {
                 error!(file = name, cause = %reason, "Hash mismatch");
             }
-            DownloadStatus::NotStarted => {}
+            ProgressStatus::NotStarted => {}
         }
 
         summary

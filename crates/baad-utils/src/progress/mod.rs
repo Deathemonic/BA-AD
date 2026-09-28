@@ -5,5 +5,5 @@ pub mod terminal;
 mod view;
 
 #[cfg(feature = "observer")]
-pub use model::{DownloadProgressHandler, DownloadProgressModel, ProgressObserver};
+pub use model::{ProgressDisplay, ProgressHandler, ViewObserver};
 pub use view::{ProgressMakeWriter, ProgressModel, ProgressView, ProgressWriter};

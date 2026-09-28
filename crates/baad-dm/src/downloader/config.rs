@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::sync::Arc;
 
-use baad_shared::DownloadObserver;
+use baad_shared::ProgressObserver;
 use bon::Builder;
 use derive_more::Debug;
 use reqwest_middleware::reqwest::Proxy;
@@ -43,5 +43,5 @@ pub struct DownloaderConfig<'a> {
 
     #[debug(skip)]
     #[builder(default = baad_shared::observer())]
-    pub observer: Arc<dyn DownloadObserver>
+    pub observer: Arc<dyn ProgressObserver>
 }

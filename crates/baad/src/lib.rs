@@ -8,11 +8,13 @@ pub mod strategy;
 pub use baad_shared::consts::*;
 pub use baad_shared::{
     BuildType,
-    DownloadEvent,
-    DownloadObserver,
-    DownloadStatus,
     NoopObserver,
     Platform,
+    Progress,
+    ProgressEvent,
+    ProgressObserver,
+    ProgressStatus,
+    ProgressUnit,
     client,
     set_client,
     set_observer
@@ -20,7 +22,7 @@ pub use baad_shared::{
 #[cfg(feature = "logs")]
 pub use baad_utils::config::{LoggingConfig, init_logging, init_logging_with_model};
 #[cfg(feature = "logs")]
-pub use baad_utils::progress::{DownloadProgressHandler, ProgressModel};
+pub use baad_utils::progress::{ProgressDisplay, ProgressHandler, ProgressModel};
 pub use baad_utils::{file, network};
 pub use error::*;
 pub use tracing::{debug, error, info, trace, warn};

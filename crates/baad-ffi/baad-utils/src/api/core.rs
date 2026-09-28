@@ -1,8 +1,26 @@
+use std::collections::HashSet;
 use std::path::Path;
+use std::sync::{Arc, Mutex, OnceLock};
 
+use baad_shared::{ProgressEvent, ProgressStatus, ProgressUnit, observer};
 use baad_utils::JsonError;
 use baad_utils::file::{create_parent_dir, load_file, save_file};
 use serde_json::Value;
+
+fn intern_label(label: &str) -> &'static str {
+    static LABELS: OnceLock<Mutex<HashSet<&'static str>>> = OnceLock::new();
+    let labels = LABELS.get_or_init(|| Mutex::new(HashSet::new()));
+
+    let Ok(mut guard) = labels.lock() else {
+        return "";
+    };
+    if let Some(existing) = guard.get(label) {
+        return existing;
+    }
+    let leaked: &'static str = String::from(label).leak();
+    guard.insert(leaked);
+    leaked
+}
 
 pub async fn json_load_string(path: &Path) -> Result<String, JsonError> {
     let bytes = load_file(path).await?;
@@ -40,6 +58,46 @@ impl LogLevel {
             _ => None
         }
     }
+}
+
+#[cfg(feature = "c-api")]
+pub const fn unit_from_repr(value: i32) -> Option<ProgressUnit> {
+    match value {
+        0 => Some(ProgressUnit::Bytes),
+        1 => Some(ProgressUnit::Count),
+        _ => None
+    }
+}
+
+pub fn progress_started(id: &str, label: &str, unit: ProgressUnit, total: u64) {
+    observer().on_event(ProgressEvent::Started {
+        id: Arc::from(id),
+        label: intern_label(label),
+        unit,
+        total
+    });
+}
+
+pub fn progress_advance(id: &str, current: u64, total: u64) {
+    observer().on_event(ProgressEvent::Advance {
+        id: Arc::from(id),
+        current,
+        total
+    });
+}
+
+pub fn progress_completed(id: &str) {
+    observer().on_event(ProgressEvent::Completed {
+        id: Arc::from(id),
+        status: ProgressStatus::Success
+    });
+}
+
+pub fn progress_failed(id: &str, reason: &str) {
+    observer().on_event(ProgressEvent::Completed {
+        id: Arc::from(id),
+        status: ProgressStatus::Failed(reason.into())
+    });
 }
 
 pub fn join_fields(fields: &[(&str, &str)]) -> String {

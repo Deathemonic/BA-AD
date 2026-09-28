@@ -5,10 +5,11 @@ pub mod error;
 pub mod zip;
 
 pub use baad_shared::{
-    DownloadEvent,
-    DownloadObserver,
-    DownloadStatus,
     NoopObserver,
+    Progress,
+    ProgressEvent,
+    ProgressObserver,
+    ProgressStatus,
     observer,
     set_observer
 };

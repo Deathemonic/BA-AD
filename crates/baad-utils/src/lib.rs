@@ -18,8 +18,21 @@ mod runner;
 pub mod config {
     pub use crate::logging::config::*;
     pub use crate::logging::sink::LoggingSink;
+    #[cfg(feature = "observer")]
+    pub use crate::progress::ProgressDisplay;
 }
 
+#[cfg(feature = "observer")]
+pub use baad_shared::{
+    NoopObserver,
+    Progress,
+    ProgressEvent,
+    ProgressObserver,
+    ProgressStatus,
+    ProgressUnit,
+    observer,
+    set_observer
+};
 #[cfg(any(feature = "logs", feature = "utils"))]
 pub use error::*;
 #[cfg(feature = "logs")]

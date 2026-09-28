@@ -127,19 +127,19 @@ impl BaadDmSummaryArray {
             .iter()
             .map(|summary| {
                 let (status, reason) = match &summary.status {
-                    baad_shared::DownloadStatus::NotStarted => {
+                    baad_shared::ProgressStatus::NotStarted => {
                         (BaadDmSummaryStatus::NotStarted, ptr::null_mut())
                     }
-                    baad_shared::DownloadStatus::Success => {
+                    baad_shared::ProgressStatus::Success => {
                         (BaadDmSummaryStatus::Success, ptr::null_mut())
                     }
-                    baad_shared::DownloadStatus::Skipped(reason) => {
+                    baad_shared::ProgressStatus::Skipped(reason) => {
                         (BaadDmSummaryStatus::Skipped, export_string(reason))
                     }
-                    baad_shared::DownloadStatus::Failed(reason) => {
+                    baad_shared::ProgressStatus::Failed(reason) => {
                         (BaadDmSummaryStatus::Failed, export_string(reason))
                     }
-                    baad_shared::DownloadStatus::HashMismatch(reason) => {
+                    baad_shared::ProgressStatus::HashMismatch(reason) => {
                         (BaadDmSummaryStatus::HashMismatch, export_string(reason))
                     }
                 };

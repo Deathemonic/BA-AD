@@ -36,6 +36,22 @@ pub fn init_logging(config: LoggingConfig) -> Result<(), ConfigError> {
 }
 
 #[uniffi::export]
+pub fn progress_started(id: &str, label: &str, unit: ProgressUnit, total: u64) {
+    core::progress_started(id, label, unit, total);
+}
+
+#[uniffi::export]
+pub fn progress_advance(id: &str, current: u64, total: u64) {
+    core::progress_advance(id, current, total);
+}
+
+#[uniffi::export]
+pub fn progress_completed(id: &str) { core::progress_completed(id); }
+
+#[uniffi::export]
+pub fn progress_failed(id: &str, reason: &str) { core::progress_failed(id, reason); }
+
+#[uniffi::export]
 pub fn flush_logs() { baad_utils::flush_logs(); }
 
 #[uniffi::export]

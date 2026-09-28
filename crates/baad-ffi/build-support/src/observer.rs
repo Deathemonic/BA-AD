@@ -8,20 +8,20 @@ pub fn render_observer_uniffi() -> TokenStream {
         type ObserverArc<T> = std::sync::Arc<T>;
 
         #[uniffi::export(with_foreign)]
-        pub trait DownloadObserver: Send + Sync {
-            fn on_event(&self, event: DownloadEvent);
+        pub trait ProgressObserver: Send + Sync {
+            fn on_event(&self, event: ProgressEvent);
         }
 
-        struct ForeignObserverAdapter(ObserverArc<dyn DownloadObserver>);
+        struct ForeignObserverAdapter(ObserverArc<dyn ProgressObserver>);
 
-        impl baad_shared::DownloadObserver for ForeignObserverAdapter {
-            fn on_event(&self, event: baad_shared::DownloadEvent) {
+        impl baad_shared::ProgressObserver for ForeignObserverAdapter {
+            fn on_event(&self, event: baad_shared::ProgressEvent) {
                 self.0.on_event(event.into());
             }
         }
 
         #[uniffi::export]
-        pub fn set_observer(observer: ObserverArc<dyn DownloadObserver>) {
+        pub fn set_observer(observer: ObserverArc<dyn ProgressObserver>) {
             crate::api::observer::register_observer(ObserverArc::new(ForeignObserverAdapter(
                 observer
             )));
@@ -36,13 +36,13 @@ pub fn render_observer_dispatch() -> TokenStream {
     quote! {
         use std::sync::{Arc, RwLock};
 
-        static FOREIGN_OBSERVER: RwLock<Option<Arc<dyn baad_shared::DownloadObserver>>> =
+        static FOREIGN_OBSERVER: RwLock<Option<Arc<dyn baad_shared::ProgressObserver>>> =
             RwLock::new(None);
 
         struct ObserverDispatcher;
 
-        impl baad_shared::DownloadObserver for ObserverDispatcher {
-            fn on_event(&self, event: baad_shared::DownloadEvent) {
+        impl baad_shared::ProgressObserver for ObserverDispatcher {
+            fn on_event(&self, event: baad_shared::ProgressEvent) {
                 let Ok(guard) = FOREIGN_OBSERVER.read() else {
                     return;
                 };
@@ -53,7 +53,7 @@ pub fn render_observer_dispatch() -> TokenStream {
             }
         }
 
-        pub(crate) fn register_observer(observer: Arc<dyn baad_shared::DownloadObserver>) {
+        pub(crate) fn register_observer(observer: Arc<dyn baad_shared::ProgressObserver>) {
             baad_shared::set_observer(Arc::new(ObserverDispatcher));
 
             if let Ok(mut guard) = FOREIGN_OBSERVER.write() {
@@ -95,8 +95,8 @@ pub fn render_observer_c(config: &Config) -> TokenStream {
 
 fn render_observer_c_types(config: &Config) -> TokenStream {
     let event_kind = format_ident!("{}EventKind", config.c_types_prefix);
-    let status = format_ident!("{}DownloadStatus", config.c_types_prefix);
-    let event = format_ident!("{}DownloadEvent", config.c_types_prefix);
+    let status = format_ident!("{}ProgressStatus", config.c_types_prefix);
+    let event = format_ident!("{}ProgressEvent", config.c_types_prefix);
     let callback = format_ident!("{}ObserverCallback", config.c_types_prefix);
 
     quote! {
@@ -104,7 +104,7 @@ fn render_observer_c_types(config: &Config) -> TokenStream {
         #[derive(Clone, Copy)]
         pub enum #event_kind {
             Started = 0,
-            Progress = 1,
+            Advance = 1,
             Completed = 2
         }
 
@@ -121,10 +121,11 @@ fn render_observer_c_types(config: &Config) -> TokenStream {
         #[repr(C)]
         pub struct #event {
             pub kind: i32,
-            pub filename: *const std::ffi::c_char,
-            pub total_bytes: u64,
-            pub downloaded_bytes: u64,
-            pub size: u64,
+            pub id: *const std::ffi::c_char,
+            pub label: *const std::ffi::c_char,
+            pub unit: i32,
+            pub current: u64,
+            pub total: u64,
             pub status: i32,
             pub reason: *const std::ffi::c_char
         }
@@ -145,67 +146,70 @@ fn render_observer_c_types(config: &Config) -> TokenStream {
 
 fn render_observer_c_dispatch(config: &Config) -> TokenStream {
     let event_kind = format_ident!("{}EventKind", config.c_types_prefix);
-    let status = format_ident!("{}DownloadStatus", config.c_types_prefix);
-    let event = format_ident!("{}DownloadEvent", config.c_types_prefix);
+    let status = format_ident!("{}ProgressStatus", config.c_types_prefix);
+    let event = format_ident!("{}ProgressEvent", config.c_types_prefix);
 
     quote! {
-        impl baad_shared::DownloadObserver for CallbackObserver {
-            fn on_event(&self, event: baad_shared::DownloadEvent) {
-                let (kind, filename, total_bytes, downloaded_bytes, size, status, reason) =
-                    match event {
-                        baad_shared::DownloadEvent::Started { filename, total_bytes } => (
+        impl baad_shared::ProgressObserver for CallbackObserver {
+            fn on_event(&self, event: baad_shared::ProgressEvent) {
+                let (kind, id, label, unit, current, total, status, reason) = match event {
+                    baad_shared::ProgressEvent::Started { id, label, unit, total } => {
+                        let unit = match unit {
+                            baad_shared::ProgressUnit::Bytes => 0,
+                            baad_shared::ProgressUnit::Count => 1
+                        };
+                        (
                             #event_kind::Started,
-                            filename,
-                            total_bytes,
+                            id,
+                            Some(label),
+                            unit,
                             0,
-                            0,
+                            total,
                             #status::NotStarted,
                             None
-                        ),
-                        baad_shared::DownloadEvent::Progress {
-                            filename,
-                            downloaded_bytes,
-                            total_bytes
-                        } => (
-                            #event_kind::Progress,
-                            filename,
-                            total_bytes,
-                            downloaded_bytes,
-                            0,
-                            #status::NotStarted,
-                            None
-                        ),
-                        baad_shared::DownloadEvent::Completed { filename, size, status } => {
-                            let (status, reason) = match status {
-                                baad_shared::DownloadStatus::NotStarted => {
-                                    (#status::NotStarted, None)
-                                }
-                                baad_shared::DownloadStatus::Success => (#status::Success, None),
-                                baad_shared::DownloadStatus::Skipped(reason) => {
-                                    (#status::Skipped, Some(reason))
-                                }
-                                baad_shared::DownloadStatus::Failed(reason) => {
-                                    (#status::Failed, Some(reason))
-                                }
-                                baad_shared::DownloadStatus::HashMismatch(reason) => {
-                                    (#status::HashMismatch, Some(reason))
-                                }
-                            };
-                            (#event_kind::Completed, filename, 0, 0, size, status, reason)
-                        }
-                    };
+                        )
+                    }
+                    baad_shared::ProgressEvent::Advance { id, current, total } => (
+                        #event_kind::Advance,
+                        id,
+                        None,
+                        0,
+                        current,
+                        total,
+                        #status::NotStarted,
+                        None
+                    ),
+                    baad_shared::ProgressEvent::Completed { id, status } => {
+                        let (status, reason) = match status {
+                            baad_shared::ProgressStatus::NotStarted => (#status::NotStarted, None),
+                            baad_shared::ProgressStatus::Success => (#status::Success, None),
+                            baad_shared::ProgressStatus::Skipped(reason) => {
+                                (#status::Skipped, Some(reason))
+                            }
+                            baad_shared::ProgressStatus::Failed(reason) => {
+                                (#status::Failed, Some(reason))
+                            }
+                            baad_shared::ProgressStatus::HashMismatch(reason) => {
+                                (#status::HashMismatch, Some(reason))
+                            }
+                        };
+                        (#event_kind::Completed, id, None, 0, 0, 0, status, reason)
+                    }
+                };
 
-                let Ok(filename) = std::ffi::CString::new(filename.as_ref()) else {
+                let Ok(id) = std::ffi::CString::new(id.as_ref()) else {
                     return;
                 };
+                let label = label.and_then(|label| std::ffi::CString::new(label).ok());
                 let reason = reason.and_then(|reason| std::ffi::CString::new(reason.as_ref()).ok());
 
                 let event = #event {
                     kind: kind as i32,
-                    filename: filename.as_ptr(),
-                    total_bytes,
-                    downloaded_bytes,
-                    size,
+                    id: id.as_ptr(),
+                    label: label.as_ref().map_or(std::ptr::null(), |label| label.as_ptr()),
+                    unit,
+                    current,
+                    total,
                     status: status as i32,
                     reason: reason.as_ref().map_or(std::ptr::null(), |reason| reason.as_ptr())
                 };

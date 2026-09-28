@@ -8,20 +8,31 @@ fn main() {
         observer: false,
         c_runtime: true,
         blocking_runtime: false,
-        sources: &[Source {
-            crate_path: "baad_utils",
-            dir: "../../baad-utils/src",
-            type_files: &[("error.rs", RemoteKind::Error)],
-            const_files: &[],
-            renames: &[],
-            sanitized: &[Sanitized {
-                file: "logging/config.rs",
-                name: "LoggingConfig",
-                skip_fields: &[],
-                native: Some("baad_utils::config::LoggingConfig")
-            }],
-            skip_types: &[]
-        }],
+        sources: &[
+            Source {
+                crate_path: "baad_utils",
+                dir: "../../baad-utils/src",
+                type_files: &[("error.rs", RemoteKind::Error)],
+                const_files: &[],
+                renames: &[],
+                sanitized: &[Sanitized {
+                    file: "logging/config.rs",
+                    name: "LoggingConfig",
+                    skip_fields: &[],
+                    native: Some("baad_utils::config::LoggingConfig")
+                }],
+                skip_types: &[]
+            },
+            Source {
+                crate_path: "baad_shared",
+                dir: "../../baad-shared/src",
+                type_files: &[("observer.rs", RemoteKind::Data)],
+                const_files: &[],
+                renames: &[],
+                sanitized: &[],
+                skip_types: &["ProgressStatus", "ProgressEvent"]
+            }
+        ],
         reexports: &[],
         handles: &[]
     });
