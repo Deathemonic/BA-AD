@@ -1,0 +1,117 @@
+name: Cross Platform Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+env:
+  SMOKE_TEST_ARGS: -- download japan --assets --filter ch0230 --limit 4
+
+jobs:
+  build:
+    name: Build (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: i586-unknown-linux-musl, bin: baad }
+          - { target: i686-unknown-linux-musl, bin: baad }
+          - { target: x86_64-unknown-linux-musl, bin: baad }
+          - { target: arm-unknown-linux-musleabi, bin: baad }
+          - { target: arm-unknown-linux-musleabihf, bin: baad }
+          - { target: armv5te-unknown-linux-musleabi, bin: baad }
+          - { target: armv7-unknown-linux-musleabi, bin: baad }
+          - { target: armv7-unknown-linux-musleabihf, bin: baad }
+          - { target: aarch64-unknown-linux-musl, bin: baad }
+          - { target: aarch64_be-unknown-linux-musl, bin: baad }
+          - { target: loongarch64-unknown-linux-musl, bin: baad }
+          - { target: mips-unknown-linux-musl, bin: baad }
+          - { target: mipsel-unknown-linux-musl, bin: baad }
+          - { target: mips64-unknown-linux-muslabi64, bin: baad }
+          - { target: mips64el-unknown-linux-muslabi64, bin: baad }
+          - { target: powerpc64-unknown-linux-musl, bin: baad }
+          - { target: powerpc64le-unknown-linux-musl, bin: baad }
+          - { target: riscv32gc-unknown-linux-musl, bin: baad }
+          - { target: riscv64gc-unknown-linux-musl, bin: baad }
+          - { target: s390x-unknown-linux-musl, bin: baad }
+
+          - { target: i586-unknown-linux-gnu, bin: baad }
+          - { target: i686-unknown-linux-gnu, bin: baad }
+          - { target: x86_64-unknown-linux-gnu, bin: baad }
+          - { target: arm-unknown-linux-gnueabi, bin: baad }
+          - { target: arm-unknown-linux-gnueabihf, bin: baad }
+          - { target: armv5te-unknown-linux-gnueabi, bin: baad }
+          - { target: armv7-unknown-linux-gnueabi, bin: baad }
+          - { target: armv7-unknown-linux-gnueabihf, bin: baad }
+          - { target: aarch64-unknown-linux-gnu, bin: baad }
+          - { target: aarch64_be-unknown-linux-gnu, bin: baad }
+          - { target: loongarch64-unknown-linux-gnu, bin: baad }
+          - { target: mips-unknown-linux-gnu, bin: baad }
+          - { target: mipsel-unknown-linux-gnu, bin: baad }
+          - { target: mips64-unknown-linux-gnuabi64, bin: baad }
+          - { target: mips64el-unknown-linux-gnuabi64, bin: baad }
+          - { target: powerpc64-unknown-linux-gnu, bin: baad }
+          - { target: powerpc64le-unknown-linux-gnu, bin: baad }
+          - { target: riscv64gc-unknown-linux-gnu, bin: baad }
+          - { target: s390x-unknown-linux-gnu, bin: baad }
+
+          - { target: i686-pc-windows-gnu, bin: baad.exe }
+          - { target: x86_64-pc-windows-gnu, bin: baad.exe }
+
+          - { target: x86_64-unknown-freebsd, bin: baad }
+          - { target: aarch64-unknown-freebsd, bin: baad }
+          - { target: powerpc64-unknown-freebsd, bin: baad }
+          - { target: powerpc64le-unknown-freebsd, bin: baad }
+          - { target: riscv64gc-unknown-freebsd, bin: baad }
+
+          - { target: x86_64-unknown-netbsd, bin: baad }
+
+          - { target: x86_64-apple-darwin, bin: baad }
+          - { target: aarch64-apple-darwin, bin: baad }
+
+          - { target: i686-linux-android, bin: baad }
+          - { target: x86_64-linux-android, bin: baad }
+          - { target: armv7-linux-androideabi, bin: baad }
+          - { target: arm-linux-androideabi, bin: baad }
+          - { target: aarch64-linux-android, bin: baad }
+          - { target: riscv64-linux-android, bin: baad }
+
+          - { target: x86_64-apple-ios, bin: baad }
+          - { target: aarch64-apple-ios, bin: baad }
+          - { target: aarch64-apple-ios-sim, bin: baad }
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        continue-on-error: true
+        uses: zijiren233/cargo-cross@v1
+        with:
+          command: build
+          targets: ${{ matrix.target }}
+          package: baad-cli
+          bin: baad
+          profile: release
+
+      - name: Run
+        continue-on-error: true
+        uses: zijiren233/cargo-cross@v1
+        with:
+          command: run
+          targets: ${{ matrix.target }}
+          package: baad-cli
+          bin: baad
+          profile: release
+          args: ${{ env.SMOKE_TEST_ARGS }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: baad-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/${{ matrix.bin }}
+          if-no-files-found: error
