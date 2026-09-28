@@ -96,7 +96,7 @@ pub fn progress_completed(id: &str) {
 pub fn progress_failed(id: &str, reason: &str) {
     observer().on_event(ProgressEvent::Completed {
         id: Arc::from(id),
-        status: ProgressStatus::Failed(reason.into())
+        status: ProgressStatus::Failed(String::from(reason).into())
     });
 }
 

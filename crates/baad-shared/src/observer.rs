@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, OnceLock};
 
@@ -13,9 +14,9 @@ pub enum ProgressStatus {
     #[default]
     NotStarted,
     Success,
-    Skipped(Arc<str>),
-    Failed(Arc<str>),
-    HashMismatch(Arc<str>)
+    Skipped(Cow<'static, str>),
+    Failed(Cow<'static, str>),
+    HashMismatch(Cow<'static, str>)
 }
 
 pub enum ProgressEvent {
@@ -100,7 +101,7 @@ impl Progress {
 
     pub fn complete(self, status: ProgressStatus) { self.inner.complete(status); }
 
-    pub fn fail(self, reason: impl Into<Arc<str>>) {
+    pub fn fail(self, reason: impl Into<Cow<'static, str>>) {
         self.inner.complete(ProgressStatus::Failed(reason.into()));
     }
 }
