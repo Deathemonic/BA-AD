@@ -1,0 +1,28 @@
+[package]
+name = "baad-shared-ffi"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[lib]
+name = "baad_shared_ffi"
+crate-type = ["rlib"]
+
+[dependencies]
+baad-native = { package = "baad", path = "../../crates/baad" }
+baad-dm.workspace = true
+baad-utils = { workspace = true, features = ["logs", "observer", "utils"] }
+tokio.workspace = true
+diplomat.workspace = true
+diplomat-runtime.workspace = true
+baad-shared.workspace = true
+reqwest.workspace = true
+bytes.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true
+
+[build-dependencies]
+baad-ffi-build = { path = "../build-support" }

@@ -183,3 +183,9 @@ by submitting a **pull request** or **issue**. Always appreciate the help.
 This project is not affiliated with, endorsed by, or connected to NAT GAMES Co., Ltd., NEXON Korea Corp., NEXON GAMES
 Co., Ltd., IODivision, Yostar, Inc., or any of their subsidiaries or affiliates. All game assets, content, and materials
 are copyrighted by their respective owners and are used for informational and educational purposes only.</sub>
+## C API
+
+The C-only release ships one BAAD shared library with matching generated headers.
+See [the C API guide](.github/docs/LIBRARY.md#c-api) for builds, ownership,
+blocking/threading and migration changes. Generated Kotlin, Swift,
+Python, and Ruby SDKs are no longer shipped.

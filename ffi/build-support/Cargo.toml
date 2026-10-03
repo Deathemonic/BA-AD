@@ -1,0 +1,15 @@
+[package]
+name = "baad-ffi-build"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+syn = { version = "2", features = ["full", "visit-mut"] }
+quote = "1"
+proc-macro2 = "1"
+prettyplease = "0.2"
+diplomat-tool = "=0.14.0"
+heck = "0.5"
+serde_json.workspace = true
+sha2 = "0.10"

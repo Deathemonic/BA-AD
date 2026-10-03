@@ -1,0 +1,27 @@
+[package]
+name = "baad-utils-ffi"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[lib]
+name = "baad_utils_ffi"
+crate-type = ["rlib"]
+
+[dependencies]
+reqwest.workspace = true
+tracing.workspace = true
+eyre.workspace = true
+owo-colors = "4.2"
+baad-shared-ffi = { path = "../baad-shared" }
+diplomat.workspace = true
+diplomat-runtime.workspace = true
+baad-shared.workspace = true
+baad-utils = { workspace = true, features = ["logs", "observer", "utils"] }
+serde_json.workspace = true
+
+[lints]
+workspace = true
+
+[build-dependencies]
+baad-ffi-build = { path = "../build-support" }

@@ -1,0 +1,24 @@
+[package]
+name = "baad-ffi"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[lib]
+name = "baad"
+crate-type = ["cdylib"]
+
+[dependencies]
+baad-native = { package = "baad", path = "../../crates/baad" }
+baad-shared = { workspace = true }
+diplomat.workspace = true
+diplomat-runtime.workspace = true
+baad-shared-ffi = { path = "../baad-shared" }
+baad-utils-ffi = { path = "../baad-utils" }
+baad-dm-ffi = { path = "../baad-dm" }
+
+[lints]
+workspace = true
+
+[build-dependencies]
+baad-ffi-build = { path = "../build-support" }

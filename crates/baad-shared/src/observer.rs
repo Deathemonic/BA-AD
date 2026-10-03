@@ -1,6 +1,7 @@
 use std::borrow::Cow;
+use std::mem;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::sync::{Arc, OnceLock};
+use std::sync::{Arc, OnceLock, PoisonError, RwLock};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ProgressUnit {
@@ -19,8 +20,9 @@ pub enum ProgressStatus {
     HashMismatch(Cow<'static, str>)
 }
 
+#[derive(Clone)]
 pub enum ProgressEvent {
-    Started { id: Arc<str>, label: &'static str, unit: ProgressUnit, total: u64 },
+    Started { id: Arc<str>, label: Arc<str>, unit: ProgressUnit, total: u64 },
     Advance { id: Arc<str>, current: u64, total: u64 },
     Completed { id: Arc<str>, status: ProgressStatus }
 }
@@ -35,12 +37,25 @@ impl ProgressObserver for NoopObserver {
     fn on_event(&self, _event: ProgressEvent) {}
 }
 
-static GLOBAL_OBSERVER: OnceLock<Arc<dyn ProgressObserver>> = OnceLock::new();
+static GLOBAL_OBSERVER: OnceLock<RwLock<Arc<dyn ProgressObserver>>> = OnceLock::new();
 
-pub fn set_observer(observer: Arc<dyn ProgressObserver>) { let _ = GLOBAL_OBSERVER.set(observer); }
+pub fn set_observer(observer: Arc<dyn ProgressObserver>) {
+    let previous = {
+        let mut slot = GLOBAL_OBSERVER
+            .get_or_init(|| RwLock::new(Arc::new(NoopObserver)))
+            .write()
+            .unwrap_or_else(PoisonError::into_inner);
+        mem::replace(&mut *slot, observer)
+    };
+    drop(previous);
+}
 
 pub fn observer() -> Arc<dyn ProgressObserver> {
-    GLOBAL_OBSERVER.get().cloned().unwrap_or_else(|| Arc::new(NoopObserver))
+    GLOBAL_OBSERVER
+        .get_or_init(|| RwLock::new(Arc::new(NoopObserver)))
+        .read()
+        .unwrap_or_else(PoisonError::into_inner)
+        .clone()
 }
 
 #[derive(Clone)]
@@ -59,7 +74,7 @@ struct ProgressInner {
 impl Progress {
     pub fn start(
         id: impl Into<Arc<str>>,
-        label: &'static str,
+        label: impl Into<Arc<str>>,
         unit: ProgressUnit,
         total: u64
     ) -> Self {
@@ -68,7 +83,7 @@ impl Progress {
 
         observer.on_event(ProgressEvent::Started {
             id: Arc::clone(&id),
-            label,
+            label: label.into(),
             unit,
             total
         });
