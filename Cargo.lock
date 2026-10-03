@@ -314,13 +314,13 @@ dependencies = [
 name = "baad-ffi-build"
 version = "3.2.0"
 dependencies = [
- "diplomat-tool",
  "heck",
- "prettyplease",
  "proc-macro2",
  "quote",
  "serde_json",
  "sha2 0.10.9",
+ "shadow-ffi",
+ "shadow-ffi-diplomat",
  "syn",
 ]
 
@@ -1986,6 +1986,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "pathdiff"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df94ce210e5bc13cb6651479fa48d14f601d9858cfe0467f43ae157023b938d3"
+
+[[package]]
 name = "pbkdf2"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2648,6 +2654,31 @@ dependencies = [
  "cfg-if",
  "cpufeatures 0.3.0",
  "digest 0.11.3",
+]
+
+[[package]]
+name = "shadow-ffi"
+version = "0.1.0"
+source = "git+https://github.com/Deathemonic/ShadowFFI?rev=b4067bccceb961ccebb4f89e30b11b6f92abe249#b4067bccceb961ccebb4f89e30b11b6f92abe249"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "shadow-ffi-diplomat"
+version = "0.1.0"
+source = "git+https://github.com/Deathemonic/ShadowFFI?rev=b4067bccceb961ccebb4f89e30b11b6f92abe249#b4067bccceb961ccebb4f89e30b11b6f92abe249"
+dependencies = [
+ "diplomat-tool",
+ "heck",
+ "pathdiff",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "shadow-ffi",
+ "syn",
 ]
 
 [[package]]

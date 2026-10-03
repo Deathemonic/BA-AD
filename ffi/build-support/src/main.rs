@@ -65,7 +65,7 @@ fn main() {
     for family in ["baad-shared", "baad-utils", "baad-dm", "baad"] {
         let out = generated.join(family);
         std::fs::create_dir(&out).expect("create family output");
-        baad_ffi_build::generate(family, &root.join("ffi").join(family), &root, &out);
+        baad_ffi_build::generate(family, &root, &out);
     }
     std::fs::remove_dir_all(generated).expect("remove temporary bindings output");
     let host = Command::new("rustc").arg("-vV").output().expect("Rust host");

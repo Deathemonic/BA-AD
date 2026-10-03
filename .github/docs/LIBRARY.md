@@ -446,9 +446,12 @@ cargo build --locked --release -p baad-ffi
 cargo run --locked -p baad-ffi-build -- --out target/baad-c
 ```
 
-Each FFI crate has a Cargo build script. Shared Rust build support reads native
-source declarations, generates the Diplomat bridge into Cargo's output directory,
-and writes generated headers into that crate's `bindings/` directory. Native
+Each FFI crate has a Cargo build script. The external `ShadowFFI` project supplies
+backend-independent Rust parsing and shadow generation through the `shadow-ffi` crate,
+and Diplomat integration through `shadow-ffi-diplomat`. BA-AD supplies its source/type
+mappings in `ffi/build-support/src/config.rs`, custom conversion hooks, and release
+packaging. The generator writes the Diplomat bridge into Cargo's output directory
+and generated headers into each crate's `bindings/` directory. Native
 enum variants, shared model fields/getters, scalar logging/download configuration
 records, aligned-line records, resource-category flags, and public constants are generated from their defining Rust source.
 Updating a supported native declaration updates its boundary declaration and
@@ -456,7 +459,9 @@ header on the next build. Native declarations remain the source of truth;
 unsupported field or constant types require an explicit boundary adapter.
 
 The bridge, runtime, and Rust header generator are pinned to Diplomat 0.14.0.
-No separate Python scripts or generator installation are required. The Rust
+No separate Python scripts or generator installation are required. The two
+ShadowFFI crates are Cargo Git dependencies pinned to an exact commit of
+`https://github.com/Deathemonic/ShadowFFI`; a sibling checkout is not required. The Rust
 packaging command builds the library and regenerates bindings before copying it and its matching per-crate
 headers (including required runtime headers), with a SHA-256 manifest. For a
 cross build, pass `--target` to the packaging command. Use `--profile debug` for

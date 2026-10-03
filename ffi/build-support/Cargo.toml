@@ -5,11 +5,11 @@ edition.workspace = true
 publish = false
 
 [dependencies]
-syn = { version = "2", features = ["full", "visit-mut"] }
+syn = { version = "2", features = ["full"] }
 quote = "1"
 proc-macro2 = "1"
-prettyplease = "0.2"
-diplomat-tool = "=0.14.0"
+shadow-ffi = { git = "https://github.com/Deathemonic/ShadowFFI", rev = "b4067bccceb961ccebb4f89e30b11b6f92abe249" }
+shadow-ffi-diplomat = { git = "https://github.com/Deathemonic/ShadowFFI", rev = "b4067bccceb961ccebb4f89e30b11b6f92abe249" }
 heck = "0.5"
 serde_json.workspace = true
 sha2 = "0.10"
