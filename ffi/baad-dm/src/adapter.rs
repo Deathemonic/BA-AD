@@ -1,4 +1,3 @@
-use baad_dm::client;
 use reqwest_middleware::ClientWithMiddleware;
 use reqwest_middleware::reqwest::Url;
 
@@ -36,7 +35,7 @@ pub fn validate_limits(
 }
 
 pub async fn resolve_url(url: &str) -> Result<String, baad_dm::Error> {
-    client::resolve_url(&default_client()?, url).await
+    baad_dm::client::resolve_url(&default_client()?, url).await
 }
 
 pub async fn zip_index(url: &str) -> Result<baad_dm::ZipIndex, baad_dm::Error> {

@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::sync::Arc;
 
-use baad_shared::{ProgressEvent, ProgressStatus, ProgressUnit, observer};
+use baad_shared::{ProgressEvent, ProgressStatus, ProgressUnit};
 use baad_utils::JsonError;
 use serde_json::Value;
 
@@ -16,7 +16,7 @@ pub async fn json_save_string(path: &Path, json: &str) -> Result<(), JsonError> 
 }
 
 pub fn progress_started(id: &str, label: &str, unit: ProgressUnit, total: u64) {
-    observer().on_event(ProgressEvent::Started {
+    baad_shared::observer().on_event(ProgressEvent::Started {
         id: Arc::from(id),
         label: Arc::from(label),
         unit,
@@ -25,7 +25,7 @@ pub fn progress_started(id: &str, label: &str, unit: ProgressUnit, total: u64) {
 }
 
 pub fn progress_advance(id: &str, current: u64, total: u64) {
-    observer().on_event(ProgressEvent::Advance {
+    baad_shared::observer().on_event(ProgressEvent::Advance {
         id: Arc::from(id),
         current,
         total
@@ -33,14 +33,14 @@ pub fn progress_advance(id: &str, current: u64, total: u64) {
 }
 
 pub fn progress_completed(id: &str) {
-    observer().on_event(ProgressEvent::Completed {
+    baad_shared::observer().on_event(ProgressEvent::Completed {
         id: Arc::from(id),
         status: ProgressStatus::Success
     });
 }
 
 pub fn progress_failed(id: &str, reason: &str) {
-    observer().on_event(ProgressEvent::Completed {
+    baad_shared::observer().on_event(ProgressEvent::Completed {
         id: Arc::from(id),
         status: ProgressStatus::Failed(String::from(reason).into())
     });

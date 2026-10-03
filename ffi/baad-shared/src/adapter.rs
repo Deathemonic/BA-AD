@@ -1,8 +1,6 @@
 use std::sync::Arc;
 
-use baad_shared::client::try_set_client;
 use baad_shared::{ProgressEvent, ProgressObserver};
-use serde::de::DeserializeOwned;
 
 use crate::runtime::CallbackScope;
 
@@ -44,7 +42,8 @@ pub fn init_client(proxy: &str, user_agent: &str, no_proxy: bool) -> Result<(), 
         builder = builder.user_agent(user_agent);
     }
     let client = builder.build().map_err(|error| error.to_string())?;
-    try_set_client(client).map_err(|_| "HTTP client already initialized".into())
+    baad_shared::client::try_set_client(client)
+        .map_err(|_| "HTTP client already initialized".into())
 }
 
 pub enum ByteBuffer {
@@ -67,6 +66,6 @@ impl AsRef<[u8]> for ByteBuffer {
     }
 }
 
-pub fn parse_json<T: DeserializeOwned>(json: &str) -> Result<T, serde_json::Error> {
+pub fn parse_json<T: serde::de::DeserializeOwned>(json: &str) -> Result<T, serde_json::Error> {
     serde_json::from_str(json)
 }

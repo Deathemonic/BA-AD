@@ -5,7 +5,6 @@ mod source;
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
-use std::{env, fs};
 
 use constants::constants;
 use mirror::transform;
@@ -20,9 +19,10 @@ const FAMILIES: &[(&str, &[&str])] = &[
 ];
 
 pub fn build(family: &str) {
-    let manifest = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("manifest directory"));
+    let manifest =
+        PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").expect("manifest directory"));
     let root = manifest.parent().expect("ffi directory").parent().expect("workspace root");
-    let out = PathBuf::from(env::var_os("OUT_DIR").expect("build output"));
+    let out = PathBuf::from(std::env::var_os("OUT_DIR").expect("build output"));
     generate(family, &manifest, root, &out);
 }
 
@@ -54,17 +54,17 @@ pub fn generate(family: &str, manifest: &Path, root: &Path, out: &Path) {
         entry.extend(quote!(pub mod #namespace { #contents }));
     }
     let own: syn::File = syn::parse2(own).expect("crate API");
-    fs::write(out.join("api.rs"), prettyplease::unparse(&own)).expect("write crate API");
+    std::fs::write(out.join("api.rs"), prettyplease::unparse(&own)).expect("write crate API");
     let entry: syn::File = syn::parse2(entry).expect("binding entry");
     let mut entry = prettyplease::unparse(&entry);
     for name in ["baad_shared_ffi", "baad_utils_ffi", "baad_dm_ffi"] {
         entry = entry.replace(&format!("use {name}::"), &format!("use crate::{name}::"));
     }
     let entry_path = out.join("bindings.rs");
-    fs::write(&entry_path, entry).expect("write binding entry");
+    std::fs::write(&entry_path, entry).expect("write binding entry");
     let generated = out.join("headers");
     if generated.exists() {
-        fs::remove_dir_all(&generated).expect("clear previous generated headers");
+        std::fs::remove_dir_all(&generated).expect("clear previous generated headers");
     }
     let mut config = diplomat_tool::config::Config::default();
     config.shared_config.unsafe_references_in_callbacks = Some(true);
@@ -78,17 +78,17 @@ pub fn generate(family: &str, manifest: &Path, root: &Path, out: &Path) {
     )
     .expect("generate C headers");
     let destination = manifest.join("bindings");
-    fs::create_dir_all(&destination).expect("create bindings directory");
+    std::fs::create_dir_all(&destination).expect("create bindings directory");
     let mut headers = Vec::new();
     let mut expected = BTreeSet::new();
-    for entry in fs::read_dir(&generated).expect("generated headers") {
+    for entry in std::fs::read_dir(&generated).expect("generated headers") {
         let path = entry.expect("header entry").path();
         let name = path.file_name().expect("header filename").to_string_lossy();
         let family_owner = owner(&name);
         if family_owner != family {
             continue;
         }
-        let mut content = fs::read_to_string(&path).expect("read header");
+        let mut content = std::fs::read_to_string(&path).expect("read header");
         for line in content.clone().lines() {
             if let Some(include) =
                 line.strip_prefix("#include \"").and_then(|s| s.strip_suffix('"'))
@@ -110,7 +110,7 @@ pub fn generate(family: &str, manifest: &Path, root: &Path, out: &Path) {
     }
     write_changed(
         &destination.join("diplomat_runtime.h"),
-        &fs::read_to_string(generated.join("diplomat_runtime.h")).expect("runtime header")
+        &std::fs::read_to_string(generated.join("diplomat_runtime.h")).expect("runtime header")
     );
     headers.sort();
     let guard = format!("{}_H", family.replace('-', "_").to_uppercase());
@@ -122,13 +122,13 @@ pub fn generate(family: &str, manifest: &Path, root: &Path, out: &Path) {
     write_changed(&destination.join(&umbrella_name), &umbrella);
     expected.insert(umbrella_name);
     expected.insert("diplomat_runtime.h".into());
-    for entry in fs::read_dir(&destination).expect("previous bindings") {
+    for entry in std::fs::read_dir(&destination).expect("previous bindings") {
         let path = entry.expect("previous binding").path();
         if path.extension().is_some_and(|extension| extension == "h")
             && !expected
                 .contains(path.file_name().expect("header filename").to_string_lossy().as_ref())
         {
-            fs::remove_file(path).expect("remove obsolete generated binding");
+            std::fs::remove_file(path).expect("remove obsolete generated binding");
         }
     }
 }
@@ -146,7 +146,7 @@ fn owner(name: &str) -> &'static str {
 }
 
 fn write_changed(path: &Path, content: &str) {
-    if fs::read_to_string(path).ok().as_deref() != Some(content) {
-        fs::write(path, content).expect("write generated file");
+    if std::fs::read_to_string(path).ok().as_deref() != Some(content) {
+        std::fs::write(path, content).expect("write generated file");
     }
 }

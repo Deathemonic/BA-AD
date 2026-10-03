@@ -1,4 +1,3 @@
-use std::fs;
 use std::path::Path;
 
 use quote::ToTokens;
@@ -8,7 +7,7 @@ pub(crate) fn read(path: &Path) -> syn::File {
     if std::env::var_os("OUT_DIR").is_some() {
         println!("cargo:rerun-if-changed={}", path.display());
     }
-    syn::parse_file(&fs::read_to_string(path).expect("read Rust source"))
+    syn::parse_file(&std::fs::read_to_string(path).expect("read Rust source"))
         .expect("parse Rust source")
 }
 

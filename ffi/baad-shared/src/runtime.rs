@@ -14,10 +14,9 @@ impl Drop for CallbackScope {
     fn drop(&mut self) { CALLBACK_DEPTH.with(|depth| depth.set(depth.get() - 1)); }
 }
 
-use std::future::Future;
 use std::sync::OnceLock;
 
-pub fn block_on<T>(future: impl Future<Output = T>) -> Result<T, String> {
+pub fn block_on<T>(future: impl std::future::Future<Output = T>) -> Result<T, String> {
     if in_callback() || tokio::runtime::Handle::try_current().is_ok() {
         return Err(
             "Blocking FFI calls cannot run inside a Tokio runtime or progress callback".into()
