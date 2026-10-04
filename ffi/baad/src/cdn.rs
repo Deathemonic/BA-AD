@@ -15,6 +15,7 @@ pub mod ffi {
 
     #[diplomat::opaque]
     pub struct BaadJapanCdn(pub baad_native::cdn::JapanCdn);
+
     impl BaadJapanCdn {
         pub fn new(url: &str, platform: BaadSharedPlatform) -> Box<Self> {
             Box::new(Self(baad_native::cdn::JapanCdn::new(url.into(), platform.into())))
@@ -49,8 +50,10 @@ pub mod ffi {
                 .map_err(baad_shared_ffi::error::error)
         }
     }
+
     #[diplomat::opaque]
     pub struct BaadGlobalCdn(pub baad_native::cdn::GlobalCdn);
+
     impl BaadGlobalCdn {
         pub fn new(url: &str, platform: BaadSharedPlatform) -> Box<Self> {
             Box::new(Self(baad_native::cdn::GlobalCdn::new(url.into(), platform.into())))
@@ -65,8 +68,10 @@ pub mod ffi {
             baad_native::cdn::GlobalCdn::derive_base_url(path)
         }
     }
+
     #[diplomat::opaque]
     pub struct BaadChinaCdn(pub baad_native::cdn::ChinaCdn);
+
     impl BaadChinaCdn {
         pub fn new(
             url: &str,

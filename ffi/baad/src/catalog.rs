@@ -1,11 +1,14 @@
 #[diplomat::bridge]
 pub mod ffi {
-    use baad_native::catalog::Catalog;
     use baad_shared_ffi::error::ffi::BaadError;
     use baad_shared_ffi::models::ffi::{BaadSharedDownloads, BaadSharedGlobalCatalogData};
     use baad_shared_ffi::shared::ffi::{BaadSharedBuildType, BaadSharedPlatform};
+
+    use crate::download_adapter::resource_category;
+
     #[diplomat::opaque]
     pub struct BaadCatalogUrl(pub (String, bool));
+
     impl BaadCatalogUrl {
         pub fn url<'a>(&'a self) -> &'a str { &self.0.0 }
 
@@ -14,22 +17,22 @@ pub mod ffi {
 
     #[diplomat::opaque]
     pub struct BaadJapanCatalog(pub baad_native::catalog::JapanCatalog);
+
     impl BaadJapanCatalog {
         pub fn new(
             category: u8,
             platform: BaadSharedPlatform
         ) -> Result<Box<Self>, Box<BaadError>> {
-            baad_native::catalog::JapanCatalog::new(
-                crate::download_adapter::resource_category(category),
-                platform.into()
-            )
-            .map(|catalog| Box::new(Self(catalog)))
-            .map_err(baad_shared_ffi::error::error)
+            baad_native::catalog::JapanCatalog::new(resource_category(category), platform.into())
+                .map(|catalog| Box::new(Self(catalog)))
+                .map_err(baad_shared_ffi::error::error)
         }
 
         pub fn prepare_downloads(&self) -> Result<Box<BaadSharedDownloads>, Box<BaadError>> {
-            baad_shared_ffi::error::blocking(self.0.prepare_downloads())
-                .map(|downloads| Box::new(BaadSharedDownloads(downloads)))
+            baad_shared_ffi::error::blocking(baad_native::catalog::Catalog::prepare_downloads(
+                &self.0
+            ))
+            .map(|downloads| Box::new(BaadSharedDownloads(downloads)))
         }
 
         pub fn get_catalog_url(&self) -> Result<Box<BaadCatalogUrl>, Box<BaadError>> {
@@ -37,8 +40,10 @@ pub mod ffi {
                 .map(|value| Box::new(BaadCatalogUrl(value)))
         }
     }
+
     #[diplomat::opaque]
     pub struct BaadGlobalCatalog(pub baad_native::catalog::GlobalCatalog);
+
     impl BaadGlobalCatalog {
         pub fn new(
             category: u8,
@@ -46,7 +51,7 @@ pub mod ffi {
             build_type: BaadSharedBuildType
         ) -> Result<Box<Self>, Box<BaadError>> {
             baad_native::catalog::GlobalCatalog::new(
-                crate::download_adapter::resource_category(category),
+                resource_category(category),
                 platform.into(),
                 build_type.into()
             )
@@ -55,8 +60,10 @@ pub mod ffi {
         }
 
         pub fn prepare_downloads(&self) -> Result<Box<BaadSharedDownloads>, Box<BaadError>> {
-            baad_shared_ffi::error::blocking(self.0.prepare_downloads())
-                .map(|downloads| Box::new(BaadSharedDownloads(downloads)))
+            baad_shared_ffi::error::blocking(baad_native::catalog::Catalog::prepare_downloads(
+                &self.0
+            ))
+            .map(|downloads| Box::new(BaadSharedDownloads(downloads)))
         }
 
         pub fn get_catalog_url(
@@ -75,24 +82,25 @@ pub mod ffi {
                 .map(|value| Box::new(BaadSharedGlobalCatalogData(value)))
         }
     }
+
     #[diplomat::opaque]
     pub struct BaadChinaCatalog(pub baad_native::catalog::ChinaCatalog);
+
     impl BaadChinaCatalog {
         pub fn new(
             category: u8,
             platform: BaadSharedPlatform
         ) -> Result<Box<Self>, Box<BaadError>> {
-            baad_native::catalog::ChinaCatalog::new(
-                crate::download_adapter::resource_category(category),
-                platform.into()
-            )
-            .map(|catalog| Box::new(Self(catalog)))
-            .map_err(baad_shared_ffi::error::error)
+            baad_native::catalog::ChinaCatalog::new(resource_category(category), platform.into())
+                .map(|catalog| Box::new(Self(catalog)))
+                .map_err(baad_shared_ffi::error::error)
         }
 
         pub fn prepare_downloads(&self) -> Result<Box<BaadSharedDownloads>, Box<BaadError>> {
-            baad_shared_ffi::error::blocking(self.0.prepare_downloads())
-                .map(|downloads| Box::new(BaadSharedDownloads(downloads)))
+            baad_shared_ffi::error::blocking(baad_native::catalog::Catalog::prepare_downloads(
+                &self.0
+            ))
+            .map(|downloads| Box::new(BaadSharedDownloads(downloads)))
         }
     }
 }

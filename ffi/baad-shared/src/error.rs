@@ -1,3 +1,14 @@
+use std::fmt::Error as FmtError;
+use std::future::Future;
+use std::io::Error as IoError;
+use std::num::ParseIntError;
+use std::str::Utf8Error;
+
+use reqwest::Error as HttpError;
+use serde_json::Error as JsonError;
+
+use crate::runtime::block_on;
+
 #[diplomat::bridge]
 pub mod ffi {
     use std::fmt::Write;
@@ -23,7 +34,6 @@ pub mod ffi {
         pub const fn kind(&self) -> BaadErrorKind { self.1 }
     }
 }
-
 macro_rules! classify {
     ($native:ty, $kind:ident) => {
         impl From<$native> for ffi::BaadError {
@@ -31,7 +41,6 @@ macro_rules! classify {
         }
     };
 }
-
 classify!(baad_native::FilterError, Filter);
 classify!(baad_native::CatalogError, Catalog);
 classify!(baad_dm::Error, Download);
@@ -40,13 +49,13 @@ classify!(baad_utils::JsonError, Json);
 classify!(baad_utils::NetworkError, Network);
 classify!(baad_utils::ConfigError, Configuration);
 classify!(baad_utils::ProgressError, Configuration);
-classify!(std::fmt::Error, InvalidArgument);
-classify!(std::io::Error, File);
+classify!(FmtError, InvalidArgument);
+classify!(IoError, File);
 classify!(baad_shared::ServerConfigError, Configuration);
-classify!(reqwest::Error, Network);
-classify!(serde_json::Error, Json);
-classify!(std::str::Utf8Error, InvalidArgument);
-classify!(std::num::ParseIntError, InvalidArgument);
+classify!(HttpError, Network);
+classify!(JsonError, Json);
+classify!(Utf8Error, InvalidArgument);
+classify!(ParseIntError, InvalidArgument);
 classify!(String, InvalidArgument);
 classify!(&str, InvalidArgument);
 
@@ -57,7 +66,7 @@ pub fn runtime_error(message: String) -> Box<ffi::BaadError> {
 }
 
 pub fn blocking<T, E: Into<ffi::BaadError>>(
-    future: impl std::future::Future<Output = Result<T, E>>
+    future: impl Future<Output = Result<T, E>>
 ) -> Result<T, Box<ffi::BaadError>> {
-    crate::runtime::block_on(future).map_err(runtime_error)?.map_err(error)
+    block_on(future).map_err(runtime_error)?.map_err(error)
 }

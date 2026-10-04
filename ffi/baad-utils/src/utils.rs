@@ -1,16 +1,42 @@
+use tracing::Level;
+
 #[diplomat::bridge]
 pub mod ffi {
     use std::fmt::Write;
+    use std::io::Write as _;
+    use std::mem::take;
     use std::path::{Path, PathBuf};
+    use std::time::Duration;
 
     use baad_shared_ffi::error::ffi::BaadError;
     use baad_shared_ffi::progress::ffi::BaadSharedProgressEvent;
+    use baad_utils::progress::{ProgressHandler as _, ProgressModel as _};
+    use owo_colors::{OwoColorize, Style};
+    use reqwest::{Proxy, Response};
+    use serde_json::{Value, from_str, to_string};
+
+    use crate::adapter::{
+        fetch_with_proxy,
+        fields,
+        json_load_string,
+        json_save_string,
+        log_message,
+        progress_advance,
+        progress_completed,
+        progress_failed,
+        progress_started,
+        render_fields
+    };
+
     #[derive(Clone, Copy)]
     pub struct BaadUtilsLoggingConfig {}
+
     impl BaadUtilsLoggingConfig {
         pub fn default_config() -> Self { baad_utils::config::LoggingConfig::default().into() }
     }
+
     pub struct BaadUtilsAlignedLine<'a> {}
+
     pub enum BaadUtilsLogLevel {
         Trace,
         Debug,
@@ -18,8 +44,10 @@ pub mod ffi {
         Warn,
         Error
     }
+
     #[diplomat::opaque]
     pub struct BaadUtils;
+
     impl BaadUtils {
         pub fn contains_url(value: &str) -> bool {
             baad_utils::formatter::styles::contains_url(value)
@@ -31,7 +59,6 @@ pub mod ffi {
             url_style: &BaadUtilsStyle,
             output: &mut DiplomatWrite
         ) -> Result<(), Box<BaadError>> {
-            use owo_colors::OwoColorize;
             baad_utils::formatter::styles::format_urls(
                 value,
                 output,
@@ -84,10 +111,7 @@ pub mod ffi {
         }
 
         pub fn json_save(path: &str, json: &str) -> Result<(), Box<BaadError>> {
-            baad_shared_ffi::error::blocking(crate::adapter::json_save_string(
-                Path::new(path),
-                json
-            ))
+            baad_shared_ffi::error::blocking(json_save_string(Path::new(path), json))
         }
 
         pub fn get_output_dir(
@@ -101,7 +125,7 @@ pub mod ffi {
         }
 
         pub fn progress_started(id: &str, label: &str, count_unit: bool, total: u64) {
-            crate::adapter::progress_started(
+            progress_started(
                 id,
                 label,
                 if count_unit {
@@ -114,17 +138,15 @@ pub mod ffi {
         }
 
         pub fn progress_advance(id: &str, current: u64, total: u64) {
-            crate::adapter::progress_advance(id, current, total);
+            progress_advance(id, current, total);
         }
 
-        pub fn progress_completed(id: &str) { crate::adapter::progress_completed(id); }
+        pub fn progress_completed(id: &str) { progress_completed(id); }
 
-        pub fn progress_failed(id: &str, reason: &str) {
-            crate::adapter::progress_failed(id, reason);
-        }
+        pub fn progress_failed(id: &str, reason: &str) { progress_failed(id, reason); }
 
         pub fn log(level: BaadUtilsLogLevel, success: bool, message: &str) {
-            crate::adapter::log_message(level, success, message, None);
+            log_message(level, success, message, None);
         }
 
         pub fn log_with_field(
@@ -134,8 +156,8 @@ pub mod ffi {
             name: &str,
             value: &str
         ) {
-            let value = crate::adapter::render_fields(&[(name, value)]);
-            crate::adapter::log_message(level, success, message, value.as_deref());
+            let value = render_fields(&[(name, value)]);
+            log_message(level, success, message, value.as_deref());
         }
 
         pub fn log_with_fields(
@@ -145,10 +167,9 @@ pub mod ffi {
             names: &[DiplomatStrSlice],
             values: &[DiplomatStrSlice]
         ) -> Result<(), Box<BaadError>> {
-            let fields =
-                crate::adapter::fields(names, values).map_err(baad_shared_ffi::error::error)?;
-            let rendered = crate::adapter::render_fields(&fields);
-            crate::adapter::log_message(level, success, message, rendered.as_deref());
+            let fields = fields(names, values).map_err(baad_shared_ffi::error::error)?;
+            let rendered = render_fields(&fields);
+            log_message(level, success, message, rendered.as_deref());
             Ok(())
         }
 
@@ -179,9 +200,7 @@ pub mod ffi {
         }
 
         pub fn json_load(path: &str, output: &mut DiplomatWrite) -> Result<(), Box<BaadError>> {
-            let value = baad_shared_ffi::error::blocking(crate::adapter::json_load_string(
-                Path::new(path)
-            ))?;
+            let value = baad_shared_ffi::error::blocking(json_load_string(Path::new(path)))?;
             let _ = output.write_str(&value);
             Ok(())
         }
@@ -192,16 +211,20 @@ pub mod ffi {
             Ok(())
         }
     }
+
     #[diplomat::opaque]
     pub struct BaadUtilsBytes(pub baad_shared_ffi::adapter::ByteBuffer);
+
     impl BaadUtilsBytes {
         pub fn data<'a>(&'a self) -> &'a [u8] { self.0.as_ref() }
     }
+
     #[derive(Clone, Copy)]
     pub struct BaadUtilsTerminalSize {
         pub width: u64,
         pub height: u64
     }
+
     impl BaadUtils {
         pub fn filename_matches(path: &str, matches: impl Fn(&str) -> bool) -> bool {
             baad_utils::file::filename_matches(path, matches)
@@ -211,10 +234,10 @@ pub mod ffi {
             path: &str,
             updater: impl Fn(&mut BaadUtilsJson)
         ) -> Result<(), Box<BaadError>> {
-            baad_shared_ffi::error::blocking(baad_utils::json::update::<serde_json::Value, _>(
+            baad_shared_ffi::error::blocking(baad_utils::json::update::<Value, _>(
                 Path::new(path),
                 |value| {
-                    let mut json = BaadUtilsJson(std::mem::take(value));
+                    let mut json = BaadUtilsJson(take(value));
                     updater(&mut json);
                     *value = json.0;
                 }
@@ -263,35 +286,39 @@ pub mod ffi {
                 .map_err(baad_shared_ffi::error::error)
         }
     }
+
     #[diplomat::opaque]
-    pub struct BaadUtilsJson(pub serde_json::Value);
+    pub struct BaadUtilsJson(pub Value);
+
     impl BaadUtilsJson {
         pub fn parse(json: &str) -> Result<Box<Self>, Box<BaadError>> {
-            serde_json::from_str(json)
-                .map(|value| Box::new(Self(value)))
-                .map_err(baad_shared_ffi::error::error)
+            from_str(json).map(|value| Box::new(Self(value))).map_err(baad_shared_ffi::error::error)
         }
 
         pub fn replace(&mut self, json: &str) -> Result<(), Box<BaadError>> {
-            self.0 = serde_json::from_str(json).map_err(baad_shared_ffi::error::error)?;
+            self.0 = from_str(json).map_err(baad_shared_ffi::error::error)?;
             Ok(())
         }
 
         pub fn write(&self, output: &mut DiplomatWrite) -> Result<(), Box<BaadError>> {
-            let json = serde_json::to_string(&self.0).map_err(baad_shared_ffi::error::error)?;
+            let json = to_string(&self.0).map_err(baad_shared_ffi::error::error)?;
             output.write_str(&json).map_err(baad_shared_ffi::error::error)
         }
     }
+
     #[diplomat::opaque]
-    pub struct BaadUtilsProxy(pub reqwest::Proxy);
+    pub struct BaadUtilsProxy(pub Proxy);
+
     impl BaadUtilsProxy {
         pub fn fetch_response(&self, url: &str) -> Result<Box<BaadUtilsResponse>, Box<BaadError>> {
-            baad_shared_ffi::error::blocking(crate::adapter::fetch_with_proxy(&self.0, url))
+            baad_shared_ffi::error::blocking(fetch_with_proxy(&self.0, url))
                 .map(|response| Box::new(BaadUtilsResponse(Some(response))))
         }
     }
+
     #[diplomat::opaque]
-    pub struct BaadUtilsResponse(pub Option<reqwest::Response>);
+    pub struct BaadUtilsResponse(pub Option<Response>);
+
     impl BaadUtilsResponse {
         pub fn content_length(&self) -> u64 {
             self.0.as_ref().map_or(0, baad_utils::network::get_content_length)
@@ -310,8 +337,10 @@ pub mod ffi {
                 .map(|bytes| Box::new(BaadUtilsBytes(bytes.into())))
         }
     }
+
     #[diplomat::opaque]
     pub struct BaadUtilsLineFormatter(pub baad_utils::formatter::LineFormatter);
+
     impl BaadUtilsLineFormatter {
         pub fn new() -> Box<Self> { Box::new(Self(baad_utils::formatter::LineFormatter::new())) }
 
@@ -357,8 +386,7 @@ pub mod ffi {
             values: &[DiplomatStrSlice],
             output: &mut DiplomatWrite
         ) -> Result<(), Box<BaadError>> {
-            let fields =
-                crate::adapter::fields(names, values).map_err(baad_shared_ffi::error::error)?;
+            let fields = fields(names, values).map_err(baad_shared_ffi::error::error)?;
             self.0
                 .write_line(output, &level.native(), success, message, &fields)
                 .map_err(baad_shared_ffi::error::error)
@@ -372,6 +400,7 @@ pub mod ffi {
             self.0.write_line_aligned(output, &line.into()).map_err(baad_shared_ffi::error::error)
         }
     }
+
     impl BaadUtilsLogLevel {
         pub const fn visual_length(self, success: bool) -> usize {
             baad_utils::formatter::styles::level_visual_length(&self.native(), success)
@@ -389,16 +418,19 @@ pub mod ffi {
             Box::new(BaadUtilsStyle(baad_utils::formatter::styles::value_style(&self.native())))
         }
     }
+
     #[diplomat::opaque]
-    pub struct BaadUtilsStyle(pub owo_colors::Style);
+    pub struct BaadUtilsStyle(pub Style);
+
     impl BaadUtilsStyle {
         pub fn apply(&self, text: &str, output: &mut DiplomatWrite) -> Result<(), Box<BaadError>> {
-            use owo_colors::OwoColorize;
             write!(output, "{}", text.style(self.0)).map_err(baad_shared_ffi::error::error)
         }
     }
+
     #[diplomat::opaque]
     pub struct BaadUtilsProgressDisplay(pub Option<baad_utils::progress::ProgressDisplay>);
+
     impl BaadUtilsProgressDisplay {
         pub fn new() -> Box<Self> {
             Box::new(Self(Some(baad_utils::progress::ProgressDisplay::new())))
@@ -408,7 +440,6 @@ pub mod ffi {
             &mut self,
             event: &BaadSharedProgressEvent
         ) -> Result<(), Box<BaadError>> {
-            use baad_utils::progress::ProgressHandler;
             self.0
                 .as_mut()
                 .ok_or_else(|| baad_shared_ffi::error::error("Progress display already consumed"))?
@@ -422,7 +453,6 @@ pub mod ffi {
             height: usize,
             output: &mut DiplomatWrite
         ) -> Result<(), Box<BaadError>> {
-            use baad_utils::progress::ProgressModel;
             let mut text = String::new();
             self.0
                 .as_mut()
@@ -431,10 +461,12 @@ pub mod ffi {
             output.write_str(&text).map_err(baad_shared_ffi::error::error)
         }
     }
+
     #[diplomat::opaque]
     pub struct BaadUtilsProgressView(
         pub Option<baad_utils::progress::ProgressView<baad_utils::progress::ProgressDisplay>>
     );
+
     impl BaadUtilsProgressView {
         pub fn new(
             display: &mut BaadUtilsProgressDisplay,
@@ -445,12 +477,11 @@ pub mod ffi {
             })?;
             Ok(Box::new(Self(Some(baad_utils::progress::ProgressView::new(
                 display,
-                std::time::Duration::from_millis(interval_ms)
+                Duration::from_millis(interval_ms)
             )))))
         }
 
         pub fn handle_event(&self, event: &BaadSharedProgressEvent) -> Result<(), Box<BaadError>> {
-            use baad_utils::progress::ProgressHandler;
             self.0
                 .as_ref()
                 .ok_or_else(|| baad_shared_ffi::error::error("Progress view already finished"))?
@@ -485,7 +516,6 @@ pub mod ffi {
         }
 
         pub fn write(&self, bytes: &[u8]) -> Result<usize, Box<BaadError>> {
-            use std::io::Write;
             let mut view = self
                 .0
                 .as_ref()
@@ -496,15 +526,15 @@ pub mod ffi {
 }
 
 impl ffi::BaadUtilsLogLevel {
-    const fn native(self) -> tracing::Level { *self.native_ref() }
+    const fn native(self) -> Level { *self.native_ref() }
 
-    const fn native_ref(self) -> &'static tracing::Level {
+    const fn native_ref(self) -> &'static Level {
         match self {
-            Self::Trace => &tracing::Level::TRACE,
-            Self::Debug => &tracing::Level::DEBUG,
-            Self::Info => &tracing::Level::INFO,
-            Self::Warn => &tracing::Level::WARN,
-            Self::Error => &tracing::Level::ERROR
+            Self::Trace => &Level::TRACE,
+            Self::Debug => &Level::DEBUG,
+            Self::Info => &Level::INFO,
+            Self::Warn => &Level::WARN,
+            Self::Error => &Level::ERROR
         }
     }
 }

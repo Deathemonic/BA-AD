@@ -1,6 +1,9 @@
+use std::ptr::from_ref;
+
 #[diplomat::bridge]
 pub mod ffi {
     use std::fmt::Write;
+    use std::mem::take;
     use std::path::Path;
 
     use baad_shared_ffi::error::ffi::BaadError;
@@ -8,9 +11,13 @@ pub mod ffi {
     use baad_shared_ffi::progress::ffi::BaadSharedProgressStatusKind;
     use baad_utils_ffi::utils::ffi::BaadUtilsBytes;
 
+    use crate::adapter::{create_proxy, resolve_url, validate_limits, zip_extract_file, zip_index};
+
     pub enum BaadDmHashType {}
+
     #[diplomat::opaque]
     pub struct BaadDmDownloads(pub Vec<baad_dm::Download>);
+
     impl BaadDmDownloads {
         pub fn new() -> Box<Self> { Box::new(Self(Vec::new())) }
 
@@ -38,15 +45,19 @@ pub mod ffi {
 
         pub const fn len(&self) -> usize { self.0.len() }
     }
+
     #[derive(Clone, Copy)]
     pub struct BaadDmDownloaderConfig {}
+
     impl BaadDmDownloaderConfig {
         pub fn default_config() -> Self {
             baad_dm::DownloaderConfig::builder().directory(Path::new("")).build().into()
         }
     }
+
     #[diplomat::opaque]
     pub struct BaadDm;
+
     impl BaadDm {
         pub fn detect_hash_type(hash: &str) -> Option<BaadDmHashType> {
             baad_dm::detect_hash_type(hash).map(Into::into)
@@ -65,7 +76,7 @@ pub mod ffi {
         }
 
         pub fn resolve_url(url: &str, output: &mut DiplomatWrite) -> Result<(), Box<BaadError>> {
-            let value = baad_shared_ffi::error::blocking(crate::adapter::resolve_url(url))?;
+            let value = baad_shared_ffi::error::blocking(resolve_url(url))?;
             let _ = output.write_str(&value);
             Ok(())
         }
@@ -76,16 +87,16 @@ pub mod ffi {
             proxy: &str,
             items: &mut BaadDmDownloads
         ) -> Result<Box<BaadDmSummaries>, Box<BaadError>> {
-            crate::adapter::validate_limits(
+            validate_limits(
                 config.concurrent_downloads,
                 config.max_chunks_per_file,
                 config.max_concurrent_chunks
             )
             .map_err(baad_shared_ffi::error::error)?;
-            let proxy = crate::adapter::create_proxy((!proxy.is_empty()).then_some(proxy))
+            let proxy = create_proxy((!proxy.is_empty()).then_some(proxy))
                 .map_err(baad_shared_ffi::error::error)?;
             let downloader = baad_dm::Downloader::new(config.native(Path::new(directory), proxy));
-            let downloads = std::mem::take(&mut items.0);
+            let downloads = take(&mut items.0);
             let values = baad_shared_ffi::runtime::block_on(downloader.download(&downloads))
                 .map_err(baad_shared_ffi::error::runtime_error)?;
             Ok(Box::new(BaadDmSummaries(values)))
@@ -95,17 +106,19 @@ pub mod ffi {
             url: &str,
             target: &str
         ) -> Result<Box<BaadUtilsBytes>, Box<BaadError>> {
-            baad_shared_ffi::error::blocking(crate::adapter::zip_extract_file(url, target))
+            baad_shared_ffi::error::blocking(zip_extract_file(url, target))
                 .map(|value| Box::new(BaadUtilsBytes(value.into())))
         }
 
         pub fn zip_index(url: &str) -> Result<Box<BaadDmZipIndex>, Box<BaadError>> {
-            baad_shared_ffi::error::blocking(crate::adapter::zip_index(url))
+            baad_shared_ffi::error::blocking(zip_index(url))
                 .map(|value| Box::new(BaadDmZipIndex(value)))
         }
     }
+
     #[diplomat::opaque]
     pub struct BaadDmZipIndex(pub baad_dm::ZipIndex);
+
     impl BaadDmZipIndex {
         pub fn names(&self) -> Box<BaadSharedStrings> {
             Box::new(BaadSharedStrings(self.0.names().map(str::to_owned).collect()))
@@ -115,10 +128,13 @@ pub mod ffi {
             self.0.get(name).cloned().map(Into::into)
         }
     }
+
     #[derive(Clone, Copy)]
     pub struct BaadDmZipFileInfo {}
+
     #[diplomat::opaque]
     pub struct BaadDmSummaries(pub Vec<baad_dm::Summary>);
+
     impl BaadDmSummaries {
         pub const fn is_empty(&self) -> bool { self.0.is_empty() }
 
@@ -128,9 +144,11 @@ pub mod ffi {
             self.0.get(index).map(BaadDmSummary::borrow)
         }
     }
+
     #[diplomat::opaque]
     #[repr(transparent)]
     pub struct BaadDmSummary(pub baad_dm::Summary);
+
     impl BaadDmSummary {
         pub fn url<'a>(&'a self) -> &'a str { self.0.download.url.as_str() }
 
@@ -151,9 +169,10 @@ pub mod ffi {
         }
     }
 }
+
 impl ffi::BaadDmSummary {
     const fn borrow(value: &baad_dm::Summary) -> &Self {
-        unsafe { &*(std::ptr::from_ref(value).cast::<Self>()) }
+        unsafe { &*(from_ref(value).cast::<Self>()) }
     }
 }
 const _: () = {

@@ -1,12 +1,20 @@
+use std::str::from_utf8;
+
+use crate::error::error;
+use crate::error::ffi::BaadError;
+
 #[diplomat::bridge]
 pub mod ffi {
+    use crate::adapter::parse_json;
+    use crate::error::error;
     use crate::error::ffi::BaadError;
+    use crate::models::{hash as make_hash, strings};
+
     pub enum BaadSharedHashKind {}
+
     impl BaadSharedGlobalCatalogData {
         pub fn parse_json(json: &str) -> Result<Box<Self>, Box<BaadError>> {
-            crate::adapter::parse_json(json)
-                .map(|value| Box::new(Self(value)))
-                .map_err(crate::error::error)
+            parse_json(json).map(|value| Box::new(Self(value))).map_err(error)
         }
 
         pub fn new() -> Box<Self> { Box::new(Self(baad_shared::GlobalCatalog::default())) }
@@ -20,48 +28,43 @@ pub mod ffi {
             });
         }
     }
+
     impl BaadSharedTableCatalogCN {
         pub fn parse_json(json: &str) -> Result<Box<Self>, Box<BaadError>> {
-            crate::adapter::parse_json(json)
-                .map(|value| Box::new(Self(value)))
-                .map_err(crate::error::error)
+            parse_json(json).map(|value| Box::new(Self(value))).map_err(error)
         }
     }
+
     impl BaadSharedBundleCatalogCN {
         pub fn parse_json(json: &str) -> Result<Box<Self>, Box<BaadError>> {
-            crate::adapter::parse_json(json)
-                .map(|value| Box::new(Self(value)))
-                .map_err(crate::error::error)
+            parse_json(json).map(|value| Box::new(Self(value))).map_err(error)
         }
     }
+
     impl BaadSharedMediaCatalogCN {
         pub fn parse_json(json: &str) -> Result<Box<Self>, Box<BaadError>> {
-            crate::adapter::parse_json(json)
-                .map(|value| Box::new(Self(value)))
-                .map_err(crate::error::error)
+            parse_json(json).map(|value| Box::new(Self(value))).map_err(error)
         }
     }
+
     impl BaadSharedMediaCatalog {
         pub fn parse_json(json: &str) -> Result<Box<Self>, Box<BaadError>> {
-            crate::adapter::parse_json(json)
-                .map(|value| Box::new(Self(value)))
-                .map_err(crate::error::error)
+            parse_json(json).map(|value| Box::new(Self(value))).map_err(error)
         }
     }
+
     impl BaadSharedTableCatalog {
         pub fn parse_json(json: &str) -> Result<Box<Self>, Box<BaadError>> {
-            crate::adapter::parse_json(json)
-                .map(|value| Box::new(Self(value)))
-                .map_err(crate::error::error)
+            parse_json(json).map(|value| Box::new(Self(value))).map_err(error)
         }
     }
+
     impl BaadSharedBundlePatchPackInfo {
         pub fn parse_json(json: &str) -> Result<Box<Self>, Box<BaadError>> {
-            crate::adapter::parse_json(json)
-                .map(|value| Box::new(Self(value)))
-                .map_err(crate::error::error)
+            parse_json(json).map(|value| Box::new(Self(value))).map_err(error)
         }
     }
+
     impl BaadSharedDownloads {
         pub fn new() -> Box<Self> {
             Box::new(Self(baad_shared::Downloads {
@@ -89,9 +92,9 @@ pub mod ffi {
             self.0.assets.push(baad_shared::DownloadAsset {
                 url: url.into(),
                 path: path.into(),
-                hash: crate::models::hash(hash_kind, hash)?,
+                hash: make_hash(hash_kind, hash)?,
                 size,
-                bundle_files: crate::models::strings(files)?
+                bundle_files: strings(files)?
             });
             Ok(())
         }
@@ -108,9 +111,9 @@ pub mod ffi {
             self.0.tables.push(baad_shared::DownloadTable {
                 url: url.into(),
                 path: path.into(),
-                hash: crate::models::hash(hash_kind, hash)?,
+                hash: make_hash(hash_kind, hash)?,
                 size,
-                bundle_files: crate::models::strings(files)?
+                bundle_files: strings(files)?
             });
             Ok(())
         }
@@ -126,14 +129,16 @@ pub mod ffi {
             self.0.media.push(baad_shared::DownloadMedia {
                 url: url.into(),
                 path: path.into(),
-                hash: crate::models::hash(hash_kind, hash)?,
+                hash: make_hash(hash_kind, hash)?,
                 size
             });
             Ok(())
         }
     }
+
     #[diplomat::opaque]
     pub struct BaadSharedStrings(pub Vec<String>);
+
     impl BaadSharedStrings {
         pub const fn is_empty(&self) -> bool { self.0.is_empty() }
 
@@ -147,12 +152,12 @@ pub mod ffi {
 
 fn strings(
     values: &[diplomat_runtime::DiplomatStrSlice<'_>]
-) -> Result<Vec<String>, Box<crate::error::ffi::BaadError>> {
+) -> Result<Vec<String>, Box<BaadError>> {
     values
         .iter()
-        .map(|value| std::str::from_utf8(value).map(str::to_owned))
+        .map(|value| from_utf8(value).map(str::to_owned))
         .collect::<Result<_, _>>()
-        .map_err(crate::error::error)
+        .map_err(error)
 }
 
 fn write_hash(hash: &baad_shared::HashValue, output: &mut diplomat_runtime::DiplomatWrite) {

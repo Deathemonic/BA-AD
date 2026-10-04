@@ -49,6 +49,13 @@ tokio = { version = "1.52", features = ["full"] }
 tracing = "0.1"
 diplomat = "=0.14.0"
 diplomat-runtime = "=0.14.0"
+shadow-ffi = { git = "https://github.com/Deathemonic/ShadowFFI", version = "0.1.0" }
+shadow-ffi-diplomat = { git = "https://github.com/Deathemonic/ShadowFFI", version = "0.1.0" }
+syn = { version = "2", features = ["full"] }
+quote = "1"
+proc-macro2 = "1"
+heck = "0.5"
+
 
 [workspace.lints.clippy]
 absolute_paths = "warn"

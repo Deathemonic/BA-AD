@@ -1,22 +1,24 @@
 use std::path::Path;
+use std::str::from_utf8;
 use std::sync::Arc;
 
-use baad_shared::{ProgressEvent, ProgressStatus, ProgressUnit, observer};
-use baad_utils::JsonError;
-use serde_json::Value;
+use reqwest::{Client, Error as HttpError, Proxy, Response};
+use serde_json::{Value, from_str, to_string};
 
-pub async fn json_load_string(path: &Path) -> Result<String, JsonError> {
+use crate::utils::ffi::BaadUtilsLogLevel;
+
+pub async fn json_load_string(path: &Path) -> Result<String, baad_utils::JsonError> {
     let value: Value = baad_utils::json::load(path).await?;
-    serde_json::to_string(&value).map_err(JsonError::SerdeJson)
+    to_string(&value).map_err(baad_utils::JsonError::SerdeJson)
 }
 
-pub async fn json_save_string(path: &Path, json: &str) -> Result<(), JsonError> {
-    let value: Value = serde_json::from_str(json).map_err(JsonError::SerdeJson)?;
+pub async fn json_save_string(path: &Path, json: &str) -> Result<(), baad_utils::JsonError> {
+    let value: Value = from_str(json).map_err(baad_utils::JsonError::SerdeJson)?;
     baad_utils::json::save(path, &value).await
 }
 
-pub fn progress_started(id: &str, label: &str, unit: ProgressUnit, total: u64) {
-    observer().on_event(ProgressEvent::Started {
+pub fn progress_started(id: &str, label: &str, unit: baad_shared::ProgressUnit, total: u64) {
+    baad_shared::observer().on_event(baad_shared::ProgressEvent::Started {
         id: Arc::from(id),
         label: Arc::from(label),
         unit,
@@ -25,7 +27,7 @@ pub fn progress_started(id: &str, label: &str, unit: ProgressUnit, total: u64) {
 }
 
 pub fn progress_advance(id: &str, current: u64, total: u64) {
-    observer().on_event(ProgressEvent::Advance {
+    baad_shared::observer().on_event(baad_shared::ProgressEvent::Advance {
         id: Arc::from(id),
         current,
         total
@@ -33,16 +35,16 @@ pub fn progress_advance(id: &str, current: u64, total: u64) {
 }
 
 pub fn progress_completed(id: &str) {
-    observer().on_event(ProgressEvent::Completed {
+    baad_shared::observer().on_event(baad_shared::ProgressEvent::Completed {
         id: Arc::from(id),
-        status: ProgressStatus::Success
+        status: baad_shared::ProgressStatus::Success
     });
 }
 
 pub fn progress_failed(id: &str, reason: &str) {
-    observer().on_event(ProgressEvent::Completed {
+    baad_shared::observer().on_event(baad_shared::ProgressEvent::Completed {
         id: Arc::from(id),
-        status: ProgressStatus::Failed(String::from(reason).into())
+        status: baad_shared::ProgressStatus::Failed(String::from(reason).into())
     });
 }
 
@@ -67,47 +69,42 @@ pub fn render_fields(fields: &[(&str, &str)]) -> Option<String> {
     }
 }
 
-pub fn log_message(
-    level: crate::utils::ffi::BaadUtilsLogLevel,
-    success: bool,
-    message: &str,
-    value: Option<&str>
-) {
+pub fn log_message(level: BaadUtilsLogLevel, success: bool, message: &str, value: Option<&str>) {
     match (level, value) {
-        (crate::utils::ffi::BaadUtilsLogLevel::Trace, None) => {
+        (BaadUtilsLogLevel::Trace, None) => {
             baad_utils::trace!(message);
         }
-        (crate::utils::ffi::BaadUtilsLogLevel::Trace, Some(value)) => {
+        (BaadUtilsLogLevel::Trace, Some(value)) => {
             baad_utils::trace!(value, message);
         }
-        (crate::utils::ffi::BaadUtilsLogLevel::Debug, None) => {
+        (BaadUtilsLogLevel::Debug, None) => {
             baad_utils::debug!(message);
         }
-        (crate::utils::ffi::BaadUtilsLogLevel::Debug, Some(value)) => {
+        (BaadUtilsLogLevel::Debug, Some(value)) => {
             baad_utils::debug!(value, message);
         }
-        (crate::utils::ffi::BaadUtilsLogLevel::Info, None) if success => {
+        (BaadUtilsLogLevel::Info, None) if success => {
             baad_utils::info!(success = true, message);
         }
-        (crate::utils::ffi::BaadUtilsLogLevel::Info, Some(value)) if success => {
+        (BaadUtilsLogLevel::Info, Some(value)) if success => {
             baad_utils::info!(success = true, value, message);
         }
-        (crate::utils::ffi::BaadUtilsLogLevel::Info, None) => {
+        (BaadUtilsLogLevel::Info, None) => {
             baad_utils::info!(message);
         }
-        (crate::utils::ffi::BaadUtilsLogLevel::Info, Some(value)) => {
+        (BaadUtilsLogLevel::Info, Some(value)) => {
             baad_utils::info!(value, message);
         }
-        (crate::utils::ffi::BaadUtilsLogLevel::Warn, None) => {
+        (BaadUtilsLogLevel::Warn, None) => {
             baad_utils::warn!(message);
         }
-        (crate::utils::ffi::BaadUtilsLogLevel::Warn, Some(value)) => {
+        (BaadUtilsLogLevel::Warn, Some(value)) => {
             baad_utils::warn!(value, message);
         }
-        (crate::utils::ffi::BaadUtilsLogLevel::Error, None) => {
+        (BaadUtilsLogLevel::Error, None) => {
             baad_utils::error!(message);
         }
-        (crate::utils::ffi::BaadUtilsLogLevel::Error, Some(value)) => {
+        (BaadUtilsLogLevel::Error, Some(value)) => {
             baad_utils::error!(value, message);
         }
     }
@@ -125,16 +122,13 @@ pub fn fields<'a>(
         .zip(values)
         .map(|(name, value)| {
             Ok((
-                std::str::from_utf8(name).map_err(|e| e.to_string())?,
-                std::str::from_utf8(value).map_err(|e| e.to_string())?
+                from_utf8(name).map_err(|e| e.to_string())?,
+                from_utf8(value).map_err(|e| e.to_string())?
             ))
         })
         .collect()
 }
 
-pub async fn fetch_with_proxy(
-    proxy: &reqwest::Proxy,
-    url: &str
-) -> Result<reqwest::Response, reqwest::Error> {
-    reqwest::Client::builder().proxy(proxy.clone()).build()?.get(url).send().await
+pub async fn fetch_with_proxy(proxy: &Proxy, url: &str) -> Result<Response, HttpError> {
+    Client::builder().proxy(proxy.clone()).build()?.get(url).send().await
 }

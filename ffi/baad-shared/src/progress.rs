@@ -1,8 +1,13 @@
 #[diplomat::bridge]
 pub mod ffi {
+    use crate::progress::status_reason;
+
     pub enum BaadSharedProgressEventKind {}
+
     pub enum BaadSharedProgressStatusKind {}
+
     pub enum BaadSharedProgressUnit {}
+
     #[diplomat::opaque]
     pub struct BaadSharedProgressEvent(pub baad_shared::ProgressEvent);
 
@@ -55,9 +60,7 @@ pub mod ffi {
 
         pub fn reason<'a>(&'a self) -> &'a str {
             match &self.0 {
-                baad_shared::ProgressEvent::Completed { status, .. } => {
-                    crate::progress::status_reason(status)
-                }
+                baad_shared::ProgressEvent::Completed { status, .. } => status_reason(status),
                 _ => ""
             }
         }

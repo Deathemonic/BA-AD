@@ -22,3 +22,9 @@ workspace = true
 
 [build-dependencies]
 baad-ffi-build = { path = "../build-support" }
+syn.workspace = true
+quote.workspace = true
+proc-macro2.workspace = true
+shadow-ffi.workspace = true
+shadow-ffi-diplomat.workspace = true
+heck.workspace = true

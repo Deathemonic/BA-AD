@@ -1,5 +1,7 @@
 #[diplomat::bridge]
 pub mod ffi {
+    use std::mem::take;
+
     use baad_shared_ffi::models::ffi::{
         BaadSharedBundleCatalogCN,
         BaadSharedBundlePatchPackInfo,
@@ -12,8 +14,11 @@ pub mod ffi {
     };
     use baad_shared_ffi::shared::ffi::BaadSharedPlatform;
 
+    use crate::download_adapter::resource_category;
+
     #[diplomat::opaque]
     pub struct BaadJapanStrategy;
+
     impl BaadJapanStrategy {
         pub fn build_asset_downloads(
             catalog: &mut BaadSharedBundlePatchPackInfo,
@@ -21,7 +26,7 @@ pub mod ffi {
             platform: BaadSharedPlatform
         ) -> Box<BaadSharedDownloads> {
             let items = baad_native::strategy::JapanStrategy::build_asset_downloads(
-                std::mem::take(&mut catalog.0),
+                take(&mut catalog.0),
                 url,
                 platform.into()
             );
@@ -37,7 +42,7 @@ pub mod ffi {
             url: &str
         ) -> Box<BaadSharedDownloads> {
             let items = baad_native::strategy::JapanStrategy::build_table_downloads(
-                std::mem::take(&mut catalog.0),
+                take(&mut catalog.0),
                 url
             );
             Box::new(BaadSharedDownloads(baad_shared::Downloads {
@@ -53,7 +58,7 @@ pub mod ffi {
             platform: BaadSharedPlatform
         ) -> Box<BaadSharedDownloads> {
             let items = baad_native::strategy::JapanStrategy::build_media_downloads(
-                std::mem::take(&mut catalog.0),
+                take(&mut catalog.0),
                 url,
                 platform.into()
             );
@@ -64,8 +69,10 @@ pub mod ffi {
             }))
         }
     }
+
     #[diplomat::opaque]
     pub struct BaadChinaStrategy;
+
     impl BaadChinaStrategy {
         pub fn build_asset_downloads(
             catalog: &mut BaadSharedBundleCatalogCN,
@@ -73,7 +80,7 @@ pub mod ffi {
             platform: BaadSharedPlatform
         ) -> Box<BaadSharedDownloads> {
             let items = baad_native::strategy::ChinaStrategy::build_asset_downloads(
-                std::mem::take(&mut catalog.0),
+                take(&mut catalog.0),
                 url,
                 platform.into()
             );
@@ -89,7 +96,7 @@ pub mod ffi {
             url: &str
         ) -> Box<BaadSharedDownloads> {
             let items = baad_native::strategy::ChinaStrategy::build_table_downloads(
-                std::mem::take(&mut catalog.0),
+                take(&mut catalog.0),
                 url
             );
             Box::new(BaadSharedDownloads(baad_shared::Downloads {
@@ -104,7 +111,7 @@ pub mod ffi {
             url: &str
         ) -> Box<BaadSharedDownloads> {
             let items = baad_native::strategy::ChinaStrategy::build_media_downloads(
-                std::mem::take(&mut catalog.0),
+                take(&mut catalog.0),
                 url
             );
             Box::new(BaadSharedDownloads(baad_shared::Downloads {
@@ -114,8 +121,10 @@ pub mod ffi {
             }))
         }
     }
+
     #[diplomat::opaque]
     pub struct BaadGlobalStrategy;
+
     impl BaadGlobalStrategy {
         pub fn build_downloads(
             catalog: &mut BaadSharedGlobalCatalogData,
@@ -123,9 +132,9 @@ pub mod ffi {
             category: u8
         ) -> Box<BaadSharedDownloads> {
             Box::new(BaadSharedDownloads(baad_native::strategy::GlobalStrategy::build_downloads(
-                std::mem::take(&mut catalog.0.resources),
+                take(&mut catalog.0.resources),
                 base_url,
-                crate::download_adapter::resource_category(category)
+                resource_category(category)
             )))
         }
     }

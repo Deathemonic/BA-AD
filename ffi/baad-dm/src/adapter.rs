@@ -1,4 +1,5 @@
-use baad_dm::client;
+use bytes::Bytes;
+use reqwest::Proxy;
 use reqwest_middleware::ClientWithMiddleware;
 use reqwest_middleware::reqwest::Url;
 
@@ -9,10 +10,10 @@ pub fn parse_url(url: &str) -> Result<Url, baad_dm::Error> {
     })
 }
 
-pub fn create_proxy(proxy_url: Option<&str>) -> Result<Option<reqwest::Proxy>, baad_dm::Error> {
+pub fn create_proxy(proxy_url: Option<&str>) -> Result<Option<Proxy>, baad_dm::Error> {
     proxy_url
         .map(|url| {
-            reqwest::Proxy::all(url).map_err(|error| baad_dm::Error::InvalidUrl {
+            Proxy::all(url).map_err(|error| baad_dm::Error::InvalidUrl {
                 url: url.into(),
                 reason: error.to_string().into()
             })
@@ -36,7 +37,7 @@ pub fn validate_limits(
 }
 
 pub async fn resolve_url(url: &str) -> Result<String, baad_dm::Error> {
-    client::resolve_url(&default_client()?, url).await
+    baad_dm::client::resolve_url(&default_client()?, url).await
 }
 
 pub async fn zip_index(url: &str) -> Result<baad_dm::ZipIndex, baad_dm::Error> {
@@ -45,7 +46,7 @@ pub async fn zip_index(url: &str) -> Result<baad_dm::ZipIndex, baad_dm::Error> {
     baad_dm::ZipExtractor::new(&client, &url).await?.build_index().await
 }
 
-pub async fn zip_extract_file(url: &str, target: &str) -> Result<bytes::Bytes, baad_dm::Error> {
+pub async fn zip_extract_file(url: &str, target: &str) -> Result<Bytes, baad_dm::Error> {
     let client = default_client()?;
     let url = parse_url(url)?;
     baad_dm::ZipExtractor::new(&client, &url).await?.extract_file(target).await

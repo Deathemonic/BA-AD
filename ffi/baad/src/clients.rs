@@ -15,6 +15,7 @@ pub mod ffi {
 
     #[diplomat::opaque]
     pub struct BaadNexonClient;
+
     impl BaadNexonClient {
         pub fn get_catalog(url: &str) -> Result<Box<BaadSharedGlobalCatalogData>, Box<BaadError>> {
             baad_shared_ffi::error::blocking(baad_native::api::NexonClient::new().get_catalog(url))
@@ -37,6 +38,7 @@ pub mod ffi {
 
     #[diplomat::opaque]
     pub struct BaadYoStarClient;
+
     impl BaadYoStarClient {
         pub fn get_base_config() -> Result<Box<BaadSharedGameBaseConfig>, Box<BaadError>> {
             baad_shared_ffi::error::blocking(
@@ -77,6 +79,7 @@ pub mod ffi {
 
     #[diplomat::opaque]
     pub struct BaadResourcesAsset(pub (String, baad_shared::GameFile));
+
     impl BaadResourcesAsset {
         pub fn url<'a>(&'a self) -> &'a str { &self.0.0 }
 
@@ -87,6 +90,7 @@ pub mod ffi {
 
     #[diplomat::opaque]
     pub struct BaadRoStarClient;
+
     impl BaadRoStarClient {
         pub fn get_state(version: &str) -> Result<Box<BaadSharedChinaState>, Box<BaadError>> {
             baad_shared_ffi::error::blocking(

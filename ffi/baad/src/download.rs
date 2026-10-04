@@ -1,10 +1,12 @@
 #[diplomat::bridge]
 pub mod ffi {
+    use std::mem::replace;
     use std::path::{Path, PathBuf};
 
     use baad_shared_ffi::error::ffi::BaadError;
     use baad_shared_ffi::models::ffi::BaadSharedDownloads;
 
+    use crate::download_adapter::category_bits;
     use crate::filter::ffi::BaadResourceFilter;
 
     #[derive(Clone, Copy)]
@@ -12,9 +14,10 @@ pub mod ffi {
 
     #[diplomat::opaque]
     pub struct BaadResourceDownloader;
+
     impl BaadResourceDownloader {
         pub fn category(assets: bool, tables: bool, media: bool) -> u8 {
-            crate::download_adapter::category_bits(assets, tables, media)
+            category_bits(assets, tables, media)
         }
 
         pub fn download(
@@ -34,7 +37,7 @@ pub mod ffi {
                 .map_err(baad_shared_ffi::error::error)?;
             let downloader = options
                 .native(PathBuf::from(output_dir), (!proxy.is_empty()).then(|| proxy.to_owned()));
-            let downloads = std::mem::replace(&mut downloads.0, baad_shared::Downloads {
+            let downloads = replace(&mut downloads.0, baad_shared::Downloads {
                 assets: Vec::new(),
                 tables: Vec::new(),
                 media: Vec::new()
