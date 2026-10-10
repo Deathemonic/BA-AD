@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use std::path::Path;
 
-use baad_dm::Download;
+use baad_dm::{Download, HashType};
 use baad_shared::{DownloadAsset, DownloadMedia, DownloadTable, HashValue};
 use baad_utils::file::filename_matches;
 use fastcat::fconcat;
@@ -99,6 +99,10 @@ fn create_download(
             .url(parsed_url)
             .filename(path.into())
             .hash(hash.as_string())
+            .hash_type(match hash {
+                HashValue::Crc(_) => HashType::Crc32,
+                HashValue::Md5(_) => HashType::Md5
+            })
             .maybe_target_file(target.map(Into::into))
             .maybe_size(u64::try_from(size).ok().filter(|s| *s > 0))
             .build()

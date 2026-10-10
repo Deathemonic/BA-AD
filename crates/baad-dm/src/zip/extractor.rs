@@ -149,6 +149,7 @@ impl<'a> ZipExtractor<'a> {
 
             entries.insert(filename.into_owned(), ZipFileInfo {
                 compression_method: read_u16_le(cd, offset + 10),
+                crc32: read_u32_le(cd, offset + 16),
                 compressed_size: read_u32_le(cd, offset + 20) as u64,
                 uncompressed_size: read_u32_le(cd, offset + 24) as u64,
                 local_header_offset: read_u32_le(cd, offset + 42) as u64

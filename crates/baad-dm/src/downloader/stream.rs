@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
 use futures::StreamExt;
-use reqwest_middleware::reqwest::Response;
 use reqwest_middleware::reqwest::header::RANGE;
+use reqwest_middleware::reqwest::{Response, StatusCode};
 use tokio::fs::{File, OpenOptions};
 use tokio::io::{AsyncWriteExt, BufWriter};
 
 use crate::client::create_range_header;
-use crate::downloader::helpers::{FetchCtx, StreamOpts, ensure_parent_dir};
+use crate::downloader::helpers::{FetchCtx, StreamOpts, ensure_parent_dir, validate_range};
 use crate::downloader::progress::ProgressTracker;
 use crate::error::Error;
 
@@ -20,7 +20,8 @@ pub async fn download_stream(
 ) -> Result<u64, Error> {
     let mut req = ctx.client.get(ctx.download.url.as_str());
 
-    if opts.resumable && opts.size_on_disk > 0 {
+    let mut resuming = opts.resumable && opts.size_on_disk > 0;
+    if resuming {
         req = req.header(RANGE, create_range_header(opts.size_on_disk, None));
     }
 
@@ -31,18 +32,39 @@ pub async fn download_stream(
         return Err(Error::HttpStatus(status));
     }
 
+    // A server or proxy may ignore Range and send the whole body; restart
+    // from zero instead of failing.
+    if resuming && status == StatusCode::OK {
+        resuming = false;
+    }
+    let initial_size = if resuming { opts.size_on_disk } else { 0 };
+
+    let expected_bytes = if resuming {
+        Some(validate_range(&res, opts.size_on_disk, None, opts.total_size)?)
+    } else if status != StatusCode::OK {
+        return Err(Error::HttpStatus(status));
+    } else {
+        res.content_length()
+    };
+
     ensure_parent_dir(&ctx.file_path).await?;
 
     let file = OpenOptions::new()
         .create(true)
         .write(true)
-        .append(opts.resumable && opts.size_on_disk > 0)
-        .truncate(!(opts.resumable && opts.size_on_disk > 0))
+        .append(resuming)
+        .truncate(!resuming)
         .open(&ctx.file_path)
         .await
         .map_err(Error::Io)?;
 
-    stream_to_file(file, res, opts.size_on_disk, progress).await
+    let downloaded = stream_to_file(file, res, initial_size, progress).await?;
+    if expected_bytes.is_some_and(|expected| downloaded - initial_size != expected) {
+        return Err(Error::DownloadFailed(
+            "Response body length does not match requested range".into()
+        ));
+    }
+    Ok(downloaded)
 }
 
 pub async fn stream_to_file(

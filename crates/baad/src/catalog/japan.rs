@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use baad_dm::HashType;
 use baad_shared::{
     API_FILENAME,
     ApiData,
@@ -21,7 +22,7 @@ use tracing::{debug, info};
 use crate::api::YoStarClient;
 use crate::catalog::traits::Catalog;
 use crate::cdn::{JapanCdn, JapanResources};
-use crate::download::{ResourceCategory, download_file};
+use crate::download::{ExpectedFile, ResourceCategory, download_expected_file};
 use crate::error::CatalogError;
 use crate::strategy::JapanStrategy;
 
@@ -107,7 +108,15 @@ impl JapanCatalog {
         debug!(url = %download_url, "Downloading resources.assets");
         debug!(hash = %file_info.hash, size = %file_info.size, "Expected file info");
 
-        download_file(&download_url, &self.paths.resources, Some(file_info.hash), 5).await?;
+        // The launcher manifest publishes a decimal CRC-64/XZ, which cannot be
+        // told apart from other checksums by its shape.
+        let size = file_info.size.parse().map_err(|_| CatalogError::DeserializationFailed)?;
+        let expected = ExpectedFile {
+            hash: Some(file_info.hash),
+            hash_type: Some(HashType::Crc64Xz),
+            size: Some(size)
+        };
+        download_expected_file(&download_url, &self.paths.resources, &expected, 5).await?;
 
         Ok(self.paths.resources.clone())
     }
