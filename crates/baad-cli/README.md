@@ -19,11 +19,14 @@ cargo install --git "https://github.com/Deathemonic/BA-AD" --locked baad-cli
 ## Usage
 
 ```shell
-# Force update the APK and fetch the latest catalogs
+# Invalidate API/catalog metadata so the next download refreshes it
 baad --update
 
-# Show detailed logs while updating local data
-baad --update --verbose full
+# Refresh metadata and download matching CN media in one invocation
+baad --update download china --media --filter "aris_"
+
+# Show detailed logs while invalidating cached metadata
+baad --update --verbose=full
 
 # Download JP table bundles into ./Downloads
 baad download japan --tables --output ./Downloads
@@ -87,6 +90,11 @@ baad download japan --assets --platform windows
 ```
 
 ## Command Overview
+
+`--update` invalidates cached API and catalog metadata for all regions. Used alone,
+it prepares the next download to refresh that metadata; used before `download`,
+the selected download refreshes it immediately. Cached APK files and downloaded
+resources are preserved. `--clean` removes the entire application cache.
 
 ### `baad --help`
 
