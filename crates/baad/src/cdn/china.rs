@@ -92,22 +92,24 @@ impl ChinaCdn {
         let url = fconcat!("/"; self.catalog_url.as_str(), "Manifest", const { MEDIA_RESOURCES }, self.media_version.as_str(), "MediaManifest");
         let hash_url = fconcat!(url.as_str(), "Hash");
         let file = Self::catalog_file(url, hash_url, "MediaManifest.txt")?;
-        cache::ensure_cached(&file).await?;
-        let bytes = fs::read(&file.path).await?;
+        let source = cache::load(&file).await?;
         // Older packs used extensionless keys and dropped paired ACB/AWB
         // entries.
         let pack_path = file.path.with_extension("v2.bytes");
 
-        if let Some(value) = cache::read_pack::<MediaCatalogCN>(&pack_path, &bytes).await {
+        if let Some(value) =
+            cache::read_bound_pack::<MediaCatalogCN>(&pack_path, &source.digest).await
+        {
             return Ok(value);
         }
 
-        let text = String::from_utf8_lossy(&bytes);
+        let text = String::from_utf8_lossy(&source.bytes);
         let catalog = MediaCatalogCN {
             table: Self::parse_media(&text).into_iter().map(Self::media_entry).collect()
         };
 
-        cache::write_pack(&pack_path, &bytes, &catalog).await?;
+        cache::write_bound_pack(&pack_path, &source.digest, &catalog).await?;
+        let _ = fs::remove_file(file.pack_path()).await;
         Ok(catalog)
     }
 

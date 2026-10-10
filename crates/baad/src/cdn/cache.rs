@@ -48,7 +48,31 @@ struct Metadata {
     source_hash: String
 }
 
+/// A cached catalog source together with its MD5 digest, so callers can bind
+/// packs to it without reading or hashing the file again.
+pub(crate) struct Source {
+    pub bytes: Vec<u8>,
+    pub digest: [u8; 16]
+}
+
+impl Source {
+    fn new(bytes: Vec<u8>) -> Self {
+        let digest = md5::compute_hash(&bytes);
+        Self { bytes, digest }
+    }
+
+    fn hex(&self) -> String { md5::to_hex_string(&self.digest) }
+}
+
 pub async fn ensure_cached(file: &CatalogFile) -> Result<bool, CatalogError> {
+    refresh(file).await.map(|(downloaded, _)| downloaded)
+}
+
+pub(crate) async fn load(file: &CatalogFile) -> Result<Source, CatalogError> {
+    refresh(file).await.map(|(_, source)| source)
+}
+
+async fn refresh(file: &CatalogFile) -> Result<(bool, Source), CatalogError> {
     let filename = file.name();
     let remote = match file.hash_url.as_deref() {
         Some(url) => remote_hash(url).await,
@@ -58,39 +82,43 @@ pub async fn ensure_cached(file: &CatalogFile) -> Result<bool, CatalogError> {
         .await
         .ok()
         .and_then(|bytes| serde_json::from_slice::<Metadata>(&bytes).ok());
-    let source = fs::read(&file.path).await.ok();
+    let source = fs::read(&file.path).await.ok().map(Source::new);
 
     // The remote hash alone cannot identify the source after a version/URL
     // change, nor prove that a previous download and metadata update both
     // completed.
-    let current = metadata.as_ref().zip(source.as_deref()).is_some_and(|(metadata, source)| {
-        metadata.url == file.url
-            && metadata.source_hash == source_hash(source)
-            && remote.as_ref().is_none_or(|hash| metadata.remote_hash.as_ref() == Some(hash))
-    });
-
-    if current {
+    if let Some(source) = source
+        && metadata.as_ref().is_some_and(|metadata| {
+            metadata.url == file.url
+                && metadata.source_hash == source.hex()
+                && remote.as_ref().is_none_or(|hash| metadata.remote_hash.as_ref() == Some(hash))
+        })
+    {
         if file.hash_url.is_some() && remote.is_none() {
             warn!(filename, "Catalog hash unavailable, using verified cache for the same URL");
         }
         debug!(filename, "Catalog up to date, using cache");
-        return Ok(false);
+        return Ok((false, source));
     }
 
     debug!(filename, "Catalog outdated, fetching...");
     let temporary = TemporaryFile::new(&file.path).await?;
     download_file(&file.url, &temporary.path, None, 5).await?;
-    let bytes = fs::read(&temporary.path).await?;
+    let source = Source::new(fs::read(&temporary.path).await?);
     let metadata = Metadata {
         url: file.url.clone(),
         remote_hash: remote,
-        source_hash: source_hash(&bytes)
+        source_hash: source.hex()
     };
     fs::rename(&temporary.path, &file.path).await?;
     // If interrupted between these writes, the source digest will not match and
     // the next run will fetch again instead of trusting an inconsistent cache.
     write_atomic(&file.metadata_path(), &serde_json::to_vec(&metadata)?).await?;
-    Ok(true)
+    // Markers written by earlier versions of the cache are no longer read.
+    for legacy in ["hash", "url"] {
+        let _ = fs::remove_file(file.path.with_extension(legacy)).await;
+    }
+    Ok((true, source))
 }
 
 pub async fn remote_hash(url: &str) -> Option<String> {
@@ -104,14 +132,13 @@ pub(crate) async fn fetch_json<T>(file: &CatalogFile) -> Result<T, CatalogError>
 where
     T: DeserializeOwned + MemoryPackSerialize + MemoryPackDeserialize
 {
-    ensure_cached(file).await?;
-    let source = fs::read(&file.path).await?;
+    let source = load(file).await?;
     let pack = file.pack_path();
-    if let Some(value) = read_pack::<T>(&pack, &source).await {
+    if let Some(value) = read_bound_pack::<T>(&pack, &source.digest).await {
         return Ok(value);
     }
 
-    let value = match serde_json::from_slice::<T>(&source) {
+    let value = match serde_json::from_slice::<T>(&source.bytes) {
         Ok(value) => value,
         Err(error) => {
             // An HTTP 200 can still contain an invalid catalog. Make the next
@@ -120,16 +147,15 @@ where
             return Err(error.into());
         }
     };
-    write_pack(&pack, &source, &value).await?;
+    write_bound_pack(&pack, &source.digest, &value).await?;
     Ok(value)
 }
 
 pub(crate) async fn fetch_memorypack<T: MemoryPackDeserialize>(
     file: &CatalogFile
 ) -> Result<T, CatalogError> {
-    ensure_cached(file).await?;
-    let source = fs::read(&file.path).await?;
-    match MemoryPackSerializer::deserialize::<T>(&source) {
+    let source = load(file).await?;
+    match MemoryPackSerializer::deserialize::<T>(&source.bytes) {
         Ok(value) => Ok(value),
         Err(error) => {
             file.invalidate().await?;
@@ -138,14 +164,8 @@ pub(crate) async fn fetch_memorypack<T: MemoryPackDeserialize>(
     }
 }
 
-fn source_hash(source: &[u8]) -> String { md5::to_hex_string(&md5::compute_hash(source)) }
-
 pub async fn read_pack<T: MemoryPackDeserialize>(path: &Path, source: &[u8]) -> Option<T> {
-    let bytes = fs::read(path).await.ok()?;
-    let payload = bytes.strip_prefix(PACK_MAGIC)?;
-    let digest = md5::compute_hash(source);
-    let payload = payload.strip_prefix(digest.as_slice())?;
-    MemoryPackSerializer::deserialize::<T>(payload).ok()
+    read_bound_pack(path, &md5::compute_hash(source)).await
 }
 
 pub async fn write_pack<T: MemoryPackSerialize>(
@@ -153,10 +173,28 @@ pub async fn write_pack<T: MemoryPackSerialize>(
     source: &[u8],
     value: &T
 ) -> Result<(), CatalogError> {
+    write_bound_pack(path, &md5::compute_hash(source), value).await
+}
+
+pub(crate) async fn read_bound_pack<T: MemoryPackDeserialize>(
+    path: &Path,
+    digest: &[u8; 16]
+) -> Option<T> {
+    let bytes = fs::read(path).await.ok()?;
+    let payload = bytes.strip_prefix(PACK_MAGIC)?;
+    let payload = payload.strip_prefix(digest.as_slice())?;
+    MemoryPackSerializer::deserialize::<T>(payload).ok()
+}
+
+pub(crate) async fn write_bound_pack<T: MemoryPackSerialize>(
+    path: &Path,
+    digest: &[u8; 16],
+    value: &T
+) -> Result<(), CatalogError> {
     // Keep the binding and payload in a single atomic file: updating a separate
     // marker first could incorrectly bless the old pack after an interruption.
     let mut bytes = PACK_MAGIC.to_vec();
-    bytes.extend_from_slice(&md5::compute_hash(source));
+    bytes.extend_from_slice(digest);
     bytes.extend_from_slice(&MemoryPackSerializer::serialize(value)?);
     write_atomic(path, &bytes).await
 }
