@@ -12,7 +12,7 @@ pub struct Args {
     #[command(subcommand)]
     pub command: Option<Commands>,
 
-    /// Force update
+    /// Invalidate cached API/catalog metadata before the next download
     #[arg(short, long)]
     pub update: bool,
 

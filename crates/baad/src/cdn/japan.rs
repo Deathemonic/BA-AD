@@ -10,8 +10,7 @@ use baad_shared::{
 };
 use baad_utils::file::get_data_path;
 use fastcat::fconcat;
-use memorypack::MemoryPackSerializer;
-use tokio::fs;
+use memorypack::MemoryPackDeserialize;
 
 use crate::cdn::cache;
 use crate::cdn::cache::CatalogFile;
@@ -71,36 +70,31 @@ impl JapanCdn {
     pub async fn fetch_assets(&self) -> Result<BundlePatchPackInfo, CatalogError> {
         let platform = self.platform.as_ref().to_lowercase();
         let url = fconcat!("/"; self.catalog_url.as_str(), self.platform.patch_pack(), "BundlePackingInfo.bytes");
-        let bytes = self
-            .fetch_bytes(&url, &fconcat!(platform.as_str(), "/BundlePackingInfo.bytes"))
-            .await?;
-        let catalog = MemoryPackSerializer::deserialize::<BundlePatchPackInfo>(&bytes)?;
-        Ok(catalog)
+        self.fetch_catalog(&url, &fconcat!(platform.as_str(), "/BundlePackingInfo.bytes")).await
     }
 
     pub async fn fetch_table(&self) -> Result<TableCatalog, CatalogError> {
         let url =
             fconcat!("/"; self.catalog_url.as_str(), const { TABLE_BUNDLES }, "TableCatalog.bytes");
-        let bytes = self.fetch_bytes(&url, "TableCatalog.bytes").await?;
-        let catalog = MemoryPackSerializer::deserialize::<TableCatalog>(&bytes)?;
-        Ok(catalog)
+        self.fetch_catalog(&url, "TableCatalog.bytes").await
     }
 
     pub async fn fetch_media(&self) -> Result<MediaCatalog, CatalogError> {
         let url = fconcat!("/"; self.catalog_url.as_str(), const { MEDIA_RESOURCES }, "Catalog", "MediaCatalog.bytes");
-        let bytes = self.fetch_bytes(&url, "MediaCatalog.bytes").await?;
-        let catalog = MemoryPackSerializer::deserialize::<MediaCatalog>(&bytes)?;
-        Ok(catalog)
+        self.fetch_catalog(&url, "MediaCatalog.bytes").await
     }
 
-    async fn fetch_bytes(&self, url: &str, filename: &str) -> Result<Vec<u8>, CatalogError> {
+    async fn fetch_catalog<T: MemoryPackDeserialize>(
+        &self,
+        url: &str,
+        filename: &str
+    ) -> Result<T, CatalogError> {
         let file = CatalogFile {
             url: url.into(),
-            hash_url: Self::hash_url(url),
+            hash_url: Some(Self::hash_url(url)),
             path: get_data_path(&fconcat!("/"; "catalog", "japan", filename))?
         };
-        cache::ensure_cached(&file).await?;
-        Ok(fs::read(&file.path).await?)
+        cache::fetch_memorypack(&file).await
     }
 
     fn hash_url(url: &str) -> String {

@@ -36,7 +36,7 @@ impl ChinaStrategy {
     pub fn build_media_downloads(catalog: MediaCatalogCN, catalog_url: &str) -> Vec<DownloadMedia> {
         let media = catalog.table.into_values().map(|entry| DownloadMedia {
             url: Self::hashed_url(catalog_url, &entry.hash, MEDIA_RESOURCES),
-            path: Self::media_path(entry.path, entry.media_type),
+            path: Self::media_path(&entry.path, entry.media_type),
             hash: HashValue::Md5(entry.hash),
             size: entry.size
         });
@@ -62,8 +62,8 @@ impl ChinaStrategy {
         url
     }
 
-    fn media_path(path: String, media_type: ChinaMediaType) -> String {
+    pub(crate) fn media_path(path: &str, media_type: ChinaMediaType) -> String {
         let extension = media_type.as_ref();
-        if extension.is_empty() { path } else { fconcat!(path.as_str(), ".", extension) }
+        if extension.is_empty() { path.into() } else { fconcat!(path, ".", extension) }
     }
 }

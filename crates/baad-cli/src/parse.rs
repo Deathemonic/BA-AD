@@ -1,10 +1,22 @@
+use std::io::ErrorKind;
+use std::path::Path;
 use std::process::exit;
 
 use baad::catalog::{Catalog, ChinaCatalog, GlobalCatalog, JapanCatalog};
 use baad::download::{FilterMethod, ResourceCategory, ResourceDownloader, ResourceFilter};
-use baad::{ASSET_BUNDLES, BuildType, MEDIA_RESOURCES, TABLE_BUNDLES, file, info, warn};
+use baad::{
+    API_FILENAME,
+    ASSET_BUNDLES,
+    BuildType,
+    MEDIA_RESOURCES,
+    TABLE_BUNDLES,
+    file,
+    info,
+    warn
+};
 use clap::CommandFactory;
 use eyre::{Result, eyre};
+use tokio::fs;
 
 use crate::args::{
     Args,
@@ -26,6 +38,14 @@ impl CommandHandler {
     async fn handle(&self) -> Result<()> {
         if self.args.clean {
             return self.clean().await;
+        }
+
+        if self.args.update {
+            invalidate_metadata(file::data_dir()?).await?;
+            info!(
+                success = true,
+                "Cached API/catalog metadata invalidated; the next download will refresh it"
+            );
         }
 
         match &self.args.command {
@@ -149,6 +169,19 @@ impl CommandHandler {
 
         let filter = ResourceFilter::new(filter_pattern, args.filter_method)?;
         Ok(Some(filter))
+    }
+}
+
+async fn invalidate_metadata(data_dir: &Path) -> Result<()> {
+    match fs::remove_dir_all(data_dir.join("catalog")).await {
+        Ok(()) => {}
+        Err(error) if error.kind() == ErrorKind::NotFound => {}
+        Err(error) => return Err(error.into())
+    }
+    match fs::remove_file(data_dir.join(API_FILENAME)).await {
+        Ok(()) => Ok(()),
+        Err(error) if error.kind() == ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(error.into())
     }
 }
 
