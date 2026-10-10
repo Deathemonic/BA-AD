@@ -34,6 +34,9 @@ baad download global --media --filter "ch0230"
 # Clean cache data; useful when fixing stale or broken local state
 baad --clean
 
+# Keep API data and catalogs in a separate directory, e.g. one per project
+baad --data-dir ./baad-data download japan --tables
+
 # Download both asset bundles and media resources from JP
 baad download japan --assets --media
 
@@ -96,6 +99,7 @@ baad download japan --assets --platform windows
 | `help`              |       | Print this message or the help of the given subcommand(s) |
 | `--update`          | `-u`  | Force update                                              |
 | `--clean`           | `-c`  | Clean the cache                                           |
+| `--data-dir <DIR>`  |       | Use this directory for cached API data and catalogs       |
 | `--verbose <LEVEL>` | `-v`  | Enable verbose output (`minimal`, `full`)                 |
 | `--help`            | `-h`  | Print help                                                |
 | `--version`         | `-V`  | Print version                                             |
