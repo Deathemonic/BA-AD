@@ -188,4 +188,21 @@ mod tests {
         }
         Ok(())
     }
+
+    #[tokio::test]
+    async fn uninferable_checksum_is_not_treated_as_verified() -> Result<(), Box<dyn Error>> {
+        // Without an explicit algorithm a CRC64 value is not recognized, so the
+        // existing file must be neither reused nor reported as verified.
+        let fixture = Fixture::new().await?;
+        let output = fixture.directory.join("resources.assets");
+        fs::write(&output, b"evil")?;
+        let url = format!("{}/ok.bin", fixture.base_url);
+        let error = download_file(&url, &output, Some(GOOD_CRC64.into()), 0)
+            .await
+            .expect_err("Unrecognized checksum must fail")
+            .to_string();
+        assert!(error.contains("Cannot verify"), "{error}");
+        assert_eq!(fs::read(&output)?, b"evil");
+        Ok(())
+    }
 }

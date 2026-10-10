@@ -12,7 +12,7 @@ use tracing::{error, info, warn};
 
 use crate::client::{HttpClientConfig, create_http_client};
 use crate::download::summary::FetchOutcome;
-use crate::download::{Download, Summary};
+use crate::download::{Download, Summary, Verified};
 use crate::downloader::chunk::download_chunked;
 use crate::downloader::config::DownloaderConfig;
 use crate::downloader::helpers::{FetchCtx, StreamOpts, check_server, ensure_parent_dir};
@@ -94,12 +94,16 @@ impl<'a> Downloader<'a> {
             return self.extract_zip(ctx).await;
         }
 
+        // Reject an uncheckable hash before transferring anything.
+        ctx.download.checksum().map_err(|e| FetchOutcome::failed(&e, StatusCode::BAD_REQUEST))?;
+
         let staging = Staging::new(&ctx.file_path);
         if !self.config.overwrite
-            && let Ok(size) = verify_file(ctx.download, &ctx.file_path, None).await
+            && let Ok(verified) = verify_file(ctx.download, &ctx.file_path, None).await
+            && let Some(reason) = verified.reason()
         {
             staging.discard().await;
-            return Ok(FetchOutcome::skipped("File exists with matching size and hash", size));
+            return Ok(FetchOutcome::skipped(reason, verified.size));
         }
 
         let (supports_ranges, content_length, resolved_url) =
@@ -164,7 +168,7 @@ impl<'a> Downloader<'a> {
         let result = match result {
             Ok(_) => {
                 let result = match verify_file(ctx.download, &staging.path, content_length).await {
-                    Ok(size) => staging.publish(&ctx.file_path).await.map(|()| size),
+                    Ok(verified) => staging.publish(&ctx.file_path).await.map(|()| verified.size),
                     Err(error) => Err(error)
                 };
                 if result.is_err() {
@@ -386,7 +390,7 @@ async fn verify_file(
     download: &Download,
     path: &Path,
     server_size: Option<u64>
-) -> Result<u64, Error> {
+) -> Result<Verified, Error> {
     let download = download.clone();
     let path = path.to_path_buf();
     task::spawn_blocking(move || download.verify_file(&path, server_size))

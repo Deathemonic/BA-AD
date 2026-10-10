@@ -280,6 +280,44 @@ mod tests {
         assert_eq!(fs::read_dir(&directory.0).expect("directory").count(), 1);
     }
 
+    #[tokio::test]
+    async fn unrecognized_hash_is_rejected_before_downloading() {
+        let server = Server::bytes(b"valid asset").await;
+        let directory = Directory::new();
+        // An existing file of the right size must not be reused either: the
+        // hash cannot prove its contents.
+        fs::write(directory.0.join("asset.bin"), b"wrong asset").expect("existing asset");
+        let item = download(&server, Some(11), Some("-123".to_string()));
+        let summary = fetch(&directory.0, item, false).await;
+        assert!(
+            matches!(&summary.status, DownloadStatus::Failed(reason) if reason.contains("Cannot verify")),
+            "{summary:?}"
+        );
+        assert!(server.requests.lock().expect("requests").is_empty());
+        assert_eq!(fs::read(directory.0.join("asset.bin")).expect("asset"), b"wrong asset");
+    }
+
+    #[tokio::test]
+    async fn existing_file_without_size_or_hash_is_not_reused() {
+        let server = Server::bytes(b"valid asset").await;
+        let directory = Directory::new();
+        fs::write(directory.0.join("asset.bin"), b"stale").expect("existing asset");
+        let summary = fetch(&directory.0, download(&server, None, None), false).await;
+        assert!(summary.is_success(), "{summary:?}");
+        assert_eq!(fs::read(directory.0.join("asset.bin")).expect("asset"), b"valid asset");
+    }
+
+    #[tokio::test]
+    async fn existing_file_with_wrong_hash_and_unknown_size_is_replaced() {
+        let server = Server::bytes(b"valid asset").await;
+        let directory = Directory::new();
+        fs::write(directory.0.join("asset.bin"), b"wrong asset").expect("existing asset");
+        let item = download(&server, None, Some(hash(b"valid asset")));
+        let summary = fetch(&directory.0, item, false).await;
+        assert!(summary.is_success(), "{summary:?}");
+        assert_eq!(fs::read(directory.0.join("asset.bin")).expect("asset"), b"valid asset");
+    }
+
     fn crc64_download(server: &Server, size: Option<u64>, crc: &str) -> Download {
         Download::builder()
             .url(server.url.parse().expect("download URL"))
@@ -324,15 +362,71 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn unrecognized_hash_format_is_checked_by_size_only() {
-        let server = Server::bytes(b"valid asset").await;
+    async fn same_filename_in_different_directories_is_staged_separately() {
+        // Two 1 MiB bodies that differ only by directory, as with Global's
+        // per-language voice files.
+        let bodies: Arc<[(String, Vec<u8>); 2]> = Arc::new([
+            ("/JP/voice.ogg".into(), vec![1; 1024 * 1024]),
+            ("/KR/voice.ogg".into(), vec![2; 1024 * 1024])
+        ]);
+        let gets = Arc::new(Mutex::new(Vec::<String>::new()));
+        let (server_bodies, server_gets) = (Arc::clone(&bodies), Arc::clone(&gets));
+        let server = Server::new(move |request| {
+            let path = request.split_whitespace().nth(1).expect("request path");
+            let body = &server_bodies.iter().find(|(name, _)| name == path).expect("route").1;
+            if request.starts_with("HEAD ") {
+                return response("200 OK", body.len(), "Accept-Ranges: bytes\r\n", &[]);
+            }
+            let mut gets = server_gets.lock().expect("GET log");
+            let first = !gets.iter().any(|seen| seen == path);
+            gets.push(path.to_string());
+            if first {
+                // Interrupt the first transfer of each file halfway.
+                return response("200 OK", body.len(), "", &body[..600_000]);
+            }
+            let start = request
+                .lines()
+                .find_map(|line| line.strip_prefix("range: bytes="))
+                .and_then(|range| range.trim_end_matches('-').parse::<usize>().ok())
+                .expect("resume range");
+            response(
+                "206 Partial Content",
+                body.len() - start,
+                &format!("Content-Range: bytes {start}-{}/{}\r\n", body.len() - 1, body.len()),
+                &body[start..]
+            )
+        })
+        .await;
+        let base = server.url.trim_end_matches("/asset.bin");
+        let items: Vec<_> = bodies
+            .iter()
+            .map(|(path, body)| {
+                Download::builder()
+                    .url(format!("{base}{path}").parse().expect("download URL"))
+                    .filename(path.trim_start_matches('/').to_string())
+                    .size(body.len() as u64)
+                    .hash(hash(body))
+                    .build()
+            })
+            .collect();
         let directory = Directory::new();
-        let item = download(&server, Some(11), Some("-123".to_string()));
-        let summary = fetch(&directory.0, item.clone(), false).await;
-        assert!(summary.is_success(), "{summary:?}");
-        assert_eq!(fs::read(directory.0.join("asset.bin")).expect("asset"), b"valid asset");
-        let summary = fetch(&directory.0, item, false).await;
-        assert!(matches!(summary.status, DownloadStatus::Skipped(_)), "{summary:?}");
+        let config = || {
+            DownloaderConfig::builder()
+                .directory(&directory.0)
+                .concurrent_downloads(2)
+                .retries(0)
+                .build()
+        };
+        let summaries = Downloader::new(config()).download(&items).await;
+        assert!(summaries.iter().all(|s| matches!(s.status, DownloadStatus::Failed(_))));
+        let summaries = Downloader::new(config()).download(&items).await;
+        assert!(summaries.iter().all(Summary::is_success), "{summaries:?}");
+        for (path, body) in bodies.iter() {
+            assert_eq!(
+                fs::read(directory.0.join(path.trim_start_matches('/'))).expect("asset"),
+                *body
+            );
+        }
     }
 
     #[tokio::test]

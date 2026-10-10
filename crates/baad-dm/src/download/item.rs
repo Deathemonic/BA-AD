@@ -11,12 +11,34 @@ use crate::error::Error;
 pub struct Download {
     pub url: Url,
     pub filename: String,
+    /// Expected content checksum. Opaque version identifiers (such as catalog
+    /// `.hash` files) must not be passed here.
     pub hash: Option<String>,
     /// Algorithm for `hash`. When omitted, only MD5 hex and decimal CRC32
     /// are inferred.
     pub hash_type: Option<HashType>,
     pub target_file: Option<String>,
     pub size: Option<u64>
+}
+
+/// What a successful file check actually established.
+#[derive(Debug, Clone, Copy)]
+pub struct Verified {
+    pub size: u64,
+    pub size_checked: bool,
+    pub checksum: Option<HashType>
+}
+
+impl Verified {
+    /// Existing files are reused only when some property was checked.
+    pub const fn reason(&self) -> Option<&'static str> {
+        match (self.size_checked, self.checksum.is_some()) {
+            (true, true) => Some("File exists with matching size and hash"),
+            (false, true) => Some("File exists with matching hash"),
+            (true, false) => Some("File exists with matching size"),
+            (false, false) => None
+        }
+    }
 }
 
 impl Download {
@@ -34,22 +56,33 @@ impl Download {
             .map_or(Ok(false), |checksum| checksum.matches_file(file_path))
     }
 
+    /// Fails when a hash is present but cannot be checked, so an unsupported
+    /// value is never mistaken for verification.
+    pub(crate) fn checksum(&self) -> Result<Option<Checksum>, Error> {
+        let Some(hash) = self.hash.as_deref() else {
+            return Ok(None);
+        };
+        Checksum::parse(hash, self.hash_type).map(Some).ok_or_else(|| {
+            let kind = self.hash_type.map_or_else(|| "unrecognized".into(), |t| format!("{t:?}"));
+            Error::DownloadFailed(format!("Cannot verify {kind} hash: {hash}").into())
+        })
+    }
+
     pub(crate) fn verify_file(
         &self,
         file_path: &Path,
         server_size: Option<u64>
-    ) -> Result<u64, Error> {
+    ) -> Result<Verified, Error> {
+        let checksum = self.checksum()?;
         let size = file_path.metadata()?.len();
-        if let Some(expected) = self.size.or(server_size)
+        let expected_size = self.size.or(server_size);
+        if let Some(expected) = expected_size
             && size != expected
         {
             return Err(Error::DownloadFailed(
                 format!("Size mismatch: expected {expected} bytes, got {size}").into()
             ));
         }
-        // Hashes in an unrecognized format cannot be checked; the size check
-        // above still applies.
-        let checksum = self.hash.as_deref().and_then(|hash| Checksum::parse(hash, self.hash_type));
         if let Some(checksum) = checksum
             && !checksum.matches_file(file_path)?
         {
@@ -62,7 +95,11 @@ impl Download {
                 .into()
             ));
         }
-        Ok(size)
+        Ok(Verified {
+            size,
+            size_checked: expected_size.is_some(),
+            checksum: checksum.map(Checksum::hash_type)
+        })
     }
 }
 
