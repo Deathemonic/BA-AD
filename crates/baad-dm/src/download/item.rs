@@ -3,7 +3,8 @@ use std::path::Path;
 use bon::Builder;
 use reqwest_middleware::reqwest::Url;
 
-use crate::download::hash::{detect_hash_type, verify_hash};
+use crate::download::checksum::Checksum;
+use crate::download::hash::HashType;
 use crate::error::Error;
 
 #[derive(Debug, Clone, Builder)]
@@ -11,6 +12,9 @@ pub struct Download {
     pub url: Url,
     pub filename: String,
     pub hash: Option<String>,
+    /// Algorithm for `hash`. When omitted, only MD5 hex and decimal CRC32
+    /// are inferred.
+    pub hash_type: Option<HashType>,
     pub target_file: Option<String>,
     pub size: Option<u64>
 }
@@ -18,8 +22,16 @@ pub struct Download {
 impl Download {
     pub const fn is_extraction(&self) -> bool { self.target_file.is_some() }
 
+    /// Returns `false` when the hash is unsupported or does not match.
     pub fn verify_hash(&self, file_path: &Path) -> Result<bool, Error> {
-        verify_hash(file_path, self.hash.as_ref())
+        let Some(hash) = self.hash.as_deref() else {
+            return Ok(true);
+        };
+        if !file_path.exists() {
+            return Ok(false);
+        }
+        Checksum::parse(hash, self.hash_type)
+            .map_or(Ok(false), |checksum| checksum.matches_file(file_path))
     }
 
     pub(crate) fn verify_file(
@@ -35,14 +47,17 @@ impl Download {
                 format!("Size mismatch: expected {expected} bytes, got {size}").into()
             ));
         }
-        // Catalog values that are neither MD5 nor CRC32 cannot be checked; the
-        // size check above still applies.
-        let checkable = self.hash.as_deref().is_some_and(|hash| detect_hash_type(hash).is_some());
-        if checkable && !self.verify_hash(file_path)? {
+        // Hashes in an unrecognized format cannot be checked; the size check
+        // above still applies.
+        let checksum = self.hash.as_deref().and_then(|hash| Checksum::parse(hash, self.hash_type));
+        if let Some(checksum) = checksum
+            && !checksum.matches_file(file_path)?
+        {
             return Err(Error::DownloadFailed(
                 format!(
-                    "File does not match expected hash: {}",
-                    self.hash.as_deref().unwrap_or("")
+                    "File does not match expected {:?} hash: {}",
+                    checksum.hash_type(),
+                    self.hash.as_deref().unwrap_or_default()
                 )
                 .into()
             ));

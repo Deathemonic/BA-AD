@@ -1,3 +1,4 @@
+mod checksum;
 mod hash;
 mod item;
 pub(crate) mod summary;

@@ -5,13 +5,16 @@ mod tests {
     use std::sync::atomic::{AtomicU64, Ordering};
     use std::{env, fs, io, process};
 
-    use baad::download::{ResourceDownloader, download_file};
+    use baad::download::{ExpectedFile, ResourceDownloader, download_expected_file, download_file};
+    use baad_dm::HashType;
     use baad_shared::{DownloadAsset, DownloadMedia, Downloads, HashValue};
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
     use tokio::net::{TcpListener, TcpStream};
     use tokio::task::JoinHandle;
 
     const GOOD_MD5: &str = "755f85c2723bb39381c7379a604160d8";
+    // CRC-64/XZ of b"good".
+    const GOOD_CRC64: &str = "578325586736611102";
     static NEXT_DIRECTORY: AtomicU64 = AtomicU64::new(0);
 
     struct Fixture {
@@ -149,6 +152,40 @@ mod tests {
         .to_string();
         assert!(error.contains("catalog.json"), "{error}");
         assert!(error.contains("404"), "{error}");
+        Ok(())
+    }
+
+    fn launcher_file(hash: &str, size: u64) -> ExpectedFile {
+        ExpectedFile {
+            hash: Some(hash.into()),
+            hash_type: Some(HashType::Crc64Xz),
+            size: Some(size)
+        }
+    }
+
+    #[tokio::test]
+    async fn launcher_file_replaces_existing_copy_with_wrong_contents() -> Result<(), Box<dyn Error>>
+    {
+        let fixture = Fixture::new().await?;
+        let output = fixture.directory.join("resources.assets");
+        fs::write(&output, b"evil")?;
+        let url = format!("{}/ok.bin", fixture.base_url);
+        download_expected_file(&url, &output, &launcher_file(GOOD_CRC64, 4), 0).await?;
+        assert_eq!(fs::read(&output)?, b"good");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn launcher_file_rejects_wrong_checksum_or_size() -> Result<(), Box<dyn Error>> {
+        let fixture = Fixture::new().await?;
+        let output = fixture.directory.join("resources.assets");
+        let url = format!("{}/ok.bin", fixture.base_url);
+        for expected in [launcher_file("1", 4), launcher_file(GOOD_CRC64, 5)] {
+            download_expected_file(&url, &output, &expected, 0)
+                .await
+                .expect_err("Mismatched launcher file must not be accepted");
+            assert!(!output.exists());
+        }
         Ok(())
     }
 }

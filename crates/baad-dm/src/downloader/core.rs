@@ -374,7 +374,10 @@ async fn remove_if_exists(path: &Path) -> io::Result<()> {
 }
 
 fn staging_identity(download: &Download) -> String {
-    let identity = format!("{}\n{:?}\n{:?}", download.url, download.hash, download.size);
+    let identity = format!(
+        "{}\n{:?}\n{:?}\n{:?}",
+        download.url, download.hash, download.hash_type, download.size
+    );
     md5::to_hex_string(&md5::compute_hash(identity.as_bytes()))
 }
 

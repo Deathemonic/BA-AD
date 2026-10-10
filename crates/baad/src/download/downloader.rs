@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use baad_dm::{Download, Downloader, DownloaderConfig};
+use baad_dm::{Download, Downloader, DownloaderConfig, HashType};
 use baad_shared::{DownloadStatus, Downloads};
 use bon::Builder;
 use reqwest::{Proxy, Url};
@@ -116,10 +116,35 @@ fn failed_downloads(summaries: &[baad_dm::Summary]) -> CatalogError {
     baad_dm::Error::DownloadFailed(failures.join("\n").into()).into()
 }
 
+/// Expected properties of a single file, as published by its manifest.
+#[derive(Debug, Clone, Default)]
+pub struct ExpectedFile {
+    /// Content checksum. Opaque version identifiers must not be used here.
+    pub hash: Option<String>,
+    /// Algorithm for `hash`; when omitted only MD5 and CRC32 are inferred.
+    pub hash_type: Option<HashType>,
+    pub size: Option<u64>
+}
+
 pub async fn download_file(
     url: &str,
     output_path: &Path,
     hash: Option<String>,
+    retries: u32
+) -> Result<(), CatalogError> {
+    let expected = ExpectedFile {
+        hash,
+        ..ExpectedFile::default()
+    };
+    download_expected_file(url, output_path, &expected, retries).await
+}
+
+/// Downloads one file, reusing an existing copy only when its size or
+/// checksum can be checked against `expected`.
+pub async fn download_expected_file(
+    url: &str,
+    output_path: &Path,
+    expected: &ExpectedFile,
     retries: u32
 ) -> Result<(), CatalogError> {
     let parsed_url = Url::parse(url).map_err(|_| CatalogError::DeserializationFailed)?;
@@ -129,10 +154,15 @@ pub async fn download_file(
         .ok_or(CatalogError::DeserializationFailed)?;
     let output_dir = output_path.parent().ok_or(CatalogError::DeserializationFailed)?;
 
-    let overwrite = hash.is_none();
+    let overwrite = expected.hash.is_none() && expected.size.is_none();
 
-    let download =
-        Download::builder().url(parsed_url).filename(filename.into()).maybe_hash(hash).build();
+    let download = Download::builder()
+        .url(parsed_url)
+        .filename(filename.into())
+        .maybe_hash(expected.hash.clone())
+        .maybe_hash_type(expected.hash_type)
+        .maybe_size(expected.size)
+        .build();
 
     let config = DownloaderConfig::builder()
         .directory(output_dir)

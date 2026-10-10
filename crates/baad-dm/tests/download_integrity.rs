@@ -5,7 +5,7 @@ mod tests {
     use std::sync::{Arc, Mutex};
     use std::{env, fs, process};
 
-    use baad_dm::{Download, DownloadStatus, Downloader, DownloaderConfig, Summary};
+    use baad_dm::{Download, DownloadStatus, Downloader, DownloaderConfig, HashType, Summary};
     use bacy::crypto::md5;
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
     use tokio::net::TcpListener;
@@ -278,6 +278,49 @@ mod tests {
         assert!(summary.is_success(), "{summary:?}");
         assert_eq!(fs::read(directory.0.join("asset.bin")).expect("asset"), *new);
         assert_eq!(fs::read_dir(&directory.0).expect("directory").count(), 1);
+    }
+
+    fn crc64_download(server: &Server, size: Option<u64>, crc: &str) -> Download {
+        Download::builder()
+            .url(server.url.parse().expect("download URL"))
+            .filename("asset.bin".to_string())
+            .maybe_size(size)
+            .hash(crc.to_string())
+            .hash_type(HashType::Crc64Xz)
+            .build()
+    }
+
+    // CRC-64/XZ of "123456789", the catalogue check value.
+    const CRC64_CHECK: &str = "11051210869376104954";
+
+    #[tokio::test]
+    async fn explicit_crc64_xz_is_verified_and_reused() {
+        let server = Server::bytes(b"123456789").await;
+        let directory = Directory::new();
+        let item = crc64_download(&server, Some(9), CRC64_CHECK);
+        let summary = fetch(&directory.0, item.clone(), false).await;
+        assert!(summary.is_success(), "{summary:?}");
+        let summary = fetch(&directory.0, item, false).await;
+        assert!(matches!(summary.status, DownloadStatus::Skipped(_)), "{summary:?}");
+    }
+
+    #[tokio::test]
+    async fn crc64_xz_rejects_corrupt_content_and_wrong_size() {
+        let server = Server::bytes(b"123456780").await;
+        let directory = Directory::new();
+        let summary =
+            fetch(&directory.0, crc64_download(&server, Some(9), CRC64_CHECK), false).await;
+        assert!(
+            matches!(&summary.status, DownloadStatus::Failed(reason) if reason.contains("Crc64Xz")),
+            "{summary:?}"
+        );
+        let summary =
+            fetch(&directory.0, crc64_download(&server, Some(10), CRC64_CHECK), false).await;
+        assert!(
+            matches!(&summary.status, DownloadStatus::Failed(reason) if reason.contains("Size mismatch")),
+            "{summary:?}"
+        );
+        assert_eq!(fs::read_dir(&directory.0).expect("directory").count(), 0);
     }
 
     #[tokio::test]
