@@ -41,17 +41,27 @@ impl ResourceDownloader {
         downloads: Downloads,
         filter: Option<&ResourceFilter>
     ) -> Result<(), CatalogError> {
+        let mut errors = Vec::new();
         if !downloads.assets.is_empty() {
             let convert = converter::convert_assets(&downloads.assets, filter);
-            self.execute(convert, "Assets").await?;
+            if let Err(error) = self.execute(convert, "Assets").await {
+                errors.push(error.to_string());
+            }
         }
         if !downloads.tables.is_empty() {
             let convert = converter::convert_tables(&downloads.tables, filter);
-            self.execute(convert, "Tables").await?;
+            if let Err(error) = self.execute(convert, "Tables").await {
+                errors.push(error.to_string());
+            }
         }
         if !downloads.media.is_empty() {
             let convert = converter::convert_media(&downloads.media, filter);
-            self.execute(convert, "Media").await?;
+            if let Err(error) = self.execute(convert, "Media").await {
+                errors.push(error.to_string());
+            }
+        }
+        if !errors.is_empty() {
+            return Err(baad_dm::Error::DownloadFailed(errors.join("\n").into()).into());
         }
         Ok(())
     }
@@ -85,11 +95,25 @@ impl ResourceDownloader {
 
         if failed_count > 0 {
             error!(category = category, failed = failed_count, "Some downloads failed");
+            return Err(failed_downloads(&summaries));
         }
 
         info!(category = category, success = true, "Download complete");
         Ok(())
     }
+}
+
+fn failed_downloads(summaries: &[baad_dm::Summary]) -> CatalogError {
+    let failures = summaries
+        .iter()
+        .filter_map(|summary| match &summary.status {
+            DownloadStatus::Failed(error) => {
+                Some(format!("{}: {error}", summary.download.filename))
+            }
+            _ => None
+        })
+        .collect::<Vec<_>>();
+    baad_dm::Error::DownloadFailed(failures.join("\n").into()).into()
 }
 
 pub async fn download_file(
@@ -122,7 +146,7 @@ pub async fn download_file(
     if let Some(summary) = summaries.first()
         && matches!(summary.status, DownloadStatus::Failed(_))
     {
-        return Err(CatalogError::DeserializationFailed);
+        return Err(failed_downloads(&summaries));
     }
 
     Ok(())
