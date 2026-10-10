@@ -10,10 +10,7 @@ use baad_shared::{
     TableCatalogCN
 };
 use baad_utils::file::get_data_path;
-use baad_utils::json::load;
 use fastcat::fconcat;
-use memorypack::{MemoryPackDeserialize, MemoryPackSerialize};
-use serde::de::DeserializeOwned;
 use tokio::fs;
 
 use crate::cdn::cache;
@@ -81,52 +78,37 @@ impl ChinaCdn {
         let file =
             Self::catalog_file(bundle, hash, &fconcat!(platform, "/bundleDownloadInfo.json"))?;
 
-        self.fetch_json(&file).await
+        cache::fetch_json(&file).await
     }
 
     pub async fn fetch_table(&self) -> Result<TableCatalogCN, CatalogError> {
         let url = fconcat!("/"; self.catalog_url.as_str(), "Manifest", const { TABLE_BUNDLES }, self.table_version.as_str(), "TableManifest");
         let hash_url = fconcat!(url.as_str(), "Hash");
         let file = Self::catalog_file(url, hash_url, "TableManifest.json")?;
-        self.fetch_json(&file).await
+        cache::fetch_json(&file).await
     }
 
     pub async fn fetch_media(&self) -> Result<MediaCatalogCN, CatalogError> {
         let url = fconcat!("/"; self.catalog_url.as_str(), "Manifest", const { MEDIA_RESOURCES }, self.media_version.as_str(), "MediaManifest");
         let hash_url = fconcat!(url.as_str(), "Hash");
         let file = Self::catalog_file(url, hash_url, "MediaManifest.txt")?;
-        let downloaded = cache::ensure_cached(&file).await?;
+        cache::ensure_cached(&file).await?;
+        let bytes = fs::read(&file.path).await?;
         // Older packs used extensionless keys and dropped paired ACB/AWB
         // entries.
         let pack_path = file.path.with_extension("v2.bytes");
 
-        if !downloaded && let Some(value) = cache::read_pack::<MediaCatalogCN>(&pack_path).await {
+        if let Some(value) = cache::read_pack::<MediaCatalogCN>(&pack_path, &bytes).await {
             return Ok(value);
         }
 
-        let bytes = fs::read(&file.path).await?;
         let text = String::from_utf8_lossy(&bytes);
         let catalog = MediaCatalogCN {
             table: Self::parse_media(&text).into_iter().map(Self::media_entry).collect()
         };
 
-        cache::write_pack(&pack_path, &catalog).await?;
+        cache::write_pack(&pack_path, &bytes, &catalog).await?;
         Ok(catalog)
-    }
-
-    async fn fetch_json<T>(&self, file: &CatalogFile) -> Result<T, CatalogError>
-    where
-        T: DeserializeOwned + MemoryPackSerialize + MemoryPackDeserialize
-    {
-        let downloaded = cache::ensure_cached(file).await?;
-
-        if !downloaded && let Some(value) = cache::read_pack::<T>(&file.pack_path()).await {
-            return Ok(value);
-        }
-
-        let value = load::<T>(&file.path).await?;
-        cache::write_pack(&file.pack_path(), &value).await?;
-        Ok(value)
     }
 
     fn catalog_file(
@@ -137,7 +119,7 @@ impl ChinaCdn {
         let key = fconcat!("/"; "catalog", "china", filename);
         Ok(CatalogFile {
             url,
-            hash_url,
+            hash_url: Some(hash_url),
             path: get_data_path(&key)?
         })
     }
