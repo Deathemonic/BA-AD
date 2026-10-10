@@ -8,7 +8,7 @@ use tokio::fs::{File, OpenOptions};
 use tokio::io::{AsyncSeekExt, AsyncWriteExt, BufWriter, SeekFrom};
 
 use crate::client::create_range_header;
-use crate::downloader::helpers::{FetchCtx, ensure_parent_dir};
+use crate::downloader::helpers::{FetchCtx, ensure_parent_dir, validate_range};
 use crate::downloader::progress::ProgressTracker;
 use crate::error::Error;
 
@@ -17,7 +17,8 @@ const WRITE_BUFFER_SIZE: usize = 256 * 1024;
 pub struct ChunkCtx {
     pub client: Arc<ClientWithMiddleware>,
     pub resolved_url: String,
-    pub file_path: PathBuf
+    pub file_path: PathBuf,
+    pub total_size: u64
 }
 
 pub struct ChunkRange {
@@ -57,7 +58,8 @@ pub async fn download_chunked(
     let chunk_ctx = ChunkCtx {
         client: Arc::clone(&ctx.client),
         resolved_url: resolved_url.into(),
-        file_path: ctx.file_path.clone()
+        file_path: ctx.file_path.clone(),
+        total_size
     };
     let chunk_ctx = Arc::new(chunk_ctx);
 
@@ -92,15 +94,22 @@ async fn download_chunk(
 
     res.error_for_status_ref()?;
 
+    let expected = validate_range(&res, range.start, Some(range.end), Some(chunk_ctx.total_size))?;
+
     let mut file = OpenOptions::new().write(true).open(&chunk_ctx.file_path).await?;
 
     file.seek(SeekFrom::Start(range.start)).await?;
 
     let mut writer = BufWriter::with_capacity(WRITE_BUFFER_SIZE, file);
     let mut stream = res.bytes_stream();
+    let mut downloaded = 0;
 
     while let Some(chunk) = stream.next().await {
         let chunk = chunk?;
+        downloaded += chunk.len() as u64;
+        if downloaded > expected {
+            return Err(Error::DownloadFailed("Range response exceeds requested length".into()));
+        }
         writer.write_all(&chunk).await?;
 
         if let Some(p) = &progress {
@@ -108,5 +117,11 @@ async fn download_chunk(
         }
     }
 
-    writer.flush().await.map_err(Error::from)
+    writer.flush().await?;
+    if downloaded != expected {
+        return Err(Error::DownloadFailed(
+            "Range response is shorter than requested length".into()
+        ));
+    }
+    Ok(())
 }

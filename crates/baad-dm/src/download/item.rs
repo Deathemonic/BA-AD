@@ -21,6 +21,31 @@ impl Download {
     pub fn verify_hash(&self, file_path: &Path) -> Result<bool, Error> {
         verify_hash(file_path, self.hash.as_ref())
     }
+
+    pub(crate) fn verify_file(
+        &self,
+        file_path: &Path,
+        server_size: Option<u64>
+    ) -> Result<u64, Error> {
+        let size = file_path.metadata()?.len();
+        if let Some(expected) = self.size.or(server_size)
+            && size != expected
+        {
+            return Err(Error::DownloadFailed(
+                format!("Size mismatch: expected {expected} bytes, got {size}").into()
+            ));
+        }
+        if !self.verify_hash(file_path)? {
+            return Err(Error::DownloadFailed(
+                format!(
+                    "File does not match expected hash: {}",
+                    self.hash.as_deref().unwrap_or("")
+                )
+                .into()
+            ));
+        }
+        Ok(size)
+    }
 }
 
 fn extract_filename(url: &Url) -> Result<String, Error> {
