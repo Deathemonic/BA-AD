@@ -20,6 +20,7 @@ use crate::cdn::cache;
 use crate::cdn::cache::CatalogFile;
 use crate::download::ResourceCategory;
 use crate::error::CatalogError;
+use crate::strategy::ChinaStrategy;
 
 pub struct ChinaCdn {
     pub(crate) catalog_url: String,
@@ -142,13 +143,7 @@ impl ChinaCdn {
     }
 
     fn media_entry(entry: MediaCN) -> (String, MediaCN) {
-        let extension = entry.media_type.as_ref();
-        let key = if extension.is_empty() {
-            entry.path.clone()
-        } else {
-            fconcat!(entry.path.as_str(), ".", extension)
-        };
-        (key, entry)
+        (ChinaStrategy::media_path(&entry.path, entry.media_type), entry)
     }
 
     fn parse_media(text: &str) -> Vec<MediaCN> {
