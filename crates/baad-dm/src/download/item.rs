@@ -3,7 +3,7 @@ use std::path::Path;
 use bon::Builder;
 use reqwest_middleware::reqwest::Url;
 
-use crate::download::hash::verify_hash;
+use crate::download::hash::{detect_hash_type, verify_hash};
 use crate::error::Error;
 
 #[derive(Debug, Clone, Builder)]
@@ -35,7 +35,10 @@ impl Download {
                 format!("Size mismatch: expected {expected} bytes, got {size}").into()
             ));
         }
-        if !self.verify_hash(file_path)? {
+        // Catalog values that are neither MD5 nor CRC32 cannot be checked; the
+        // size check above still applies.
+        let checkable = self.hash.as_deref().is_some_and(|hash| detect_hash_type(hash).is_some());
+        if checkable && !self.verify_hash(file_path)? {
             return Err(Error::DownloadFailed(
                 format!(
                     "File does not match expected hash: {}",

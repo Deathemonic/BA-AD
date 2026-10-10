@@ -238,13 +238,11 @@ mod tests {
                 .expect("second GET")
                 .contains("range: bytes=")
         );
-        if ignore_range {
-            assert!(matches!(summary.status, DownloadStatus::Failed(_)));
-            assert!(!directory.0.join("asset.bin").exists());
-        } else {
-            assert!(summary.is_success(), "{summary:?}");
-            assert_eq!(fs::read(directory.0.join("asset.bin")).expect("asset"), *body);
-        }
+        // A server that ignores Range sends the whole body, which replaces
+        // the partial instead of being appended to it.
+        assert!(summary.is_success(), "{summary:?}");
+        assert_eq!(fs::read(directory.0.join("asset.bin")).expect("asset"), *body);
+        assert_eq!(fs::read_dir(&directory.0).expect("directory").count(), 1);
     }
 
     #[tokio::test]
@@ -253,7 +251,46 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn ignored_resume_range_is_rejected_without_publishing() { resumed_download(true).await; }
+    async fn ignored_resume_range_restarts_from_zero() { resumed_download(true).await; }
+
+    #[tokio::test]
+    async fn partial_from_another_version_is_not_resumed() {
+        let old = vec![1; 1024 * 1024];
+        let new = Arc::new(vec![2; 1024 * 1024]);
+        let server_body = Arc::clone(&new);
+        let server = Server::new(move |request| {
+            let body = &server_body;
+            if request.starts_with("HEAD ") {
+                return response("200 OK", body.len(), "Accept-Ranges: bytes\r\n", &[]);
+            }
+            assert!(!request.contains("range: bytes="), "stale partial was resumed");
+            response("200 OK", body.len(), "", body)
+        })
+        .await;
+        let directory = Directory::new();
+        // A partial and marker left behind by an interrupted download of the
+        // old version of this asset.
+        fs::write(directory.0.join("asset.bin.baad-part"), &old[..600_000]).expect("partial");
+        fs::write(directory.0.join("asset.bin.baad-part.id"), hash(b"old identity"))
+            .expect("stale marker");
+        let item = download(&server, Some(new.len() as u64), Some(hash(&new)));
+        let summary = fetch(&directory.0, item, false).await;
+        assert!(summary.is_success(), "{summary:?}");
+        assert_eq!(fs::read(directory.0.join("asset.bin")).expect("asset"), *new);
+        assert_eq!(fs::read_dir(&directory.0).expect("directory").count(), 1);
+    }
+
+    #[tokio::test]
+    async fn unrecognized_hash_format_is_checked_by_size_only() {
+        let server = Server::bytes(b"valid asset").await;
+        let directory = Directory::new();
+        let item = download(&server, Some(11), Some("-123".to_string()));
+        let summary = fetch(&directory.0, item.clone(), false).await;
+        assert!(summary.is_success(), "{summary:?}");
+        assert_eq!(fs::read(directory.0.join("asset.bin")).expect("asset"), b"valid asset");
+        let summary = fetch(&directory.0, item, false).await;
+        assert!(matches!(summary.status, DownloadStatus::Skipped(_)), "{summary:?}");
+    }
 
     #[tokio::test]
     async fn interrupted_unverifiable_or_nonresumable_stream_discards_staging_file() {
@@ -372,11 +409,53 @@ mod tests {
         let directory = Directory::new();
         let mut item = download(&server, Some(ARCHIVE.len() as u64), Some(hash(ARCHIVE)));
         item.target_file = Some("member.txt".to_string());
+        let summary = fetch(&directory.0, item.clone(), false).await;
+        assert!(summary.is_success(), "{summary:?}");
+        let member = directory.0.join("asset.bin");
+        assert_eq!(fs::read(&member).expect("extracted member"), b"extracted asset");
+
+        // The member's own central directory CRC identifies an intact file.
+        let summary = fetch(&directory.0, item.clone(), false).await;
+        assert!(matches!(summary.status, DownloadStatus::Skipped(_)), "{summary:?}");
+
+        // A truncated extraction is repaired instead of trusted.
+        fs::write(&member, b"extracted").expect("truncate member");
         let summary = fetch(&directory.0, item, false).await;
         assert!(summary.is_success(), "{summary:?}");
-        assert_eq!(
-            fs::read(directory.0.join("asset.bin")).expect("extracted member"),
-            b"extracted asset"
-        );
+        assert_eq!(fs::read(&member).expect("extracted member"), b"extracted asset");
+        assert_eq!(fs::read_dir(&directory.0).expect("directory").count(), 1);
+    }
+
+    #[tokio::test]
+    async fn disabling_resume_keeps_chunked_downloads() {
+        let body = Arc::new(vec![42; 16 * 1024 * 1024]);
+        let server_body = Arc::clone(&body);
+        let server = Server::new(move |request| {
+            let body = &server_body;
+            if request.starts_with("HEAD ") {
+                return response("200 OK", body.len(), "Accept-Ranges: bytes\r\n", &[]);
+            }
+            let range = request
+                .lines()
+                .find_map(|line| line.strip_prefix("range: bytes="))
+                .expect("chunk range");
+            let (start, end) = range.split_once('-').expect("range bounds");
+            let start = start.parse::<usize>().expect("range start");
+            let end = end.parse::<usize>().expect("range end");
+            response(
+                "206 Partial Content",
+                end - start + 1,
+                &format!("Content-Range: bytes {start}-{end}/{}\r\n", body.len()),
+                &body[start..=end]
+            )
+        })
+        .await;
+        let directory = Directory::new();
+        let config =
+            DownloaderConfig::builder().directory(&directory.0).resumable(false).retries(0).build();
+        let item = download(&server, Some(body.len() as u64), None);
+        let summary = Downloader::new(config).download(&[item]).await.remove(0);
+        assert!(summary.is_success(), "{summary:?}");
+        assert_eq!(fs::read(directory.0.join("asset.bin")).expect("asset"), *body);
     }
 }

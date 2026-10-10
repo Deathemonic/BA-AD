@@ -1,9 +1,11 @@
-use std::fs;
+use std::fs::File;
+use std::io::Read;
 use std::path::Path;
 
 use bacy::crypto::md5;
 use bacy::error::HashError;
 use bacy::hash::crc;
+use md5_hasher::{Digest, Md5};
 
 use crate::error::Error;
 
@@ -34,9 +36,7 @@ pub fn verify_hash(file_path: &Path, expected: Option<&String>) -> Result<bool, 
 
     match detect_hash_type(expected) {
         Some(HashType::Md5) => {
-            let data = fs::read(file_path)?;
-            let hash_bytes = md5::compute_hash(&data);
-            let calculated = md5::to_hex_string(&hash_bytes);
+            let calculated = md5::to_hex_string(&md5_streaming(file_path)?);
             Ok(calculated.eq_ignore_ascii_case(expected))
         }
         Some(HashType::Crc32) => {
@@ -51,4 +51,18 @@ pub fn verify_hash(file_path: &Path, expected: Option<&String>) -> Result<bool, 
         }
         None => Ok(false)
     }
+}
+
+fn md5_streaming(file_path: &Path) -> Result<[u8; 16], Error> {
+    let mut file = File::open(file_path)?;
+    let mut hasher = Md5::new();
+    let mut buffer = vec![0; HASH_BUFFER_SIZE];
+    loop {
+        let count = file.read(&mut buffer)?;
+        if count == 0 {
+            break;
+        }
+        hasher.update(&buffer[..count]);
+    }
+    Ok(hasher.finalize().into())
 }

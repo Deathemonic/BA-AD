@@ -14,9 +14,11 @@ reqwest = { workspace = true, features = ["http2", "stream", "socks", "gzip", "d
 thiserror = { workspace = true }
 tokio = { workspace = true }
 
+crc32fast = "1.5"
 flate2 = "1.1"
 form_urlencoded = "1.2"
 futures = "0.3"
+md5_hasher = { package = "md-5", version = "0.11" }
 reqwest-middleware = "0.5"
 reqwest-retry = "0.9"
 tracing = "0.1"

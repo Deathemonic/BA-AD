@@ -1,11 +1,13 @@
+use std::io;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use baad_shared::{DownloadEvent, DownloadStatus};
 use bacy::crypto::md5;
+use bacy::hash::crc;
 use futures::stream::{self, StreamExt};
 use reqwest_middleware::reqwest::StatusCode;
-use tokio::fs;
+use tokio::{fs, task};
 use tracing::{error, info, warn};
 
 use crate::client::{HttpClientConfig, create_http_client};
@@ -17,7 +19,9 @@ use crate::downloader::helpers::{FetchCtx, StreamOpts, check_server, ensure_pare
 use crate::downloader::progress::ProgressTracker;
 use crate::downloader::stream::download_stream;
 use crate::error::Error;
-use crate::zip::{ZipCache, ZipExtractor};
+use crate::zip::{ZipCache, ZipExtractor, ZipFileInfo};
+
+const HASH_BUFFER_SIZE: usize = 256 * 1024;
 
 #[derive(Clone, Debug)]
 pub struct Downloader<'a> {
@@ -86,20 +90,15 @@ impl<'a> Downloader<'a> {
         ctx: &FetchCtx<'_>,
         filename: &Arc<str>
     ) -> Result<FetchOutcome, FetchOutcome> {
-        // ZIP metadata describes the archive, not the extracted member.
         if ctx.download.is_extraction() {
-            if !self.config.overwrite
-                && ctx.download.hash.is_none()
-                && let Ok(metadata) = fs::metadata(&ctx.file_path).await
-            {
-                return Ok(FetchOutcome::skipped("File exists", metadata.len()));
-            }
             return self.extract_zip(ctx).await;
         }
 
+        let staging = Staging::new(&ctx.file_path);
         if !self.config.overwrite
-            && let Ok(size) = ctx.download.verify_file(&ctx.file_path, None)
+            && let Ok(size) = verify_file(ctx.download, &ctx.file_path, None).await
         {
+            staging.discard().await;
             return Ok(FetchOutcome::skipped("File exists with matching size and hash", size));
         }
 
@@ -111,7 +110,7 @@ impl<'a> Downloader<'a> {
         let resumable = supports_ranges && self.config.resumable;
         let total_size = content_length.unwrap_or(0);
         let chunk_size = 8 * 1024 * 1024;
-        let chunk_count = if resumable && total_size >= self.config.chunk_threshold {
+        let chunk_count = if supports_ranges && total_size >= self.config.chunk_threshold {
             let calculated = (total_size / chunk_size).max(1) as usize;
             calculated.clamp(1, self.config.max_chunks_per_file)
         } else {
@@ -121,19 +120,14 @@ impl<'a> Downloader<'a> {
         let staged_ctx = FetchCtx {
             client: Arc::clone(&ctx.client),
             download: ctx.download,
-            file_path: staging_path(ctx),
+            file_path: staging.path.clone(),
             cache: ctx.cache
         };
-        let partial_size =
-            fs::metadata(&staged_ctx.file_path).await.map_or(0, |metadata| metadata.len());
-        // Only sequential prefixes are resumable. A complete staging file might
-        // be a preallocated chunk download interrupted before validation.
         let can_resume =
             !self.config.overwrite && resumable && chunk_count == 1 && ctx.download.hash.is_some();
-        let size_on_disk = if can_resume && content_length.is_some_and(|size| partial_size < size) {
-            partial_size
-        } else {
-            0
+        let size_on_disk = match staging.prepare(ctx.download, can_resume, content_length).await {
+            Ok(size) => size,
+            Err(error) => return Ok(FetchOutcome::from_result(Err(Error::Io(error)), resumable))
         };
         let opts = StreamOpts {
             size_on_disk,
@@ -169,15 +163,12 @@ impl<'a> Downloader<'a> {
 
         let result = match result {
             Ok(_) => {
-                let result = match ctx.download.verify_file(&staged_ctx.file_path, content_length) {
-                    Ok(size) => fs::rename(&staged_ctx.file_path, &ctx.file_path)
-                        .await
-                        .map(|()| size)
-                        .map_err(Error::Io),
+                let result = match verify_file(ctx.download, &staging.path, content_length).await {
+                    Ok(size) => staging.publish(&ctx.file_path).await.map(|()| size),
                     Err(error) => Err(error)
                 };
                 if result.is_err() {
-                    let _ = fs::remove_file(&staged_ctx.file_path).await;
+                    staging.discard().await;
                 }
                 result
             }
@@ -185,12 +176,12 @@ impl<'a> Downloader<'a> {
                 // A failed chunked download contains holes; only retain a
                 // sequential prefix after a network or I/O interruption.
                 let partial_size =
-                    fs::metadata(&staged_ctx.file_path).await.map_or(0, |metadata| metadata.len());
+                    fs::metadata(&staging.path).await.map_or(0, |metadata| metadata.len());
                 let keep_partial = can_resume
                     && matches!(error, Error::Http(_) | Error::Io(_))
                     && content_length.is_some_and(|size| partial_size > 0 && partial_size < size);
                 if !keep_partial {
-                    let _ = fs::remove_file(&staged_ctx.file_path).await;
+                    staging.discard().await;
                 }
                 Err(error)
             }
@@ -216,19 +207,39 @@ impl<'a> Downloader<'a> {
             )
         })?;
 
+        // ZIP metadata on the download describes the archive; the member is
+        // checked against its own central directory entry instead.
+        if !self.config.overwrite && member_matches(&ctx.file_path, info).await {
+            return Ok(FetchOutcome::skipped(
+                "File exists with matching size and CRC",
+                info.uncompressed_size
+            ));
+        }
+
         let data = ZipExtractor::extract_member(&ctx.client, &ctx.download.url, info)
             .await
             .map_err(|e| FetchOutcome::failed(&e, StatusCode::NOT_FOUND))?;
 
         let size = data.len() as u64;
+        if size != info.uncompressed_size || crc32fast::hash(&data) != info.crc32 {
+            return Err(FetchOutcome::failed(
+                &format!("Extracted '{target}' does not match ZIP size and CRC"),
+                StatusCode::UNPROCESSABLE_ENTITY
+            ));
+        }
 
-        ensure_parent_dir(&ctx.file_path)
-            .await
-            .map_err(|e| FetchOutcome::failed(&e, StatusCode::INTERNAL_SERVER_ERROR))?;
-
-        fs::write(&ctx.file_path, &data)
-            .await
-            .map_err(|e| FetchOutcome::failed(&e, StatusCode::INTERNAL_SERVER_ERROR))?;
+        let staging = Staging::new(&ctx.file_path);
+        let written = async {
+            ensure_parent_dir(&staging.path).await?;
+            staging.unmark().await?;
+            fs::write(&staging.path, &data).await?;
+            staging.publish(&ctx.file_path).await
+        }
+        .await;
+        if let Err(error) = written {
+            staging.discard().await;
+            return Err(FetchOutcome::failed(&error, StatusCode::INTERNAL_SERVER_ERROR));
+        }
 
         Ok(FetchOutcome::success(size, false))
     }
@@ -295,11 +306,97 @@ impl<'a> Downloader<'a> {
     }
 }
 
-fn staging_path(ctx: &FetchCtx<'_>) -> PathBuf {
-    let identity =
-        format!("{}\n{:?}\n{:?}", ctx.download.url, ctx.download.hash, ctx.download.size);
-    let digest = md5::to_hex_string(&md5::compute_hash(identity.as_bytes()));
-    let mut filename = ctx.file_path.file_name().unwrap_or_default().to_os_string();
-    filename.push(format!(".{digest}.baad-part"));
-    ctx.file_path.with_file_name(filename)
+/// Downloads are written to `<name>.baad-part` and only renamed into place
+/// after validation. A sequential partial is kept for resume together with a
+/// `<name>.baad-part.id` marker naming the URL, hash and size it belongs to.
+struct Staging {
+    path: PathBuf,
+    marker: PathBuf
+}
+
+impl Staging {
+    fn new(file_path: &Path) -> Self {
+        let mut path = file_path.as_os_str().to_os_string();
+        path.push(".baad-part");
+        let mut marker = path.clone();
+        marker.push(".id");
+        Self {
+            path: path.into(),
+            marker: marker.into()
+        }
+    }
+
+    /// Returns the prefix length to resume from. Only sequential prefixes are
+    /// resumable, and only when the marker proves they belong to this exact
+    /// download. Chunked downloads preallocate the file and never get a
+    /// marker.
+    async fn prepare(
+        &self,
+        download: &Download,
+        can_resume: bool,
+        content_length: Option<u64>
+    ) -> io::Result<u64> {
+        if !can_resume {
+            self.unmark().await?;
+            return Ok(0);
+        }
+        let identity = staging_identity(download);
+        let partial_size =
+            if fs::read_to_string(&self.marker).await.is_ok_and(|marker| marker == identity) {
+                fs::metadata(&self.path).await.map_or(0, |metadata| metadata.len())
+            } else {
+                0
+            };
+        ensure_parent_dir(&self.marker).await.map_err(io::Error::other)?;
+        fs::write(&self.marker, identity).await?;
+        Ok(if content_length.is_some_and(|size| partial_size < size) { partial_size } else { 0 })
+    }
+
+    async fn unmark(&self) -> io::Result<()> { remove_if_exists(&self.marker).await }
+
+    async fn publish(&self, destination: &Path) -> Result<(), Error> {
+        fs::rename(&self.path, destination).await?;
+        let _ = self.unmark().await;
+        Ok(())
+    }
+
+    async fn discard(&self) {
+        let _ = remove_if_exists(&self.path).await;
+        let _ = self.unmark().await;
+    }
+}
+
+async fn remove_if_exists(path: &Path) -> io::Result<()> {
+    match fs::remove_file(path).await {
+        Err(error) if error.kind() != io::ErrorKind::NotFound => Err(error),
+        _ => Ok(())
+    }
+}
+
+fn staging_identity(download: &Download) -> String {
+    let identity = format!("{}\n{:?}\n{:?}", download.url, download.hash, download.size);
+    md5::to_hex_string(&md5::compute_hash(identity.as_bytes()))
+}
+
+/// Hashing reads the whole file, so keep it off the async workers.
+async fn verify_file(
+    download: &Download,
+    path: &Path,
+    server_size: Option<u64>
+) -> Result<u64, Error> {
+    let download = download.clone();
+    let path = path.to_path_buf();
+    task::spawn_blocking(move || download.verify_file(&path, server_size))
+        .await
+        .map_err(|error| Error::Io(io::Error::other(error)))?
+}
+
+async fn member_matches(path: &Path, info: &ZipFileInfo) -> bool {
+    if fs::metadata(path).await.map_or(true, |metadata| metadata.len() != info.uncompressed_size) {
+        return false;
+    }
+    let path = path.to_path_buf();
+    task::spawn_blocking(move || crc::compute_streaming(&path, HASH_BUFFER_SIZE, None))
+        .await
+        .is_ok_and(|actual| actual.is_ok_and(|actual| actual == info.crc32))
 }
