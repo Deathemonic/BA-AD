@@ -57,6 +57,13 @@ baad download global --assets --platform ios --teen
 baad download japan --assets --platform windows
 ```
 
+Files are written below `--output` in `AssetBundles/`, `TableBundles/`, and `MediaResources/`, keeping the
+subdirectories from the server catalog. Global media keep their path below `MediaResources`, for example
+`MediaResources/Audio/VOC_JP/JP_Momoi/Momoi_Title.ogg` and `MediaResources/Audio/VOC_KR/KR_Momoi/Momoi_Title.ogg`.
+Earlier versions flattened Global media and tables to their file names, so files that share a name across languages
+overwrote each other; media downloaded by those versions are not reused and are downloaded again into the new layout.
+Filters still match the file name only.
+
 <details>
   <summary>Command Line</summary>
 
