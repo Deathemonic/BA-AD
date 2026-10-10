@@ -110,7 +110,12 @@ pub struct GlobalDownloadArgs {
 
     /// Download Teen assets
     #[arg(long)]
-    pub teen: bool
+    pub teen: bool,
+
+    /// Use this client build (e.g. 1.93.454564) instead of discovering the
+    /// latest one
+    #[arg(long, value_name = "VERSION")]
+    pub client_version: Option<String>
 }
 
 #[derive(Parser)]

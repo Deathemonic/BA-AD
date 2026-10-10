@@ -101,6 +101,7 @@ baad download japan --assets --platform windows
 | `--boost`                         | Aggressive downloading, this can trigger CDN rate limiting |            |                                                                                                   |
 | `--platform <PLATFORM>`           | Platform to download                                       | `android`  | `android`, `ios`, `windows`                                                                       |
 | `--teen`                          | Download Teen assets (Global only)                         |            |                                                                                                   | 
+| `--client-version <VERSION>`      | Client build to use, e.g. 1.93.454564 (Global only)        |            |                                                                                                   |
 | `--help`                          | Print help                                                 |            |                                                                                                   |
 
 </details>
