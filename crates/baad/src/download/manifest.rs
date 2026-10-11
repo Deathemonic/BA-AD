@@ -11,7 +11,7 @@ use std::fmt;
 use std::path::Path;
 
 use baad_dm::{Download, HashType, Summary};
-use baad_shared::{DownloadStatus, Downloads};
+use baad_shared::{DownloadStatus, Downloads, HashValue, PackedFile};
 use reqwest::Url;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -88,14 +88,42 @@ pub struct ManifestEntry {
     pub hash: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub hash_type: Option<ManifestHash>,
-    /// Extract only this member of the ZIP at `url`. Members are checked
-    /// against the archive's own CRC32 and size, so `size` and `hash` are
-    /// not used for them.
+    /// Extract only this member of the ZIP at `url`. The extracted file is
+    /// checked against the archive's central directory. `size` and `hash`
+    /// then describe the member as published by the catalog, for callers
+    /// that check it themselves.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub member: Option<String>,
-    /// Names of the bundles packed in this file, when it is a ZIP pack.
+    /// Files packed in this file, when it is a ZIP pack.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub members: Vec<String>
+    pub members: Vec<ManifestMember>
+}
+
+/// A file packed in a ZIP pack, with the size and checksum of the extracted
+/// file when the catalog publishes them.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ManifestMember {
+    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub size: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hash: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hash_type: Option<ManifestHash>
+}
+
+impl From<&PackedFile> for ManifestMember {
+    fn from(file: &PackedFile) -> Self {
+        Self {
+            name: file.name.clone(),
+            size: file.size.and_then(|size| u64::try_from(size).ok()),
+            hash: file.hash.as_ref().map(HashValue::as_string),
+            hash_type: file.hash.as_ref().map(|hash| match hash {
+                HashValue::Crc(_) => ManifestHash::Crc32,
+                HashValue::Md5(_) => ManifestHash::Md5
+            })
+        }
+    }
 }
 
 #[derive(Error, Debug)]
@@ -183,18 +211,17 @@ impl ManifestEntry {
             .build())
     }
 
-    fn from_download(kind: ResourceKind, download: &Download, members: &[String]) -> Self {
-        let member = download.target_file.clone();
-        let archive = member.is_none();
+    fn from_download(kind: ResourceKind, download: &Download, members: &[PackedFile]) -> Self {
+        let archive = download.target_file.is_none();
         Self {
             kind,
             path: download.filename.clone(),
             url: download.url.to_string(),
-            size: download.size.filter(|_| archive),
-            hash: download.hash.clone().filter(|_| archive),
-            hash_type: download.hash_type.and_then(manifest_hash).filter(|_| archive),
-            member,
-            members: if archive { members.to_vec() } else { Vec::new() }
+            size: download.size,
+            hash: download.hash.clone(),
+            hash_type: download.hash_type.and_then(manifest_hash),
+            member: download.target_file.clone(),
+            members: if archive { members.iter().map(Into::into).collect() } else { Vec::new() }
         }
     }
 }
@@ -230,7 +257,7 @@ fn is_safe_relative_path(path: &str) -> bool {
 
 /// Resolves `downloads` and `filter` into the files a download would write.
 pub fn plan(downloads: &Downloads, filter: Option<&ResourceFilter>) -> Vec<ManifestEntry> {
-    let mut members: HashMap<&str, &[String]> = HashMap::new();
+    let mut members: HashMap<&str, &[PackedFile]> = HashMap::new();
     for asset in &downloads.assets {
         members.insert(&asset.path, &asset.bundle_files);
     }
@@ -330,7 +357,14 @@ impl fmt::Display for ReportEntry {
 
 #[cfg(test)]
 mod tests {
-    use baad_shared::{DownloadAsset, DownloadMedia, DownloadTable, Downloads, HashValue};
+    use baad_shared::{
+        DownloadAsset,
+        DownloadMedia,
+        DownloadTable,
+        Downloads,
+        HashValue,
+        PackedFile
+    };
     use serde_json::json;
 
     use super::*;
@@ -344,7 +378,14 @@ mod tests {
                 path: "AssetBundles/pack-1.zip".into(),
                 hash: HashValue::Crc(123),
                 size: 100,
-                bundle_files: vec!["ch0230-a.bundle".into(), "ch0231-b.bundle".into()]
+                bundle_files: vec![
+                    PackedFile {
+                        name: "ch0230-a.bundle".into(),
+                        size: Some(40),
+                        hash: Some(HashValue::Crc(11))
+                    },
+                    "ch0231-b.bundle".to_owned().into(),
+                ]
             }],
             tables: vec![DownloadTable {
                 url: "https://cdn.test/TableBundles/ExcelDB.db".into(),
@@ -400,7 +441,20 @@ mod tests {
             hash: Some("123".into()),
             hash_type: Some(ManifestHash::Crc32),
             member: None,
-            members: vec!["ch0230-a.bundle".into(), "ch0231-b.bundle".into()]
+            members: vec![
+                ManifestMember {
+                    name: "ch0230-a.bundle".into(),
+                    size: Some(40),
+                    hash: Some("11".into()),
+                    hash_type: Some(ManifestHash::Crc32)
+                },
+                ManifestMember {
+                    name: "ch0231-b.bundle".into(),
+                    size: None,
+                    hash: None,
+                    hash_type: None
+                },
+            ]
         });
         assert_eq!(entries[1].kind, ResourceKind::Tables);
         assert_eq!(entries[1].hash_type, Some(ManifestHash::Md5));
@@ -408,7 +462,7 @@ mod tests {
     }
 
     #[test]
-    fn filtered_plan_extracts_matching_members_without_archive_checksums() -> Result<(), FilterError>
+    fn filtered_plan_extracts_matching_members_with_their_own_checksums() -> Result<(), FilterError>
     {
         let filter = ResourceFilter::new("ch0230-a.bundle", FilterMethod::Exact)?;
         let entries = plan(&downloads(), Some(&filter));
@@ -417,21 +471,28 @@ mod tests {
             kind: ResourceKind::Assets,
             path: "AssetBundles/ch0230-a.bundle".into(),
             url: "https://cdn.test/Android_PatchPack/pack-1.zip".into(),
-            size: None,
-            hash: None,
-            hash_type: None,
+            size: Some(40),
+            hash: Some("11".into()),
+            hash_type: Some(ManifestHash::Crc32),
             member: Some("ch0230-a.bundle".into()),
             members: Vec::new()
         }]);
+
+        let filter = ResourceFilter::new("ch0231-b.bundle", FilterMethod::Exact)?;
+        let unchecked = &plan(&downloads(), Some(&filter))[0];
+        assert_eq!(unchecked.member.as_deref(), Some("ch0231-b.bundle"));
+        assert_eq!((unchecked.size, unchecked.hash.as_deref()), (None, None));
         Ok(())
     }
 
     #[test]
     fn entries_round_trip_through_downloads() -> Result<(), ManifestError> {
-        for original in plan(&downloads(), None) {
+        let downloads = downloads();
+        let packed = &downloads.assets[0].bundle_files;
+        for original in plan(&downloads, None) {
             let download = original.to_download()?;
-            let packed = original.members.clone();
-            assert_eq!(ManifestEntry::from_download(original.kind, &download, &packed), original);
+            let members = if original.members.is_empty() { &[][..] } else { packed };
+            assert_eq!(ManifestEntry::from_download(original.kind, &download, members), original);
         }
         Ok(())
     }

@@ -168,6 +168,10 @@ pub struct BaadDownloadEntry {
     pub bundle_files: BaadStringArray
 }
 
+fn packed_names(files: &[baad_shared::PackedFile]) -> Vec<String> {
+    files.iter().map(|file| file.name.clone()).collect()
+}
+
 impl BaadDownloadEntry {
     fn new(
         url: &str,
@@ -192,11 +196,23 @@ impl BaadDownloadEntry {
     }
 
     fn asset(asset: &DownloadAsset) -> Self {
-        Self::new(&asset.url, &asset.path, &asset.hash, asset.size, &asset.bundle_files)
+        Self::new(
+            &asset.url,
+            &asset.path,
+            &asset.hash,
+            asset.size,
+            &packed_names(&asset.bundle_files)
+        )
     }
 
     fn table(table: &DownloadTable) -> Self {
-        Self::new(&table.url, &table.path, &table.hash, table.size, &table.bundle_files)
+        Self::new(
+            &table.url,
+            &table.path,
+            &table.hash,
+            table.size,
+            &packed_names(&table.bundle_files)
+        )
     }
 
     fn media(media: &DownloadMedia) -> Self {
