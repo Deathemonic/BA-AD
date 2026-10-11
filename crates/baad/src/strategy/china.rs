@@ -50,7 +50,7 @@ impl ChinaStrategy {
             path: entry.name,
             hash: HashValue::Md5(entry.crc),
             size: entry.size,
-            bundle_files: entry.includes.unwrap_or_default()
+            bundle_files: entry.includes.unwrap_or_default().into_iter().map(Into::into).collect()
         });
 
         tables.collect()

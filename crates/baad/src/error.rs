@@ -4,6 +4,8 @@ use baad_utils::{FileError, JsonError, NetworkError};
 use bacy::error::TableEncryptionError;
 use thiserror::Error;
 
+use crate::download::ManifestError;
+
 #[derive(Error, Debug)]
 pub enum FilterError {
     #[error("Invalid regex pattern: {pattern}")]
@@ -38,6 +40,9 @@ pub enum CatalogError {
 
     #[error(transparent)]
     Download(#[from] baad_dm::Error),
+
+    #[error(transparent)]
+    Manifest(#[from] ManifestError),
 
     #[error(transparent)]
     TableEncryption(#[from] TableEncryptionError),

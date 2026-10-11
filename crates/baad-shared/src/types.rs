@@ -381,13 +381,32 @@ pub struct BundleFile {
     pub signature: String
 }
 
+/// A file packed in a downloadable archive, with the size and checksum of the
+/// extracted file when the catalog publishes them.
+#[derive(Debug, Clone)]
+pub struct PackedFile {
+    pub name: String,
+    pub size: Option<i64>,
+    pub hash: Option<HashValue>
+}
+
+impl From<String> for PackedFile {
+    fn from(name: String) -> Self {
+        Self {
+            name,
+            size: None,
+            hash: None
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct DownloadAsset {
     pub url: String,
     pub path: String,
     pub hash: HashValue,
     pub size: i64,
-    pub bundle_files: Vec<String>
+    pub bundle_files: Vec<PackedFile>
 }
 
 #[derive(Debug, Clone)]
@@ -404,7 +423,7 @@ pub struct DownloadTable {
     pub path: String,
     pub hash: HashValue,
     pub size: i64,
-    pub bundle_files: Vec<String>
+    pub bundle_files: Vec<PackedFile>
 }
 
 #[derive(Debug, Clone)]

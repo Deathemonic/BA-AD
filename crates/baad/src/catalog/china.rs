@@ -102,6 +102,11 @@ impl Catalog for ChinaCatalog {
         Ok((cdn.catalog_url, resources, up_to_date))
     }
 
+    async fn version(&self) -> Option<String> {
+        let data = load::<ApiData>(&self.paths.api).await.ok()?;
+        Some(data.china.version).filter(|version| !version.is_empty())
+    }
+
     fn build_downloads(&self, resources: Self::Resources, url: &str) -> Downloads {
         Downloads {
             assets: resources

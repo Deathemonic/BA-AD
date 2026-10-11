@@ -5,6 +5,7 @@ use baad_shared::{
     DownloadTable,
     HashValue,
     MediaCatalog,
+    PackedFile,
     Platform,
     TableCatalog
 };
@@ -24,7 +25,15 @@ impl JapanStrategy {
                 path: pack.pack_name,
                 hash: HashValue::Crc(pack.crc),
                 size: pack.pack_size,
-                bundle_files: pack.bundle_files.into_iter().map(|b| b.name).collect()
+                bundle_files: pack
+                    .bundle_files
+                    .into_iter()
+                    .map(|b| PackedFile {
+                        name: b.name,
+                        size: Some(b.size),
+                        hash: Some(HashValue::Crc(b.crc))
+                    })
+                    .collect()
             }
         });
 
@@ -64,7 +73,15 @@ impl JapanStrategy {
             path: pack.name,
             hash: HashValue::Crc(pack.crc),
             size: pack.size,
-            bundle_files: pack.bundle_files.into_iter().map(|b| b.name).collect()
+            bundle_files: pack
+                .bundle_files
+                .into_iter()
+                .map(|b| PackedFile {
+                    name: b.name,
+                    size: Some(b.size),
+                    hash: Some(HashValue::Crc(b.crc))
+                })
+                .collect()
         });
 
         base.chain(packs).collect()

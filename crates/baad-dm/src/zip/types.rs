@@ -12,6 +12,7 @@ pub const EOCD_SEARCH_SIZE: u64 = 65536;
 #[derive(Debug, Clone)]
 pub struct ZipFileInfo {
     pub compression_method: u16,
+    pub crc32: u32,
     pub compressed_size: u64,
     pub uncompressed_size: u64,
     pub local_header_offset: u64

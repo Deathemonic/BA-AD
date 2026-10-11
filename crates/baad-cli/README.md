@@ -84,6 +84,10 @@ baad download global --assets --platform ios --teen
 
 # Download JP Windows asset bundles
 baad download japan --assets --platform windows
+
+# Save the files a filtered download would fetch, then download exactly those
+baad download japan --filter "CH0230" --export-manifest ./ch0230.json
+baad download japan --manifest ./ch0230.json --output ./ch0230 --report ./report.json
 ```
 
 ## Command Overview
@@ -125,6 +129,9 @@ baad download japan --assets --platform windows
 | `--boost`                         | Aggressive downloading, this can trigger CDN rate limiting |            |                                                                                                   |
 | `--platform <PLATFORM>`           | Platform to download                                       | `android`  | `android`, `ios`, `windows`                                                                       |
 | `--teen`                          | Download Teen assets (Global only)                         |            |                                                                                                   | 
+| `--export-manifest <FILE>`        | Write the files to download to a JSON manifest instead     |            |                                                                                                   |
+| `--manifest <FILE>`               | Download exactly the files listed in a manifest            |            |                                                                                                   |
+| `--report <FILE>`                 | Write the outcome of every file to a JSON report           |            |                                                                                                   |
 | `--help`                          | Print help                                                 |            |                                                                                                   |
 
 ## Building
