@@ -1,12 +1,14 @@
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
-use baad_dm::{Download, Downloader, DownloaderConfig, HashType};
+use baad_dm::{Download, Downloader, DownloaderConfig, HashType, Summary};
 use baad_shared::{DownloadStatus, Downloads};
 use bon::Builder;
 use reqwest::{Proxy, Url};
 use tracing::{error, info, warn};
 
-use crate::download::{ResourceFilter, converter};
+use crate::download::ResourceFilter;
+use crate::download::manifest::{self, ManifestEntry, Report, ResourceKind};
 use crate::error::CatalogError;
 
 #[derive(Builder)]
@@ -41,37 +43,77 @@ impl ResourceDownloader {
         downloads: Downloads,
         filter: Option<&ResourceFilter>
     ) -> Result<(), CatalogError> {
-        let mut errors = Vec::new();
-        if !downloads.assets.is_empty() {
-            let convert = converter::convert_assets(&downloads.assets, filter);
-            if let Err(error) = self.execute(convert, "Assets").await {
-                errors.push(error.to_string());
-            }
-        }
-        if !downloads.tables.is_empty() {
-            let convert = converter::convert_tables(&downloads.tables, filter);
-            if let Err(error) = self.execute(convert, "Tables").await {
-                errors.push(error.to_string());
-            }
-        }
-        if !downloads.media.is_empty() {
-            let convert = converter::convert_media(&downloads.media, filter);
-            if let Err(error) = self.execute(convert, "Media").await {
-                errors.push(error.to_string());
-            }
-        }
-        if !errors.is_empty() {
-            return Err(baad_dm::Error::DownloadFailed(errors.join("\n").into()).into());
+        let report = self.download_with_report(&downloads, filter).await?;
+        let failures = report.failures().map(ToString::to_string).collect::<Vec<_>>();
+        if !failures.is_empty() {
+            return Err(baad_dm::Error::DownloadFailed(failures.join("\n").into()).into());
         }
         Ok(())
     }
 
-    async fn execute(&self, downloads: Vec<Download>, category: &str) -> Result<(), CatalogError> {
-        if downloads.is_empty() {
-            warn!(category = category, "No files matched filter");
-            return Ok(());
+    /// Like [`Self::download`], but returns each file's outcome instead of
+    /// failing when some files could not be downloaded.
+    pub async fn download_with_report(
+        &self,
+        downloads: &Downloads,
+        filter: Option<&ResourceFilter>
+    ) -> Result<Report, CatalogError> {
+        let mut entries = manifest::plan(downloads, filter);
+        entries.retain(|entry| match entry.to_download() {
+            Ok(_) => true,
+            Err(error) => {
+                warn!(path = entry.path, %error, "Skipping resource");
+                false
+            }
+        });
+        for (kind, available) in [
+            (ResourceKind::Assets, downloads.assets.len()),
+            (ResourceKind::Tables, downloads.tables.len()),
+            (ResourceKind::Media, downloads.media.len())
+        ] {
+            if available > 0 && !entries.iter().any(|entry| entry.kind == kind) {
+                warn!(category = kind.label(), "No files matched filter");
+            }
+        }
+        self.download_entries(&entries).await
+    }
+
+    /// Downloads every entry and reports each file's outcome. Fails before
+    /// downloading anything when an entry is invalid; failed files are only
+    /// recorded in the report.
+    pub async fn download_entries(
+        &self,
+        entries: &[ManifestEntry]
+    ) -> Result<Report, CatalogError> {
+        let mut seen = HashSet::new();
+        let mut batches: Vec<(ResourceKind, Vec<Download>)> = Vec::new();
+        for entry in entries {
+            let download = entry.to_download()?;
+            if !seen.insert(entry.path.as_str()) {
+                continue;
+            }
+            match batches.iter_mut().find(|(kind, _)| *kind == entry.kind) {
+                Some((_, batch)) => batch.push(download),
+                None => batches.push((entry.kind, vec![download]))
+            }
         }
 
+        let mut report = Report::default();
+        for (kind, batch) in batches {
+            let mut summaries = self.execute(&batch, kind.label()).await;
+            // Downloads finish in any order; report them in manifest order.
+            let order: HashMap<&str, usize> = batch
+                .iter()
+                .enumerate()
+                .map(|(index, download)| (download.filename.as_str(), index))
+                .collect();
+            summaries.sort_by_key(|summary| order.get(summary.download.filename.as_str()).copied());
+            report.extend(kind, &summaries);
+        }
+        Ok(report)
+    }
+
+    async fn execute(&self, downloads: &[Download], category: &str) -> Vec<Summary> {
         info!(category = category, "Starting download");
 
         let proxy = self.proxy.as_deref().and_then(|url| Proxy::all(url).ok());
@@ -88,18 +130,17 @@ impl ResourceDownloader {
             .build();
 
         let downloader = Downloader::new(config);
-        let summaries = downloader.download(&downloads).await;
+        let summaries = downloader.download(downloads).await;
 
         let failed_count =
             summaries.iter().filter(|s| matches!(s.status, DownloadStatus::Failed(_))).count();
 
         if failed_count > 0 {
             error!(category = category, failed = failed_count, "Some downloads failed");
-            return Err(failed_downloads(&summaries));
+        } else {
+            info!(category = category, success = true, "Download complete");
         }
-
-        info!(category = category, success = true, "Download complete");
-        Ok(())
+        summaries
     }
 }
 

@@ -5,6 +5,7 @@ mod tests {
     use std::sync::atomic::{AtomicU64, Ordering};
     use std::{env, fs, io, process};
 
+    use baad::download::manifest::FileStatus;
     use baad::download::{ExpectedFile, ResourceDownloader, download_expected_file, download_file};
     use baad_dm::HashType;
     use baad_shared::{DownloadAsset, DownloadMedia, Downloads, HashValue};
@@ -115,6 +116,41 @@ mod tests {
         assert!(!fixture.directory.join("missing.asset").exists());
         assert!(!fixture.directory.join("missing.ogg").exists());
         assert_eq!(fs::read(fixture.directory.join("ok.bin"))?, b"good");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn report_records_each_file_and_skips_unsafe_catalog_paths() -> Result<(), Box<dyn Error>>
+    {
+        let fixture = Fixture::new().await?;
+        let output = fixture.directory.join("output");
+        let mut escape = fixture.media("ok.bin");
+        escape.path = "../escape.bin".into();
+        let downloads = Downloads {
+            assets: Vec::new(),
+            tables: Vec::new(),
+            media: vec![fixture.media("ok.bin"), fixture.media("missing.ogg"), escape]
+        };
+        let report = ResourceDownloader::builder()
+            .output_dir(output.clone())
+            .retries(0)
+            .build()
+            .download_with_report(&downloads, None)
+            .await?;
+
+        let statuses =
+            report.files.iter().map(|file| (file.path.as_str(), file.status)).collect::<Vec<_>>();
+        assert_eq!(statuses, [
+            ("ok.bin", FileStatus::Downloaded),
+            ("missing.ogg", FileStatus::Failed)
+        ]);
+        assert!(
+            report
+                .failures()
+                .all(|file| file.message.as_deref().is_some_and(|m| m.contains("404")))
+        );
+        assert_eq!(fs::read(output.join("ok.bin"))?, b"good");
+        assert!(!fixture.directory.join("escape.bin").exists());
         Ok(())
     }
 
