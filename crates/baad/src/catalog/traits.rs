@@ -11,6 +11,9 @@ pub trait Catalog {
 
     fn build_downloads(&self, resources: Self::Resources, base_or_url: &str) -> Downloads;
 
+    /// Client version of the most recently fetched catalog, when known.
+    async fn version(&self) -> Option<String> { None }
+
     async fn prepare_downloads(&self) -> Result<Downloads, CatalogError> {
         let (base_or_url, resources, up_to_date) = self.fetch_resources().await?;
 

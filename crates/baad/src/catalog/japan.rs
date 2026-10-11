@@ -182,6 +182,11 @@ impl Catalog for JapanCatalog {
         Ok((url, resources, up_to_date))
     }
 
+    async fn version(&self) -> Option<String> {
+        let data = load::<ApiData>(&self.paths.api).await.ok()?;
+        Some(data.japan.version).filter(|version| !version.is_empty())
+    }
+
     fn build_downloads(&self, resources: Self::Resources, url: &str) -> Downloads {
         Downloads {
             assets: resources
