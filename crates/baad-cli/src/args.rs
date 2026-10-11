@@ -20,6 +20,11 @@ pub struct Args {
     #[arg(short, long)]
     pub clean: bool,
 
+    /// Keep API data, catalogs and other cached metadata in this directory
+    /// instead of the platform data directory
+    #[arg(long, value_name = "DIR", global = true)]
+    pub data_dir: Option<PathBuf>,
+
     /// Enable verbose output
     #[arg(short, long, value_name = "LEVEL", num_args = 0..=1, default_missing_value = "minimal", require_equals = true)]
     pub verbose: Option<VerboseLevel>
