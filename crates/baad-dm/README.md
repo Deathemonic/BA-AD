@@ -30,7 +30,7 @@ async fn main() -> eyre::Result<()> {
 
     let config = DownloaderConfig::builder()
         .directory(Path::new("./output"))
-        .concurrent_downloads(8)
+        .concurrent_downloads(8)?
         .retries(3)
         .resumable(true)
         .build();
@@ -68,10 +68,32 @@ use baad_dm::DownloaderConfig;
 
 let config = DownloaderConfig::builder()
     .directory(Path::new("./output"))
-    .concurrent_downloads(4)
-    .max_chunks_per_file(8)
+    .concurrent_downloads(4)?
+    .max_concurrent_segments(4)?
+    .max_concurrent_requests(32)?
+    .max_concurrent_transforms(2)?
+    .max_chunks_per_file(8)?
     .overwrite(false)
     .build();
+```
+
+By default, the downloader runs up to 32 downloads, 4 segments per file, 32 HTTP requests, 2 output transforms, and 8 chunks per file. Setting a concurrency limit to zero returns `Error::ZeroConcurrency`.
+
+Build a download from segments:
+
+```rust
+use baad_dm::{Download, ServerSegment};
+
+let download = Download::builder()
+    .segments(vec![ServerSegment {
+        url: "https://example.com/assets.bundle.0".parse()?,
+        size: Some(68 * 1024),
+        hash: None,
+    }])
+    .filename("assets.bundle".into())
+    .size(5 * 1024 * 1024)
+    .build();
+# Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
 ---

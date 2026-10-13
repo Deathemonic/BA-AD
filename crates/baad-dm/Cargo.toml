@@ -10,6 +10,7 @@ bacy = { workspace = true }
 
 bon = { workspace = true }
 derive_more = { workspace = true }
+fastcat = { workspace = true }
 reqwest = { workspace = true, features = ["http2", "stream", "socks", "gzip", "deflate", "brotli", "zstd", "rustls"] }
 thiserror = { workspace = true }
 tokio = { workspace = true }

@@ -1,14 +1,10 @@
 use std::collections::HashMap;
-use std::io::Read;
 
 use bytes::Bytes;
-use flate2::read::DeflateDecoder;
-use reqwest_middleware::ClientWithMiddleware;
-use reqwest_middleware::reqwest::Url;
-use reqwest_middleware::reqwest::header::RANGE;
+use fastcat::fconcat;
 
-use crate::client::create_range_header;
 use crate::error::Error;
+use crate::zip::ZipSource;
 use crate::zip::types::*;
 
 struct EocdInfo {
@@ -21,21 +17,22 @@ pub struct ZipIndex {
     entries: HashMap<String, ZipFileInfo>
 }
 
+pub struct ZipExtractor<'a> {
+    source: ZipSource<'a>,
+    zip_size: u64
+}
+
 impl ZipIndex {
     pub fn get(&self, name: &str) -> Option<&ZipFileInfo> { self.entries.get(name) }
 
     pub fn names(&self) -> impl Iterator<Item = &str> { self.entries.keys().map(String::as_str) }
 }
 
-pub struct ZipExtractor<'a> {
-    client: &'a ClientWithMiddleware,
-    url: &'a Url,
-    zip_size: u64
-}
-
 impl<'a> ZipExtractor<'a> {
-    pub async fn new(client: &'a ClientWithMiddleware, url: &'a Url) -> Result<Self, Error> {
-        let head = client.head(url.clone()).send().await?;
+    pub async fn new(source: ZipSource<'a>) -> Result<Self, Error> {
+        let permit = source.acquire_permit().await?;
+        let head = source.client.head(source.url.clone()).send().await?;
+        head.error_for_status_ref()?;
         let headers = head.headers();
 
         let zip_size = headers
@@ -53,64 +50,33 @@ impl<'a> ZipExtractor<'a> {
             return Err(Error::RangeNotSupported);
         }
 
-        Ok(Self { client, url, zip_size })
+        drop(permit);
+        Ok(Self { source, zip_size })
     }
 
     pub async fn extract_file(&self, target: &str) -> Result<Bytes, Error> {
         let index = self.build_index().await?;
-        let info = index
-            .get(target)
-            .ok_or_else(|| Error::Archive(format!("File '{target}' not found in ZIP").into()))?;
-        Self::extract_member(self.client, self.url, info).await
+        let info = index.get(target).ok_or_else(|| {
+            Error::Archive(fconcat!("File '", target, "' not found in ZIP").into())
+        })?;
+        self.source.extract_member(info).await
     }
 
     pub async fn build_index(&self) -> Result<ZipIndex, Error> {
         let eocd = self.read_eocd().await?;
-        let cd_data = Self::fetch_range(
-            self.client,
-            self.url,
-            eocd.cd_offset,
-            eocd.cd_offset + eocd.cd_size - 1
-        )
-        .await?;
+        let cd_data =
+            self.source.fetch_range(eocd.cd_offset, eocd.cd_offset + eocd.cd_size - 1).await?;
 
         Ok(ZipIndex {
             entries: Self::parse_central_directory(&cd_data)
         })
     }
 
-    pub async fn extract_member(
-        client: &ClientWithMiddleware,
-        url: &Url,
-        info: &ZipFileInfo
-    ) -> Result<Bytes, Error> {
-        let header = Self::fetch_range(
-            client,
-            url,
-            info.local_header_offset,
-            info.local_header_offset + LOCAL_HEADER_MIN_SIZE as u64 - 1
-        )
-        .await?;
-
-        if header.len() < LOCAL_HEADER_MIN_SIZE {
-            return Err(Error::Archive("Invalid local file header".into()));
-        }
-
-        let filename_len = read_u16_le(&header, 26) as u64;
-        let extra_len = read_u16_le(&header, 28) as u64;
-        let data_start =
-            info.local_header_offset + LOCAL_HEADER_MIN_SIZE as u64 + filename_len + extra_len;
-        let data_end = data_start + info.compressed_size - 1;
-
-        let compressed = Self::fetch_range(client, url, data_start, data_end).await?;
-        Self::decompress(&compressed, info.compression_method)
-    }
-
     async fn read_eocd(&self) -> Result<EocdInfo, Error> {
         let search_size = self.zip_size.min(EOCD_SEARCH_SIZE);
         let start = self.zip_size - search_size;
 
-        let data = Self::fetch_range(self.client, self.url, start, self.zip_size - 1).await?;
+        let data = self.source.fetch_range(start, self.zip_size - 1).await?;
 
         let offset = data
             .windows(4)
@@ -159,35 +125,6 @@ impl<'a> ZipExtractor<'a> {
         }
 
         entries
-    }
-
-    async fn fetch_range(
-        client: &ClientWithMiddleware,
-        url: &Url,
-        start: u64,
-        end: u64
-    ) -> Result<Bytes, Error> {
-        let res = client
-            .get(url.as_str())
-            .header(RANGE, create_range_header(start, Some(end)))
-            .send()
-            .await?;
-
-        Ok(res.bytes().await?)
-    }
-
-    fn decompress(data: &[u8], method: u16) -> Result<Bytes, Error> {
-        match method {
-            COMPRESSION_STORED => Ok(Bytes::copy_from_slice(data)),
-            COMPRESSION_DEFLATE => {
-                let mut output = Vec::with_capacity(data.len() * 2);
-                DeflateDecoder::new(data).read_to_end(&mut output).map_err(|e| {
-                    Error::Archive(format!("Deflate decompression failed: {e}").into())
-                })?;
-                Ok(Bytes::from(output))
-            }
-            _ => Err(Error::UnsupportedCompression(method))
-        }
     }
 }
 

@@ -1,112 +1,121 @@
-use std::path::PathBuf;
 use std::sync::Arc;
 
-use futures::stream::{self, StreamExt};
-use reqwest_middleware::ClientWithMiddleware;
+use futures::stream::{self, StreamExt, TryStreamExt};
+use reqwest_middleware::reqwest::StatusCode;
 use reqwest_middleware::reqwest::header::RANGE;
 use tokio::fs::{File, OpenOptions};
 use tokio::io::{AsyncSeekExt, AsyncWriteExt, BufWriter, SeekFrom};
 
 use crate::client::create_range_header;
-use crate::downloader::helpers::{FetchCtx, ensure_parent_dir};
-use crate::downloader::progress::ProgressTracker;
+use crate::downloader::helpers::ensure_parent_dir;
+use crate::downloader::progress::RangeProgress;
+use crate::downloader::segment::{Transfer, WRITE_BUFFER_SIZE};
 use crate::error::Error;
 
-const WRITE_BUFFER_SIZE: usize = 256 * 1024;
-
-pub struct ChunkCtx {
-    pub client: Arc<ClientWithMiddleware>,
-    pub resolved_url: String,
-    pub file_path: PathBuf
+struct ChunkContext<'a, 'shared> {
+    transfer: &'a Transfer<'a, 'shared>,
+    progress: RangeProgress
 }
 
-pub struct ChunkRange {
-    pub start: u64,
-    pub end: u64
+struct ChunkRange {
+    index: usize,
+    start: u64,
+    end: u64
 }
 
-pub async fn download_chunked(
-    ctx: &FetchCtx<'_>,
-    total_size: u64,
-    chunk_count: usize,
-    resolved_url: &str,
-    max_concurrent_chunks: usize,
-    progress: Option<Arc<ProgressTracker>>
-) -> Result<(), Error> {
+impl Transfer<'_, '_> {
+    pub(super) async fn run_chunks(
+        &self,
+        total_size: u64,
+        chunk_count: usize
+    ) -> Result<(), Error> {
+        ensure_parent_dir(self.request.path).await?;
+        let file = File::create(self.request.path).await?;
+        file.set_len(total_size).await?;
+        drop(file);
+
+        let progress = RangeProgress::new(
+            chunk_count,
+            Arc::clone(&self.context.progress),
+            self.request.progress_index
+        );
+        let context = ChunkContext { transfer: self, progress };
+        stream::iter(ranges(total_size, chunk_count))
+            .map(Ok::<_, Error>)
+            .try_for_each_concurrent(self.context.config.max_concurrent_chunks.get(), |range| {
+                context.download(range)
+            })
+            .await
+    }
+}
+
+impl ChunkContext<'_, '_> {
+    async fn download(&self, range: ChunkRange) -> Result<(), Error> {
+        self.transfer.context.cancellation.check()?;
+        let _permit = self
+            .transfer
+            .context
+            .shared
+            .requests
+            .acquire()
+            .await
+            .map_err(|_| Error::LimiterClosed)?;
+
+        let response = self
+            .transfer
+            .context
+            .shared
+            .client
+            .get(&self.transfer.server.resolved_url)
+            .header(RANGE, create_range_header(range.start, Some(range.end)))
+            .send()
+            .await?;
+        response.error_for_status_ref()?;
+
+        if response.status() != StatusCode::PARTIAL_CONTENT {
+            return Err(Error::RangeNotSupported);
+        }
+
+        let mut file = OpenOptions::new().write(true).open(self.transfer.request.path).await?;
+        file.seek(SeekFrom::Start(range.start)).await?;
+        let mut writer = BufWriter::with_capacity(WRITE_BUFFER_SIZE, file);
+        let mut stream = response.bytes_stream();
+        let mut downloaded = 0_u64;
+        let expected = range.end - range.start + 1;
+
+        while let Some(chunk) = stream.next().await {
+            self.transfer.context.cancellation.check()?;
+            let chunk = chunk?;
+            if chunk.len() as u64 > expected - downloaded {
+                return Err(Error::InvalidDownload("range response exceeds requested size".into()));
+            }
+            writer.write_all(&chunk).await?;
+            downloaded = downloaded.saturating_add(chunk.len() as u64);
+            self.progress.set_position(range.index, downloaded);
+        }
+
+        writer.flush().await?;
+
+        if downloaded != expected {
+            return Err(Error::InvalidDownload(
+                format!("range size mismatch: {downloaded} != {expected}").into()
+            ));
+        }
+
+        Ok(())
+    }
+}
+
+fn ranges(total_size: u64, chunk_count: usize) -> impl Iterator<Item = ChunkRange> {
     let chunk_size = total_size / chunk_count as u64;
 
-    ensure_parent_dir(&ctx.file_path).await?;
-
-    let file = File::create(&ctx.file_path).await.map_err(Error::Io)?;
-
-    file.set_len(total_size).await.map_err(Error::Io)?;
-
-    drop(file);
-
-    let ranges: Vec<_> = (0..chunk_count)
-        .map(|i| {
-            let start = i as u64 * chunk_size;
-            let end =
-                if i == chunk_count - 1 { total_size - 1 } else { (i as u64 + 1) * chunk_size - 1 };
-            ChunkRange { start, end }
-        })
-        .collect();
-
-    let concurrent_chunks = chunk_count.min(max_concurrent_chunks);
-
-    let chunk_ctx = ChunkCtx {
-        client: Arc::clone(&ctx.client),
-        resolved_url: resolved_url.into(),
-        file_path: ctx.file_path.clone()
-    };
-    let chunk_ctx = Arc::new(chunk_ctx);
-
-    let results: Vec<_> = stream::iter(ranges)
-        .map(|range| {
-            let chunk_ctx = Arc::clone(&chunk_ctx);
-            let progress = progress.clone();
-            async move { download_chunk(&chunk_ctx, range, progress).await }
-        })
-        .buffer_unordered(concurrent_chunks)
-        .collect()
-        .await;
-
-    if let Some(Err(e)) = results.into_iter().find(Result::is_err) {
-        return Err(e);
-    }
-
-    Ok(())
-}
-
-async fn download_chunk(
-    chunk_ctx: &ChunkCtx,
-    range: ChunkRange,
-    progress: Option<Arc<ProgressTracker>>
-) -> Result<(), Error> {
-    let res = chunk_ctx
-        .client
-        .get(&chunk_ctx.resolved_url)
-        .header(RANGE, create_range_header(range.start, Some(range.end)))
-        .send()
-        .await?;
-
-    res.error_for_status_ref()?;
-
-    let mut file = OpenOptions::new().write(true).open(&chunk_ctx.file_path).await?;
-
-    file.seek(SeekFrom::Start(range.start)).await?;
-
-    let mut writer = BufWriter::with_capacity(WRITE_BUFFER_SIZE, file);
-    let mut stream = res.bytes_stream();
-
-    while let Some(chunk) = stream.next().await {
-        let chunk = chunk?;
-        writer.write_all(&chunk).await?;
-
-        if let Some(p) = &progress {
-            p.add_bytes(chunk.len() as u64);
-        }
-    }
-
-    writer.flush().await.map_err(Error::from)
+    (0..chunk_count).map(move |index| {
+        let start = index as u64 * chunk_size;
+        let end = if index == chunk_count - 1 {
+            total_size - 1
+        } else {
+            (index as u64 + 1) * chunk_size - 1
+        };
+        ChunkRange { index, start, end }
+    })
 }

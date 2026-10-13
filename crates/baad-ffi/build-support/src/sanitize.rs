@@ -131,7 +131,7 @@ fn sanitized_type(ty: &Type) -> TokenStream {
     if text == "Option<Proxy>" {
         return quote! { Option<String> };
     }
-    if text == "usize" {
+    if matches!(text.as_str(), "usize" | "NonZeroUsize") {
         return quote! { u64 };
     }
     quote! { #ty }
@@ -170,6 +170,16 @@ fn sanitized_default(field: &syn::Field, struct_defaults: &[(String, Expr)]) -> 
 
 fn evaluate_literal(expression: &Expr) -> Option<TokenStream> {
     match expression {
+        Expr::MethodCall(method) if method.method == "expect" => {
+            let Expr::Call(call) = method.receiver.as_ref() else {
+                return None;
+            };
+            let function = &call.func;
+            if quote!(#function).to_string().replace(' ', "") != "NonZeroUsize::new" {
+                return None;
+            }
+            evaluate_literal(call.args.first()?)
+        }
         Expr::Lit(literal) => match &literal.lit {
             Lit::Int(_) | Lit::Bool(_) | Lit::Str(_) => Some(quote! { #literal }),
             _ => None

@@ -1,45 +1,158 @@
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::collections::HashMap;
+use std::fs::metadata;
+use std::io::ErrorKind;
+use std::path::Path;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex, PoisonError};
 
 use reqwest_middleware::ClientWithMiddleware;
+use reqwest_middleware::reqwest::Url;
 use tokio::fs;
+use tokio::sync::{Mutex as AsyncMutex, Semaphore};
+use tokio::task::spawn_blocking;
 
 use crate::client::{parse_accept_ranges, parse_content_length};
-use crate::download::Download;
+use crate::download::verify_hash;
 use crate::error::Error;
 use crate::zip::ZipCache;
 
+#[derive(Debug, Default)]
+pub struct Cancellation {
+    cancelled: AtomicBool
+}
+
+pub struct CancellationGuard {
+    cancellation: Arc<Cancellation>,
+    armed: bool
+}
+
 #[derive(Debug)]
-pub struct FetchCtx<'a> {
-    pub client: Arc<ClientWithMiddleware>,
-    pub download: &'a Download,
-    pub file_path: PathBuf,
-    pub cache: &'a ZipCache
+pub struct ServerInfo {
+    pub resumable: bool,
+    pub content_length: Option<u64>,
+    pub resolved_url: String
 }
 
-pub struct StreamOpts {
-    pub size_on_disk: u64,
-    pub resumable: bool
+#[derive(Debug)]
+pub struct SharedExecution {
+    pub client: ClientWithMiddleware,
+    pub requests: Arc<Semaphore>,
+    pub transforms: Arc<Semaphore>,
+    pub zip_cache: ZipCache,
+    resource_locks: Mutex<HashMap<String, Arc<AsyncMutex<()>>>>
 }
 
-pub async fn check_server(
-    client: &ClientWithMiddleware,
-    download: &Download
-) -> Result<(bool, Option<u64>, String), Error> {
-    let res = client.head(download.url.clone()).send().await?;
+impl Cancellation {
+    pub fn cancel(&self) { self.cancelled.store(true, Ordering::Release); }
 
-    let resolved_url = res.url().to_string();
-    let headers = res.headers();
+    pub fn check(&self) -> Result<(), Error> {
+        if self.cancelled.load(Ordering::Acquire) {
+            return Err(Error::Cancelled);
+        }
 
-    let resumable = parse_accept_ranges(headers);
-    let content_length = parse_content_length(headers);
+        Ok(())
+    }
+}
 
-    Ok((resumable, content_length, resolved_url))
+impl CancellationGuard {
+    pub const fn new(cancellation: Arc<Cancellation>) -> Self { Self { cancellation, armed: true } }
+
+    pub const fn disarm(&mut self) { self.armed = false; }
+}
+
+impl Drop for CancellationGuard {
+    fn drop(&mut self) {
+        if self.armed {
+            self.cancellation.cancel();
+        }
+    }
+}
+
+impl SharedExecution {
+    pub fn new(client: ClientWithMiddleware, max_requests: usize, max_transforms: usize) -> Self {
+        Self {
+            client,
+            requests: Arc::new(Semaphore::new(max_requests)),
+            transforms: Arc::new(Semaphore::new(max_transforms)),
+            zip_cache: ZipCache::new(),
+            resource_locks: Mutex::new(HashMap::new())
+        }
+    }
+
+    pub fn resource_lock(&self, identity: &str) -> Arc<AsyncMutex<()>> {
+        let mut locks = self.resource_locks.lock().unwrap_or_else(PoisonError::into_inner);
+
+        if let Some(lock) = locks.get(identity) {
+            return Arc::clone(lock);
+        }
+
+        Arc::clone(locks.entry(identity.into()).or_default())
+    }
+
+    pub async fn verify_file(
+        &self,
+        path: &Path,
+        size: Option<u64>,
+        hash: Option<&String>
+    ) -> Result<bool, Error> {
+        if hash.is_none() {
+            return match fs::metadata(path).await {
+                Ok(metadata) => Ok(size.is_none_or(|expected| metadata.len() == expected)),
+                Err(error) if error.kind() == ErrorKind::NotFound => Ok(false),
+                Err(error) => Err(error.into())
+            };
+        }
+
+        let permit =
+            self.transforms.clone().acquire_owned().await.map_err(|_| Error::LimiterClosed)?;
+        let path = path.to_path_buf();
+        let hash = hash.cloned();
+
+        spawn_blocking(move || {
+            let _permit = permit;
+            verify_file(&path, size, hash.as_ref())
+        })
+        .await?
+    }
+
+    pub async fn inspect(
+        &self,
+        url: &Url,
+        cancellation: &Cancellation
+    ) -> Result<ServerInfo, Error> {
+        cancellation.check()?;
+
+        let _permit = self.requests.acquire().await.map_err(|_| Error::LimiterClosed)?;
+
+        let response = self.client.head(url.clone()).send().await?;
+        response.error_for_status_ref()?;
+
+        Ok(ServerInfo {
+            resumable: parse_accept_ranges(response.headers()),
+            content_length: parse_content_length(response.headers()),
+            resolved_url: response.url().to_string()
+        })
+    }
 }
 
 pub async fn ensure_parent_dir(path: &Path) -> Result<(), Error> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).await?;
     }
+
     Ok(())
+}
+
+pub fn verify_file(path: &Path, size: Option<u64>, hash: Option<&String>) -> Result<bool, Error> {
+    let metadata = match metadata(path) {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == ErrorKind::NotFound => return Ok(false),
+        Err(error) => return Err(error.into())
+    };
+
+    if size.is_some_and(|expected| metadata.len() != expected) {
+        return Ok(false);
+    }
+
+    verify_hash(path, hash)
 }

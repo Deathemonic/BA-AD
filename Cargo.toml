@@ -31,7 +31,7 @@ baad-dm = { path = "crates/baad-dm" }
 baad-ffi-build = { path = "crates/baad-ffi/build-support" }
 baad-shared = { path = "crates/baad-shared" }
 baad-utils = { path = "crates/baad-utils", default-features = false }
-bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "3.3.0" }
+bacy = { path = "../BA-CY/crates/bacy", version = "3.3.0" }
 
 bitflags = "2"
 bon = "3"

@@ -14,7 +14,17 @@ pub use baad_shared::{
     set_observer
 };
 pub use client::{HttpClientConfig, create_http_client};
-pub use download::{Download, HashType, Summary, detect_hash_type, verify_hash};
+pub use download::{
+    Download,
+    DownloadSource,
+    HashType,
+    OutputTransform,
+    ServerSegment,
+    Summary,
+    TransformError,
+    detect_hash_type,
+    verify_hash
+};
 pub use downloader::{Downloader, DownloaderConfig};
 pub use error::Error;
-pub use zip::{ZipCache, ZipExtractor, ZipFileInfo, ZipIndex};
+pub use zip::{ZipCache, ZipExtractor, ZipFileInfo, ZipIndex, ZipSource};

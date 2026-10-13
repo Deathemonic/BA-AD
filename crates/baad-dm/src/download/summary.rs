@@ -5,7 +5,6 @@ use bon::Builder;
 use reqwest_middleware::reqwest::StatusCode;
 
 use crate::download::Download;
-use crate::error::Error;
 
 #[derive(Debug)]
 pub enum FetchOutcome {
@@ -27,13 +26,6 @@ impl FetchOutcome {
         Self::Failed {
             error: error.to_string(),
             status_code
-        }
-    }
-
-    pub(crate) fn from_result(result: Result<u64, Error>, resumable: bool) -> Self {
-        match result {
-            Ok(size) => Self::success(size, resumable),
-            Err(e) => Self::failed(&e, StatusCode::PARTIAL_CONTENT)
         }
     }
 }

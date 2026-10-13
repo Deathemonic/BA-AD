@@ -293,6 +293,7 @@ dependencies = [
  "bon",
  "bytes",
  "derive_more",
+ "fastcat",
  "flate2",
  "form_urlencoded",
  "futures",
@@ -407,8 +408,7 @@ dependencies = [
 
 [[package]]
 name = "bacy"
-version = "3.3.0"
-source = "git+https://github.com/Deathemonic/BA-CY#2e28bc072c8d1e9ca8fbd75bd1afb430dc8b11f5"
+version = "3.3.2"
 dependencies = [
  "aes",
  "base64",
@@ -418,6 +418,7 @@ dependencies = [
  "hmac",
  "md-5",
  "rand_mt",
+ "sha1",
  "sha2",
  "thiserror 2.0.17",
  "tokio",

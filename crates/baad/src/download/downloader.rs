@@ -68,12 +68,12 @@ impl ResourceDownloader {
 
         let config = DownloaderConfig::builder()
             .directory(self.output_dir.as_path())
-            .concurrent_downloads(self.limit)
+            .concurrent_downloads(self.limit)?
             .retries(self.retries)
             .maybe_proxy(proxy)
             .http1_only(self.http1_only)
-            .max_chunks_per_file(self.max_chunks_per_file)
-            .max_concurrent_chunks(self.max_concurrent_chunks)
+            .max_chunks_per_file(self.max_chunks_per_file)?
+            .max_concurrent_chunks(self.max_concurrent_chunks)?
             .chunk_threshold(self.chunk_threshold)
             .build();
 
@@ -112,7 +112,7 @@ pub async fn download_file(
 
     let config = DownloaderConfig::builder()
         .directory(output_dir)
-        .concurrent_downloads(1)
+        .concurrent_downloads(1)?
         .retries(retries)
         .overwrite(overwrite)
         .build();

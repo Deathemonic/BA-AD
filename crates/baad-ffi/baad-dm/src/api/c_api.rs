@@ -6,6 +6,7 @@
 #![allow(unsafe_op_in_unsafe_fn)]
 
 use std::ffi::c_char;
+use std::num::NonZeroUsize;
 use std::path::PathBuf;
 use std::{mem, ptr, slice};
 
@@ -223,9 +224,12 @@ unsafe fn import_options(config: &BaadDmDownloaderConfig) -> Result<core::Downlo
 
     Ok(core::DownloadOptions {
         directory: PathBuf::from(directory),
-        concurrent_downloads: config.concurrent_downloads as usize,
-        max_chunks_per_file: config.max_chunks_per_file as usize,
-        max_concurrent_chunks: config.max_concurrent_chunks as usize,
+        concurrent_downloads: NonZeroUsize::new(config.concurrent_downloads as usize)
+            .ok_or(BaadDmErrorCode::from(&baad_dm::Error::ZeroConcurrency) as i32)?,
+        max_chunks_per_file: NonZeroUsize::new(config.max_chunks_per_file as usize)
+            .ok_or(BaadDmErrorCode::from(&baad_dm::Error::ZeroConcurrency) as i32)?,
+        max_concurrent_chunks: NonZeroUsize::new(config.max_concurrent_chunks as usize)
+            .ok_or(BaadDmErrorCode::from(&baad_dm::Error::ZeroConcurrency) as i32)?,
         chunk_threshold: config.chunk_threshold,
         retries: config.retries,
         resumable: config.resumable,
@@ -305,7 +309,8 @@ pub unsafe extern "C" fn baad_dm_zip_extract_file(
     let result = runtime.block_on(async {
         let client = core::default_client()?;
         let parsed = core::parse_url(url)?;
-        let extractor = baad_dm::ZipExtractor::new(&client, &parsed).await?;
+        let source = baad_dm::ZipSource::new(&client, &parsed, None);
+        let extractor = baad_dm::ZipExtractor::new(source).await?;
         extractor.extract_file(target).await
     });
 
@@ -345,7 +350,8 @@ pub unsafe extern "C" fn baad_dm_zip_list_files(
     let result = runtime.block_on(async {
         let client = core::default_client()?;
         let parsed = core::parse_url(url)?;
-        let extractor = baad_dm::ZipExtractor::new(&client, &parsed).await?;
+        let source = baad_dm::ZipSource::new(&client, &parsed, None);
+        let extractor = baad_dm::ZipExtractor::new(source).await?;
         let index = extractor.build_index().await?;
         Ok::<_, baad_dm::Error>(index.names().map(String::from).collect::<Vec<_>>())
     });
@@ -407,7 +413,8 @@ pub unsafe extern "C" fn baad_dm_zip_file_info(
     let result = runtime.block_on(async {
         let client = core::default_client()?;
         let parsed = core::parse_url(url)?;
-        let extractor = baad_dm::ZipExtractor::new(&client, &parsed).await?;
+        let source = baad_dm::ZipSource::new(&client, &parsed, None);
+        let extractor = baad_dm::ZipExtractor::new(source).await?;
         let index = extractor.build_index().await?;
         Ok::<_, baad_dm::Error>(index.get(target).cloned())
     });

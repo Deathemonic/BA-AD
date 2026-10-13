@@ -3,6 +3,9 @@ use std::io;
 use bacy::error::HashError;
 use reqwest_middleware::reqwest::{Error as ReqwestError, StatusCode};
 use thiserror::Error;
+use tokio::task::JoinError;
+
+use crate::download::TransformError;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -33,6 +36,24 @@ pub enum Error {
     #[error("Hash mismatch: expected {expected}, got {actual}")]
     HashMismatch { expected: Box<str>, actual: Box<str> },
 
+    #[error("Unsupported hash format: {0}")]
+    UnsupportedHash(Box<str>),
+
+    #[error("Invalid download: {0}")]
+    InvalidDownload(Box<str>),
+
+    #[error("Output transform failed: {0}")]
+    Transform(#[source] TransformError),
+
+    #[error("Download worker failed: {0}")]
+    Worker(#[from] JoinError),
+
+    #[error("Download cancelled")]
+    Cancelled,
+
+    #[error("Concurrency limiter closed")]
+    LimiterClosed,
+
     #[error("Server does not support range requests")]
     RangeNotSupported,
 
@@ -44,5 +65,8 @@ pub enum Error {
         downloaded: u64,
         #[source]
         source: Box<Self>
-    }
+    },
+
+    #[error("Concurrency limits must be nonzero")]
+    ZeroConcurrency
 }
