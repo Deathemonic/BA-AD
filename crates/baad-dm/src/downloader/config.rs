@@ -15,39 +15,27 @@ pub struct DownloaderConfig<'a> {
     pub directory: &'a Path,
 
     #[builder(default = NonZeroUsize::new(32).expect("32 is nonzero"))]
-    #[builder(with = |value: usize| -> Result<_, Error> {
-        NonZeroUsize::new(value).ok_or(Error::ZeroConcurrency)
-    })]
+    #[builder(with = |value: usize| -> Result<_, Error> { validate_concurrency(value) })]
     pub concurrent_downloads: NonZeroUsize,
 
     #[builder(default = NonZeroUsize::new(16).expect("16 is nonzero"))]
-    #[builder(with = |value: usize| -> Result<_, Error> {
-        NonZeroUsize::new(value).ok_or(Error::ZeroConcurrency)
-    })]
+    #[builder(with = |value: usize| -> Result<_, Error> { validate_concurrency(value) })]
     pub max_chunks_per_file: NonZeroUsize,
 
     #[builder(default = NonZeroUsize::new(8).expect("8 is nonzero"))]
-    #[builder(with = |value: usize| -> Result<_, Error> {
-        NonZeroUsize::new(value).ok_or(Error::ZeroConcurrency)
-    })]
+    #[builder(with = |value: usize| -> Result<_, Error> { validate_concurrency(value) })]
     pub max_concurrent_chunks: NonZeroUsize,
 
     #[builder(default = NonZeroUsize::new(4).expect("4 is nonzero"))]
-    #[builder(with = |value: usize| -> Result<_, Error> {
-        NonZeroUsize::new(value).ok_or(Error::ZeroConcurrency)
-    })]
+    #[builder(with = |value: usize| -> Result<_, Error> { validate_concurrency(value) })]
     pub max_concurrent_segments: NonZeroUsize,
 
     #[builder(default = NonZeroUsize::new(32).expect("32 is nonzero"))]
-    #[builder(with = |value: usize| -> Result<_, Error> {
-        NonZeroUsize::new(value).ok_or(Error::ZeroConcurrency)
-    })]
+    #[builder(with = |value: usize| -> Result<_, Error> { validate_concurrency(value) })]
     pub max_concurrent_requests: NonZeroUsize,
 
     #[builder(default = NonZeroUsize::new(2).expect("2 is nonzero"))]
-    #[builder(with = |value: usize| -> Result<_, Error> {
-        NonZeroUsize::new(value).ok_or(Error::ZeroConcurrency)
-    })]
+    #[builder(with = |value: usize| -> Result<_, Error> { validate_concurrency(value) })]
     pub max_concurrent_transforms: NonZeroUsize,
 
     #[builder(default = 10 * 1024 * 1024)]
@@ -77,4 +65,8 @@ pub struct DownloaderConfig<'a> {
     #[debug(skip)]
     #[builder(default = baad_shared::observer())]
     pub observer: Arc<dyn ProgressObserver>
+}
+
+fn validate_concurrency(value: usize) -> Result<NonZeroUsize, Error> {
+    NonZeroUsize::new(value).ok_or(Error::ZeroConcurrency)
 }

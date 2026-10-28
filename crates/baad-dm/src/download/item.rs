@@ -14,11 +14,6 @@ use crate::segment::ServerSegment;
 
 pub type TransformError = Box<dyn StdError + Send + Sync>;
 
-pub trait OutputTransform: Send + Sync {
-    fn transform(&self, input: &mut dyn Read, output: &mut dyn Write)
-    -> Result<(), TransformError>;
-}
-
 #[derive(Debug, Clone)]
 pub enum DownloadSource {
     Url(Url),
@@ -27,7 +22,7 @@ pub enum DownloadSource {
 
 #[derive(Builder, Clone, Debug)]
 pub struct Download {
-    #[builder(setters(vis = "pub(crate)"))]
+    #[builder(setters(vis = ""))]
     pub source: DownloadSource,
     pub filename: String,
     pub hash: Option<String>,
@@ -35,6 +30,11 @@ pub struct Download {
     pub size: Option<u64>,
     #[debug(skip)]
     pub transform: Option<Arc<dyn OutputTransform>>
+}
+
+pub trait OutputTransform: Send + Sync {
+    fn transform(&self, input: &mut dyn Read, output: &mut dyn Write)
+    -> Result<(), TransformError>;
 }
 
 impl Download {
@@ -65,19 +65,6 @@ where
     }
 }
 
-fn extract_filename(url: &Url) -> Result<String, Error> {
-    let filename = url
-        .path_segments()
-        .and_then(|mut segments| segments.next_back())
-        .filter(|segment| !segment.is_empty())
-        .ok_or_else(|| Error::InvalidUrl {
-            url: url.as_str().into(),
-            reason: "URL does not contain a filename".into()
-        })?;
-
-    Ok(form_urlencoded::parse(filename.as_bytes()).map(|(key, val)| [key, val].concat()).collect())
-}
-
 impl TryFrom<&str> for Download {
     type Error = Error;
 
@@ -96,6 +83,20 @@ impl TryFrom<&Url> for Download {
 
     fn try_from(url: &Url) -> Result<Self, Self::Error> {
         let filename = extract_filename(url)?;
+
         Ok(Self::builder().url(url.clone()).filename(filename).build())
     }
+}
+
+fn extract_filename(url: &Url) -> Result<String, Error> {
+    let filename = url
+        .path_segments()
+        .and_then(|mut segments| segments.next_back())
+        .filter(|segment| !segment.is_empty())
+        .ok_or_else(|| Error::InvalidUrl {
+            url: url.as_str().into(),
+            reason: "URL does not contain a filename".into()
+        })?;
+
+    Ok(form_urlencoded::parse(filename.as_bytes()).map(|(key, val)| [key, val].concat()).collect())
 }

@@ -5,12 +5,14 @@ use fastcat::fconcat;
 
 use crate::error::Error;
 use crate::zip::ZipSource;
-use crate::zip::types::*;
-
-struct EocdInfo {
-    cd_size: u64,
-    cd_offset: u64
-}
+use crate::zip::types::{
+    CENTRAL_DIR_ENTRY_MIN_SIZE,
+    CENTRAL_DIR_SIGNATURE,
+    EOCD_MIN_SIZE,
+    EOCD_SEARCH_SIZE,
+    EOCD_SIGNATURE,
+    ZipFileInfo
+};
 
 #[derive(Debug)]
 pub struct ZipIndex {
@@ -20,6 +22,11 @@ pub struct ZipIndex {
 pub struct ZipExtractor<'a> {
     source: ZipSource<'a>,
     zip_size: u64
+}
+
+struct EocdInfo {
+    cd_size: u64,
+    cd_offset: u64
 }
 
 impl ZipIndex {

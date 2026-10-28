@@ -13,23 +13,6 @@ pub enum FetchOutcome {
     Failed { error: String, status_code: StatusCode }
 }
 
-impl FetchOutcome {
-    pub(crate) const fn success(size: u64, resumable: bool) -> Self {
-        Self::Success { size, resumable }
-    }
-
-    pub(crate) const fn skipped(reason: &'static str, size: u64) -> Self {
-        Self::Skipped { reason, size }
-    }
-
-    pub(crate) fn failed(error: &impl ToString, status_code: StatusCode) -> Self {
-        Self::Failed {
-            error: error.to_string(),
-            status_code
-        }
-    }
-}
-
 #[derive(Debug, Clone, Builder)]
 pub struct Summary {
     pub download: Arc<Download>,
@@ -41,6 +24,19 @@ pub struct Summary {
     pub status: ProgressStatus,
     #[builder(default)]
     pub resumable: bool
+}
+
+impl FetchOutcome {
+    pub const fn success(size: u64, resumable: bool) -> Self { Self::Success { size, resumable } }
+
+    pub const fn skipped(reason: &'static str, size: u64) -> Self { Self::Skipped { reason, size } }
+
+    pub fn failed(error: &impl ToString, status_code: StatusCode) -> Self {
+        Self::Failed {
+            error: error.to_string(),
+            status_code
+        }
+    }
 }
 
 impl Summary {

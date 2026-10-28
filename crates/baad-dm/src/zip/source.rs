@@ -9,12 +9,17 @@ use tokio::sync::{Semaphore, SemaphorePermit};
 
 use crate::client::create_range_header;
 use crate::error::Error;
-use crate::zip::types::*;
+use crate::zip::types::{
+    COMPRESSION_DEFLATE,
+    COMPRESSION_STORED,
+    LOCAL_HEADER_MIN_SIZE,
+    ZipFileInfo
+};
 
 #[derive(Clone, Copy)]
 pub struct ZipSource<'a> {
-    pub(super) client: &'a ClientWithMiddleware,
-    pub(super) url: &'a Url,
+    pub client: &'a ClientWithMiddleware,
+    pub url: &'a Url,
     requests: Option<&'a Semaphore>
 }
 
@@ -49,14 +54,14 @@ impl<'a> ZipSource<'a> {
         Self::decompress(&compressed, info.compression_method)
     }
 
-    pub(super) async fn acquire_permit(&self) -> Result<Option<SemaphorePermit<'_>>, Error> {
+    pub async fn acquire_permit(&self) -> Result<Option<SemaphorePermit<'_>>, Error> {
         match self.requests {
             Some(requests) => requests.acquire().await.map(Some).map_err(|_| Error::LimiterClosed),
             None => Ok(None)
         }
     }
 
-    pub(super) async fn fetch_range(&self, start: u64, end: u64) -> Result<Bytes, Error> {
+    pub async fn fetch_range(&self, start: u64, end: u64) -> Result<Bytes, Error> {
         let permit = self.acquire_permit().await?;
         let res = self
             .client
