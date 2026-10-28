@@ -6,11 +6,11 @@ use tokio::io::{AsyncWriteExt, BufWriter};
 
 use crate::client::create_range_header;
 use crate::downloader::helpers::ensure_parent_dir;
-use crate::downloader::segment::{Transfer, WRITE_BUFFER_SIZE};
+use crate::downloader::transfer::{Transfer, WRITE_BUFFER_SIZE};
 use crate::error::Error;
 
 impl Transfer<'_, '_> {
-    pub(super) async fn run_stream(&self) -> Result<u64, Error> {
+    pub async fn run_stream(&self) -> Result<u64, Error> {
         self.context.cancellation.check()?;
 
         let _permit =

@@ -1,20 +1,23 @@
-use std::collections::HashMap;
-use std::fs::metadata;
+use std::fs::{File, TryLockError, metadata};
 use std::io::ErrorKind;
 use std::path::Path;
+use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex, PoisonError};
+use std::time::Duration;
 
 use reqwest_middleware::ClientWithMiddleware;
 use reqwest_middleware::reqwest::Url;
 use tokio::fs;
-use tokio::sync::{Mutex as AsyncMutex, Semaphore};
+use tokio::sync::Semaphore;
 use tokio::task::spawn_blocking;
+use tokio::time::sleep;
 
 use crate::client::{parse_accept_ranges, parse_content_length};
 use crate::download::verify_hash;
 use crate::error::Error;
 use crate::zip::ZipCache;
+
+const LOCK_RETRY_INTERVAL: Duration = Duration::from_millis(50);
 
 #[derive(Debug, Default)]
 pub struct Cancellation {
@@ -38,8 +41,8 @@ pub struct SharedExecution {
     pub client: ClientWithMiddleware,
     pub requests: Arc<Semaphore>,
     pub transforms: Arc<Semaphore>,
-    pub zip_cache: ZipCache,
-    resource_locks: Mutex<HashMap<String, Arc<AsyncMutex<()>>>>
+    pub blocking: Arc<Semaphore>,
+    pub zip_cache: ZipCache
 }
 
 impl Cancellation {
@@ -74,19 +77,9 @@ impl SharedExecution {
             client,
             requests: Arc::new(Semaphore::new(max_requests)),
             transforms: Arc::new(Semaphore::new(max_transforms)),
-            zip_cache: ZipCache::new(),
-            resource_locks: Mutex::new(HashMap::new())
+            blocking: Arc::new(Semaphore::new(max_requests)),
+            zip_cache: ZipCache::new()
         }
-    }
-
-    pub fn resource_lock(&self, identity: &str) -> Arc<AsyncMutex<()>> {
-        let mut locks = self.resource_locks.lock().unwrap_or_else(PoisonError::into_inner);
-
-        if let Some(lock) = locks.get(identity) {
-            return Arc::clone(lock);
-        }
-
-        Arc::clone(locks.entry(identity.into()).or_default())
     }
 
     pub async fn verify_file(
@@ -104,7 +97,7 @@ impl SharedExecution {
         }
 
         let permit =
-            self.transforms.clone().acquire_owned().await.map_err(|_| Error::LimiterClosed)?;
+            self.blocking.clone().acquire_owned().await.map_err(|_| Error::LimiterClosed)?;
         let path = path.to_path_buf();
         let hash = hash.cloned();
 
@@ -132,6 +125,31 @@ impl SharedExecution {
             content_length: parse_content_length(response.headers()),
             resolved_url: response.url().to_string()
         })
+    }
+}
+
+pub async fn lock_file(path: &Path, cancellation: &Cancellation) -> Result<Arc<File>, Error> {
+    cancellation.check()?;
+    ensure_parent_dir(path).await?;
+
+    let file = fs::OpenOptions::new()
+        .create(true)
+        .truncate(false)
+        .read(true)
+        .write(true)
+        .open(path)
+        .await?
+        .into_std()
+        .await;
+
+    loop {
+        cancellation.check()?;
+
+        match file.try_lock() {
+            Ok(()) => return Ok(Arc::new(file)),
+            Err(TryLockError::WouldBlock) => sleep(LOCK_RETRY_INTERVAL).await,
+            Err(TryLockError::Error(error)) => return Err(error.into())
+        }
     }
 }
 

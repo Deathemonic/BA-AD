@@ -68,5 +68,34 @@ pub enum Error {
     },
 
     #[error("Concurrency limits must be nonzero")]
-    ZeroConcurrency
+    ZeroConcurrency,
+
+    #[error("Segment list must not be empty")]
+    EmptySegments,
+
+    #[error("ZIP extraction does not support segment sources")]
+    ZipSegmentsNotSupported,
+
+    #[error("ZIP extraction does not support output transforms")]
+    ZipTransformNotSupported,
+
+    #[error("Segment transfer size overflow")]
+    SegmentSizeOverflow,
+
+    #[error("Transfer did not start")]
+    TransferNotStarted,
+
+    #[error(
+        "Transfer verification failed: expected size {expected_size:?}, hash {expected_hash:?}"
+    )]
+    TransferVerificationFailed { expected_size: Option<u64>, expected_hash: Option<Box<str>> },
+
+    #[error("Output verification failed: expected size {expected_size:?}, hash {expected_hash:?}")]
+    OutputVerificationFailed { expected_size: Option<u64>, expected_hash: Option<Box<str>> },
+
+    #[error("Output exceeds expected size {expected}")]
+    OutputSizeExceeded { expected: u64 },
+
+    #[error("Output size mismatch: expected {expected}, got {actual}")]
+    OutputSizeMismatch { expected: u64, actual: u64 }
 }

@@ -2,6 +2,7 @@ pub mod client;
 pub mod download;
 pub mod downloader;
 pub mod error;
+pub mod segment;
 pub mod zip;
 
 pub use baad_shared::{

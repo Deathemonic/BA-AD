@@ -25,6 +25,16 @@ pub fn detect_hash_type(hash: &str) -> Option<HashType> {
     }
 }
 
+pub fn validate_hash(hash: Option<&String>) -> Result<(), Error> {
+    if let Some(hash) = hash
+        && detect_hash_type(hash).is_none()
+    {
+        return Err(Error::UnsupportedHash(hash.clone().into()));
+    }
+
+    Ok(())
+}
+
 pub fn verify_hash(file_path: &Path, expected: Option<&String>) -> Result<bool, Error> {
     let Some(expected) = expected else {
         return Ok(true);

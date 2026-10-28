@@ -1,7 +1,10 @@
 mod hash;
 mod item;
-pub(crate) mod summary;
+mod pipeline;
+mod summary;
 
-pub use hash::{HashType, detect_hash_type, verify_hash};
-pub use item::{Download, DownloadSource, OutputTransform, ServerSegment, TransformError};
-pub use summary::Summary;
+pub use hash::{HashType, detect_hash_type, validate_hash, verify_hash};
+pub use item::{Download, DownloadSource, OutputTransform, TransformError};
+pub use summary::{FetchOutcome, Summary};
+
+pub use crate::segment::ServerSegment;

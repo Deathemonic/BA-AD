@@ -65,6 +65,9 @@ pub struct DownloaderConfig<'a> {
     #[builder(default = false)]
     pub http1_only: bool,
 
+    #[builder(default = true)]
+    pub log_results: bool,
+
     #[debug(skip)]
     pub headers: Option<HeaderMap>,
 

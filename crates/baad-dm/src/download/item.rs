@@ -10,19 +10,13 @@ use reqwest_middleware::reqwest::Url;
 use self::download_builder::{IsUnset, SetSource, State};
 use crate::download::hash::verify_hash;
 use crate::error::Error;
+use crate::segment::ServerSegment;
 
 pub type TransformError = Box<dyn StdError + Send + Sync>;
 
 pub trait OutputTransform: Send + Sync {
     fn transform(&self, input: &mut dyn Read, output: &mut dyn Write)
     -> Result<(), TransformError>;
-}
-
-#[derive(Debug, Clone)]
-pub struct ServerSegment {
-    pub url: Url,
-    pub size: Option<u64>,
-    pub hash: Option<String>
 }
 
 #[derive(Debug, Clone)]

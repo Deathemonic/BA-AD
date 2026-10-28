@@ -1,20 +1,18 @@
 use std::io::ErrorKind;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
 
-use futures::stream::{self, StreamExt, TryStreamExt};
 use reqwest_middleware::reqwest::Url;
 use tokio::fs;
 use tokio::time::sleep;
 
-use crate::download::ServerSegment;
 use crate::downloader::config::DownloaderConfig;
 use crate::downloader::helpers::{Cancellation, ServerInfo, SharedExecution};
 use crate::downloader::progress::ProgressTracker;
 use crate::error::Error;
 
-pub(super) const WRITE_BUFFER_SIZE: usize = 256 * 1024;
+pub const WRITE_BUFFER_SIZE: usize = 256 * 1024;
 const CHUNK_SIZE: u64 = 8 * 1024 * 1024;
 const RETRY_BASE_DELAY_MS: u64 = 250;
 
@@ -34,62 +32,14 @@ pub struct TransferContext<'a> {
     pub cancellation: Arc<Cancellation>
 }
 
-pub(super) struct Transfer<'a, 'shared> {
+pub struct Transfer<'a, 'shared> {
     pub context: &'a TransferContext<'shared>,
     pub request: &'a TransferRequest<'a>,
     pub server: &'a ServerInfo,
     pub size_on_disk: u64
 }
 
-impl<'a> TransferContext<'a> {
-    pub const fn new(
-        shared: &'a SharedExecution,
-        config: &'a DownloaderConfig<'a>,
-        progress: Arc<ProgressTracker>,
-        cancellation: Arc<Cancellation>
-    ) -> Self {
-        Self {
-            shared,
-            config,
-            progress,
-            cancellation
-        }
-    }
-
-    pub async fn fetch_segments(
-        &self,
-        segments: &[ServerSegment],
-        cache_dir: &Path
-    ) -> Result<Vec<PathBuf>, Error> {
-        fs::create_dir_all(cache_dir).await?;
-
-        let paths: Vec<_> =
-            (0..segments.len()).map(|index| cache_dir.join(format!("segment-{index}"))).collect();
-
-        let result = stream::iter(segments.iter().zip(&paths).enumerate())
-            .map(Ok::<_, Error>)
-            .try_for_each_concurrent(
-                self.config.max_concurrent_segments.get(),
-                |(index, (segment, path))| async move {
-                    self.fetch(&TransferRequest {
-                        url: &segment.url,
-                        path,
-                        expected_size: segment.size,
-                        expected_hash: segment.hash.as_ref(),
-                        progress_index: index
-                    })
-                    .await
-                }
-            )
-            .await;
-
-        if result.is_err() {
-            self.cancellation.cancel();
-        }
-
-        result.map(|_| paths)
-    }
-
+impl TransferContext<'_> {
     pub async fn fetch(&self, request: &TransferRequest<'_>) -> Result<(), Error> {
         if !self.config.overwrite && self.verify_with_size(request, request.expected_size).await? {
             let size = fs::metadata(request.path).await?.len();
@@ -110,7 +60,7 @@ impl<'a> TransferContext<'a> {
             self.wait_before_retry(attempt).await;
         }
 
-        Err(last_error.unwrap_or_else(|| Error::DownloadFailed("transfer did not start".into())))
+        Err(last_error.unwrap_or(Error::TransferNotStarted))
     }
 
     async fn fetch_once(&self, request: &TransferRequest<'_>) -> Result<(), Error> {
@@ -137,7 +87,15 @@ impl<'a> TransferContext<'a> {
             self.transfer(request, &server, size_on_disk).await?;
         }
 
-        if self.verify_with_size(request, request.expected_size.or(server.content_length)).await? {
+        if self
+            .shared
+            .verify_file(
+                request.path,
+                request.expected_size.or(server.content_length),
+                request.expected_hash
+            )
+            .await?
+        {
             let size = fs::metadata(request.path).await?.len();
             self.progress.complete_position(request.progress_index, size);
             return Ok(());
@@ -147,13 +105,9 @@ impl<'a> TransferContext<'a> {
 
         self.progress.set_position(request.progress_index, 0);
 
-        Err(Error::HashMismatch {
-            expected: request
-                .expected_hash
-                .cloned()
-                .unwrap_or_else(|| "expected transfer metadata".into())
-                .into(),
-            actual: "downloaded file did not match".into()
+        Err(Error::TransferVerificationFailed {
+            expected_size: request.expected_size.or(server.content_length),
+            expected_hash: request.expected_hash.map(|hash| hash.as_str().into())
         })
     }
 

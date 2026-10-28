@@ -7,11 +7,10 @@ use reqwest_middleware::reqwest::StatusCode;
 use tracing::{error, info, warn};
 
 use crate::client::{HttpClientConfig, create_http_client};
-use crate::download::summary::FetchOutcome;
-use crate::download::{Download, Summary};
+use crate::download::{Download, FetchOutcome, Summary};
 use crate::downloader::config::DownloaderConfig;
 use crate::downloader::helpers::{Cancellation, CancellationGuard, SharedExecution};
-use crate::downloader::job::{DownloadJob, network_total, validate_download};
+use crate::downloader::job::DownloadJob;
 use crate::error::Error;
 
 #[derive(Clone, Debug)]
@@ -44,7 +43,7 @@ impl<'a> Downloader<'a> {
         let cancellation = Arc::new(Cancellation::default());
         let mut cancellation_guard = CancellationGuard::new(Arc::clone(&cancellation));
         let filename: Arc<str> = download.filename.as_str().into();
-        let total = network_total(download).unwrap_or(0);
+        let total = download.network_total().unwrap_or(0);
 
         self.config.observer.on_event(ProgressEvent::Started {
             id: Arc::clone(&filename),
@@ -53,7 +52,7 @@ impl<'a> Downloader<'a> {
             total
         });
 
-        let outcome = match validate_download(download) {
+        let outcome = match download.validate() {
             Ok(()) => {
                 let job = DownloadJob {
                     shared,
@@ -99,7 +98,7 @@ impl<'a> Downloader<'a> {
             id: Arc::clone(&filename),
             label: "Downloading",
             unit: ProgressUnit::Bytes,
-            total: network_total(download).unwrap_or(0)
+            total: download.network_total().unwrap_or(0)
         });
 
         self.finalize(
@@ -145,7 +144,10 @@ impl<'a> Downloader<'a> {
             status: summary.status.clone()
         });
 
-        log_summary(&summary);
+        if self.config.log_results {
+            log_summary(&summary);
+        }
+
         summary
     }
 }
