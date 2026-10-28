@@ -5,10 +5,12 @@ use tokio::fs;
 use tokio::task::spawn_blocking;
 
 use crate::download::{Download, FetchOutcome};
-use crate::downloader::{OutputJob, TransferContext};
 use crate::error::Error;
-use crate::segment::cache::SegmentCache;
-use crate::segment::{OrderedSegmentReader, ServerSegment, fetch_segments};
+use crate::output::{OutputJob, verify_file};
+use crate::segment::ServerSegment;
+use crate::segment_service::cache::SegmentCache;
+use crate::segment_service::{OrderedSegmentReader, fetch_segments};
+use crate::transfer::TransferContext;
 
 pub async fn download(
     transfer: &TransferContext<'_>,
@@ -17,10 +19,18 @@ pub async fn download(
     destination: &Path
 ) -> Result<FetchOutcome, Error> {
     let cache = SegmentCache::acquire(transfer, segments).await?;
+
     if !transfer.config.overwrite
-        && transfer.shared.verify_file(destination, download.size, download.hash.as_ref()).await?
+        && verify_file(
+            &transfer.shared.blocking,
+            destination,
+            download.size,
+            download.hash.as_ref()
+        )
+        .await?
     {
         let size = fs::metadata(destination).await?.len();
+
         return Ok(FetchOutcome::skipped("File exists with matching metadata", size));
     }
 
@@ -31,9 +41,11 @@ pub async fn download(
         &transfer.shared.blocking
     };
     let permit = limiter.clone().acquire_owned().await.map_err(|_| Error::LimiterClosed)?;
+
     if let Some(parent) = destination.parent() {
         fs::create_dir_all(parent).await?;
     }
+
     let job =
         OutputJob::new(download, destination.to_path_buf(), Arc::clone(&transfer.cancellation));
     let cache_lock = Arc::clone(&cache.lock);
@@ -41,10 +53,12 @@ pub async fn download(
     let size = spawn_blocking(move || {
         let _permit = permit;
         let _cache_lock = cache_lock;
+
         job.run(&mut OrderedSegmentReader::new(paths))
     })
     .await??;
 
     cache.clean().await;
+
     Ok(FetchOutcome::success(size, transfer.config.resumable))
 }

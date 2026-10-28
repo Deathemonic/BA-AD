@@ -8,10 +8,10 @@ use tokio::fs::{self, File, OpenOptions};
 use tokio::io::{AsyncSeekExt, AsyncWriteExt, BufWriter, SeekFrom};
 
 use crate::client::create_range_header;
-use crate::downloader::helpers::ensure_parent_dir;
-use crate::downloader::progress::RangeProgress;
-use crate::downloader::transfer::{Transfer, WRITE_BUFFER_SIZE};
 use crate::error::Error;
+use crate::execution::RangeProgress;
+use crate::output::ensure_parent_dir;
+use crate::transfer::{Transfer, WRITE_BUFFER_SIZE};
 
 struct ChunkContext<'a, 'shared> {
     transfer: &'a Transfer<'a, 'shared>,
@@ -28,6 +28,7 @@ struct ChunkRange {
 impl Transfer<'_, '_> {
     pub async fn run_chunks(&self, total_size: u64, chunk_count: usize) -> Result<(), Error> {
         ensure_parent_dir(self.request.path).await?;
+
         let path = self.request.path.with_added_extension("chunks");
         let file = File::create(&path).await?;
         file.set_len(total_size).await?;
@@ -43,6 +44,7 @@ impl Transfer<'_, '_> {
             path: &path,
             progress
         };
+
         stream::iter(ranges(total_size, chunk_count))
             .map(Ok::<_, Error>)
             .try_for_each_concurrent(self.context.config.max_concurrent_chunks.get(), |range| {
@@ -59,6 +61,7 @@ impl Transfer<'_, '_> {
 impl ChunkContext<'_, '_> {
     async fn download(&self, range: ChunkRange) -> Result<(), Error> {
         self.transfer.context.cancellation.check()?;
+
         let _permit = self
             .transfer
             .context
@@ -92,10 +95,13 @@ impl ChunkContext<'_, '_> {
 
         while let Some(chunk) = stream.next().await {
             self.transfer.context.cancellation.check()?;
+
             let chunk = chunk?;
+
             if chunk.len() as u64 > expected - downloaded {
                 return Err(Error::InvalidDownload("range response exceeds requested size".into()));
             }
+
             writer.write_all(&chunk).await?;
             downloaded = downloaded.saturating_add(chunk.len() as u64);
             self.progress.set_position(range.index, downloaded);
@@ -123,6 +129,7 @@ fn ranges(total_size: u64, chunk_count: usize) -> impl Iterator<Item = ChunkRang
         } else {
             (index as u64 + 1) * chunk_size - 1
         };
+
         ChunkRange { index, start, end }
     })
 }

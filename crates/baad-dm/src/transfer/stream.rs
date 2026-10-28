@@ -5,9 +5,9 @@ use tokio::fs::{File, OpenOptions};
 use tokio::io::{AsyncWriteExt, BufWriter};
 
 use crate::client::create_range_header;
-use crate::downloader::helpers::ensure_parent_dir;
-use crate::downloader::transfer::{Transfer, WRITE_BUFFER_SIZE};
 use crate::error::Error;
+use crate::output::ensure_parent_dir;
+use crate::transfer::{Transfer, WRITE_BUFFER_SIZE};
 
 impl Transfer<'_, '_> {
     pub async fn run_stream(&self) -> Result<u64, Error> {
@@ -18,6 +18,7 @@ impl Transfer<'_, '_> {
 
         let resumable = self.context.config.resumable && self.server.resumable;
         let mut request = self.context.shared.client.get(&self.server.resolved_url);
+
         if resumable && self.size_on_disk > 0 {
             request = request.header(RANGE, create_range_header(self.size_on_disk, None));
         }
@@ -52,6 +53,7 @@ impl Transfer<'_, '_> {
 
         while let Some(chunk) = stream.next().await {
             self.context.cancellation.check()?;
+
             let chunk = chunk?;
             writer.write_all(&chunk).await?;
             downloaded = downloaded.saturating_add(chunk.len() as u64);

@@ -2,7 +2,11 @@ pub mod client;
 pub mod download;
 pub mod downloader;
 pub mod error;
-pub mod segment;
+mod execution;
+mod output;
+#[path = "segment/mod.rs"]
+mod segment_service;
+mod transfer;
 pub mod zip;
 
 pub use baad_shared::{
@@ -28,4 +32,5 @@ pub use download::{
 };
 pub use downloader::{Downloader, DownloaderConfig};
 pub use error::Error;
+pub use segment_service::source as segment;
 pub use zip::{ZipCache, ZipExtractor, ZipFileInfo, ZipIndex, ZipSource};

@@ -10,11 +10,11 @@ use tokio::time::sleep;
 
 use crate::download::{Download, FetchOutcome};
 use crate::downloader::config::DownloaderConfig;
-use crate::downloader::helpers::{Cancellation, SharedExecution, ensure_parent_dir, lock_file};
-use crate::downloader::output::OutputJob;
-use crate::downloader::progress::ProgressTracker;
-use crate::downloader::transfer::TransferContext;
+use crate::downloader::pipeline::fetch_source;
 use crate::error::Error;
+use crate::execution::{Cancellation, ProgressTracker, SharedExecution};
+use crate::output::{OutputJob, ensure_parent_dir, lock_file, verify_file};
+use crate::transfer::TransferContext;
 use crate::zip::ZipSource;
 
 const RETRY_BASE_DELAY_MS: u64 = 250;
@@ -34,12 +34,16 @@ impl DownloadJob<'_, '_> {
                 .await?;
 
         if !self.config.overwrite
-            && self
-                .shared
-                .verify_file(&self.destination, self.download.size, self.download.hash.as_ref())
-                .await?
+            && verify_file(
+                &self.shared.blocking,
+                &self.destination,
+                self.download.size,
+                self.download.hash.as_ref()
+            )
+            .await?
         {
             let size = fs::metadata(&self.destination).await?.len();
+
             return Ok(FetchOutcome::skipped("File exists with matching metadata", size));
         }
 
@@ -62,7 +66,7 @@ impl DownloadJob<'_, '_> {
             cancellation: Arc::clone(&self.cancellation)
         };
 
-        self.download.fetch_source(&transfer, &self.destination).await
+        fetch_source(self.download, &transfer, &self.destination).await
     }
 
     async fn extract_zip(&self) -> Result<FetchOutcome, Error> {
@@ -94,6 +98,7 @@ impl DownloadJob<'_, '_> {
 
             if attempt < self.config.retries {
                 let shift = attempt.min(8);
+
                 sleep(Duration::from_millis(RETRY_BASE_DELAY_MS << shift)).await;
             }
         }

@@ -9,9 +9,9 @@ use tracing::{error, info, warn};
 use crate::client::{HttpClientConfig, create_http_client};
 use crate::download::{Download, FetchOutcome, Summary};
 use crate::downloader::config::DownloaderConfig;
-use crate::downloader::helpers::{Cancellation, CancellationGuard, SharedExecution};
 use crate::downloader::job::DownloadJob;
 use crate::error::Error;
+use crate::execution::{Cancellation, CancellationGuard, SharedExecution};
 
 #[derive(Clone, Debug)]
 pub struct Downloader<'a> {

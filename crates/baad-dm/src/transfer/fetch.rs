@@ -1,49 +1,24 @@
 use std::io::ErrorKind;
 use std::path::Path;
-use std::sync::Arc;
 use std::time::Duration;
 
-use reqwest_middleware::reqwest::Url;
 use tokio::fs;
 use tokio::time::sleep;
 
-use crate::downloader::config::DownloaderConfig;
-use crate::downloader::helpers::{Cancellation, ServerInfo, SharedExecution};
-use crate::downloader::progress::ProgressTracker;
+use crate::client::{ServerInfo, inspect};
 use crate::error::Error;
+use crate::output::verify_file;
+use crate::transfer::{Transfer, TransferContext, TransferRequest};
 
-pub const WRITE_BUFFER_SIZE: usize = 256 * 1024;
 const CHUNK_SIZE: u64 = 8 * 1024 * 1024;
 const RETRY_BASE_DELAY_MS: u64 = 250;
-
-#[derive(Debug)]
-pub struct TransferRequest<'a> {
-    pub url: &'a Url,
-    pub path: &'a Path,
-    pub expected_size: Option<u64>,
-    pub expected_hash: Option<&'a String>,
-    pub progress_index: usize
-}
-
-pub struct TransferContext<'a> {
-    pub shared: &'a SharedExecution,
-    pub config: &'a DownloaderConfig<'a>,
-    pub progress: Arc<ProgressTracker>,
-    pub cancellation: Arc<Cancellation>
-}
-
-pub struct Transfer<'a, 'shared> {
-    pub context: &'a TransferContext<'shared>,
-    pub request: &'a TransferRequest<'a>,
-    pub server: &'a ServerInfo,
-    pub size_on_disk: u64
-}
 
 impl TransferContext<'_> {
     pub async fn fetch(&self, request: &TransferRequest<'_>) -> Result<(), Error> {
         if !self.config.overwrite && self.verify_with_size(request, request.expected_size).await? {
             let size = fs::metadata(request.path).await?.len();
             self.progress.complete_position(request.progress_index, size);
+
             return Ok(());
         }
 
@@ -64,7 +39,9 @@ impl TransferContext<'_> {
     }
 
     async fn fetch_once(&self, request: &TransferRequest<'_>) -> Result<(), Error> {
-        let server = self.shared.inspect(request.url, &self.cancellation).await?;
+        self.cancellation.check()?;
+
+        let server = inspect(&self.shared.client, &self.shared.requests, request.url).await?;
         let resumable = self.config.resumable && server.resumable;
         let mut size_on_disk = match fs::metadata(request.path).await {
             Ok(metadata) => metadata.len(),
@@ -83,21 +60,22 @@ impl TransferContext<'_> {
         self.progress.set_position(request.progress_index, size_on_disk);
 
         let total_size = server.content_length.or(request.expected_size);
+
         if total_size != Some(size_on_disk) || size_on_disk == 0 {
             self.transfer(request, &server, size_on_disk).await?;
         }
 
-        if self
-            .shared
-            .verify_file(
-                request.path,
-                request.expected_size.or(server.content_length),
-                request.expected_hash
-            )
-            .await?
+        if verify_file(
+            &self.shared.blocking,
+            request.path,
+            request.expected_size.or(server.content_length),
+            request.expected_hash
+        )
+        .await?
         {
             let size = fs::metadata(request.path).await?.len();
             self.progress.complete_position(request.progress_index, size);
+
             return Ok(());
         }
 
@@ -126,6 +104,7 @@ impl TransferContext<'_> {
         let total_size = server.content_length.or(request.expected_size);
         let resumable = self.config.resumable && server.resumable;
         let chunk_count = self.chunk_count(total_size, size_on_disk, resumable);
+
         if chunk_count == 1 {
             return transfer.run_stream().await.map(|_| ());
         }
@@ -149,7 +128,8 @@ impl TransferContext<'_> {
         if expected_size.is_none() && request.expected_hash.is_none() {
             return Ok(false);
         }
-        self.shared.verify_file(request.path, expected_size, request.expected_hash).await
+
+        verify_file(&self.shared.blocking, request.path, expected_size, request.expected_hash).await
     }
 
     fn chunk_count(&self, total_size: Option<u64>, size_on_disk: u64, resumable: bool) -> usize {
@@ -166,6 +146,7 @@ impl TransferContext<'_> {
     async fn wait_before_retry(&self, attempt: u32) {
         if attempt < self.config.retries {
             let shift = attempt.min(8);
+
             sleep(Duration::from_millis(RETRY_BASE_DELAY_MS << shift)).await;
         }
     }

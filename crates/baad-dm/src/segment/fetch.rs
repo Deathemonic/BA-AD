@@ -3,9 +3,9 @@ use std::path::{Path, PathBuf};
 use futures::stream::{self, StreamExt, TryStreamExt};
 use tokio::fs;
 
-use crate::downloader::{TransferContext, TransferRequest};
 use crate::error::Error;
 use crate::segment::ServerSegment;
+use crate::transfer::{TransferContext, TransferRequest};
 
 pub async fn fetch_segments(
     transfer: &TransferContext<'_>,

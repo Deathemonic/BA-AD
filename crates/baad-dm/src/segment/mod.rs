@@ -2,9 +2,8 @@ mod cache;
 mod fetch;
 mod pipeline;
 mod reader;
-mod source;
+pub mod source;
 
-use fetch::fetch_segments;
+pub use fetch::fetch_segments;
 pub use pipeline::download;
-use reader::OrderedSegmentReader;
-pub use source::{ServerSegment, network_total, progress_limits, validate_segments};
+pub use reader::OrderedSegmentReader;

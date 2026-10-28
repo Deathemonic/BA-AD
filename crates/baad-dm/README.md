@@ -38,7 +38,7 @@ async fn main() -> eyre::Result<()> {
     let summaries = Downloader::new(config).download(&downloads).await;
 
     for summary in summaries {
-        println!("{}: {:?}", summary.filename, summary.status);
+        println!("{}: {:?}", summary.download.filename, summary.status);
     }
 
     Ok(())

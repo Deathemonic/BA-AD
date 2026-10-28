@@ -57,18 +57,23 @@ impl ProgressTracker {
 
     fn update(&self, index: usize, position: u64, force: bool) {
         let mut state = self.state.lock().unwrap_or_else(PoisonError::into_inner);
+
         let Some(current) = state.positions.get_mut(index) else {
             return;
         };
+
         let position = self
             .limits
             .get(index)
             .and_then(|limit| *limit)
             .map_or(position, |limit| position.min(limit));
+
         if *current == position && !force {
             return;
         }
+
         *current = position;
+
         let downloaded = state.positions.iter().copied().fold(0_u64, u64::saturating_add);
         let downloaded =
             if self.total_bytes > 0 { downloaded.min(self.total_bytes) } else { downloaded };
@@ -77,12 +82,14 @@ impl ProgressTracker {
             state.last_update.is_none_or(|last| now.duration_since(last) >= UPDATE_INTERVAL);
         let complete = self.total_bytes > 0 && downloaded == self.total_bytes;
         let reset = downloaded < state.last_position;
+
         if !force && !complete && !reset && !elapsed {
             return;
         }
 
         state.last_position = downloaded;
         state.last_update = Some(now);
+
         self.observer.on_event(ProgressEvent::Advance {
             id: Arc::clone(&self.filename),
             current: downloaded,
@@ -102,11 +109,15 @@ impl RangeProgress {
 
     pub fn set_position(&self, index: usize, position: u64) {
         let mut positions = self.positions.lock().unwrap_or_else(PoisonError::into_inner);
+
         let Some(current) = positions.get_mut(index) else {
             return;
         };
+
         *current = position;
+
         let position = positions.iter().copied().fold(0_u64, u64::saturating_add);
+
         self.parent.set_position(self.parent_index, position);
     }
 }

@@ -1,5 +1,6 @@
 mod config;
 mod http;
+mod inspect;
 
 pub use config::HttpClientConfig;
 pub use http::{
@@ -10,3 +11,4 @@ pub use http::{
     parse_content_length,
     resolve_url
 };
+pub use inspect::{ServerInfo, inspect};
