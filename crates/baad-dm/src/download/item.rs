@@ -8,7 +8,7 @@ use derive_more::Debug;
 use reqwest_middleware::reqwest::Url;
 
 use self::download_builder::{IsUnset, SetSource, State};
-use crate::download::hash::verify_hash;
+use crate::download::{hash, validation};
 use crate::error::Error;
 use crate::segment::ServerSegment;
 
@@ -48,7 +48,7 @@ impl Download {
     }
 
     pub fn verify_hash(&self, file_path: &Path) -> Result<bool, Error> {
-        verify_hash(file_path, self.hash.as_ref())
+        hash::verify_hash(file_path, self.hash.as_ref())
     }
 }
 
@@ -98,5 +98,30 @@ fn extract_filename(url: &Url) -> Result<String, Error> {
             reason: "URL does not contain a filename".into()
         })?;
 
-    Ok(form_urlencoded::parse(filename.as_bytes()).map(|(key, val)| [key, val].concat()).collect())
+    let invalid = || Error::InvalidUrl {
+        url: url.as_str().into(),
+        reason: "URL filename is not a safe UTF-8 path component".into()
+    };
+
+    if filename.match_indices('%').any(|(offset, _)| {
+        !filename
+            .as_bytes()
+            .get(offset + 1..offset + 3)
+            .is_some_and(|digits| digits.iter().all(u8::is_ascii_hexdigit))
+    }) {
+        return Err(invalid());
+    }
+
+    let filename = percent_encoding::percent_decode_str(filename)
+        .decode_utf8()
+        .map_err(|_| invalid())?
+        .into_owned();
+
+    if filename.contains(['/', '\\']) {
+        return Err(invalid());
+    }
+
+    validation::validate_filename(&filename)?;
+
+    Ok(filename)
 }

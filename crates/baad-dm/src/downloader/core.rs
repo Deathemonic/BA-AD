@@ -12,14 +12,27 @@ use crate::downloader::config::DownloaderConfig;
 use crate::downloader::job::DownloadJob;
 use crate::error::Error;
 use crate::execution::{Cancellation, CancellationGuard, SharedExecution};
+use crate::zip::ZipLimits;
 
 #[derive(Clone, Debug)]
 pub struct Downloader<'a> {
-    config: DownloaderConfig<'a>
+    config: DownloaderConfig<'a>,
+    zip_limits: ZipLimits
 }
 
 impl<'a> Downloader<'a> {
-    pub const fn new(config: DownloaderConfig<'a>) -> Self { Self { config } }
+    pub fn new(config: DownloaderConfig<'a>) -> Self {
+        Self {
+            config,
+            zip_limits: ZipLimits::default()
+        }
+    }
+
+    pub const fn with_zip_limits(mut self, limits: ZipLimits) -> Self {
+        self.zip_limits = limits;
+
+        self
+    }
 
     pub async fn download(&self, downloads: &[Download]) -> Vec<Summary> {
         let shared = match self.shared_execution() {
@@ -58,6 +71,7 @@ impl<'a> Downloader<'a> {
                     shared,
                     config: &self.config,
                     download,
+                    zip_limits: self.zip_limits,
                     destination: self.config.directory.join(&download.filename),
                     cancellation
                 };

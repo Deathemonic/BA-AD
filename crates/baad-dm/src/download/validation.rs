@@ -12,6 +12,7 @@ impl Download {
     }
 
     pub fn validate(&self) -> Result<(), Error> {
+        validate_filename(&self.filename)?;
         validate_hash(self.hash.as_ref())?;
 
         if self.target_file.is_some() && self.transform.is_some() {
@@ -30,4 +31,19 @@ impl Download {
             DownloadSource::Segments(segments) => segment::progress_limits(segments)
         }
     }
+}
+
+pub fn validate_filename(filename: &str) -> Result<(), Error> {
+    let invalid_component = filename.split(['/', '\\']).any(|component| {
+        component.is_empty()
+            || component == "."
+            || component == ".."
+            || component.ends_with(['.', ' '])
+    });
+
+    if invalid_component || filename.contains([':', '\0']) {
+        return Err(Error::InvalidOutputPath);
+    }
+
+    Ok(())
 }

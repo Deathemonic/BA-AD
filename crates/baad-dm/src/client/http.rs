@@ -13,6 +13,10 @@ pub fn create_http_client(config: HttpClientConfig) -> Result<ClientWithMiddlewa
     let retry_policy = ExponentialBackoff::builder().build_with_max_retries(config.retries);
 
     let mut builder = Client::builder()
+        .no_gzip()
+        .no_deflate()
+        .no_brotli()
+        .no_zstd()
         .pool_max_idle_per_host(config.pool_max_idle)
         .pool_idle_timeout(Duration::from_secs(90))
         .tcp_nodelay(config.tcp_nodelay)

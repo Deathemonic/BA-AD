@@ -42,6 +42,13 @@ impl TransferContext<'_> {
         self.cancellation.check()?;
 
         let server = inspect(&self.shared.client, &self.shared.requests, request.url).await?;
+
+        if let (Some(expected), Some(actual)) = (request.expected_size, server.content_length)
+            && expected != actual
+        {
+            return Err(Error::ServerSizeMismatch);
+        }
+
         let resumable = self.config.resumable && server.resumable;
         let mut size_on_disk = match fs::metadata(request.path).await {
             Ok(metadata) => metadata.len(),

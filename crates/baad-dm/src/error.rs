@@ -97,5 +97,68 @@ pub enum Error {
     OutputSizeExceeded { expected: u64 },
 
     #[error("Output size mismatch: expected {expected}, got {actual}")]
-    OutputSizeMismatch { expected: u64, actual: u64 }
+    OutputSizeMismatch { expected: u64, actual: u64 },
+
+    #[error("Invalid or mismatched Content-Range")]
+    InvalidRangeResponse,
+
+    #[error("Encoded byte-range representation")]
+    EncodedRangeResponse,
+
+    #[error("Unexpected full-download response")]
+    UnexpectedDownloadResponse,
+
+    #[error("Response size overflow")]
+    ResponseSizeOverflow,
+
+    #[error("Response size differs from expected size")]
+    ResponseSizeMismatch,
+
+    #[error("Server size differs from expected size")]
+    ServerSizeMismatch,
+
+    #[error("Output path must be a safe relative file path")]
+    InvalidOutputPath,
+
+    #[error("ZIP extraction requires a target member")]
+    MissingZipTarget,
+
+    #[error("ZIP extraction requires a URL source")]
+    MissingZipUrl,
+
+    #[error("ZIP member exceeds extraction limits")]
+    ZipMemberTooLarge,
+
+    #[error("ZIP member is out of bounds")]
+    ZipMemberOutOfBounds,
+
+    #[error("Invalid local file header")]
+    InvalidZipLocalHeader,
+
+    #[error("ZIP range exceeds fetch limits")]
+    ZipRangeTooLarge,
+
+    #[error("ZIP range body size differs from requested size")]
+    ZipRangeSizeMismatch,
+
+    #[error("ZIP expanded size overflow")]
+    ZipExpandedSizeOverflow,
+
+    #[error("ZIP expanded size mismatch")]
+    ZipExpandedSizeMismatch,
+
+    #[error("Could not determine ZIP file size")]
+    UnknownZipSize,
+
+    #[error("Invalid or missing End of Central Directory")]
+    InvalidZipEocd,
+
+    #[error("ZIP central directory exceeds limit")]
+    ZipDirectoryTooLarge,
+
+    #[error("ZIP central directory is out of bounds")]
+    ZipDirectoryOutOfBounds,
+
+    #[error("Invalid or truncated central directory")]
+    InvalidZipDirectory
 }

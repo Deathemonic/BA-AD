@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use bytes::Bytes;
 use fastcat::fconcat;
+use reqwest::header::ACCEPT_ENCODING;
+use tokio::task;
 
 use crate::error::Error;
 use crate::zip::ZipSource;
@@ -16,7 +18,8 @@ use crate::zip::types::{
 
 #[derive(Debug)]
 pub struct ZipIndex {
-    entries: HashMap<String, ZipFileInfo>
+    entries: HashMap<String, ZipFileInfo>,
+    pub total_size: u64
 }
 
 pub struct ZipExtractor<'a> {
@@ -36,9 +39,14 @@ impl ZipIndex {
 }
 
 impl<'a> ZipExtractor<'a> {
-    pub async fn new(source: ZipSource<'a>) -> Result<Self, Error> {
+    pub async fn new(mut source: ZipSource<'a>) -> Result<Self, Error> {
         let permit = source.acquire_permit().await?;
-        let head = source.client.head(source.url.clone()).send().await?;
+        let head = source
+            .client
+            .head(source.url.clone())
+            .header(ACCEPT_ENCODING, "identity")
+            .send()
+            .await?;
         head.error_for_status_ref()?;
         let headers = head.headers();
 
@@ -46,7 +54,7 @@ impl<'a> ZipExtractor<'a> {
             .get("content-length")
             .and_then(|h| h.to_str().ok())
             .and_then(|s| s.parse().ok())
-            .ok_or_else(|| Error::Archive("Could not determine ZIP file size".into()))?;
+            .ok_or(Error::UnknownZipSize)?;
 
         let accepts_ranges = headers
             .get("accept-ranges")
@@ -58,6 +66,13 @@ impl<'a> ZipExtractor<'a> {
         }
 
         drop(permit);
+
+        if zip_size < EOCD_MIN_SIZE as u64 {
+            return Err(Error::InvalidZipEocd);
+        }
+
+        source.total_size = Some(zip_size);
+
         Ok(Self { source, zip_size })
     }
 
@@ -71,12 +86,37 @@ impl<'a> ZipExtractor<'a> {
 
     pub async fn build_index(&self) -> Result<ZipIndex, Error> {
         let eocd = self.read_eocd().await?;
-        let cd_data =
-            self.source.fetch_range(eocd.cd_offset, eocd.cd_offset + eocd.cd_size - 1).await?;
+        if eocd.cd_size > self.source.limits.max_directory {
+            return Err(Error::ZipDirectoryTooLarge);
+        }
 
-        Ok(ZipIndex {
-            entries: Self::parse_central_directory(&cd_data)
+        let end = eocd
+            .cd_offset
+            .checked_add(eocd.cd_size)
+            .filter(|end| *end <= self.zip_size)
+            .ok_or(Error::ZipDirectoryOutOfBounds)?;
+
+        if eocd.cd_size == 0 {
+            return Ok(ZipIndex {
+                entries: HashMap::new(),
+                total_size: self.zip_size
+            });
+        }
+
+        let permit = self.source.acquire_blocking_permit().await?;
+        let cd_data = self.source.fetch_range(eocd.cd_offset, end - 1).await?;
+
+        let total_size = self.zip_size;
+
+        task::spawn_blocking(move || {
+            let _permit = permit;
+
+            Ok(ZipIndex {
+                entries: Self::parse_central_directory(&cd_data)?,
+                total_size
+            })
         })
+        .await?
     }
 
     async fn read_eocd(&self) -> Result<EocdInfo, Error> {
@@ -85,14 +125,18 @@ impl<'a> ZipExtractor<'a> {
 
         let data = self.source.fetch_range(start, self.zip_size - 1).await?;
 
-        let offset = data
-            .windows(4)
-            .rposition(|w| w == EOCD_SIGNATURE)
-            .ok_or_else(|| Error::Archive("Could not find End of Central Directory".into()))?;
+        let offset =
+            data.windows(4).rposition(|w| w == EOCD_SIGNATURE).ok_or(Error::InvalidZipEocd)?;
 
         let eocd = &data[offset..];
         if eocd.len() < EOCD_MIN_SIZE {
-            return Err(Error::Archive("Invalid EOCD record".into()));
+            return Err(Error::InvalidZipEocd);
+        }
+
+        let comment_size = read_u16_le(eocd, 20) as usize;
+
+        if eocd.len() != EOCD_MIN_SIZE + comment_size {
+            return Err(Error::InvalidZipEocd);
         }
 
         Ok(EocdInfo {
@@ -101,13 +145,13 @@ impl<'a> ZipExtractor<'a> {
         })
     }
 
-    fn parse_central_directory(cd: &[u8]) -> HashMap<String, ZipFileInfo> {
+    fn parse_central_directory(cd: &[u8]) -> Result<HashMap<String, ZipFileInfo>, Error> {
         let mut entries = HashMap::new();
         let mut offset = 0;
 
         while offset + CENTRAL_DIR_ENTRY_MIN_SIZE <= cd.len() {
             if &cd[offset..offset + 4] != CENTRAL_DIR_SIGNATURE {
-                break;
+                return Err(Error::InvalidZipDirectory);
             }
 
             let filename_len = read_u16_le(cd, offset + 28) as usize;
@@ -115,8 +159,10 @@ impl<'a> ZipExtractor<'a> {
             let comment_len = read_u16_le(cd, offset + 32) as usize;
 
             let name_start = offset + CENTRAL_DIR_ENTRY_MIN_SIZE;
-            if name_start + filename_len > cd.len() {
-                break;
+            let entry_end = name_start + filename_len + extra_len + comment_len;
+
+            if entry_end > cd.len() {
+                return Err(Error::InvalidZipDirectory);
             }
 
             let filename = String::from_utf8_lossy(&cd[name_start..name_start + filename_len]);
@@ -128,10 +174,14 @@ impl<'a> ZipExtractor<'a> {
                 local_header_offset: read_u32_le(cd, offset + 42) as u64
             });
 
-            offset += CENTRAL_DIR_ENTRY_MIN_SIZE + filename_len + extra_len + comment_len;
+            offset = entry_end;
         }
 
-        entries
+        if offset != cd.len() {
+            return Err(Error::InvalidZipDirectory);
+        }
+
+        Ok(entries)
     }
 }
 

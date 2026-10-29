@@ -1,6 +1,7 @@
 mod config;
 mod http;
 mod inspect;
+mod range;
 
 pub use config::HttpClientConfig;
 pub use http::{
@@ -12,3 +13,4 @@ pub use http::{
     resolve_url
 };
 pub use inspect::{ServerInfo, inspect};
+pub use range::{validate_identity, validate_range_response};

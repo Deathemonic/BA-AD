@@ -15,7 +15,7 @@ use crate::error::Error;
 use crate::execution::{Cancellation, ProgressTracker, SharedExecution};
 use crate::output::{OutputJob, ensure_parent_dir, lock_file, verify_file};
 use crate::transfer::TransferContext;
-use crate::zip::ZipSource;
+use crate::zip::{ZipLimits, ZipSource};
 
 const RETRY_BASE_DELAY_MS: u64 = 250;
 
@@ -23,6 +23,7 @@ pub struct DownloadJob<'job, 'config> {
     pub shared: &'job SharedExecution,
     pub config: &'job DownloaderConfig<'config>,
     pub download: &'job Download,
+    pub zip_limits: ZipLimits,
     pub destination: PathBuf,
     pub cancellation: Arc<Cancellation>
 }
@@ -70,13 +71,8 @@ impl DownloadJob<'_, '_> {
     }
 
     async fn extract_zip(&self) -> Result<FetchOutcome, Error> {
-        let target = self.download.target_file.as_ref().ok_or_else(|| {
-            Error::InvalidDownload("ZIP extraction requires a target member".into())
-        })?;
-        let url = self
-            .download
-            .url()
-            .ok_or_else(|| Error::InvalidDownload("ZIP extraction requires a URL source".into()))?;
+        let target = self.download.target_file.as_ref().ok_or(Error::MissingZipTarget)?;
+        let url = self.download.url().ok_or(Error::MissingZipUrl)?;
         let data = self.fetch_zip_member(url, target).await?;
         let job =
             OutputJob::new(self.download, self.destination.clone(), Arc::clone(&self.cancellation));
@@ -107,8 +103,12 @@ impl DownloadJob<'_, '_> {
     }
 
     async fn try_zip_member(&self, url: &Url, target: &str) -> Result<Bytes, Error> {
-        let source = ZipSource::new(&self.shared.client, url, Some(&self.shared.requests));
+        let mut source = ZipSource::new(&self.shared.client, url, Some(&self.shared.requests))
+            .with_blocking_limiter(&self.shared.blocking);
+        source.limits = self.zip_limits;
+
         let index = self.shared.zip_cache.get_index(source).await?;
+        source.total_size = Some(index.total_size);
         let info = index.get(target).ok_or_else(|| {
             Error::Archive(fconcat!("File '", target, "' not found in ZIP").into())
         })?;

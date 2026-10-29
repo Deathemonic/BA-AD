@@ -1,5 +1,6 @@
 use reqwest_middleware::ClientWithMiddleware;
 use reqwest_middleware::reqwest::Url;
+use reqwest_middleware::reqwest::header::ACCEPT_ENCODING;
 use tokio::sync::Semaphore;
 
 use crate::client::{parse_accept_ranges, parse_content_length};
@@ -19,7 +20,7 @@ pub async fn inspect(
 ) -> Result<ServerInfo, Error> {
     let _permit = requests.acquire().await.map_err(|_| Error::LimiterClosed)?;
 
-    let response = client.head(url.clone()).send().await?;
+    let response = client.head(url.clone()).header(ACCEPT_ENCODING, "identity").send().await?;
     response.error_for_status_ref()?;
 
     Ok(ServerInfo {

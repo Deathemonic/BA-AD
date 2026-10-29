@@ -5,5 +5,5 @@ mod types;
 
 pub use cache::ZipCache;
 pub use extractor::{ZipExtractor, ZipIndex};
-pub use source::ZipSource;
+pub use source::{ZipLimits, ZipSource};
 pub use types::ZipFileInfo;

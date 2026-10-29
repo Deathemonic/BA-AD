@@ -2,12 +2,11 @@ use std::path::Path;
 use std::sync::Arc;
 
 use futures::stream::{self, StreamExt, TryStreamExt};
-use reqwest_middleware::reqwest::StatusCode;
-use reqwest_middleware::reqwest::header::RANGE;
+use reqwest_middleware::reqwest::header::{ACCEPT_ENCODING, RANGE};
 use tokio::fs::{self, File, OpenOptions};
 use tokio::io::{AsyncSeekExt, AsyncWriteExt, BufWriter, SeekFrom};
 
-use crate::client::create_range_header;
+use crate::client::{create_range_header, validate_range_response};
 use crate::error::Error;
 use crate::execution::RangeProgress;
 use crate::output::ensure_parent_dir;
@@ -77,21 +76,24 @@ impl ChunkContext<'_, '_> {
             .shared
             .client
             .get(&self.transfer.server.resolved_url)
+            .header(ACCEPT_ENCODING, "identity")
             .header(RANGE, create_range_header(range.start, Some(range.end)))
             .send()
             .await?;
         response.error_for_status_ref()?;
 
-        if response.status() != StatusCode::PARTIAL_CONTENT {
-            return Err(Error::RangeNotSupported);
-        }
+        let expected = validate_range_response(
+            &response,
+            range.start,
+            Some(range.end),
+            self.transfer.server.content_length.or(self.transfer.request.expected_size)
+        )?;
 
         let mut file = OpenOptions::new().write(true).open(self.path).await?;
         file.seek(SeekFrom::Start(range.start)).await?;
         let mut writer = BufWriter::with_capacity(WRITE_BUFFER_SIZE, file);
         let mut stream = response.bytes_stream();
         let mut downloaded = 0_u64;
-        let expected = range.end - range.start + 1;
 
         while let Some(chunk) = stream.next().await {
             self.transfer.context.cancellation.check()?;
@@ -99,7 +101,7 @@ impl ChunkContext<'_, '_> {
             let chunk = chunk?;
 
             if chunk.len() as u64 > expected - downloaded {
-                return Err(Error::InvalidDownload("range response exceeds requested size".into()));
+                return Err(Error::InvalidRangeResponse);
             }
 
             writer.write_all(&chunk).await?;
