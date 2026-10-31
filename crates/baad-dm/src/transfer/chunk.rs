@@ -35,7 +35,7 @@ struct ChunkWriter {
 
 impl Transfer<'_, '_> {
     pub async fn run_chunks(&self, total_size: u64, chunk_count: usize) -> Result<(), Error> {
-        output::ensure_parent_dir(self.request.path).await?;
+        output::create_parent_dir(self.request.path).await?;
 
         let path = output::sibling_path(self.request.path, "chunks");
         let temporary =

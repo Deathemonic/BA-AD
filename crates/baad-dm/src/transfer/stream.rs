@@ -6,7 +6,7 @@ use tokio::io::{AsyncWriteExt, BufWriter};
 
 use crate::client::{create_range_header, validate_identity, validate_range_response};
 use crate::error::Error;
-use crate::output::ensure_parent_dir;
+use crate::output::create_parent_dir;
 use crate::transfer::{Transfer, WRITE_BUFFER_SIZE};
 
 impl Transfer<'_, '_> {
@@ -31,7 +31,7 @@ impl Transfer<'_, '_> {
         let response = request.send().await?;
         response.error_for_status_ref()?;
 
-        ensure_parent_dir(self.request.path).await?;
+        create_parent_dir(self.request.path).await?;
         let append =
             resumable && self.size_on_disk > 0 && response.status() == StatusCode::PARTIAL_CONTENT;
         let total = self.server.content_length.or(self.request.expected_size);

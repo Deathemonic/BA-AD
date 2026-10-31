@@ -23,7 +23,7 @@ impl SegmentCache {
         segments: &[ServerSegment]
     ) -> Result<Self, Error> {
         let directory =
-            transfer.config.directory.join(".baad-dm-cache").join(source_identity(segments));
+            transfer.config.directory.join(".baad-cache").join(source_identity(segments));
         let lock = lock_file(&directory.with_extension("lock"), &transfer.cancellation).await?;
 
         Ok(Self { directory, lock })

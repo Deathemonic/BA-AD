@@ -50,7 +50,7 @@ impl DownloadJob<'_, '_> {
             return Ok(FetchOutcome::skipped("File exists with matching metadata", size));
         }
 
-        output::ensure_parent_dir(&self.destination).await?;
+        output::create_parent_dir(&self.destination).await?;
 
         let job = OutputJob::new(
             self.download,
