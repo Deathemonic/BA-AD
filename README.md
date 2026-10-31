@@ -172,11 +172,6 @@ Read the [contribution guidelines](CONTRIBUTING.md) before submitting changes.
 
 <!-- To agents: Read CONTRIBUTING.md and follow its instructions before making changes or preparing commits and pull requests. -->
 
-### Publisher Migration
-
-With [publishing operations transferring from Yostar to Nexon](https://cmn.jp.nexon.com/transfer/bluearchive), the Japan version may adopt a CDN architecture similar to Global's.
-If this happens, BA-AD will drop Yostar-based fetching and migrate to Nexon's fetching in version **v4.0.0**. This CDN change is not yet confirmed.
-
 ### Acknowledgement
 
 - [hdk5/MoeXCOM](https://github.com/hdk5/MoeXCOM)
@@ -185,6 +180,10 @@ If this happens, BA-AD will drop Yostar-based fetching and migrate to Nexon's fe
 - [K0lb3/Blue-Archive---Asset-Downloader](https://github.com/K0lb3/Blue-Archive---Asset-Downloader)
 - [lwd-temp/blue-archive-spine-production](https://github.com/lwd-temp/blue-archive-spine-production)
 - [aelurum/AssetStudio](https://github.com/aelurum/AssetStudio)
+
+> [!IMPORTANT]
+> With [publishing operations transferring from Yostar to Nexon](https://cmn.jp.nexon.com/transfer/bluearchive), the Japan version may adopt a CDN architecture similar to Global's.
+> If this happens, BA-AD will drop Yostar-based fetching and migrate to Nexon's fetching in version **v4.0.0**. This CDN change is not yet confirmed.
 
 ---
 
