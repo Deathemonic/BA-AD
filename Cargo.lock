@@ -411,6 +411,7 @@ dependencies = [
 [[package]]
 name = "bacy"
 version = "4.0.0"
+source = "git+https://github.com/Deathemonic/BA-CY#57b30a4ec63738a54e78b22c39e45df810562918"
 dependencies = [
  "aes",
  "base64",
