@@ -6,6 +6,10 @@
 
 A tool and library that downloads the latest **Blue Archive** assets.
 
+> [!IMPORTANT]
+> With [ongoing publisher transferring from Yostar to Nexon](https://cmn.jp.nexon.com/transfer/bluearchive), the Japan version might adopt a CDN architecture similar to Global's.
+> If this happens, BA-AD will drop Yostar-based fetching and migrate to Nexon's fetching in version **v4.0.0**. This CDN change is not yet confirmed.
+
 ## Install
 
 ### Release
@@ -180,10 +184,6 @@ Read the [contribution guidelines](CONTRIBUTING.md) before submitting changes.
 - [K0lb3/Blue-Archive---Asset-Downloader](https://github.com/K0lb3/Blue-Archive---Asset-Downloader)
 - [lwd-temp/blue-archive-spine-production](https://github.com/lwd-temp/blue-archive-spine-production)
 - [aelurum/AssetStudio](https://github.com/aelurum/AssetStudio)
-
-> [!IMPORTANT]
-> With [publishing operations transferring from Yostar to Nexon](https://cmn.jp.nexon.com/transfer/bluearchive), the Japan version may adopt a CDN architecture similar to Global's.
-> If this happens, BA-AD will drop Yostar-based fetching and migrate to Nexon's fetching in version **v4.0.0**. This CDN change is not yet confirmed.
 
 ---
 
