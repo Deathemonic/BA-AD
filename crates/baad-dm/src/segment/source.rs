@@ -20,7 +20,7 @@ pub fn validate_segments(download: &Download, segments: &[ServerSegment]) -> Res
     }
 
     segments.iter().try_fold(0_u64, |total, segment| {
-        validate_hash(segment.hash.as_ref())?;
+        validate_hash(segment.hash.as_deref())?;
         segment
             .size
             .map_or(Ok(total), |size| total.checked_add(size).ok_or(Error::SegmentSizeOverflow))

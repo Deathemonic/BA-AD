@@ -41,7 +41,7 @@ fn source_identity(segments: &[ServerSegment]) -> String {
 
     for segment in segments {
         let url = segment.url.as_str();
-        descriptor.push_str(url.split_once(['?', '#']).map_or(url, |(source, _)| source));
+        descriptor.push_str(url.split_once('#').map_or(url, |(source, _)| source));
         descriptor.push('|');
 
         match segment.size {

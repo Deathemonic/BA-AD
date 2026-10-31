@@ -10,10 +10,10 @@ use tokio::time::sleep;
 
 use crate::download::{Download, FetchOutcome};
 use crate::downloader::config::DownloaderConfig;
-use crate::downloader::pipeline::fetch_source;
+use crate::downloader::pipeline;
 use crate::error::Error;
 use crate::execution::{Cancellation, ProgressTracker, SharedExecution};
-use crate::output::{OutputJob, ensure_parent_dir, lock_file, verify_file};
+use crate::output::{self, OutputJob};
 use crate::transfer::TransferContext;
 use crate::zip::{ZipLimits, ZipSource};
 
@@ -30,12 +30,14 @@ pub struct DownloadJob<'job, 'config> {
 
 impl DownloadJob<'_, '_> {
     pub async fn run(&self, filename: Arc<str>, total: u64) -> Result<FetchOutcome, Error> {
-        let _output_lock =
-            lock_file(&self.destination.with_added_extension("baad-lock"), &self.cancellation)
-                .await?;
+        let output_lock = output::lock_file(
+            &self.destination.with_added_extension("baad-lock"),
+            &self.cancellation
+        )
+        .await?;
 
         if !self.config.overwrite
-            && verify_file(
+            && output::verify_file(
                 &self.shared.blocking,
                 &self.destination,
                 self.download.size,
@@ -48,10 +50,17 @@ impl DownloadJob<'_, '_> {
             return Ok(FetchOutcome::skipped("File exists with matching metadata", size));
         }
 
-        ensure_parent_dir(&self.destination).await?;
+        output::ensure_parent_dir(&self.destination).await?;
+
+        let job = OutputJob::new(
+            self.download,
+            self.destination.clone(),
+            Arc::clone(&self.cancellation),
+            output_lock
+        );
 
         if self.download.is_extraction() {
-            return self.extract_zip().await;
+            return self.extract_zip(job).await;
         }
 
         let progress = Arc::new(ProgressTracker::new(
@@ -67,15 +76,13 @@ impl DownloadJob<'_, '_> {
             cancellation: Arc::clone(&self.cancellation)
         };
 
-        fetch_source(self.download, &transfer, &self.destination).await
+        pipeline::fetch_source(&self.download.source, &transfer, job).await
     }
 
-    async fn extract_zip(&self) -> Result<FetchOutcome, Error> {
+    async fn extract_zip(&self, job: OutputJob) -> Result<FetchOutcome, Error> {
         let target = self.download.target_file.as_ref().ok_or(Error::MissingZipTarget)?;
         let url = self.download.url().ok_or(Error::MissingZipUrl)?;
         let data = self.fetch_zip_member(url, target).await?;
-        let job =
-            OutputJob::new(self.download, self.destination.clone(), Arc::clone(&self.cancellation));
         let size = job.finish_bytes(self.shared, data).await?;
 
         Ok(FetchOutcome::success(size, false))

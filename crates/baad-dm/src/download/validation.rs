@@ -13,7 +13,7 @@ impl Download {
 
     pub fn validate(&self) -> Result<(), Error> {
         validate_filename(&self.filename)?;
-        validate_hash(self.hash.as_ref())?;
+        validate_hash(self.hash.as_deref())?;
 
         if self.target_file.is_some() && self.transform.is_some() {
             return Err(Error::ZipTransformNotSupported);

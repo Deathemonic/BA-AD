@@ -22,6 +22,7 @@ futures = "0.3"
 percent-encoding = "2.3"
 reqwest-middleware = "0.5"
 reqwest-retry = "0.9"
+scopeguard = "1.2"
 tracing = "0.1"
 
 [lints]

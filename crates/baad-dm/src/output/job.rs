@@ -4,13 +4,13 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use bytes::Bytes;
-use tokio::task::spawn_blocking;
+use tokio::task;
 
 use crate::download::{Download, OutputTransform};
 use crate::error::Error;
 use crate::execution::{Cancellation, SharedExecution};
 use crate::output::checked::{CheckedReader, CheckedWriter};
-use crate::output::file::{IO_BUFFER_SIZE, remove_temporary, sibling_path};
+use crate::output::file::{self, IO_BUFFER_SIZE};
 use crate::output::verify_file_sync;
 
 pub struct OutputJob {
@@ -18,17 +18,24 @@ pub struct OutputJob {
     pub transform: Option<Arc<dyn OutputTransform>>,
     pub expected_size: Option<u64>,
     pub expected_hash: Option<String>,
-    pub cancellation: Arc<Cancellation>
+    pub cancellation: Arc<Cancellation>,
+    destination_lock: Arc<File>
 }
 
 impl OutputJob {
-    pub fn new(download: &Download, destination: PathBuf, cancellation: Arc<Cancellation>) -> Self {
+    pub fn new(
+        download: &Download,
+        destination: PathBuf,
+        cancellation: Arc<Cancellation>,
+        destination_lock: Arc<File>
+    ) -> Self {
         Self {
             destination,
             transform: download.transform.clone(),
             expected_size: download.size,
             expected_hash: download.hash.clone(),
-            cancellation
+            cancellation,
+            destination_lock
         }
     }
 
@@ -41,9 +48,10 @@ impl OutputJob {
         let limiter = if self.transform.is_some() { &shared.transforms } else { &shared.blocking };
         let permit = limiter.clone().acquire_owned().await.map_err(|_| Error::LimiterClosed)?;
 
-        spawn_blocking(move || {
+        task::spawn_blocking(move || {
             let _permit = permit;
             let _lock = lock;
+            let _destination_lock = Arc::clone(&self.destination_lock);
 
             if self.transform.is_none() {
                 return self.publish(&path);
@@ -52,7 +60,7 @@ impl OutputJob {
             let mut input = BufReader::with_capacity(IO_BUFFER_SIZE, File::open(&path)?);
             let size = self.run(&mut input)?;
             drop(input);
-            remove_temporary(&path);
+            file::remove_temporary(&path);
 
             Ok(size)
         })
@@ -63,7 +71,7 @@ impl OutputJob {
         let permit =
             shared.blocking.clone().acquire_owned().await.map_err(|_| Error::LimiterClosed)?;
 
-        spawn_blocking(move || {
+        task::spawn_blocking(move || {
             let _permit = permit;
 
             self.run(&mut data.as_ref())
@@ -74,7 +82,7 @@ impl OutputJob {
     pub fn run(self, input: &mut impl Read) -> Result<u64, Error> {
         self.cancellation.check()?;
 
-        let temporary = sibling_path(&self.destination, "baad-tmp");
+        let temporary = file::sibling_path(&self.destination, "baad-tmp");
         let file = OpenOptions::new().create_new(true).write(true).open(&temporary)?;
 
         let result = (|| {
@@ -84,7 +92,7 @@ impl OutputJob {
         })();
 
         if result.is_err() {
-            remove_temporary(&temporary);
+            file::remove_temporary(&temporary);
         }
 
         result

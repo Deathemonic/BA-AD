@@ -1,20 +1,20 @@
-use std::path::Path;
+use std::fs::{self, File, OpenOptions};
+use std::io::{self, BufWriter, Seek, SeekFrom, Write};
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use futures::stream::{self, StreamExt, TryStreamExt};
 use reqwest_middleware::reqwest::header::{ACCEPT_ENCODING, RANGE};
-use tokio::fs::{self, File, OpenOptions};
-use tokio::io::{AsyncSeekExt, AsyncWriteExt, BufWriter, SeekFrom};
+use tokio::task;
 
-use crate::client::{create_range_header, validate_range_response};
 use crate::error::Error;
 use crate::execution::RangeProgress;
-use crate::output::ensure_parent_dir;
 use crate::transfer::{Transfer, WRITE_BUFFER_SIZE};
+use crate::{client, output};
 
 struct ChunkContext<'a, 'shared> {
     transfer: &'a Transfer<'a, 'shared>,
-    path: &'a Path,
+    temporary: Arc<ChunkTemporary>,
     progress: RangeProgress
 }
 
@@ -24,14 +24,22 @@ struct ChunkRange {
     end: u64
 }
 
+struct ChunkTemporary {
+    path: PathBuf
+}
+
+struct ChunkWriter {
+    writer: BufWriter<File>,
+    _temporary: Arc<ChunkTemporary>
+}
+
 impl Transfer<'_, '_> {
     pub async fn run_chunks(&self, total_size: u64, chunk_count: usize) -> Result<(), Error> {
-        ensure_parent_dir(self.request.path).await?;
+        output::ensure_parent_dir(self.request.path).await?;
 
-        let path = self.request.path.with_added_extension("chunks");
-        let file = File::create(&path).await?;
-        file.set_len(total_size).await?;
-        drop(file);
+        let path = output::sibling_path(self.request.path, "chunks");
+        let temporary =
+            task::spawn_blocking(move || ChunkTemporary::new(path, total_size)).await??;
 
         let progress = RangeProgress::new(
             chunk_count,
@@ -40,7 +48,7 @@ impl Transfer<'_, '_> {
         );
         let context = ChunkContext {
             transfer: self,
-            path: &path,
+            temporary,
             progress
         };
 
@@ -51,7 +59,9 @@ impl Transfer<'_, '_> {
             })
             .await?;
 
-        fs::rename(&path, self.request.path).await?;
+        self.context.cancellation.check()?;
+
+        fs::rename(&context.temporary.path, self.request.path)?;
 
         Ok(())
     }
@@ -77,21 +87,21 @@ impl ChunkContext<'_, '_> {
             .client
             .get(&self.transfer.server.resolved_url)
             .header(ACCEPT_ENCODING, "identity")
-            .header(RANGE, create_range_header(range.start, Some(range.end)))
+            .header(RANGE, client::create_range_header(range.start, Some(range.end)))
             .send()
             .await?;
         response.error_for_status_ref()?;
 
-        let expected = validate_range_response(
+        let expected = client::validate_range_response(
             &response,
             range.start,
             Some(range.end),
             self.transfer.server.content_length.or(self.transfer.request.expected_size)
         )?;
 
-        let mut file = OpenOptions::new().write(true).open(self.path).await?;
-        file.seek(SeekFrom::Start(range.start)).await?;
-        let mut writer = BufWriter::with_capacity(WRITE_BUFFER_SIZE, file);
+        let temporary = Arc::clone(&self.temporary);
+        let mut writer =
+            task::spawn_blocking(move || ChunkWriter::new(temporary, range.start)).await??;
         let mut stream = response.bytes_stream();
         let mut downloaded = 0_u64;
 
@@ -99,17 +109,28 @@ impl ChunkContext<'_, '_> {
             self.transfer.context.cancellation.check()?;
 
             let chunk = chunk?;
+            let chunk_size = chunk.len() as u64;
 
-            if chunk.len() as u64 > expected - downloaded {
+            if chunk_size > expected - downloaded {
                 return Err(Error::InvalidRangeResponse);
             }
 
-            writer.write_all(&chunk).await?;
-            downloaded = downloaded.saturating_add(chunk.len() as u64);
+            if chunk.len() < writer.writer.capacity() - writer.writer.buffer().len() {
+                writer.writer.write_all(&chunk)?;
+            } else {
+                writer = task::spawn_blocking(move || {
+                    writer.writer.write_all(&chunk)?;
+
+                    Ok::<_, Error>(writer)
+                })
+                .await??;
+            }
+
+            downloaded = downloaded.saturating_add(chunk_size);
             self.progress.set_position(range.index, downloaded);
         }
 
-        writer.flush().await?;
+        task::spawn_blocking(move || writer.finish()).await??;
 
         if downloaded != expected {
             return Err(Error::InvalidDownload(
@@ -119,6 +140,37 @@ impl ChunkContext<'_, '_> {
 
         Ok(())
     }
+}
+
+impl ChunkTemporary {
+    fn new(path: PathBuf, size: u64) -> Result<Arc<Self>, Error> {
+        let file = OpenOptions::new().create_new(true).write(true).open(&path)?;
+        let temporary = Self { path };
+        let result = file.set_len(size);
+        drop(file);
+
+        result?;
+
+        Ok(Arc::new(temporary))
+    }
+}
+
+impl Drop for ChunkTemporary {
+    fn drop(&mut self) { output::remove_temporary(&self.path); }
+}
+
+impl ChunkWriter {
+    fn new(temporary: Arc<ChunkTemporary>, start: u64) -> Result<Self, Error> {
+        let mut file = OpenOptions::new().write(true).open(&temporary.path)?;
+        file.seek(SeekFrom::Start(start))?;
+
+        Ok(Self {
+            writer: BufWriter::with_capacity(WRITE_BUFFER_SIZE, file),
+            _temporary: temporary
+        })
+    }
+
+    fn finish(mut self) -> io::Result<()> { self.writer.flush() }
 }
 
 fn ranges(total_size: u64, chunk_count: usize) -> impl Iterator<Item = ChunkRange> {
