@@ -1,5 +1,5 @@
-use std::env;
 use std::path::{Path, PathBuf};
+use std::{env, str};
 
 use tokio::fs;
 
@@ -53,4 +53,13 @@ pub fn filename_or(path: &str) -> &str {
 
 pub fn filename_matches(path: impl AsRef<Path>, matches: impl Fn(&str) -> bool) -> bool {
     path.as_ref().file_name().and_then(|n| n.to_str()).is_some_and(matches)
+}
+
+pub fn read_length_prefixed<'a>(data: &'a [u8], position: &mut usize) -> Option<&'a str> {
+    let length_end = position.checked_add(4)?;
+    let length = u32::from_le_bytes(data.get(*position..length_end)?.try_into().ok()?) as usize;
+    let end = length_end.checked_add(length)?;
+    let text = str::from_utf8(data.get(length_end..end)?).ok()?;
+    *position = end.checked_add(3)? & !3;
+    Some(text)
 }

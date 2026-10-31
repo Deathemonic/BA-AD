@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use baad_dm::{Download, Downloader, DownloaderConfig};
-use baad_shared::{DownloadStatus, Downloads};
+use baad_shared::{Downloads, ProgressStatus};
 use bon::Builder;
 use reqwest::{Proxy, Url};
 use tracing::{error, info, warn};
@@ -68,12 +68,12 @@ impl ResourceDownloader {
 
         let config = DownloaderConfig::builder()
             .directory(self.output_dir.as_path())
-            .concurrent_downloads(self.limit)
+            .concurrent_downloads(self.limit)?
             .retries(self.retries)
             .maybe_proxy(proxy)
             .http1_only(self.http1_only)
-            .max_chunks_per_file(self.max_chunks_per_file)
-            .max_concurrent_chunks(self.max_concurrent_chunks)
+            .max_chunks_per_file(self.max_chunks_per_file)?
+            .max_concurrent_chunks(self.max_concurrent_chunks)?
             .chunk_threshold(self.chunk_threshold)
             .build();
 
@@ -81,7 +81,7 @@ impl ResourceDownloader {
         let summaries = downloader.download(&downloads).await;
 
         let failed_count =
-            summaries.iter().filter(|s| matches!(s.status, DownloadStatus::Failed(_))).count();
+            summaries.iter().filter(|s| matches!(s.status, ProgressStatus::Failed(_))).count();
 
         if failed_count > 0 {
             error!(category = category, failed = failed_count, "Some downloads failed");
@@ -112,7 +112,7 @@ pub async fn download_file(
 
     let config = DownloaderConfig::builder()
         .directory(output_dir)
-        .concurrent_downloads(1)
+        .concurrent_downloads(1)?
         .retries(retries)
         .overwrite(overwrite)
         .build();
@@ -120,7 +120,7 @@ pub async fn download_file(
     let summaries = Downloader::new(config).download(&[download]).await;
 
     if let Some(summary) = summaries.first()
-        && matches!(summary.status, DownloadStatus::Failed(_))
+        && matches!(summary.status, ProgressStatus::Failed(_))
     {
         return Err(CatalogError::DeserializationFailed);
     }

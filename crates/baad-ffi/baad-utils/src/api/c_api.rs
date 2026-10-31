@@ -46,6 +46,70 @@ pub unsafe extern "C" fn baad_utils_init_logging(config: *const BaadUtilsLogging
 pub extern "C" fn baad_utils_flush_logs() { baad_utils::flush_logs(); }
 
 /// # Safety
+/// `id` and `label` must be valid NUL-terminated strings; `unit` must be `0`
+/// bytes or `1` count.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn baad_utils_progress_started(
+    id: *const c_char,
+    label: *const c_char,
+    unit: i32,
+    total: u64
+) -> i32 {
+    let (id, label) = match (import_string(id), import_string(label)) {
+        (Ok(id), Ok(label)) => (id, label),
+        (Err(code), _) | (_, Err(code)) => return code
+    };
+    let Some(unit) = core::unit_from_repr(unit) else {
+        return INVALID_ARGUMENT;
+    };
+    core::progress_started(id, label, unit, total);
+    0
+}
+
+/// # Safety
+/// `id` must be a valid NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn baad_utils_progress_advance(
+    id: *const c_char,
+    current: u64,
+    total: u64
+) -> i32 {
+    let id = match import_string(id) {
+        Ok(id) => id,
+        Err(code) => return code
+    };
+    core::progress_advance(id, current, total);
+    0
+}
+
+/// # Safety
+/// `id` must be a valid NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn baad_utils_progress_completed(id: *const c_char) -> i32 {
+    let id = match import_string(id) {
+        Ok(id) => id,
+        Err(code) => return code
+    };
+    core::progress_completed(id);
+    0
+}
+
+/// # Safety
+/// `id` and `reason` must be valid NUL-terminated strings.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn baad_utils_progress_failed(
+    id: *const c_char,
+    reason: *const c_char
+) -> i32 {
+    let (id, reason) = match (import_string(id), import_string(reason)) {
+        (Ok(id), Ok(reason)) => (id, reason),
+        (Err(code), _) | (_, Err(code)) => return code
+    };
+    core::progress_failed(id, reason);
+    0
+}
+
+/// # Safety
 /// `level` must be `0` trace, `1` debug, `2` info, `3` warn or `4` error;
 /// `message` must be a valid NUL-terminated string.
 #[unsafe(no_mangle)]

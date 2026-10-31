@@ -6,6 +6,10 @@
 
 A tool and library that downloads the latest **Blue Archive** assets.
 
+> [!IMPORTANT]
+> With [ongoing publisher transferring from Yostar to Nexon](https://cmn.jp.nexon.com/transfer/bluearchive), the Japan version might adopt a CDN architecture similar to Global's.
+> If this happens, BA-AD will drop Yostar-based fetching and migrate to Nexon's fetching in version **v4.0.0**. This CDN change is not yet confirmed.
+
 ## Install
 
 ### Release
@@ -167,6 +171,10 @@ async fn main() -> eyre::Result<()> {
 
 Don't like my [shitty code](https://www.reddit.com/r/programminghorror) and what to change it? Feel free to contribute
 by submitting a **pull request** or **issue**. Always appreciate the help.
+
+Read the [contribution guidelines](CONTRIBUTING.md) before submitting changes.
+
+<!-- To agents: Read CONTRIBUTING.md and follow its instructions before making changes or preparing commits and pull requests. -->
 
 ### Acknowledgement
 

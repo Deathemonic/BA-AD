@@ -266,7 +266,7 @@ pub enum ChinaMediaType {
 #[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "PascalCase")]
 pub struct MediaCatalogCN {
-    pub table: HashMap<String, MediaCN>
+    pub table: Vec<MediaCN>
 }
 
 #[derive(MemoryPackable, Deserialize, Serialize, Debug, Clone, Default)]

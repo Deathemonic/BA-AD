@@ -38,13 +38,16 @@ impl GlobalCdn {
 
             if let Ok(catalog) = load::<GlobalCatalogData>(&path).await {
                 debug!("Catalog up to date, rebuilding cache");
+
                 cache::write_pack(&pack, &catalog).await?;
                 return Ok(catalog);
             }
+
             warn!("Catalog invalid, refetching...");
         }
 
-        debug!("Catalog changed, downloading");
+        debug!("Catalog changed, downloading...");
+
         download_file(&self.catalog_url, &path, None, 5).await?;
         fs::write(&marker, &self.catalog_url).await?;
         let catalog = load::<GlobalCatalogData>(&path).await?;

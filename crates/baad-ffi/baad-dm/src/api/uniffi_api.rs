@@ -6,6 +6,7 @@
 //! take records or optional strings by reference.
 #![allow(clippy::needless_pass_by_value)]
 
+use std::num::NonZeroUsize;
 use std::path::PathBuf;
 
 use baad_dm::client::{create_range_header as create_range_header_native, resolve_url as resolve};
@@ -50,22 +51,29 @@ impl TryFrom<Download> for baad_dm::Download {
     }
 }
 
-impl From<&baad_dm::Download> for Download {
-    fn from(download: &baad_dm::Download) -> Self {
-        Self {
-            url: String::from(download.url.as_str()),
+impl TryFrom<&baad_dm::Download> for Download {
+    type Error = Error;
+
+    fn try_from(download: &baad_dm::Download) -> Result<Self, Self::Error> {
+        let url = download.url().ok_or_else(|| {
+            baad_dm::Error::InvalidDownload(
+                "segmented downloads cannot be represented by the legacy URL record".into()
+            )
+        })?;
+        Ok(Self {
+            url: String::from(url.as_str()),
             filename: download.filename.clone(),
             hash: download.hash.clone(),
             target_file: download.target_file.clone(),
             size: download.size
-        }
+        })
     }
 }
 
 #[uniffi::export]
 pub fn download_from_url(url: &str) -> Result<Download, Error> {
     let download = baad_dm::Download::try_from(url).map_err(Error::from)?;
-    Ok(Download::from(&download))
+    Download::try_from(&download)
 }
 
 #[derive(Debug, Clone, uniffi::Record)]
@@ -73,25 +81,27 @@ pub struct Summary {
     pub download: Download,
     pub status_code: u16,
     pub size: u64,
-    pub status: DownloadStatus,
+    pub status: ProgressStatus,
     pub resumable: bool
 }
 
-impl From<&baad_dm::Summary> for Summary {
-    fn from(summary: &baad_dm::Summary) -> Self {
-        Self {
-            download: Download::from(summary.download.as_ref()),
+impl TryFrom<&baad_dm::Summary> for Summary {
+    type Error = Error;
+
+    fn try_from(summary: &baad_dm::Summary) -> Result<Self, Self::Error> {
+        Ok(Self {
+            download: Download::try_from(summary.download.as_ref())?,
             status_code: summary.status_code.as_u16(),
             size: summary.size,
-            status: DownloadStatus::from(summary.status.clone()),
+            status: ProgressStatus::from(summary.status.clone()),
             resumable: summary.resumable
-        }
+        })
     }
 }
 
 #[uniffi::export]
 pub const fn summary_is_success(summary: &Summary) -> bool {
-    matches!(summary.status, DownloadStatus::Success)
+    matches!(summary.status, ProgressStatus::Success)
 }
 
 #[derive(uniffi::Object)]
@@ -106,9 +116,12 @@ impl Downloader {
         Ok(Self {
             options: core::DownloadOptions {
                 directory: PathBuf::from(&config.directory),
-                concurrent_downloads: config.concurrent_downloads as usize,
-                max_chunks_per_file: config.max_chunks_per_file as usize,
-                max_concurrent_chunks: config.max_concurrent_chunks as usize,
+                concurrent_downloads: NonZeroUsize::new(config.concurrent_downloads as usize)
+                    .ok_or(baad_dm::Error::ZeroConcurrency)?,
+                max_chunks_per_file: NonZeroUsize::new(config.max_chunks_per_file as usize)
+                    .ok_or(baad_dm::Error::ZeroConcurrency)?,
+                max_concurrent_chunks: NonZeroUsize::new(config.max_concurrent_chunks as usize)
+                    .ok_or(baad_dm::Error::ZeroConcurrency)?,
                 chunk_threshold: config.chunk_threshold,
                 retries: config.retries,
                 resumable: config.resumable,
@@ -129,7 +142,7 @@ impl Downloader {
 
         let summaries =
             run_blocking(move |handle| handle.block_on(core::run_download(options, items))).await;
-        Ok(summaries.iter().map(Summary::from).collect())
+        summaries.iter().map(Summary::try_from).collect()
     }
 }
 
@@ -151,20 +164,23 @@ impl ZipExtractor {
 
     #[uniffi::method(async_runtime = "tokio")]
     pub async fn extract_file(&self, target: &str) -> Result<Vec<u8>, Error> {
-        let extractor = baad_dm::ZipExtractor::new(&self.client, &self.url).await?;
-        extractor.extract_file(target).await.map_err(Into::into)
+        let source = baad_dm::ZipSource::new(&self.client, &self.url, None);
+        let extractor = baad_dm::ZipExtractor::new(source).await?;
+        extractor.extract_file(target).await.map(|b| b.to_vec()).map_err(Into::into)
     }
 
     #[uniffi::method(async_runtime = "tokio")]
     pub async fn list_files(&self) -> Result<Vec<String>, Error> {
-        let extractor = baad_dm::ZipExtractor::new(&self.client, &self.url).await?;
+        let source = baad_dm::ZipSource::new(&self.client, &self.url, None);
+        let extractor = baad_dm::ZipExtractor::new(source).await?;
         let index = extractor.build_index().await?;
         Ok(index.names().map(String::from).collect())
     }
 
     #[uniffi::method(async_runtime = "tokio")]
     pub async fn file_info(&self, target: &str) -> Result<Option<baad_dm::ZipFileInfo>, Error> {
-        let extractor = baad_dm::ZipExtractor::new(&self.client, &self.url).await?;
+        let source = baad_dm::ZipSource::new(&self.client, &self.url, None);
+        let extractor = baad_dm::ZipExtractor::new(source).await?;
         let index = extractor.build_index().await?;
         Ok(index.get(target).cloned())
     }
@@ -193,7 +209,8 @@ impl ZipCache {
         target: &str
     ) -> Result<Option<baad_dm::ZipFileInfo>, Error> {
         let parsed = parse_url(url)?;
-        let index = self.inner.get_index(&self.client, &parsed).await?;
+        let source = baad_dm::ZipSource::new(&self.client, &parsed, None);
+        let index = self.inner.get_index(source).await?;
         Ok(index.get(target).cloned())
     }
 }

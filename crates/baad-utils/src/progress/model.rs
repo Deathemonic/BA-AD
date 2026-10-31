@@ -1,92 +1,116 @@
 use std::collections::HashMap;
-use std::fmt::Write;
+use std::fmt::{self, Write};
 use std::path::Path;
 use std::sync::Arc;
 
-use baad_shared::{DownloadEvent, DownloadObserver, DownloadStatus};
-use better_default::Default;
+use baad_shared::{ProgressEvent, ProgressObserver, ProgressUnit};
 use tracing::Level;
 
 use crate::formatter::{AlignedLine, HumanBytes, LineFormatter};
 use crate::progress::view::{ProgressModel, ProgressView};
 
-pub trait DownloadProgressHandler: ProgressModel {
-    fn handle_event(&mut self, event: DownloadEvent);
+pub trait ProgressHandler: ProgressModel {
+    fn handle_event(&mut self, event: ProgressEvent);
 }
 
-struct FileState {
-    downloaded_bytes: u64,
-    total_bytes: u64
+struct TaskState {
+    label: &'static str,
+    unit: ProgressUnit,
+    current: u64,
+    total: u64
+}
+
+struct UnitValue {
+    unit: ProgressUnit,
+    value: u64
+}
+
+impl fmt::Display for UnitValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.unit {
+            ProgressUnit::Bytes => HumanBytes(self.value).fmt(f),
+            ProgressUnit::Count => self.value.fmt(f)
+        }
+    }
 }
 
 #[derive(Default)]
-pub struct DownloadProgressModel {
-    active: HashMap<Arc<str>, FileState>,
-    completed: Vec<Arc<str>>,
+pub struct ProgressDisplay {
+    active: HashMap<Arc<str>, TaskState>,
+    order: Vec<Arc<str>>,
     formatter: LineFormatter,
     scratch: String
 }
 
-impl DownloadProgressModel {
+impl ProgressDisplay {
     pub fn new() -> Self { Self::default() }
 }
 
-impl DownloadProgressHandler for DownloadProgressModel {
-    fn handle_event(&mut self, event: DownloadEvent) {
+impl ProgressHandler for ProgressDisplay {
+    fn handle_event(&mut self, event: ProgressEvent) {
         match event {
-            DownloadEvent::Started { filename, total_bytes } => {
-                self.active.insert(filename, FileState {
-                    downloaded_bytes: 0,
-                    total_bytes
+            ProgressEvent::Started { id, label, unit, total } => {
+                if !self.active.contains_key(&id) {
+                    self.order.push(Arc::clone(&id));
+                }
+                self.active.insert(id, TaskState {
+                    label,
+                    unit,
+                    current: 0,
+                    total
                 });
             }
-            DownloadEvent::Progress {
-                filename,
-                downloaded_bytes,
-                total_bytes
-            } => {
-                if let Some(state) = self.active.get_mut(&filename) {
-                    state.downloaded_bytes = downloaded_bytes;
-                    state.total_bytes = total_bytes;
+            ProgressEvent::Advance { id, current, total } => {
+                if let Some(state) = self.active.get_mut(&id) {
+                    state.current = current;
+                    state.total = total;
                 }
             }
-            DownloadEvent::Completed { filename, status, .. } => {
-                self.active.remove(&filename);
-                if matches!(status, DownloadStatus::Success) {
-                    self.completed.push(filename);
-                }
+            ProgressEvent::Completed { id, .. } => {
+                self.active.remove(&id);
+                self.order.retain(|entry| entry != &id);
             }
         }
     }
 }
 
-impl ProgressModel for DownloadProgressModel {
+impl ProgressModel for ProgressDisplay {
     fn render(&mut self, width: usize, height: usize, output: &mut String) {
         let reserved = (height / 3).max(5);
         let max_visible = height.saturating_sub(reserved).max(1);
 
-        for (filename, state) in self.active.iter().take(max_visible) {
-            let name = Path::new(filename.as_ref())
-                .file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or(filename);
+        for id in self.order.iter().take(max_visible) {
+            let Some(state) = self.active.get(id) else {
+                continue;
+            };
+
+            let name = Path::new(id.as_ref()).file_name().and_then(|n| n.to_str()).unwrap_or(id);
 
             self.scratch.clear();
-            if state.total_bytes > 0 {
+            if state.total > 0 {
                 let _ = write!(
                     self.scratch,
                     "{} / {}",
-                    HumanBytes(state.downloaded_bytes),
-                    HumanBytes(state.total_bytes)
+                    UnitValue {
+                        unit: state.unit,
+                        value: state.current
+                    },
+                    UnitValue {
+                        unit: state.unit,
+                        value: state.total
+                    }
                 );
-            } else if state.downloaded_bytes > 0 {
-                let _ = write!(self.scratch, "{}", HumanBytes(state.downloaded_bytes));
+            } else if state.current > 0 {
+                let _ = write!(self.scratch, "{}", UnitValue {
+                    unit: state.unit,
+                    value: state.current
+                });
             }
 
             let _ = self.formatter.write_line_aligned(output, &AlignedLine {
                 level: &Level::INFO,
                 is_success: false,
-                message: "Downloading",
+                message: state.label,
                 value: name,
                 right: &self.scratch,
                 width
@@ -100,26 +124,18 @@ impl ProgressModel for DownloadProgressModel {
             let _ = self.formatter.write_line(output, &Level::INFO, false, &self.scratch, &[]);
         }
     }
-
-    fn final_message(&mut self, output: &mut String) {
-        for filename in &self.completed {
-            let _ = self
-                .formatter
-                .write_line(output, &Level::INFO, true, "Downloaded", &[("file", filename)]);
-        }
-    }
 }
 
-pub struct ProgressObserver<M: DownloadProgressHandler> {
+pub struct ViewObserver<M: ProgressHandler> {
     view: Arc<ProgressView<M>>
 }
 
-impl<M: DownloadProgressHandler> ProgressObserver<M> {
+impl<M: ProgressHandler> ViewObserver<M> {
     pub const fn new(view: Arc<ProgressView<M>>) -> Self { Self { view } }
 }
 
-impl<M: DownloadProgressHandler + Sync> DownloadObserver for ProgressObserver<M> {
-    fn on_event(&self, event: DownloadEvent) {
+impl<M: ProgressHandler + Sync> ProgressObserver for ViewObserver<M> {
+    fn on_event(&self, event: ProgressEvent) {
         let _ = self.view.update(|model| model.handle_event(event));
     }
 }

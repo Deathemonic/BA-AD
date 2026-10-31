@@ -21,7 +21,7 @@ default-members = [
 ]
 
 [workspace.package]
-version = "3.1.0"
+version = "3.2.0"
 edition = "2024"
 authors = ["Zinth"]
 
@@ -31,8 +31,9 @@ baad-dm = { path = "crates/baad-dm" }
 baad-ffi-build = { path = "crates/baad-ffi/build-support" }
 baad-shared = { path = "crates/baad-shared" }
 baad-utils = { path = "crates/baad-utils", default-features = false }
-bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "3.3.0" }
+bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "4.0.0" }
 
+better_default = "1.0.5"
 bitflags = "2"
 bon = "3"
 derive_more = { version = "2", default-features = false, features = ["debug"] }

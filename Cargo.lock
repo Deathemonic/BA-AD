@@ -245,7 +245,7 @@ dependencies = [
 
 [[package]]
 name = "baad"
-version = "3.1.0"
+version = "3.2.0"
 dependencies = [
  "ada-url",
  "baad-dm",
@@ -276,7 +276,7 @@ dependencies = [
 
 [[package]]
 name = "baad-cli"
-version = "3.1.0"
+version = "3.2.0"
 dependencies = [
  "baad",
  "clap",
@@ -286,18 +286,22 @@ dependencies = [
 
 [[package]]
 name = "baad-dm"
-version = "3.1.0"
+version = "3.2.0"
 dependencies = [
  "baad-shared",
  "bacy",
+ "better_default",
  "bon",
+ "bytes",
  "derive_more",
+ "fastcat",
  "flate2",
- "form_urlencoded",
  "futures",
+ "percent-encoding",
  "reqwest",
  "reqwest-middleware",
  "reqwest-retry",
+ "scopeguard",
  "thiserror 2.0.17",
  "tokio",
  "tracing",
@@ -305,7 +309,7 @@ dependencies = [
 
 [[package]]
 name = "baad-dm-ffi"
-version = "3.1.0"
+version = "3.2.0"
 dependencies = [
  "baad-dm",
  "baad-ffi-build",
@@ -319,7 +323,7 @@ dependencies = [
 
 [[package]]
 name = "baad-ffi"
-version = "3.1.0"
+version = "3.2.0"
 dependencies = [
  "baad",
  "baad-ffi-build",
@@ -335,7 +339,7 @@ dependencies = [
 
 [[package]]
 name = "baad-ffi-build"
-version = "3.1.0"
+version = "3.2.0"
 dependencies = [
  "fastcat",
  "prettyplease 0.3.0",
@@ -346,7 +350,7 @@ dependencies = [
 
 [[package]]
 name = "baad-shared"
-version = "3.1.0"
+version = "3.2.0"
 dependencies = [
  "lazy-regex",
  "memorypack",
@@ -358,7 +362,7 @@ dependencies = [
 
 [[package]]
 name = "baad-shared-ffi"
-version = "3.1.0"
+version = "3.2.0"
 dependencies = [
  "baad-ffi-build",
  "baad-shared",
@@ -369,13 +373,12 @@ dependencies = [
 
 [[package]]
 name = "baad-utils"
-version = "3.1.0"
+version = "3.2.0"
 dependencies = [
  "baad-shared",
  "better_default",
  "chrono",
  "eyre",
- "itoa",
  "lazy-regex",
  "owo-colors",
  "platform-dirs",
@@ -394,7 +397,7 @@ dependencies = [
 
 [[package]]
 name = "baad-utils-ffi"
-version = "3.1.0"
+version = "3.2.0"
 dependencies = [
  "baad-ffi-build",
  "baad-shared",
@@ -407,17 +410,19 @@ dependencies = [
 
 [[package]]
 name = "bacy"
-version = "3.3.0"
-source = "git+https://github.com/Deathemonic/BA-CY#2e28bc072c8d1e9ca8fbd75bd1afb430dc8b11f5"
+version = "4.0.0"
+source = "git+https://github.com/Deathemonic/BA-CY#57b30a4ec63738a54e78b22c39e45df810562918"
 dependencies = [
  "aes",
  "base64",
  "cbc",
  "crc32fast",
+ "crc64fast",
  "flatbuffers",
  "hmac",
  "md-5",
  "rand_mt",
+ "sha1",
  "sha2",
  "thiserror 2.0.17",
  "tokio",
@@ -535,9 +540,9 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "bytes"
-version = "1.11.0"
+version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b35204fbdc0b3f4446b89fc1ac2cf84a8a68971995d0bf2e925ec7cd960f9cb3"
+checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
 
 [[package]]
 name = "bzip2"
@@ -796,6 +801,12 @@ checksum = "9481c1c90cbf2ac953f07c8d4a58aa3945c425b7185c9154d67a65e4230da511"
 dependencies = [
  "cfg-if",
 ]
+
+[[package]]
+name = "crc64fast"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "26bb92ecea20291efcf0009e2713d64b7e327dedb8ce780545250f24075429e2"
 
 [[package]]
 name = "crossbeam-channel"

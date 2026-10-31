@@ -105,7 +105,7 @@ impl ChinaCdn {
         let bytes = fs::read(&file.path).await?;
         let text = String::from_utf8_lossy(&bytes);
         let catalog = MediaCatalogCN {
-            table: Self::parse_media(&text).into_iter().map(Self::media_entry).collect()
+            table: Self::parse_media(&text)
         };
 
         cache::write_pack(&file.pack_path(), &catalog).await?;
@@ -139,8 +139,6 @@ impl ChinaCdn {
             path: get_data_path(&key)?
         })
     }
-
-    fn media_entry(entry: MediaCN) -> (String, MediaCN) { (entry.path.clone(), entry) }
 
     fn parse_media(text: &str) -> Vec<MediaCN> {
         text.lines()
