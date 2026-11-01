@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use syn::{Fields, ItemEnum, Type};
+use syn::{Fields, GenericArgument, ItemEnum, PathArguments, Type};
 
 use crate::syntax::{crate_path, normalized, type_is_ffi_safe};
 
@@ -10,6 +10,7 @@ enum FieldConversion {
     ArcStr,
     StaticStr,
     Mirrored,
+    Optional(Box<Self>, TokenStream),
     Message
 }
 
@@ -19,6 +20,22 @@ impl FieldConversion {
         if mirrored_names.contains(&text) {
             return Self::Mirrored;
         }
+
+        if let Type::Path(path) = ty
+            && let Some(segment) = path.path.segments.last()
+            && segment.ident == "Option"
+            && let PathArguments::AngleBracketed(arguments) = &segment.arguments
+            && let Some(GenericArgument::Type(inner)) = arguments.args.first()
+        {
+            let conversion = Self::classify(inner, mirrored_names);
+            if matches!(conversion, Self::Keep) {
+                return Self::Keep;
+            }
+
+            let target = conversion.target_type(inner);
+            return Self::Optional(Box::new(conversion), target);
+        }
+
         match text.as_str() {
             "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" | "f32" | "f64"
             | "bool" | "String" | "ProgressUnit" | "ProgressStatus" => Self::Keep,
@@ -32,6 +49,7 @@ impl FieldConversion {
     fn target_type(&self, ty: &Type) -> TokenStream {
         match self {
             Self::Keep | Self::Mirrored => quote! { #ty },
+            Self::Optional(_, target) => quote! { Option<#target> },
             Self::BoxStr | Self::ArcStr | Self::StaticStr | Self::Message => {
                 quote! { String }
             }
@@ -44,6 +62,11 @@ impl FieldConversion {
             Self::Mirrored | Self::BoxStr => quote! { #binding.into() },
             Self::ArcStr => quote! { String::from(#binding.as_ref()) },
             Self::StaticStr => quote! { String::from(#binding) },
+            Self::Optional(inner, _) => {
+                let value = format_ident!("value");
+                let conversion = inner.convert(&value);
+                quote! { #binding.map(|#value| #conversion) }
+            }
             Self::Message => quote! { #binding.to_string() }
         }
     }
