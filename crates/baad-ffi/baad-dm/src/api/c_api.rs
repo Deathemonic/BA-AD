@@ -14,12 +14,21 @@ use baad_dm::client::{create_range_header, resolve_url};
 
 use super::core;
 
+pub const BAAD_DM_HASH_TYPE_NONE: i32 = -1;
+
+#[repr(i32)]
+#[derive(Clone, Copy)]
+pub enum BaadDmHashType {
+    Md5 = 0,
+    Sha1 = 1,
+    Crc32 = 2,
+    Crc64 = 3
+}
+
 unsafe fn download_failure(out: *mut *mut c_char, error: &baad_dm::Error) -> i32 {
     write_error(out, &error.to_string());
     BaadDmErrorCode::from(error) as i32
 }
-
-pub const BAAD_DM_HASH_TYPE_NONE: i32 = -1;
 
 /// # Safety
 /// `hash` must be a valid NUL-terminated string. Returns `BaadDmHashType` as
@@ -29,8 +38,15 @@ pub unsafe extern "C" fn baad_dm_detect_hash_type(hash: *const c_char) -> i32 {
     let Ok(hash) = import_string(hash) else {
         return BAAD_DM_HASH_TYPE_NONE;
     };
-    baad_dm::detect_hash_type(hash)
-        .map_or(BAAD_DM_HASH_TYPE_NONE, |hash_type| BaadDmHashType::from(hash_type) as i32)
+
+    baad_dm::detect_hash_type(hash).map_or(BAAD_DM_HASH_TYPE_NONE, |hash_type| {
+        (match hash_type {
+            baad_dm::HashType::Md5 => BaadDmHashType::Md5,
+            baad_dm::HashType::Sha1 => BaadDmHashType::Sha1,
+            baad_dm::HashType::Crc32(_) => BaadDmHashType::Crc32,
+            baad_dm::HashType::Crc64(_) => BaadDmHashType::Crc64
+        }) as i32
+    })
 }
 
 /// # Safety
