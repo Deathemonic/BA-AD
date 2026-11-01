@@ -60,7 +60,7 @@ impl<'a> Downloader<'a> {
 
         self.config.observer.on_event(ProgressEvent::Started {
             id: Arc::clone(&filename),
-            label: "Downloading",
+            label: "Downloading".into(),
             unit: ProgressUnit::Bytes,
             total
         });
@@ -110,7 +110,7 @@ impl<'a> Downloader<'a> {
 
         self.config.observer.on_event(ProgressEvent::Started {
             id: Arc::clone(&filename),
-            label: "Downloading",
+            label: "Downloading".into(),
             unit: ProgressUnit::Bytes,
             total: download.network_total().unwrap_or(0)
         });

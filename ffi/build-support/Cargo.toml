@@ -1,0 +1,12 @@
+[package]
+name = "baad-ffi-build"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+shadow-ffi-diplomat = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,30 @@
+[package]
+name = "baad-ffi"
+version.workspace = true
+edition.workspace = true
+publish = false
+links = "baad_ffi"
+
+[lib]
+name = "baad"
+crate-type = ["cdylib"]
+
+[dependencies]
+baad-native = { workspace = true }
+baad-shared = { workspace = true }
+diplomat = { workspace = true }
+diplomat-runtime = { workspace = true }
+baad-shared-ffi = { workspace = true }
+baad-utils-ffi = { workspace = true }
+baad-dm-ffi = { path = "../baad-dm" }
+
+[lints]
+workspace = true
+
+[build-dependencies]
+baad-ffi-build = { workspace = true }
+syn = { workspace = true }
+quote = { workspace = true }
+proc-macro2 = { workspace = true }
+shadow-ffi = { workspace = true }
+shadow-ffi-diplomat = { workspace = true }

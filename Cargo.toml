@@ -4,11 +4,11 @@ members = [
     "crates/baad",
     "crates/baad-cli",
     "crates/baad-dm",
-    "crates/baad-ffi/baad",
-    "crates/baad-ffi/baad-dm",
-    "crates/baad-ffi/baad-shared",
-    "crates/baad-ffi/baad-utils",
-    "crates/baad-ffi/build-support",
+    "ffi/baad",
+    "ffi/build-support",
+    "ffi/baad-dm",
+    "ffi/baad-shared",
+    "ffi/baad-utils",
     "crates/baad-shared",
     "crates/baad-utils",
 ]
@@ -21,14 +21,17 @@ default-members = [
 ]
 
 [workspace.package]
-version = "3.2.0"
+version = "3.3.0"
 edition = "2024"
 authors = ["Zinth"]
 
 [workspace.dependencies]
 baad = { path = "crates/baad" }
+baad-native = { package = "baad", path = "crates/baad" }
+baad-ffi-build = { path = "ffi/build-support" }
+baad-shared-ffi = { path = "ffi/baad-shared" }
+baad-utils-ffi = { path = "ffi/baad-utils" }
 baad-dm = { path = "crates/baad-dm" }
-baad-ffi-build = { path = "crates/baad-ffi/build-support" }
 baad-shared = { path = "crates/baad-shared" }
 baad-utils = { path = "crates/baad-utils", default-features = false }
 bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "4.0.0" }
@@ -36,19 +39,29 @@ bacy = { git = "https://github.com/Deathemonic/BA-CY", version = "4.0.0" }
 better_default = "1.0.5"
 bitflags = "2"
 bon = "3"
+bytes = "1"
 derive_more = { version = "2", default-features = false, features = ["debug"] }
 eyre = "0.6"
 fastcat = "1.1"
 lazy-regex = "3.6"
 memorypack = "1.2.2"
+owo-colors = "4.2"
 reqwest = "0.13"
+reqwest-middleware = "0.5"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 strum = { version = "0.28", features = ["derive"] }
 thiserror = "2"
 tokio = { version = "1.52", features = ["full"] }
 tracing = "0.1"
-uniffi = "0.32"
+diplomat = "0.17"
+diplomat-runtime = "0.16"
+syn = { version = "2", features = ["full"] }
+quote = "1"
+proc-macro2 = "1"
+shadow-ffi = { git = "https://github.com/Deathemonic/ShadowFFI", version = "0.1.0" }
+shadow-ffi-diplomat = { git = "https://github.com/Deathemonic/ShadowFFI", version = "0.1.0" }
+
 
 [workspace.lints.clippy]
 absolute_paths = "warn"

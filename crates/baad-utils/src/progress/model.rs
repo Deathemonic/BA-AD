@@ -14,7 +14,7 @@ pub trait ProgressHandler: ProgressModel {
 }
 
 struct TaskState {
-    label: &'static str,
+    label: Arc<str>,
     unit: ProgressUnit,
     current: u64,
     total: u64
@@ -110,7 +110,7 @@ impl ProgressModel for ProgressDisplay {
             let _ = self.formatter.write_line_aligned(output, &AlignedLine {
                 level: &Level::INFO,
                 is_success: false,
-                message: state.label,
+                message: &state.label,
                 value: name,
                 right: &self.scratch,
                 width

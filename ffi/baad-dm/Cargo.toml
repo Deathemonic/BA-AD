@@ -1,0 +1,32 @@
+[package]
+name = "baad-dm-ffi"
+version.workspace = true
+edition.workspace = true
+publish = false
+links = "baad_dm_ffi"
+
+[lib]
+name = "baad_dm_ffi"
+crate-type = ["rlib"]
+
+[dependencies]
+baad-utils-ffi = { workspace = true }
+baad-shared-ffi = { workspace = true }
+diplomat = { workspace = true }
+diplomat-runtime = { workspace = true }
+baad-dm = { workspace = true }
+baad-shared = { workspace = true }
+reqwest = { workspace = true }
+bytes = { workspace = true }
+reqwest-middleware = { workspace = true }
+
+[lints]
+workspace = true
+
+[build-dependencies]
+baad-ffi-build = { workspace = true }
+syn = { workspace = true }
+quote = { workspace = true }
+proc-macro2 = { workspace = true }
+shadow-ffi = { workspace = true }
+shadow-ffi-diplomat = { workspace = true }
