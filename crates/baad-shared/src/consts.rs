@@ -7,7 +7,11 @@ pub static REGEX_VERSION: LazyLock<&'static Regex> = LazyLock::new(|| regex!(r"\
 pub const GLOBAL_API_URL: &str = "https://api-pub.nexon.com/patch/v1.1/version-check";
 
 pub const GLOBAL_PLAYSTORE_URL: &str =
-    "https://apptopia.com/google-play/app/com.nexon.bluearchive/about";
+    "https://play.google.com/store/apps/details?hl=en&id=com.nexon.bluearchive";
+/// Google Play details page; the market game ID is appended.
+pub const GOOGLE_PLAY_URL: &str = "https://play.google.com/store/apps/details?hl=en&id=";
+/// Apple iTunes Search lookup; the App Store ID is appended.
+pub const APPLE_LOOKUP_URL: &str = "https://itunes.apple.com/lookup?id=";
 pub const GLOBAL_APPSTORE_URL: &str = "https://apps.apple.com/us/app/blue-archive/id1571873795";
 
 pub const GLOBAL_ANDROID_STANDARD_ID: &str = "com.nexon.bluearchive";
