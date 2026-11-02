@@ -18,7 +18,7 @@ use crate::zip::types::{
 
 #[derive(Debug)]
 pub struct ZipIndex {
-    entries: HashMap<String, ZipFileInfo>,
+    entries: HashMap<String, (ZipFileInfo, u32)>,
     pub total_size: u64
 }
 
@@ -33,7 +33,11 @@ struct EocdInfo {
 }
 
 impl ZipIndex {
-    pub fn get(&self, name: &str) -> Option<&ZipFileInfo> { self.entries.get(name) }
+    pub fn get(&self, name: &str) -> Option<&ZipFileInfo> {
+        self.entries.get(name).map(|(info, _)| info)
+    }
+
+    pub fn crc(&self, name: &str) -> Option<u32> { self.entries.get(name).map(|(_, crc)| *crc) }
 
     pub fn names(&self) -> impl Iterator<Item = &str> { self.entries.keys().map(String::as_str) }
 }
@@ -145,7 +149,7 @@ impl<'a> ZipExtractor<'a> {
         })
     }
 
-    fn parse_central_directory(cd: &[u8]) -> Result<HashMap<String, ZipFileInfo>, Error> {
+    fn parse_central_directory(cd: &[u8]) -> Result<HashMap<String, (ZipFileInfo, u32)>, Error> {
         let mut entries = HashMap::new();
         let mut offset = 0;
 
@@ -167,12 +171,13 @@ impl<'a> ZipExtractor<'a> {
 
             let filename = String::from_utf8_lossy(&cd[name_start..name_start + filename_len]);
 
-            entries.insert(filename.into_owned(), ZipFileInfo {
+            let info = ZipFileInfo {
                 compression_method: read_u16_le(cd, offset + 10),
                 compressed_size: read_u32_le(cd, offset + 20) as u64,
                 uncompressed_size: read_u32_le(cd, offset + 24) as u64,
                 local_header_offset: read_u32_le(cd, offset + 42) as u64
-            });
+            };
+            entries.insert(filename.into_owned(), (info, read_u32_le(cd, offset + 16)));
 
             offset = entry_end;
         }

@@ -36,12 +36,23 @@ impl DownloadJob<'_, '_> {
         )
         .await?;
 
+        let mut job = OutputJob::new(
+            self.download,
+            self.destination.clone(),
+            Arc::clone(&self.cancellation),
+            output_lock
+        );
+
+        if self.download.is_extraction() {
+            self.set_zip_metadata(&mut job).await?;
+        }
+
         if !self.config.overwrite
             && output::verify_file(
                 &self.shared.blocking,
                 &self.destination,
-                self.download.size,
-                self.download.hash.as_ref()
+                job.expected_size,
+                job.expected_hash.as_ref()
             )
             .await?
         {
@@ -51,13 +62,6 @@ impl DownloadJob<'_, '_> {
         }
 
         output::create_parent_dir(&self.destination).await?;
-
-        let job = OutputJob::new(
-            self.download,
-            self.destination.clone(),
-            Arc::clone(&self.cancellation),
-            output_lock
-        );
 
         if self.download.is_extraction() {
             return self.extract_zip(job).await;
@@ -77,6 +81,26 @@ impl DownloadJob<'_, '_> {
         };
 
         pipeline::fetch_source(&self.download.source, &transfer, job).await
+    }
+
+    async fn set_zip_metadata(&self, job: &mut OutputJob) -> Result<(), Error> {
+        let target = self.download.target_file.as_ref().ok_or(Error::MissingZipTarget)?;
+        let url = self.download.url().ok_or(Error::MissingZipUrl)?;
+        let mut source = ZipSource::new(&self.shared.client, url, Some(&self.shared.requests))
+            .with_blocking_limiter(&self.shared.blocking);
+        source.limits = self.zip_limits;
+
+        let index = self.shared.zip_cache.get_index(source).await?;
+        let info = index.get(target).ok_or_else(|| {
+            Error::Archive(fconcat!("File '", target, "' not found in ZIP").into())
+        })?;
+        job.expected_size.get_or_insert(info.uncompressed_size);
+
+        if job.expected_hash.is_none() {
+            job.expected_hash = index.crc(target).map(|crc| crc.to_string());
+        }
+
+        Ok(())
     }
 
     async fn extract_zip(&self, job: OutputJob) -> Result<FetchOutcome, Error> {
