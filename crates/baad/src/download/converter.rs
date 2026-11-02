@@ -98,7 +98,7 @@ fn create_download(
         Download::builder()
             .url(parsed_url)
             .filename(path.into())
-            .hash(hash.as_string())
+            .maybe_hash(target.is_none().then(|| hash.as_string()))
             .maybe_target_file(target.map(Into::into))
             .maybe_size(u64::try_from(size).ok().filter(|s| *s > 0))
             .build()
