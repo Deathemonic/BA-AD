@@ -1,6 +1,7 @@
 use std::error::Error as StdError;
 use std::io::{Read, Write};
 use std::path::Path;
+use std::str::FromStr;
 use std::sync::Arc;
 
 use bon::Builder;
@@ -65,10 +66,10 @@ where
     }
 }
 
-impl TryFrom<&str> for Download {
-    type Error = Error;
+impl FromStr for Download {
+    type Err = Error;
 
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
         let url = Url::parse(value).map_err(|error| Error::InvalidUrl {
             url: value.into(),
             reason: error.to_string().into()
@@ -76,6 +77,12 @@ impl TryFrom<&str> for Download {
 
         Self::try_from(&url)
     }
+}
+
+impl TryFrom<&str> for Download {
+    type Error = Error;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> { value.parse() }
 }
 
 impl TryFrom<&Url> for Download {

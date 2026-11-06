@@ -104,18 +104,15 @@ impl Catalog for ChinaCatalog {
 
     fn build_downloads(&self, resources: Self::Resources, url: &str) -> Downloads {
         Downloads {
-            assets: resources
-                .assets
-                .map(|m| ChinaStrategy::build_asset_downloads(m, url, self.platform))
-                .unwrap_or_default(),
+            assets: resources.assets.map_or_else(Vec::new, |m| {
+                ChinaStrategy::build_asset_downloads(m, url, self.platform)
+            }),
             tables: resources
                 .table
-                .map(|t| ChinaStrategy::build_table_downloads(t, url))
-                .unwrap_or_default(),
+                .map_or_else(Vec::new, |t| ChinaStrategy::build_table_downloads(t, url)),
             media: resources
                 .media
-                .map(|m| ChinaStrategy::build_media_downloads(m, url))
-                .unwrap_or_default()
+                .map_or_else(Vec::new, |m| ChinaStrategy::build_media_downloads(m, url))
         }
     }
 }

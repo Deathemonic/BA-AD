@@ -23,7 +23,6 @@ default-members = [
 [workspace.package]
 version = "3.3.0"
 edition = "2024"
-authors = ["Zinth"]
 
 [workspace.dependencies]
 baad = { path = "crates/baad" }

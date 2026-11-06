@@ -175,18 +175,15 @@ impl Catalog for JapanCatalog {
 
     fn build_downloads(&self, resources: Self::Resources, url: &str) -> Downloads {
         Downloads {
-            assets: resources
-                .assets
-                .map(|p| JapanStrategy::build_asset_downloads(p, url, self.platform))
-                .unwrap_or_default(),
+            assets: resources.assets.map_or_else(Vec::new, |p| {
+                JapanStrategy::build_asset_downloads(p, url, self.platform)
+            }),
             tables: resources
                 .table
-                .map(|t| JapanStrategy::build_table_downloads(t, url))
-                .unwrap_or_default(),
-            media: resources
-                .media
-                .map(|m| JapanStrategy::build_media_downloads(m, url, self.platform))
-                .unwrap_or_default()
+                .map_or_else(Vec::new, |t| JapanStrategy::build_table_downloads(t, url)),
+            media: resources.media.map_or_else(Vec::new, |m| {
+                JapanStrategy::build_media_downloads(m, url, self.platform)
+            })
         }
     }
 }
