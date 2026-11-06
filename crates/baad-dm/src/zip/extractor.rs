@@ -85,7 +85,8 @@ impl<'a> ZipExtractor<'a> {
         let info = index.get(target).ok_or_else(|| {
             Error::Archive(fconcat!("File '", target, "' not found in ZIP").into())
         })?;
-        self.source.extract_member(info).await
+
+        self.source.extract_member(info, None).await
     }
 
     pub async fn build_index(&self) -> Result<ZipIndex, Error> {
@@ -108,7 +109,7 @@ impl<'a> ZipExtractor<'a> {
         }
 
         let permit = self.source.acquire_blocking_permit().await?;
-        let cd_data = self.source.fetch_range(eocd.cd_offset, end - 1).await?;
+        let cd_data = self.source.fetch_range(eocd.cd_offset, end - 1, None).await?;
 
         let total_size = self.zip_size;
 
@@ -127,7 +128,7 @@ impl<'a> ZipExtractor<'a> {
         let search_size = self.zip_size.min(EOCD_SEARCH_SIZE);
         let start = self.zip_size - search_size;
 
-        let data = self.source.fetch_range(start, self.zip_size - 1).await?;
+        let data = self.source.fetch_range(start, self.zip_size - 1, None).await?;
 
         let offset =
             data.windows(4).rposition(|w| w == EOCD_SIGNATURE).ok_or(Error::InvalidZipEocd)?;

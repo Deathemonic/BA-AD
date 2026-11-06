@@ -485,7 +485,7 @@ pub mod ffi {
             self.0
                 .as_ref()
                 .ok_or_else(|| baad_shared_ffi::error::error("Progress view already finished"))?
-                .update(|display| display.handle_event(event.0.clone()))
+                .handle_event(event.0.clone())
                 .map_err(baad_shared_ffi::error::error)
         }
 

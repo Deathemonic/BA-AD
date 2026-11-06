@@ -13,6 +13,7 @@ use tokio::task;
 
 use crate::client::{create_range_header, validate_range_response};
 use crate::error::Error;
+use crate::execution::ProgressTracker;
 use crate::zip::types::{
     COMPRESSION_DEFLATE,
     COMPRESSION_STORED,
@@ -70,7 +71,11 @@ impl<'a> ZipSource<'a> {
         self
     }
 
-    pub async fn extract_member(&self, info: &ZipFileInfo) -> Result<Bytes, Error> {
+    pub async fn extract_member(
+        &self,
+        info: &ZipFileInfo,
+        progress: Option<&ProgressTracker>
+    ) -> Result<Bytes, Error> {
         if info.compressed_size > self.limits.max_range
             || info.uncompressed_size > self.limits.max_member
         {
@@ -82,7 +87,7 @@ impl<'a> ZipSource<'a> {
             .local_header_offset
             .checked_add(LOCAL_HEADER_MIN_SIZE as u64 - 1)
             .ok_or(Error::ZipMemberOutOfBounds)?;
-        let header = self.fetch_range(info.local_header_offset, header_end).await?;
+        let header = self.fetch_range(info.local_header_offset, header_end, None).await?;
 
         if header.len() < LOCAL_HEADER_MIN_SIZE || &header[..4] != b"PK\x03\x04" {
             return Err(Error::InvalidZipLocalHeader);
@@ -105,7 +110,7 @@ impl<'a> ZipSource<'a> {
         let compressed = if info.compressed_size == 0 {
             Bytes::new()
         } else {
-            self.fetch_range(data_start, data_end - 1).await?
+            self.fetch_range(data_start, data_end - 1, progress).await?
         };
         let info = info.clone();
 
@@ -131,7 +136,12 @@ impl<'a> ZipSource<'a> {
             .map_err(|_| Error::LimiterClosed)
     }
 
-    pub async fn fetch_range(&self, start: u64, end: u64) -> Result<Bytes, Error> {
+    pub async fn fetch_range(
+        &self,
+        start: u64,
+        end: u64,
+        progress: Option<&ProgressTracker>
+    ) -> Result<Bytes, Error> {
         let expected = end
             .checked_sub(start)
             .and_then(|size| size.checked_add(1))
@@ -159,6 +169,10 @@ impl<'a> ZipSource<'a> {
             }
 
             bytes.extend_from_slice(&chunk);
+
+            if let Some(progress) = progress {
+                progress.set_position(0, bytes.len() as u64);
+            }
         }
 
         if bytes.len() as u64 != expected {

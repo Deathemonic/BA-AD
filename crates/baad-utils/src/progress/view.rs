@@ -2,17 +2,18 @@ use std::io::{self, Write as IoWrite};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
+#[cfg(feature = "observer")]
+use baad_shared::ProgressEvent;
 use simdutf8::basic::from_utf8;
 use tracing_subscriber::fmt::MakeWriter;
 
 use crate::error::ProgressError;
+#[cfg(feature = "observer")]
+use crate::progress::ProgressHandler;
 use crate::progress::{ansi, terminal};
 
-pub trait ProgressModel: Send + 'static {
-    fn render(&mut self, width: usize, height: usize, buffer: &mut String);
-
-    fn final_message(&mut self, _buffer: &mut String) {}
-}
+const SIZE_CACHE_DURATION: Duration = Duration::from_secs(1);
+const DEFAULT_SIZE: (usize, usize) = (80, 24);
 
 pub struct ProgressView<M: ProgressModel> {
     inner: Mutex<Option<InnerView<M>>>
@@ -31,8 +32,19 @@ struct InnerView<M: ProgressModel> {
     last_size_check: Option<Instant>
 }
 
-const SIZE_CACHE_DURATION: Duration = Duration::from_secs(1);
-const DEFAULT_SIZE: (usize, usize) = (80, 24);
+pub struct ProgressMakeWriter<M: ProgressModel> {
+    view: Arc<ProgressView<M>>
+}
+
+pub struct ProgressWriter<M: ProgressModel> {
+    view: Arc<ProgressView<M>>
+}
+
+pub trait ProgressModel: Send + 'static {
+    fn render(&mut self, width: usize, height: usize, buffer: &mut String);
+
+    fn final_message(&mut self, _buffer: &mut String) {}
+}
 
 impl<M: ProgressModel> ProgressView<M> {
     pub fn new(model: M, update_interval: Duration) -> Self {
@@ -52,15 +64,6 @@ impl<M: ProgressModel> ProgressView<M> {
                 last_size_check: Some(Instant::now())
             }))
         }
-    }
-
-    fn with_inner<F, R>(&self, function: F) -> Result<R, ProgressError>
-    where
-        F: FnOnce(&mut InnerView<M>) -> R
-    {
-        let mut guard = self.inner.lock().map_err(|_| ProgressError::MutexPoisoned)?;
-        let inner = guard.as_mut().ok_or(ProgressError::AlreadyFinished)?;
-        Ok(function(inner))
     }
 
     pub fn update<F, R>(&self, update_function: F) -> Result<R, ProgressError>
@@ -92,6 +95,30 @@ impl<M: ProgressModel> ProgressView<M> {
         inner.write_final_message();
 
         Ok(inner.model)
+    }
+
+    fn with_inner<F, R>(&self, function: F) -> Result<R, ProgressError>
+    where
+        F: FnOnce(&mut InnerView<M>) -> R
+    {
+        let mut guard = self.inner.lock().map_err(|_| ProgressError::MutexPoisoned)?;
+        let inner = guard.as_mut().ok_or(ProgressError::AlreadyFinished)?;
+
+        Ok(function(inner))
+    }
+}
+
+#[cfg(feature = "observer")]
+impl<M: ProgressHandler> ProgressView<M> {
+    pub fn handle_event(&self, event: ProgressEvent) -> Result<(), ProgressError> {
+        self.with_inner(|inner| {
+            if !matches!(event, ProgressEvent::Advance { .. }) {
+                inner.last_paint = None;
+            }
+
+            inner.model.handle_event(event);
+            inner.paint();
+        })
     }
 }
 
@@ -262,10 +289,6 @@ impl<M: ProgressModel> InnerView<M> {
     }
 }
 
-pub struct ProgressMakeWriter<M: ProgressModel> {
-    view: Arc<ProgressView<M>>
-}
-
 impl<M: ProgressModel> ProgressMakeWriter<M> {
     pub const fn new(view: Arc<ProgressView<M>>) -> Self { Self { view } }
 }
@@ -276,10 +299,6 @@ impl<M: ProgressModel> Clone for ProgressMakeWriter<M> {
             view: Arc::clone(&self.view)
         }
     }
-}
-
-pub struct ProgressWriter<M: ProgressModel> {
-    view: Arc<ProgressView<M>>
 }
 
 impl<M: ProgressModel> io::Write for ProgressWriter<M> {

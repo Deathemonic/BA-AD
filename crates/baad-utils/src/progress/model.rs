@@ -135,7 +135,5 @@ impl<M: ProgressHandler> ViewObserver<M> {
 }
 
 impl<M: ProgressHandler + Sync> ProgressObserver for ViewObserver<M> {
-    fn on_event(&self, event: ProgressEvent) {
-        let _ = self.view.update(|model| model.handle_event(event));
-    }
+    fn on_event(&self, event: ProgressEvent) { let _ = self.view.handle_event(event); }
 }
