@@ -144,6 +144,14 @@ impl DownloadJob<'_, '_> {
             Error::Archive(fconcat!("File '", target, "' not found in ZIP").into())
         })?;
 
-        source.extract_member(info).await
+        let progress = ProgressTracker::new(
+            self.download.filename.as_str().into(),
+            info.compressed_size,
+            vec![Some(info.compressed_size)],
+            Arc::clone(&self.config.observer)
+        );
+        progress.complete_position(0, 0);
+
+        source.extract_member(info, Some(&progress)).await
     }
 }

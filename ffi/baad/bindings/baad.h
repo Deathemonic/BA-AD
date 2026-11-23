@@ -1,0 +1,23 @@
+#ifndef BAAD_H
+#define BAAD_H
+#include "BaadCatalogUrl.h"
+#include "BaadChinaCatalog.h"
+#include "BaadChinaCdn.h"
+#include "BaadChinaStrategy.h"
+#include "BaadDownloaderOptions.h"
+#include "BaadFilterMethod.h"
+#include "BaadGlobalCatalog.h"
+#include "BaadGlobalCdn.h"
+#include "BaadGlobalStrategy.h"
+#include "BaadJapanCatalog.h"
+#include "BaadJapanCdn.h"
+#include "BaadJapanStrategy.h"
+#include "BaadNexonClient.h"
+#include "BaadResourceCategory.h"
+#include "BaadResourceDownloader.h"
+#include "BaadResourceFilter.h"
+#include "BaadResourcesAsset.h"
+#include "BaadRoStarClient.h"
+#include "BaadYoStarClient.h"
+#include "diplomat_runtime.h"
+#endif

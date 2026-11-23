@@ -48,7 +48,7 @@ simdutf8 = "0.1"
 better_default = { workspace = true, optional = true }
 chrono = { version = "0.4", features = ["serde"], optional = true }
 eyre = { workspace = true, optional = true }
-owo-colors = { version = "4.2", features = ["supports-colors"], optional = true }
+owo-colors = { workspace = true, features = ["supports-colors"], optional = true }
 platform-dirs = { version = "0.3", optional = true }
 smallvec = { version = "1.15", optional = true }
 terminal_size = { version = "0.4", optional = true }

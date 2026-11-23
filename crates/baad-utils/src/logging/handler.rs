@@ -53,10 +53,9 @@ pub fn install() -> Result<(), ConfigError> {
                 .or_else(|| panic_info.payload().downcast_ref::<String>().cloned())
                 .unwrap_or_else(|| "Unknown panic".into());
 
-            let location = panic_info
-                .location()
-                .map(|loc| format!("{}:{}:{}", loc.file(), loc.line(), loc.column()))
-                .unwrap_or_default();
+            let location = panic_info.location().map_or_else(String::new, |loc| {
+                format!("{}:{}:{}", loc.file(), loc.line(), loc.column())
+            });
 
             error!(msg = %msg, location = %location, "Panic occurred");
         }));

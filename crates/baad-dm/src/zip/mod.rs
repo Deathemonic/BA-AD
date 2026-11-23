@@ -7,3 +7,5 @@ pub use cache::ZipCache;
 pub use extractor::{ZipExtractor, ZipIndex};
 pub use source::{ZipLimits, ZipSource};
 pub use types::ZipFileInfo;
+
+pub use crate::execution::ProgressTracker;
