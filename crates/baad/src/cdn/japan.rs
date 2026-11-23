@@ -1,7 +1,6 @@
 use baad_shared::{
     BundlePatchPackInfo,
     JapanAddressable,
-    MEDIA_RESOURCES,
     MediaCatalog,
     Platform,
     TABLE_BUNDLES,
@@ -87,8 +86,11 @@ impl JapanCdn {
     }
 
     pub async fn fetch_media(&self) -> Result<MediaCatalog, CatalogError> {
-        let url = fconcat!("/"; self.catalog_url.as_str(), const { MEDIA_RESOURCES }, "Catalog", "MediaCatalog.bytes");
-        let bytes = self.fetch_bytes(&url, "MediaCatalog.bytes").await?;
+        let media_path = self.platform.media_path();
+        let url =
+            fconcat!("/"; self.catalog_url.as_str(), media_path, "Catalog", "MediaCatalog.bytes");
+        let bytes =
+            self.fetch_bytes(&url, &fconcat!("/"; media_path, "MediaCatalog.bytes")).await?;
         let catalog = MemoryPackSerializer::deserialize::<MediaCatalog>(&bytes)?;
         Ok(catalog)
     }
