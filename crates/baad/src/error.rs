@@ -48,6 +48,12 @@ pub enum CatalogError {
     #[error("Catalog URL is empty for {region} region")]
     EmptyCatalogUrl { region: Box<str> },
 
+    #[error("Version check rejected client {version} ({code}): {message}")]
+    VersionCheck { version: Box<str>, code: i64, message: Box<str> },
+
+    #[error("Could not determine the client version: {reason}")]
+    VersionDiscovery { reason: Box<str> },
+
     #[error("Failed to deserialize catalog data")]
     DeserializationFailed
 }

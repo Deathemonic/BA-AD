@@ -27,8 +27,10 @@ pub fn create_proxy(proxy_url: Option<&str>) -> Result<Option<Proxy>, NetworkErr
     }
 }
 
+/// Extracts the first `x.y.z` version from the page. Error pages are rejected
+/// so their contents are never mistaken for a version.
 pub async fn fetch_version(url: &str) -> Result<String, NetworkError> {
-    let response = client().get(url).send().await?;
+    let response = client().get(url).send().await?.error_for_status()?;
     let body = response.text().await?;
 
     REGEX_VERSION.find(&body).map(|m| m.as_str().into()).ok_or(NetworkError::ExtractionFailed)

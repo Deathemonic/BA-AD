@@ -69,7 +69,10 @@ impl CommandHandler {
 
         info!(platform = %platform.display_name(), "Starting Global download");
 
-        let catalog = GlobalCatalog::new(categories, platform, build_type)?;
+        let mut catalog = GlobalCatalog::new(categories, platform, build_type)?;
+        if let Some(version) = &args.client_version {
+            catalog = catalog.with_client_version(version);
+        }
         self.run_download(&args.base, catalog).await
     }
 
