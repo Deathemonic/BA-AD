@@ -231,8 +231,7 @@ fn write_colored_field(
 }
 
 fn truncate_middle(value: &str, max_chars: usize) -> Cow<'_, str> {
-    let count = value.chars().count();
-    if count <= max_chars {
+    if value.chars().nth(max_chars).is_none() {
         return Cow::Borrowed(value);
     }
 
@@ -243,7 +242,11 @@ fn truncate_middle(value: &str, max_chars: usize) -> Cow<'_, str> {
     let mut truncated = String::with_capacity(max_chars * 4);
     truncated.extend(value.chars().take(front));
     truncated.push('…');
-    truncated.extend(value.chars().skip(count - back));
+    let suffix_start = back
+        .checked_sub(1)
+        .and_then(|index| value.char_indices().nth_back(index))
+        .map_or(value.len(), |(index, _)| index);
+    truncated.push_str(&value[suffix_start..]);
 
     Cow::Owned(truncated)
 }

@@ -109,16 +109,14 @@ impl<E: StdError + Send + Sync + 'static> IntoEyreReport for E {
 
 #[cfg(feature = "logs")]
 pub fn log_recoverable_error(error: &Report, recovery_action: &str) {
-    if let Some(cause) = error.source() {
-        if cause.to_string() == error.to_string() {
-            warn!(recovery = recovery_action, "Recoverable error, continuing: {}", error);
-        } else {
-            warn!(
-                cause = %cause,
-                recovery = recovery_action,
-                "Recoverable error, continuing: {}", error
-            );
-        }
+    if let Some(cause) = error.source()
+        && cause.to_string() != error.to_string()
+    {
+        warn!(
+            cause = %cause,
+            recovery = recovery_action,
+            "Recoverable error, continuing: {}", error
+        );
     } else {
         warn!(recovery = recovery_action, "Recoverable error, continuing: {}", error);
     }
