@@ -24,6 +24,7 @@ pub struct ResourceFilter {
     pattern: String,
     method: FilterMethod,
     compiled_regex: Option<Regex>,
+    compiled_glob: Option<GlobPattern>,
     fuzzy_matcher: Option<RefCell<Matcher>>,
     lowercase_pattern: Option<String>
 }
@@ -31,6 +32,7 @@ pub struct ResourceFilter {
 impl ResourceFilter {
     pub fn new(pattern: &str, method: FilterMethod) -> Result<Self, FilterError> {
         let mut compiled_regex = None;
+        let mut compiled_glob = None;
         let mut fuzzy_matcher = None;
         let mut lowercase_pattern = None;
 
@@ -45,8 +47,10 @@ impl ResourceFilter {
                 fuzzy_matcher = Some(RefCell::new(Matcher::new(Config::DEFAULT)));
             }
             FilterMethod::Glob => {
-                GlobPattern::new(pattern)
-                    .map_err(|_| FilterError::InvalidGlob { pattern: pattern.into() })?;
+                compiled_glob = Some(
+                    GlobPattern::new(pattern)
+                        .map_err(|_| FilterError::InvalidGlob { pattern: pattern.into() })?
+                );
             }
             FilterMethod::ContainsIgnoreCase => {
                 lowercase_pattern = Some(pattern.to_lowercase());
@@ -58,6 +62,7 @@ impl ResourceFilter {
             pattern: pattern.into(),
             method,
             compiled_regex,
+            compiled_glob,
             fuzzy_matcher,
             lowercase_pattern
         })
@@ -98,7 +103,7 @@ impl ResourceFilter {
     }
 
     fn match_glob(&self, path: &str) -> bool {
-        GlobPattern::new(&self.pattern).is_ok_and(|pattern| pattern.matches(path))
+        self.compiled_glob.as_ref().is_some_and(|pattern| pattern.matches(path))
     }
 
     pub fn matches(&self, path: &str) -> bool {
