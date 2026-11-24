@@ -1,3 +1,4 @@
+use std::mem::DropGuard;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -11,7 +12,7 @@ use crate::download::{Download, FetchOutcome, Summary};
 use crate::downloader::config::DownloaderConfig;
 use crate::downloader::job::DownloadJob;
 use crate::error::Error;
-use crate::execution::{Cancellation, CancellationGuard, SharedExecution};
+use crate::execution::{Cancellation, SharedExecution};
 use crate::zip::ZipLimits;
 
 #[derive(Clone, Debug)]
@@ -54,7 +55,7 @@ impl<'a> Downloader<'a> {
 
     async fn run_download(&self, shared: &SharedExecution, download: &Download) -> Summary {
         let cancellation = Arc::new(Cancellation::default());
-        let mut cancellation_guard = CancellationGuard::new(Arc::clone(&cancellation));
+        let cancellation_guard = DropGuard::new(Arc::clone(&cancellation), |token| token.cancel());
         let filename: Arc<str> = download.filename.as_str().into();
         let total = download.network_total().unwrap_or(0);
 
@@ -83,7 +84,7 @@ impl<'a> Downloader<'a> {
             Err(error) => FetchOutcome::failed(&error, StatusCode::BAD_REQUEST)
         };
 
-        cancellation_guard.disarm();
+        let _cancellation = DropGuard::dismiss(cancellation_guard);
 
         self.finalize(Self::create_summary(download.clone(), outcome), filename)
     }

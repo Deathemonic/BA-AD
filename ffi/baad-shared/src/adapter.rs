@@ -5,13 +5,13 @@ use reqwest::{Client, Proxy};
 use serde::de::DeserializeOwned;
 use serde_json::{Error as JsonError, from_str};
 
-use crate::runtime::CallbackScope;
+use crate::runtime::enter_callback;
 
 struct ThreadCallback<F>(Option<F>);
 
 impl<F> Drop for ThreadCallback<F> {
     fn drop(&mut self) {
-        let _scope = CallbackScope::enter();
+        let _scope = enter_callback();
         drop(self.0.take());
     }
 }
@@ -24,7 +24,7 @@ impl<F: Fn(baad_shared::ProgressEvent) + 'static> baad_shared::ProgressObserver
     for ThreadCallback<F>
 {
     fn on_event(&self, event: baad_shared::ProgressEvent) {
-        let _scope = CallbackScope::enter();
+        let _scope = enter_callback();
         if let Some(callback) = &self.0 {
             callback(event);
         }

@@ -1,5 +1,6 @@
 use std::cell::Cell;
 use std::future::Future;
+use std::mem::DropGuard;
 use std::sync::OnceLock;
 
 use tokio::runtime::{Builder, Handle, Runtime};
@@ -9,17 +10,11 @@ thread_local! {
 
 pub fn in_callback() -> bool { CALLBACK_DEPTH.with(|depth| depth.get() != 0) }
 
-pub(crate) struct CallbackScope;
-
-impl CallbackScope {
-    pub(crate) fn enter() -> Self {
-        CALLBACK_DEPTH.with(|depth| depth.set(depth.get() + 1));
-        Self
-    }
-}
-
-impl Drop for CallbackScope {
-    fn drop(&mut self) { CALLBACK_DEPTH.with(|depth| depth.set(depth.get() - 1)); }
+pub(crate) fn enter_callback() -> DropGuard<(), impl FnOnce(())> {
+    CALLBACK_DEPTH.with(|depth| depth.set(depth.get() + 1));
+    DropGuard::new((), |()| {
+        CALLBACK_DEPTH.with(|depth| depth.set(depth.get() - 1));
+    })
 }
 
 pub fn block_on<T>(future: impl Future<Output = T>) -> Result<T, String> {
