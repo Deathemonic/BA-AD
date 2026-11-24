@@ -90,7 +90,6 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
           key: ${{ runner.os }}-cargo-ffi-${{ matrix.config.rust_target }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Setup MSVC toolchain

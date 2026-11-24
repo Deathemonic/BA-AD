@@ -6,3 +6,4 @@
 /inspiration
 /output
 /sdk/
+/ffi/*/bindings/*.h
