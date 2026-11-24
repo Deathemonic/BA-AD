@@ -17,11 +17,11 @@ thiserror = { workspace = true }
 tokio = { workspace = true }
 
 bytes = { workspace = true }
-flate2 = "1.1"
-futures = "0.3"
-percent-encoding = "2.3"
+flate2 = "1.1.11"
+futures = "0.3.34"
+percent-encoding = "2.3.2"
 reqwest-middleware = { workspace = true }
-reqwest-retry = "0.9"
+reqwest-retry = "0.9.1"
 scopeguard = "1.2"
 tracing = { workspace = true }
 

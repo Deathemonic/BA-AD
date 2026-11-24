@@ -43,17 +43,17 @@ thiserror = { workspace = true }
 tokio = { workspace = true, optional = true }
 tracing = { workspace = true, optional = true }
 
-simdutf8 = "0.1"
+simdutf8 = "0.1.5"
 
 better_default = { workspace = true, optional = true }
-chrono = { version = "0.4", features = ["serde"], optional = true }
+chrono = { version = "0.4.45", features = ["serde"], optional = true }
 eyre = { workspace = true, optional = true }
 owo-colors = { workspace = true, features = ["supports-colors"], optional = true }
 platform-dirs = { version = "0.3", optional = true }
-smallvec = { version = "1.15", optional = true }
-terminal_size = { version = "0.4", optional = true }
-tracing-appender = { version = "0.2.4", features = ["parking_lot"], optional = true }
-tracing-subscriber = { version = "0.3", features = ["env-filter", "json"], optional = true }
+smallvec = { version = "1.16.6", optional = true }
+terminal_size = { version = "0.4.4", optional = true }
+tracing-appender = { version = "0.2.5", features = ["parking_lot"], optional = true }
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "json"], optional = true }
 
 [lints]
 workspace = true

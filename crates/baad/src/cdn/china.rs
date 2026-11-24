@@ -12,7 +12,7 @@ use baad_shared::{
 use baad_utils::file::get_data_path;
 use baad_utils::json::load;
 use fastcat::fconcat;
-use memorypack::{MemoryPackDeserialize, MemoryPackSerialize};
+use memorypack::{MemoryPackDeserializeOwned, MemoryPackSerialize};
 use serde::de::DeserializeOwned;
 use tokio::fs;
 
@@ -114,7 +114,7 @@ impl ChinaCdn {
 
     async fn fetch_json<T>(&self, file: &CatalogFile) -> Result<T, CatalogError>
     where
-        T: DeserializeOwned + MemoryPackSerialize + MemoryPackDeserialize
+        T: DeserializeOwned + MemoryPackSerialize + MemoryPackDeserializeOwned
     {
         let downloaded = cache::ensure_cached(file).await?;
 

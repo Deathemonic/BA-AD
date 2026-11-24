@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use baad_shared::client;
-use memorypack::{MemoryPackDeserialize, MemoryPackSerialize, MemoryPackSerializer};
+use memorypack::{MemoryPackDeserializeOwned, MemoryPackSerialize, MemoryPackSerializer};
 use tokio::fs;
 use tracing::debug;
 
@@ -59,7 +59,7 @@ pub async fn local_hash(path: &Path) -> Option<String> {
     fs::read_to_string(path).await.ok().map(|hash| hash.trim().into())
 }
 
-pub async fn read_pack<T: MemoryPackDeserialize>(path: &Path) -> Option<T> {
+pub async fn read_pack<T: MemoryPackDeserializeOwned>(path: &Path) -> Option<T> {
     let bytes = fs::read(path).await.ok()?;
     MemoryPackSerializer::deserialize::<T>(&bytes).ok()
 }
