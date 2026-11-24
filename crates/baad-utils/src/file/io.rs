@@ -56,10 +56,10 @@ pub fn filename_matches(path: impl AsRef<Path>, matches: impl Fn(&str) -> bool) 
 }
 
 pub fn read_length_prefixed<'a>(data: &'a [u8], position: &mut usize) -> Option<&'a str> {
-    let length_end = position.checked_add(4)?;
-    let length = u32::from_le_bytes(data.get(*position..length_end)?.try_into().ok()?) as usize;
-    let end = length_end.checked_add(length)?;
-    let text = str::from_utf8(data.get(length_end..end)?).ok()?;
-    *position = end.checked_add(3)? & !3;
+    let (length, payload) = data.get(*position..)?.split_first_chunk()?;
+    let length = u32::from_le_bytes(*length) as usize;
+    let text = str::from_utf8(payload.get(..length)?).ok()?;
+    let end = position.checked_add(4)?.checked_add(length)?;
+    *position = end.checked_next_multiple_of(4)?;
     Some(text)
 }

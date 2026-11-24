@@ -130,8 +130,10 @@ impl<'a> ZipExtractor<'a> {
 
         let data = self.source.fetch_range(start, self.zip_size - 1, None).await?;
 
-        let offset =
-            data.windows(4).rposition(|w| w == EOCD_SIGNATURE).ok_or(Error::InvalidZipEocd)?;
+        let offset = data
+            .array_windows()
+            .rposition(|window| window == EOCD_SIGNATURE)
+            .ok_or(Error::InvalidZipEocd)?;
 
         let eocd = &data[offset..];
         if eocd.len() < EOCD_MIN_SIZE {
