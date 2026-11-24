@@ -18,13 +18,7 @@ pub fn get_content_length(response: &Response) -> u64 {
 }
 
 pub fn create_proxy(proxy_url: Option<&str>) -> Result<Option<Proxy>, NetworkError> {
-    match proxy_url {
-        Some(url) => {
-            let proxy = Proxy::all(url)?;
-            Ok(Some(proxy))
-        }
-        None => Ok(None)
-    }
+    proxy_url.map(Proxy::all).transpose().map_err(Into::into)
 }
 
 pub async fn fetch_version(url: &str) -> Result<String, NetworkError> {

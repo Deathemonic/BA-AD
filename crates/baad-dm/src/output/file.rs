@@ -74,10 +74,7 @@ pub fn sibling_path(destination: &Path, marker: &str) -> PathBuf {
 }
 
 async fn temporary_lock_path(path: &Path) -> Result<PathBuf, Error> {
-    let parent = path
-        .parent()
-        .filter(|parent| !parent.as_os_str().is_empty())
-        .unwrap_or_else(|| Path::new("."));
+    let parent = path.parent().filter(|parent| !parent.is_empty()).unwrap_or_else(|| Path::new("."));
     let parent = async_fs::canonicalize(parent).await?;
     let filename = path.file_name().ok_or(Error::InvalidOutputPath)?;
     let path = parent.join(filename);

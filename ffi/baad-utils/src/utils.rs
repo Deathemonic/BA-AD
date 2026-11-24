@@ -321,11 +321,11 @@ pub mod ffi {
 
     impl BaadUtilsResponse {
         pub fn content_length(&self) -> u64 {
-            self.0.as_ref().map_or(0, baad_utils::network::get_content_length)
+            self.0.as_ref().map_or_default(baad_utils::network::get_content_length)
         }
 
         pub fn status(&self) -> u16 {
-            self.0.as_ref().map_or(0, |response| response.status().as_u16())
+            self.0.as_ref().map_or_default(|response| response.status().as_u16())
         }
 
         pub fn body(&mut self) -> Result<Box<BaadUtilsBytes>, Box<BaadError>> {

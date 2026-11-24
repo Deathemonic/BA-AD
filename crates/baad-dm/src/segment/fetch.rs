@@ -14,8 +14,7 @@ pub async fn fetch_segments(
 ) -> Result<Vec<PathBuf>, Error> {
     fs::create_dir_all(cache_dir).await?;
 
-    let paths: Vec<_> =
-        (0..segments.len()).map(|index| cache_dir.join(format!("segment-{index}"))).collect();
+    let paths = Vec::from_fn(segments.len(), |index| cache_dir.join(format!("segment-{index}")));
 
     let result = stream::iter(segments.iter().zip(&paths).enumerate())
         .map(Ok::<_, Error>)
