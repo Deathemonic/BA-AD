@@ -30,6 +30,10 @@ size_t BaadSharedBundlePatchPack_bundle_files_len(const BaadSharedBundlePatchPac
 
 const BaadSharedBundleFile* BaadSharedBundlePatchPack_bundle_files_at(const BaadSharedBundlePatchPack* self, size_t index);
 
+DiplomatI64View BaadSharedBundlePatchPack_entry_offsets(const BaadSharedBundlePatchPack* self);
+
+DiplomatI64View BaadSharedBundlePatchPack_entry_compressed_sizes(const BaadSharedBundlePatchPack* self);
+
 void BaadSharedBundlePatchPack_destroy(BaadSharedBundlePatchPack* self);
 
 

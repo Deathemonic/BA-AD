@@ -25,6 +25,8 @@ int64_t BaadSharedBundleFile_crc(const BaadSharedBundleFile* self);
 
 bool BaadSharedBundleFile_is_split_download(const BaadSharedBundleFile* self);
 
+DiplomatStringView BaadSharedBundleFile_hash(const BaadSharedBundleFile* self);
+
 uint64_t BaadSharedBundleFile_file_hash(const BaadSharedBundleFile* self);
 
 DiplomatStringView BaadSharedBundleFile_signature(const BaadSharedBundleFile* self);

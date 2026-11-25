@@ -366,7 +366,9 @@ pub struct BundlePatchPack {
     pub crc: i64,
     pub is_prologue: bool,
     pub is_split_download: bool,
-    pub bundle_files: Vec<BundleFile>
+    pub bundle_files: Vec<BundleFile>,
+    pub entry_offsets: Vec<i64>,
+    pub entry_compressed_sizes: Vec<i64>
 }
 
 #[derive(MemoryPackable, Serialize, Deserialize, Debug, Clone, Default)]
@@ -377,6 +379,7 @@ pub struct BundleFile {
     pub is_prologue: bool,
     pub crc: i64,
     pub is_split_download: bool,
+    pub hash: String,
     pub file_hash: u64,
     pub signature: String
 }
