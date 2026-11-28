@@ -94,7 +94,8 @@ pub mod ffi {
                 path: path.into(),
                 hash: make_hash(hash_kind, hash)?,
                 size,
-                bundle_files: strings(files)?
+                bundle_files: strings(files)?,
+                zip_entries: Vec::new()
             });
             Ok(())
         }

@@ -384,13 +384,22 @@ pub struct BundleFile {
     pub signature: String
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct BundleZipEntry {
+    pub offset: u64,
+    pub compressed_size: u64,
+    pub size: u64,
+    pub crc: u32
+}
+
 #[derive(Debug, Clone)]
 pub struct DownloadAsset {
     pub url: String,
     pub path: String,
     pub hash: HashValue,
     pub size: i64,
-    pub bundle_files: Vec<String>
+    pub bundle_files: Vec<String>,
+    pub zip_entries: Vec<BundleZipEntry>
 }
 
 #[derive(Debug, Clone)]

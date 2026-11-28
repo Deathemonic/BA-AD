@@ -1,5 +1,6 @@
 use baad_shared::{
     BundlePatchPackInfo,
+    BundleZipEntry,
     DownloadAsset,
     DownloadMedia,
     DownloadTable,
@@ -19,12 +20,34 @@ impl JapanStrategy {
         platform: Platform
     ) -> Vec<DownloadAsset> {
         let packs = packing.full_patch_packs.into_iter().chain(packing.update_packs).map(|pack| {
+            let zip_entries = if pack.bundle_files.len() == pack.entry_offsets.len()
+                && pack.bundle_files.len() == pack.entry_compressed_sizes.len()
+            {
+                pack.bundle_files
+                    .iter()
+                    .zip(pack.entry_offsets)
+                    .zip(pack.entry_compressed_sizes)
+                    .map(|((bundle, offset), compressed_size)| {
+                        Some(BundleZipEntry {
+                            offset: offset.try_into().ok()?,
+                            compressed_size: compressed_size.try_into().ok()?,
+                            size: bundle.size.try_into().ok()?,
+                            crc: bundle.crc.try_into().ok()?
+                        })
+                    })
+                    .collect::<Option<Vec<_>>>()
+                    .unwrap_or_default()
+            } else {
+                Vec::new()
+            };
+
             DownloadAsset {
                 url: fconcat!("/"; catalog_url, platform.patch_pack(), pack.pack_name.as_str()),
                 path: pack.pack_name,
                 hash: HashValue::Crc(pack.crc),
                 size: pack.pack_size,
-                bundle_files: pack.bundle_files.into_iter().map(|b| b.name).collect()
+                bundle_files: pack.bundle_files.into_iter().map(|b| b.name).collect(),
+                zip_entries
             }
         });
 

@@ -23,7 +23,7 @@ pub fn convert_assets(assets: &[DownloadAsset], filter: Option<&ResourceFilter>)
         }
 
         if let Some(f) = filter {
-            for bundle_name in &asset.bundle_files {
+            for (index, bundle_name) in asset.bundle_files.iter().enumerate() {
                 if f.matches(bundle_name)
                     && seen.insert(bundle_name.as_str())
                     && let Some(dl) = create_download(
@@ -34,7 +34,10 @@ pub fn convert_assets(assets: &[DownloadAsset], filter: Option<&ResourceFilter>)
                         Some(bundle_name)
                     )
                 {
-                    downloads.push(dl);
+                    downloads.push(Download {
+                        zip_entry: asset.zip_entries.get(index).copied(),
+                        ..dl
+                    });
                 }
             }
         } else {

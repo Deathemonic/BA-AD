@@ -15,7 +15,7 @@ use crate::error::Error;
 use crate::execution::{Cancellation, ProgressTracker, SharedExecution};
 use crate::output::{self, OutputJob};
 use crate::transfer::TransferContext;
-use crate::zip::{ZipLimits, ZipSource};
+use crate::zip::{LOCAL_HEADER_MIN_SIZE, ZipLimits, ZipSource};
 
 const RETRY_BASE_DELAY_MS: u64 = 250;
 
@@ -44,7 +44,12 @@ impl DownloadJob<'_, '_> {
         );
 
         if self.download.is_extraction() {
-            self.set_zip_metadata(&mut job).await?;
+            if let Some(entry) = self.download.zip_entry {
+                job.expected_size.get_or_insert(entry.size);
+                job.expected_hash.get_or_insert_with(|| entry.crc.to_string());
+            } else {
+                self.set_zip_metadata(&mut job).await?;
+            }
         }
 
         if !self.config.overwrite
@@ -86,11 +91,7 @@ impl DownloadJob<'_, '_> {
     async fn set_zip_metadata(&self, job: &mut OutputJob) -> Result<(), Error> {
         let target = self.download.target_file.as_ref().ok_or(Error::MissingZipTarget)?;
         let url = self.download.url().ok_or(Error::MissingZipUrl)?;
-        let mut source = ZipSource::new(&self.shared.client, url, Some(&self.shared.requests))
-            .with_blocking_limiter(&self.shared.blocking);
-        source.limits = self.zip_limits;
-
-        let index = self.shared.zip_cache.get_index(source).await?;
+        let index = self.shared.zip_cache.get_index(self.zip_source(url)).await?;
         let info = index.get(target).ok_or_else(|| {
             Error::Archive(fconcat!("File '", target, "' not found in ZIP").into())
         })?;
@@ -134,9 +135,16 @@ impl DownloadJob<'_, '_> {
     }
 
     async fn try_zip_member(&self, url: &Url, target: &str) -> Result<Bytes, Error> {
-        let mut source = ZipSource::new(&self.shared.client, url, Some(&self.shared.requests))
-            .with_blocking_limiter(&self.shared.blocking);
-        source.limits = self.zip_limits;
+        let mut source = self.zip_source(url);
+        if let Some(entry) = self.download.zip_entry {
+            let total = entry
+                .compressed_size
+                .saturating_add((LOCAL_HEADER_MIN_SIZE + target.len()) as u64);
+            let progress = self.zip_progress(total);
+            if let Ok(data) = source.extract_catalog_member(entry, target, &progress).await {
+                return Ok(data);
+            }
+        }
 
         let index = self.shared.zip_cache.get_index(source).await?;
         source.total_size = Some(index.total_size);
@@ -144,14 +152,25 @@ impl DownloadJob<'_, '_> {
             Error::Archive(fconcat!("File '", target, "' not found in ZIP").into())
         })?;
 
+        let progress = self.zip_progress(info.compressed_size);
+        source.extract_member(info, Some(&progress)).await
+    }
+
+    fn zip_source<'a>(&'a self, url: &'a Url) -> ZipSource<'a> {
+        let mut source = ZipSource::new(&self.shared.client, url, Some(&self.shared.requests))
+            .with_blocking_limiter(&self.shared.blocking);
+        source.limits = self.zip_limits;
+        source
+    }
+
+    fn zip_progress(&self, total: u64) -> ProgressTracker {
         let progress = ProgressTracker::new(
             self.download.filename.as_str().into(),
-            info.compressed_size,
-            vec![Some(info.compressed_size)],
+            total,
+            vec![Some(total)],
             Arc::clone(&self.config.observer)
         );
         progress.complete_position(0, 0);
-
-        source.extract_member(info, Some(&progress)).await
+        progress
     }
 }

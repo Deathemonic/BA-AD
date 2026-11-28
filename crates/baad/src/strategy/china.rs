@@ -27,7 +27,8 @@ impl ChinaStrategy {
             path: file.name,
             hash: HashValue::Md5(file.crc),
             size: file.size,
-            bundle_files: Vec::new()
+            bundle_files: Vec::new(),
+            zip_entries: Vec::new()
         });
 
         assets.collect()

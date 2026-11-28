@@ -60,7 +60,8 @@ impl GlobalStrategy {
                     path: resource.resource_path,
                     hash,
                     size,
-                    bundle_files: Vec::new()
+                    bundle_files: Vec::new(),
+                    zip_entries: Vec::new()
                 });
             }
         }

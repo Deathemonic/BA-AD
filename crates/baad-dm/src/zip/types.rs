@@ -9,7 +9,7 @@ pub const CENTRAL_DIR_ENTRY_MIN_SIZE: usize = 46;
 pub const LOCAL_HEADER_MIN_SIZE: usize = 30;
 pub const EOCD_SEARCH_SIZE: u64 = u16::MAX as u64 + EOCD_MIN_SIZE as u64;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct ZipFileInfo {
     pub compression_method: u16,
     pub compressed_size: u64,

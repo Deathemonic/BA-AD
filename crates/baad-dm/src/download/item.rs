@@ -4,6 +4,7 @@ use std::path::Path;
 use std::str::FromStr;
 use std::sync::Arc;
 
+use baad_shared::BundleZipEntry;
 use bon::Builder;
 use derive_more::Debug;
 use reqwest_middleware::reqwest::Url;
@@ -28,6 +29,7 @@ pub struct Download {
     pub filename: String,
     pub hash: Option<String>,
     pub target_file: Option<String>,
+    pub zip_entry: Option<BundleZipEntry>,
     pub size: Option<u64>,
     #[debug(skip)]
     pub transform: Option<Arc<dyn OutputTransform>>

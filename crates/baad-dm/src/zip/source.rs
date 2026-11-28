@@ -1,6 +1,7 @@
 use std::io::Read;
 use std::sync::{Arc, LazyLock};
 
+use baad_shared::BundleZipEntry;
 use better_default::Default;
 use bytes::Bytes;
 use flate2::read::DeflateDecoder;
@@ -20,6 +21,8 @@ use crate::zip::types::{
     LOCAL_HEADER_MIN_SIZE,
     ZipFileInfo
 };
+
+const ALLOWED_FLAGS: u16 = 0x0806;
 
 const DEFAULT_MAX_RANGE: u64 = 512 * 1024 * 1024;
 const DEFAULT_MAX_MEMBER: u64 = 512 * 1024 * 1024;
@@ -112,14 +115,49 @@ impl<'a> ZipSource<'a> {
         } else {
             self.fetch_range(data_start, data_end - 1, progress).await?
         };
-        let info = info.clone();
+        Self::decompress_member(compressed, *info, permit).await
+    }
 
-        task::spawn_blocking(move || {
-            let _permit = permit;
+    pub async fn extract_catalog_member(
+        &self,
+        entry: BundleZipEntry,
+        target: &str,
+        progress: &ProgressTracker
+    ) -> Result<Bytes, Error> {
+        if entry.size > self.limits.max_member {
+            return Err(Error::ZipMemberTooLarge);
+        }
 
-            Self::decompress(compressed, &info)
-        })
-        .await?
+        let data_start = LOCAL_HEADER_MIN_SIZE + target.len();
+        let end = entry
+            .offset
+            .checked_add(data_start as u64 - 1)
+            .and_then(|end| end.checked_add(entry.compressed_size))
+            .ok_or(Error::ZipMemberOutOfBounds)?;
+        let permit = self.acquire_blocking_permit().await?;
+        let data = self.fetch_range(entry.offset, end, Some(progress)).await?;
+
+        let flags = u16::from_le_bytes([data[6], data[7]]);
+        let compression_method = u16::from_le_bytes([data[8], data[9]]);
+        let filename_len = u16::from_le_bytes([data[26], data[27]]) as usize;
+        let extra_len = u16::from_le_bytes([data[28], data[29]]);
+
+        if !data.starts_with(b"PK\x03\x04")
+            || flags & !ALLOWED_FLAGS != 0
+            || extra_len != 0
+            || filename_len != target.len()
+            || &data[LOCAL_HEADER_MIN_SIZE..data_start] != target.as_bytes()
+        {
+            return Err(Error::InvalidZipLocalHeader);
+        }
+
+        let info = ZipFileInfo {
+            compression_method,
+            compressed_size: entry.compressed_size,
+            uncompressed_size: entry.size,
+            local_header_offset: entry.offset
+        };
+        Self::decompress_member(data.slice(data_start..), info, permit).await
     }
 
     pub async fn acquire_permit(&self) -> Result<Option<SemaphorePermit<'_>>, Error> {
@@ -184,7 +222,19 @@ impl<'a> ZipSource<'a> {
         Ok(Bytes::from(bytes))
     }
 
-    fn decompress(data: Bytes, info: &ZipFileInfo) -> Result<Bytes, Error> {
+    async fn decompress_member(
+        data: Bytes,
+        info: ZipFileInfo,
+        permit: OwnedSemaphorePermit
+    ) -> Result<Bytes, Error> {
+        task::spawn_blocking(move || {
+            let _permit = permit;
+            Self::decompress(data, info)
+        })
+        .await?
+    }
+
+    fn decompress(data: Bytes, info: ZipFileInfo) -> Result<Bytes, Error> {
         let output = match info.compression_method {
             COMPRESSION_STORED => data,
             COMPRESSION_DEFLATE => {
